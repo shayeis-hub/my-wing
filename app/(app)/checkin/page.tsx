@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import type { DailyCheckin } from "@/types";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 
 const moods = [
   { value: 1, emoji: "😞", label: "קשה" },
@@ -26,6 +25,7 @@ export default function CheckinPage() {
   const [water, setWater] = useState(0);
   const [vegetables, setVegetables] = useState(0);
   const [mood, setMood] = useState<1 | 2 | 3 | 4 | 5>(3);
+  const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -37,6 +37,7 @@ export default function CheckinPage() {
         setWater(c.waterGlasses);
         setVegetables(c.vegetablesServings);
         setMood(c.mood);
+        setNotes(c.notes ?? "");
       }
     });
     getWingCheckins(user.wingId, today).then(setGroupCheckins);
@@ -54,6 +55,7 @@ export default function CheckinPage() {
         waterGlasses: water,
         vegetablesServings: vegetables,
         mood,
+        notes: notes.trim() || undefined,
       });
       toast.success("הצ'ק-אין נשמר! 💪");
       setMyCheckin({
@@ -65,6 +67,7 @@ export default function CheckinPage() {
         waterGlasses: water,
         vegetablesServings: vegetables,
         mood,
+        notes: notes.trim() || undefined,
         createdAt: null as unknown as DailyCheckin["createdAt"],
       });
     } catch {
@@ -83,27 +86,43 @@ export default function CheckinPage() {
         </p>
       </div>
 
-      {/* Water */}
+      {/* Water slider */}
       <Card>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-slate-800">💧 שתיית מים</h3>
-          <span className="text-lg font-bold text-wing-primary">{water} / 8 כוסות</span>
+          <span className="text-lg font-bold text-wing-primary">
+            {water.toFixed(1)} ליטר
+          </span>
         </div>
-        <ProgressBar value={water} max={8} color="bg-blue-400" />
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <button
-            onClick={() => setWater(Math.max(0, water - 1))}
-            className="w-10 h-10 bg-slate-100 rounded-full text-xl font-bold hover:bg-slate-200 transition-colors"
-          >
-            −
-          </button>
-          <span className="text-3xl font-bold text-slate-700 w-12 text-center">{water}</span>
-          <button
-            onClick={() => setWater(Math.min(15, water + 1))}
-            className="w-10 h-10 bg-wing-soft rounded-full text-xl font-bold text-wing-primary hover:bg-sky-100 transition-colors"
-          >
-            +
-          </button>
+        <input
+          type="range"
+          min={0}
+          max={3}
+          step={0.1}
+          value={water}
+          onChange={(e) => setWater(parseFloat(e.target.value))}
+          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-wing-primary bg-slate-200"
+        />
+        <div className="flex justify-between text-xs text-slate-400 mt-1">
+          <span>0</span>
+          <span>1L</span>
+          <span>2L</span>
+          <span>3L</span>
+        </div>
+        <div className="flex justify-center gap-2 mt-3">
+          {[0.5, 1, 1.5, 2, 2.5, 3].map((v) => (
+            <button
+              key={v}
+              onClick={() => setWater(v)}
+              className={`text-xs px-2 py-1 rounded-full transition-all ${
+                water === v
+                  ? "bg-wing-primary text-white"
+                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+              }`}
+            >
+              {v}L
+            </button>
+          ))}
         </div>
       </Card>
 
@@ -111,19 +130,23 @@ export default function CheckinPage() {
       <Card>
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-slate-800">🥦 ירקות</h3>
-          <span className="text-lg font-bold text-wing-primary">{vegetables} / 5 מנות</span>
+          <span className="text-lg font-bold text-wing-primary">
+            {vegetables} {vegetables === 1 ? "ארוחה" : "ארוחות"}
+          </span>
         </div>
-        <ProgressBar value={vegetables} max={5} color="bg-green-400" />
-        <div className="flex items-center justify-center gap-4 mt-4">
+        <p className="text-xs text-slate-400 mb-3">בכמה ארוחות אכלת ירקות היום?</p>
+        <div className="flex items-center justify-center gap-4">
           <button
             onClick={() => setVegetables(Math.max(0, vegetables - 1))}
             className="w-10 h-10 bg-slate-100 rounded-full text-xl font-bold hover:bg-slate-200 transition-colors"
           >
             −
           </button>
-          <span className="text-3xl font-bold text-slate-700 w-12 text-center">{vegetables}</span>
+          <span className="text-3xl font-bold text-slate-700 w-12 text-center">
+            {vegetables}
+          </span>
           <button
-            onClick={() => setVegetables(Math.min(10, vegetables + 1))}
+            onClick={() => setVegetables(Math.min(6, vegetables + 1))}
             className="w-10 h-10 bg-green-50 rounded-full text-xl font-bold text-green-500 hover:bg-green-100 transition-colors"
           >
             +
@@ -140,9 +163,7 @@ export default function CheckinPage() {
               key={m.value}
               onClick={() => setMood(m.value as 1 | 2 | 3 | 4 | 5)}
               className={`flex flex-col items-center gap-1 p-2 rounded-2xl transition-all ${
-                mood === m.value
-                  ? "bg-wing-soft scale-110"
-                  : "hover:bg-slate-50"
+                mood === m.value ? "bg-wing-soft scale-110" : "hover:bg-slate-50"
               }`}
             >
               <span className="text-2xl">{m.emoji}</span>
@@ -150,6 +171,18 @@ export default function CheckinPage() {
             </button>
           ))}
         </div>
+      </Card>
+
+      {/* Free text */}
+      <Card>
+        <h3 className="font-semibold text-slate-800 mb-2">✏️ הערה חופשית</h3>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="איך היה היום? משהו שרצית לציין..."
+          rows={3}
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-wing-primary focus:border-transparent transition-all"
+        />
       </Card>
 
       <Button onClick={handleSave} loading={saving} size="lg" className="w-full">
@@ -165,7 +198,7 @@ export default function CheckinPage() {
               <div key={c.id} className="flex items-center justify-between text-sm">
                 <span className="text-slate-700">{c.userName}</span>
                 <div className="flex gap-3 text-slate-500">
-                  <span>💧 {c.waterGlasses}</span>
+                  <span>💧 {c.waterGlasses.toFixed(1)}L</span>
                   <span>🥦 {c.vegetablesServings}</span>
                   <span>{moods.find((m) => m.value === c.mood)?.emoji}</span>
                 </div>

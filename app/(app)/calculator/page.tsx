@@ -18,6 +18,46 @@ const activityOptions: { value: UserProfile["activityLevel"]; label: string; des
   { value: "very_active", label: "מאוד פעיל", desc: "פעילות אינטנסיבית יומית" },
 ];
 
+const infoTexts: Record<string, { title: string; body: string }> = {
+  BMI: {
+    title: "BMI – מדד מסת הגוף",
+    body: "מדד המחשב את היחס בין משקל לגובה. ערך תקין הוא 18.5–24.9. מתחת ל-18.5 הוא תת משקל, 25–29.9 הוא עודף משקל, ומעל 30 נחשב להשמנה.",
+  },
+  TDEE: {
+    title: "TDEE – סך ההוצאה האנרגטית היומית",
+    body: "כמות הקלוריות שהגוף שלך שורף ביממה כולל פעילות גופנית. זה ה-BMR שלך כפול מכפיל הפעילות. אם תאכל בדיוק כמו ה-TDEE שלך – משקלך יישאר יציב.",
+  },
+  "יעד יומי": {
+    title: "יעד קלורי יומי",
+    body: "הכמות המומלצת לצרוך כדי להגיע ליעד המשקל שלך. מחושב על בסיס ה-TDEE עם גירעון קלורי מתון (כ-500 קק\"ל ביום) לירידה של כחצי ק\"ג בשבוע.",
+  },
+};
+
+function InfoModal({ topic, onClose }: { topic: string; onClose: () => void }) {
+  const info = infoTexts[topic];
+  if (!info) return null;
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl p-6 w-full max-w-sm space-y-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="font-bold text-slate-800 text-lg">{info.title}</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">{info.body}</p>
+        <button
+          onClick={onClose}
+          className="w-full py-2.5 bg-wing-primary text-white rounded-2xl font-medium text-sm"
+        >
+          הבנתי
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function CalculatorPage() {
   const { user, firebaseUser } = useAuth();
 
@@ -27,6 +67,7 @@ export default function CalculatorPage() {
   const [targetWeight, setTargetWeight] = useState("");
   const [gender, setGender] = useState<UserProfile["gender"]>("male");
   const [activity, setActivity] = useState<UserProfile["activityLevel"]>("moderate");
+  const [activeInfo, setActiveInfo] = useState<string | null>(null);
 
   useEffect(() => {
     const p = user?.profile;
@@ -87,6 +128,10 @@ export default function CalculatorPage() {
 
   return (
     <div className="p-4 space-y-4">
+      {activeInfo && (
+        <InfoModal topic={activeInfo} onClose={() => setActiveInfo(null)} />
+      )}
+
       <div className="pt-4">
         <h1 className="text-xl font-bold text-slate-800">מחשבון אישי</h1>
         <p className="text-sm text-slate-500">חישוב BMI, BMR ו-TDEE</p>
@@ -144,22 +189,32 @@ export default function CalculatorPage() {
       {result && (
         <Card className="space-y-4">
           <h3 className="font-bold text-slate-800">התוצאות שלך</h3>
+          <p className="text-xs text-slate-400">לחץ על כל נתון לקבלת הסבר</p>
           <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-slate-50 rounded-2xl p-3">
+            <button
+              onClick={() => setActiveInfo("BMI")}
+              className="bg-slate-50 rounded-2xl p-3 text-center active:scale-95 transition-transform"
+            >
               <p className={`text-2xl font-bold ${result.bmiCategory.color}`}>{result.bmi}</p>
-              <p className="text-xs text-slate-400 mt-1">BMI</p>
+              <p className="text-xs text-slate-400 mt-1">BMI ⓘ</p>
               <p className={`text-xs font-medium mt-0.5 ${result.bmiCategory.color}`}>{result.bmiCategory.label}</p>
-            </div>
-            <div className="bg-slate-50 rounded-2xl p-3">
+            </button>
+            <button
+              onClick={() => setActiveInfo("TDEE")}
+              className="bg-slate-50 rounded-2xl p-3 text-center active:scale-95 transition-transform"
+            >
               <p className="text-2xl font-bold text-slate-700">{result.tdee}</p>
-              <p className="text-xs text-slate-400 mt-1">TDEE</p>
+              <p className="text-xs text-slate-400 mt-1">TDEE ⓘ</p>
               <p className="text-xs text-slate-500 mt-0.5">קק&quot;ל/יום</p>
-            </div>
-            <div className="bg-wing-soft rounded-2xl p-3">
+            </button>
+            <button
+              onClick={() => setActiveInfo("יעד יומי")}
+              className="bg-wing-soft rounded-2xl p-3 text-center active:scale-95 transition-transform"
+            >
               <p className="text-2xl font-bold text-wing-primary">{result.dailyTarget}</p>
-              <p className="text-xs text-slate-400 mt-1">יעד יומי</p>
+              <p className="text-xs text-slate-400 mt-1">יעד יומי ⓘ</p>
               <p className="text-xs text-wing-primary mt-0.5">קק&quot;ל/יום</p>
-            </div>
+            </button>
           </div>
 
           <Button variant="secondary" onClick={saveToProfile} loading={saving} className="w-full">

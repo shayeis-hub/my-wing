@@ -62,7 +62,7 @@ export default function DashboardPage() {
         <Link href="/meals">
           <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
             <div className="text-3xl mb-1">🍽️</div>
-            <p className="text-sm font-semibold text-slate-700">צלם ארוחה</p>
+            <p className="text-sm font-semibold text-slate-700">צילום ארוחה</p>
             <p className="text-xs text-slate-400">ניתוח AI מיידי</p>
           </Card>
         </Link>
