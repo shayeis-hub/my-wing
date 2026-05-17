@@ -20,6 +20,7 @@ import type {
   Wing,
   Meal,
   DailyCheckin,
+  Encouragement,
   StepsEntry,
   Challenge,
   WingMember,
@@ -184,6 +185,32 @@ export async function getWingCheckins(
     ...(d.data() as Omit<DailyCheckin, "id">),
     id: d.id,
   }));
+}
+
+export async function getMonthCheckins(
+  wingId: string,
+  yearMonth: string
+): Promise<DailyCheckin[]> {
+  const q = query(
+    collection(db, "wings", wingId, "checkins"),
+    where("date", ">=", `${yearMonth}-01`),
+    where("date", "<=", `${yearMonth}-31`)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({
+    ...(d.data() as Omit<DailyCheckin, "id">),
+    id: d.id,
+  }));
+}
+
+export async function addEncouragement(
+  wingId: string,
+  checkinId: string,
+  encouragement: Encouragement
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "checkins", checkinId), {
+    encouragements: arrayUnion(encouragement),
+  });
 }
 
 // ── Steps ─────────────────────────────────────────────────────────────────────

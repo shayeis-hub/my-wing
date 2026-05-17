@@ -69,6 +69,13 @@ export interface FoodItem {
   calories: number;
 }
 
+export interface Encouragement {
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: number;
+}
+
 export interface DailyCheckin {
   id: string;
   wingId: string;
@@ -79,6 +86,7 @@ export interface DailyCheckin {
   vegetablesServings: number;
   mood: 1 | 2 | 3 | 4 | 5;
   notes?: string;
+  encouragements?: Encouragement[];
   createdAt: Timestamp;
 }
 

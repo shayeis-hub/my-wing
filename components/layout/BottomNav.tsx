@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   UtensilsCrossed,
-  Footprints,
+  CalendarDays,
   CheckSquare,
   Users,
 } from "lucide-react";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils/cn";
 const navItems = [
   { href: "/dashboard", icon: Home, label: "בית" },
   { href: "/meals", icon: UtensilsCrossed, label: "ארוחות" },
-  { href: "/steps", icon: Footprints, label: "צעדים" },
+  { href: "/calendar", icon: CalendarDays, label: "לוח שנה" },
   { href: "/checkin", icon: CheckSquare, label: "צ'ק-אין" },
   { href: "/wing", icon: Users, label: "מבנה" },
 ];
