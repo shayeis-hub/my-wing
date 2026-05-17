@@ -106,7 +106,7 @@ export default function WingPage() {
 
             {/* Members */}
             <div className="space-y-2 mb-4">
-              {wing.members.map((m) => (
+              {(wing.members ?? []).map((m) => (
                 <div key={m.uid} className="flex items-center gap-3 px-1">
                   <div className="w-9 h-9 rounded-full bg-wing-soft flex items-center justify-center text-wing-primary font-bold text-sm">
                     {m.displayName.charAt(0).toUpperCase()}
