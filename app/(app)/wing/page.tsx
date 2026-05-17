@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { SOSButton } from "@/components/wing/SOSButton";
-import { renameWing, regenerateInviteToken } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 
 export default function WingPage() {
@@ -15,28 +14,21 @@ export default function WingPage() {
   const { wing, loading } = useWing(user?.wingId);
 
   const [wingName, setWingName] = useState("");
-  const [inviteToken, setInviteToken] = useState("");
+  const [joinToken, setJoinToken] = useState("");
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
 
-  // Rename state
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState("");
   const [renamingWing, setRenamingWing] = useState(false);
 
-  // Build invite link using window.location.origin so it works everywhere
   const [origin, setOrigin] = useState("");
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
 
-  // Auto-fix missing inviteToken when wing loads
-  useEffect(() => {
-    if (wing && !wing.inviteToken && firebaseUser) {
-      regenerateInviteToken(wing.id).catch(() => {});
-    }
-  }, [wing, firebaseUser]);
-
+  const members = Array.isArray(wing?.members) ? wing.members : [];
+  const memberCount = Array.isArray(wing?.memberIds) ? wing.memberIds.length : members.length;
   const inviteLink = wing?.inviteToken ? `${origin}/join/${wing.inviteToken}` : "";
 
   async function handleCreate() {
@@ -63,14 +55,14 @@ export default function WingPage() {
   }
 
   async function handleJoin() {
-    if (!inviteToken.trim() || !firebaseUser || !user) return;
+    if (!joinToken.trim() || !firebaseUser || !user) return;
     setJoining(true);
     try {
       const res = await fetch("/api/wing/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          token: inviteToken.trim(),
+          token: joinToken.trim(),
           userId: firebaseUser.uid,
           displayName: user.displayName,
           photoURL: user.photoURL,
@@ -90,7 +82,12 @@ export default function WingPage() {
     if (!newName.trim() || !wing) return;
     setRenamingWing(true);
     try {
-      await renameWing(wing.id, newName.trim());
+      const res = await fetch("/api/wing/rename", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wingId: wing.id, name: newName.trim() }),
+      });
+      if (!res.ok) throw new Error();
       toast.success("שם המבנה עודכן!");
       setEditingName(false);
     } catch {
@@ -127,37 +124,28 @@ export default function WingPage() {
 
       {wing ? (
         <>
-          {/* Wing info */}
           <Card>
             <div className="flex items-center gap-3 mb-4">
               <div className="text-3xl">🪽</div>
               <div className="flex-1 min-w-0">
-                  <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name}</h2>
-                <p className="text-sm text-slate-500">
-                  {wing.memberIds?.length ?? 0} חברים
-                </p>
+                <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name}</h2>
+                <p className="text-sm text-slate-500">{memberCount} חברים</p>
               </div>
             </div>
 
-            {/* Members */}
+            {/* Members list */}
             <div className="space-y-2 mb-4">
-              {Array.isArray(wing.members) && wing.members.map((m) => (
+              {members.map((m) => (
                 <div key={m.uid} className="flex items-center gap-3 px-1">
                   <div className="w-9 h-9 rounded-full bg-wing-soft flex items-center justify-center text-wing-primary font-bold text-sm">
                     {(m.displayName ?? "?").charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-sm text-slate-700 font-medium">
-                    {m.displayName ?? ""}
-                  </span>
+                  <span className="text-sm text-slate-700 font-medium">{m.displayName ?? ""}</span>
                   {m.uid === wing.ownerId && (
-                    <span className="text-xs text-wing-muted bg-slate-100 px-2 py-0.5 rounded-full">
-                      מנהל
-                    </span>
+                    <span className="text-xs text-wing-muted bg-slate-100 px-2 py-0.5 rounded-full">מנהל</span>
                   )}
                   {m.uid === firebaseUser?.uid && (
-                    <span className="text-xs text-wing-primary bg-wing-soft px-2 py-0.5 rounded-full">
-                      אני
-                    </span>
+                    <span className="text-xs text-wing-primary bg-wing-soft px-2 py-0.5 rounded-full">אני</span>
                   )}
                 </div>
               ))}
@@ -206,7 +194,7 @@ export default function WingPage() {
               </div>
             )}
 
-            {/* Invite */}
+            {/* Invite link */}
             <div className="bg-slate-50 rounded-2xl p-3 space-y-2">
               <p className="text-xs text-slate-500">קישור הזמנה לחברים</p>
               {inviteLink ? (
@@ -220,7 +208,6 @@ export default function WingPage() {
             </div>
           </Card>
 
-          {/* SOS */}
           {firebaseUser && user && (
             <SOSButton
               wingId={wing.id}
@@ -229,7 +216,6 @@ export default function WingPage() {
             />
           )}
 
-          {/* Active challenge */}
           {wing.activeChallenge && (
             <Card>
               <div className="flex items-center gap-2 mb-3">
@@ -243,13 +229,10 @@ export default function WingPage() {
         </>
       ) : (
         <div className="space-y-4">
-          {/* Create */}
           <Card className="space-y-4">
             <div>
               <h2 className="font-bold text-slate-800">צור מבנה חדש</h2>
-              <p className="text-sm text-slate-500 mt-1">
-                אתה תהיה המנהל ותשלח קישור לחברים
-              </p>
+              <p className="text-sm text-slate-500 mt-1">אתה תהיה המנהל ותשלח קישור לחברים</p>
             </div>
             <Input
               label="שם המבנה"
@@ -268,27 +251,19 @@ export default function WingPage() {
             <div className="flex-1 border-t border-slate-200" />
           </div>
 
-          {/* Join */}
           <Card className="space-y-4">
             <div>
               <h2 className="font-bold text-slate-800">הצטרף למבנה קיים</h2>
-              <p className="text-sm text-slate-500 mt-1">
-                הכנס את קוד ההזמנה שקיבלת
-              </p>
+              <p className="text-sm text-slate-500 mt-1">הכנס את קוד ההזמנה שקיבלת</p>
             </div>
             <Input
               label="קוד הזמנה"
-              value={inviteToken}
-              onChange={(e) => setInviteToken(e.target.value)}
+              value={joinToken}
+              onChange={(e) => setJoinToken(e.target.value)}
               placeholder="XXXXXXXXXX"
               dir="ltr"
             />
-            <Button
-              variant="secondary"
-              onClick={handleJoin}
-              loading={joining}
-              className="w-full"
-            >
+            <Button variant="secondary" onClick={handleJoin} loading={joining} className="w-full">
               הצטרף
             </Button>
           </Card>
