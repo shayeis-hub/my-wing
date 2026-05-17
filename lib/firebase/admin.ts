@@ -1,9 +1,11 @@
 import * as admin from "firebase-admin";
 
-if (!admin.apps.length) {
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT!;
+function getAdminApp() {
+  if (admin.apps.length) return admin.apps[0]!;
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!raw) throw new Error("FIREBASE_SERVICE_ACCOUNT env var is missing");
   const serviceAccount = JSON.parse(raw) as admin.ServiceAccount;
-  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  return admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
-export { admin };
+export { admin, getAdminApp };

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
-import { admin } from "@/lib/firebase/admin";
+import { admin, getAdminApp } from "@/lib/firebase/admin";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, notified: 0 });
     }
 
+    getAdminApp();
     const results = await Promise.allSettled(
       tokens.map((token) =>
         admin.messaging().send({
