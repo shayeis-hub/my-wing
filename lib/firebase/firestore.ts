@@ -123,6 +123,16 @@ export async function addMeal(
   return ref.id;
 }
 
+export async function addMealComment(
+  wingId: string,
+  mealId: string,
+  comment: Encouragement
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "meals", mealId), {
+    comments: arrayUnion(comment),
+  });
+}
+
 export async function getWingMeals(wingId: string, limitN = 20): Promise<Meal[]> {
   const q = query(
     collection(db, "wings", wingId, "meals"),

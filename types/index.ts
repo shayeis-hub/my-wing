@@ -47,6 +47,7 @@ export interface Meal {
   imageURL: string;
   analysis: MealAnalysis;
   notes?: string;
+  comments?: Encouragement[];
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
   createdAt: Timestamp;
 }
@@ -86,6 +87,7 @@ export interface DailyCheckin {
   vegetablesServings: number;
   mood: 1 | 2 | 3 | 4 | 5;
   notes?: string;
+  steps?: number;
   encouragements?: Encouragement[];
   createdAt: Timestamp;
 }

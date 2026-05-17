@@ -221,7 +221,7 @@ export default function MealsPage() {
       ) : (
         <div className="space-y-3">
           {meals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} />
+            <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
           ))}
         </div>
       )}

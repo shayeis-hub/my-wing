@@ -137,7 +137,7 @@ export default function DashboardPage() {
             <Link href="/meals" className="text-sm text-wing-primary">הכל</Link>
           </div>
           {todayMeals.slice(0, 3).map((meal) => (
-            <MealCard key={meal.id} meal={meal} />
+            <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
           ))}
         </div>
       )}
