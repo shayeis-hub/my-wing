@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -20,14 +20,24 @@ const activityOptions: { value: UserProfile["activityLevel"]; label: string; des
 
 export default function CalculatorPage() {
   const { user, firebaseUser } = useAuth();
-  const p = user?.profile;
 
-  const [age, setAge] = useState(String(p?.age ?? ""));
-  const [height, setHeight] = useState(String(p?.heightCm ?? ""));
-  const [weight, setWeight] = useState(String(p?.weightKg ?? ""));
-  const [targetWeight, setTargetWeight] = useState(String(p?.targetWeightKg ?? ""));
-  const [gender, setGender] = useState<UserProfile["gender"]>(p?.gender ?? "male");
-  const [activity, setActivity] = useState<UserProfile["activityLevel"]>(p?.activityLevel ?? "moderate");
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [targetWeight, setTargetWeight] = useState("");
+  const [gender, setGender] = useState<UserProfile["gender"]>("male");
+  const [activity, setActivity] = useState<UserProfile["activityLevel"]>("moderate");
+
+  useEffect(() => {
+    const p = user?.profile;
+    if (!p || !p.age) return;
+    setAge(String(p.age));
+    setHeight(String(p.heightCm));
+    setWeight(String(p.weightKg));
+    setTargetWeight(String(p.targetWeightKg));
+    setGender(p.gender);
+    setActivity(p.activityLevel);
+  }, [user]);
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{
     bmi: number;
