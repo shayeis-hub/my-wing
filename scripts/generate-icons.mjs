@@ -2,49 +2,68 @@ import sharp from "sharp";
 import { mkdir } from "fs/promises";
 import { existsSync } from "fs";
 
-const svgIcon = (size) => `
-<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background rounded square -->
-  <rect width="${size}" height="${size}" rx="${size * 0.22}" fill="#0ea5e9"/>
+// Wing drawn as SVG paths in a 100x100 grid, scaled by `s`
+const svgIcon = (size) => {
+  const r = size * 0.22; // corner radius
+  const s = size / 100;  // scale
 
-  <!-- Wing shape (stylized) -->
-  <g transform="translate(${size * 0.5}, ${size * 0.52})">
-    <!-- Left wing -->
-    <path
-      d="M0,0 C${-size*0.05},${-size*0.12} ${-size*0.22},${-size*0.18} ${-size*0.32},${-size*0.08}
-         C${-size*0.38},${-size*0.02} ${-size*0.35},${size*0.08} ${-size*0.22},${size*0.1}
-         C${-size*0.12},${size*0.12} ${-size*0.04},${size*0.06} 0,0 Z"
-      fill="white" opacity="0.95"
-    />
-    <!-- Right wing -->
-    <path
-      d="M0,0 C${size*0.05},${-size*0.12} ${size*0.22},${-size*0.18} ${size*0.32},${-size*0.08}
-         C${size*0.38},${-size*0.02} ${size*0.35},${size*0.08} ${size*0.22},${size*0.1}
-         C${size*0.12},${size*0.12} ${size*0.04},${size*0.06} 0,0 Z"
-      fill="white" opacity="0.95"
-    />
-    <!-- Body / center -->
-    <ellipse cx="0" cy="${size*0.04}" rx="${size*0.06}" ry="${size*0.1}" fill="white"/>
-    <!-- Tail -->
-    <path
-      d="M${-size*0.04},${size*0.1} Q0,${size*0.2} ${size*0.04},${size*0.1}"
-      stroke="white" stroke-width="${size*0.025}" fill="none" stroke-linecap="round"
-    />
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="${size}" height="${size}" rx="${r}" fill="#f0f9ff"/>
+
+  <!-- Wing (single right-facing angel wing) -->
+  <g transform="scale(${s})">
+
+    <!-- Shadow layer -->
+    <path d="
+      M 50 78
+      C 46 68, 28 52, 22 28
+      C 30 14, 52 10, 68 18
+      C 80 14, 88 22, 87 36
+      C 82 30, 74 30, 70 38
+      C 80 32, 86 42, 84 54
+      C 77 47, 68 48, 66 58
+      C 73 53, 78 61, 74 70
+      C 64 66, 56 68, 52 74
+      Z
+    " fill="#c8dff0" />
+
+    <!-- Main wing body -->
+    <path d="
+      M 48 76
+      C 44 66, 26 50, 20 26
+      C 28 12, 50 8, 66 16
+      C 78 12, 86 20, 85 34
+      C 80 28, 72 28, 68 36
+      C 78 30, 84 40, 82 52
+      C 75 45, 66 46, 64 56
+      C 71 51, 76 59, 72 68
+      C 62 64, 54 66, 50 72
+      Z
+    " fill="white" />
+
+    <!-- Feather division lines from quill outward -->
+    <path d="M48,76 C52,60 60,40 66,16" stroke="#c8dff0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M48,76 C56,60 68,42 82,30" stroke="#c8dff0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M48,76 C58,64 72,56 82,52" stroke="#c8dff0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M48,76 C58,70 68,66 72,68" stroke="#c8dff0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+    <!-- Quill -->
+    <ellipse cx="48" cy="78" rx="2.5" ry="4" fill="#a0bcd4" transform="rotate(-15, 48, 78)"/>
   </g>
 
-  <!-- "MW" subtle text at bottom -->
+  <!-- App name -->
   <text
-    x="${size*0.5}" y="${size*0.91}"
-    font-family="system-ui, sans-serif"
-    font-size="${size*0.1}"
+    x="${size * 0.5}"
+    y="${size * 0.915}"
+    font-size="${size * 0.1}"
     font-weight="700"
-    fill="white"
-    opacity="0.7"
+    font-family="system-ui, -apple-system, Arial, sans-serif"
+    fill="#1e3a5f"
     text-anchor="middle"
-    letter-spacing="${size*0.008}"
   >MY WING</text>
-</svg>
-`;
+</svg>`;
+};
 
 async function generate() {
   const dir = "./public/icons";
@@ -57,19 +76,17 @@ async function generate() {
     console.log(`✓ icon-${size}.png`);
   }
 
-  // Apple touch icon (180x180)
   await sharp(Buffer.from(svgIcon(180)))
     .png()
     .toFile("./public/apple-touch-icon.png");
   console.log("✓ apple-touch-icon.png");
 
-  // Favicon 32x32
   await sharp(Buffer.from(svgIcon(32)))
     .png()
     .toFile("./public/favicon-32.png");
   console.log("✓ favicon-32.png");
 
-  console.log("\nDone! Icons generated in public/icons/");
+  console.log("\nDone!");
 }
 
 generate().catch(console.error);
