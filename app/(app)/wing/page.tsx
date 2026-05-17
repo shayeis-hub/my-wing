@@ -128,7 +128,7 @@ export default function WingPage() {
             <div className="flex items-center gap-3 mb-4">
               <div className="text-3xl">🪽</div>
               <div className="flex-1 min-w-0">
-                <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name}</h2>
+                <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name || <span className="text-slate-400 italic">ללא שם</span>}</h2>
                 <p className="text-sm text-slate-500">{memberCount} חברים</p>
               </div>
             </div>
@@ -151,8 +151,8 @@ export default function WingPage() {
               ))}
             </div>
 
-            {/* Rename — owner only */}
-            {firebaseUser?.uid === wing.ownerId && (
+            {/* Rename — any member */}
+            {firebaseUser && (Array.isArray(wing.memberIds) ? wing.memberIds.includes(firebaseUser.uid) : true) && (
               <div className="mb-4">
                 {editingName ? (
                   <div className="space-y-2">
