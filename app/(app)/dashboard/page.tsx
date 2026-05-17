@@ -40,9 +40,8 @@ export default function DashboardPage() {
     const d = m.createdAt?.toDate?.();
     return d && format(d, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
   });
-  const todayCalories = todayMeals
-    .filter((m) => m.userId === firebaseUser?.uid)
-    .reduce((sum, m) => sum + m.analysis.calories, 0);
+  const myTodayMeals = todayMeals.filter((m) => m.userId === firebaseUser?.uid);
+  const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
   const dailyTarget = user?.profile?.dailyCalorieTarget ?? 2000;
 
   return (
@@ -79,7 +78,7 @@ export default function DashboardPage() {
             <span className="text-3xl font-bold text-slate-800">{todayCalories}</span>
             <span className="text-slate-400 text-sm mr-1">/ {dailyTarget} קק&quot;ל</span>
           </div>
-          <span className="text-sm text-slate-500">{todayMeals.length} ארוחות</span>
+          <span className="text-sm text-slate-500">{myTodayMeals.length} ארוחות</span>
         </div>
         <ProgressBar
           value={todayCalories}

@@ -109,7 +109,7 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
       </div>
 
       {/* Comments section */}
-      {(comments.length > 0 || (!isOwn && currentUserId)) && (
+      {(comments.length > 0 || currentUserId) && (
         <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
           {comments.length > 0 && (
             <button onClick={() => setShowComments((v) => !v)}
@@ -123,11 +123,11 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
               <span className="text-slate-600">{c.text}</span>
             </div>
           ))}
-          {!isOwn && currentUserId && (
+          {currentUserId && (isOwn ? comments.length > 0 : true) && (
             <div className="flex gap-2">
               <input type="text" value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder={`עודד את ${meal.userName}...`}
+                placeholder={isOwn ? "הגב / תודה על העידוד..." : `עודד את ${meal.userName}...`}
                 className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-wing-primary bg-slate-50"
                 onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
               />

@@ -168,6 +168,17 @@ export async function saveCheckin(
     ...checkin,
     createdAt: serverTimestamp(),
   });
+  // Sync steps to the steps collection so leaderboard stays consistent
+  if (checkin.steps) {
+    await setDoc(doc(db, "wings", wingId, "steps", id), {
+      wingId,
+      userId: checkin.userId,
+      userName: checkin.userName,
+      date: checkin.date,
+      steps: checkin.steps,
+      createdAt: serverTimestamp(),
+    });
+  }
 }
 
 export async function getTodayCheckin(
@@ -234,6 +245,12 @@ export async function saveSteps(
     ...entry,
     createdAt: serverTimestamp(),
   });
+  // Sync steps to the checkin doc so calendar and daily summary stay consistent
+  await setDoc(
+    doc(db, "wings", wingId, "checkins", id),
+    { steps: entry.steps },
+    { merge: true }
+  );
 }
 
 export async function getWingSteps(

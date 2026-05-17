@@ -19,13 +19,15 @@ service cloud.firestore {
       allow delete: if request.auth != null &&
         request.auth.uid == resource.data.ownerId;
 
-      // Meals: member can CRUD own meals, read group meals
+      // Meals: member can CRUD own meals, read group meals, any member can add comments
       match /meals/{mealId} {
         allow read: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow create: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
-        allow update, delete: if request.auth != null &&
+        allow update: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow delete: if request.auth != null &&
           request.auth.uid == resource.data.userId;
       }
 
@@ -35,7 +37,9 @@ service cloud.firestore {
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow create: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
-        allow update, delete: if request.auth != null &&
+        allow update: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow delete: if request.auth != null &&
           request.auth.uid == resource.data.userId;
       }
 

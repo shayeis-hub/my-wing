@@ -44,7 +44,7 @@ export interface Meal {
   wingId: string;
   userId: string;
   userName: string;
-  imageURL: string;
+  imageURL?: string;
   analysis: MealAnalysis;
   notes?: string;
   comments?: Encouragement[];

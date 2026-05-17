@@ -84,6 +84,7 @@ export function DayModal({
                   <div className="flex gap-3 text-sm text-slate-500">
                     <span>💧 {checkin.waterGlasses.toFixed(1)}L</span>
                     <span>🥦 {checkin.vegetablesServings}</span>
+                    {checkin.steps ? <span>👟 {checkin.steps.toLocaleString()}</span> : null}
                     <span className="text-lg">{moods.find((m) => m.value === checkin.mood)?.emoji}</span>
                   </div>
                 </div>
@@ -105,7 +106,8 @@ export function DayModal({
                   </div>
                 )}
 
-                {checkin.userId !== currentUserId && (
+                {(checkin.userId !== currentUserId ||
+                  (checkin.encouragements ?? []).length > 0) && (
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -113,7 +115,11 @@ export function DayModal({
                       onChange={(e) =>
                         setTexts((prev) => ({ ...prev, [checkin.id]: e.target.value }))
                       }
-                      placeholder={`עודד את ${checkin.userName}...`}
+                      placeholder={
+                        checkin.userId === currentUserId
+                          ? "הגב / תודה על העידוד..."
+                          : `עודד את ${checkin.userName}...`
+                      }
                       className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-wing-primary bg-white"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleSend(checkin);

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { saveCheckin, getTodayCheckin, getWingCheckins, addEncouragement } from "@/lib/firebase/firestore";
+import { saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -42,17 +42,25 @@ export default function CheckinPage() {
 
   useEffect(() => {
     if (!user?.wingId || !firebaseUser) return;
-    getTodayCheckin(user.wingId, firebaseUser.uid, today).then((c) => {
-      if (c) {
+    const uid = firebaseUser.uid;
+    Promise.all([
+      getTodayCheckin(user.wingId, uid, today),
+      getWingSteps(user.wingId, today),
+      getWingCheckins(user.wingId, today),
+    ]).then(([c, stepsEntries, checkins]) => {
+      const stepsFromLeaderboard = stepsEntries.find((e) => e.userId === uid)?.steps;
+      if (c && c.waterGlasses !== undefined) {
         setMyCheckin(c);
-        setWater(c.waterGlasses);
-        setVegetables(c.vegetablesServings);
-        setMood(c.mood);
+        setWater(c.waterGlasses ?? 0);
+        setVegetables(c.vegetablesServings ?? 0);
+        setMood(c.mood ?? 3);
         setNotes(c.notes ?? "");
-        setSteps(c.steps ? String(c.steps) : "");
+        setSteps(c.steps ? String(c.steps) : stepsFromLeaderboard ? String(stepsFromLeaderboard) : "");
+      } else if (stepsFromLeaderboard) {
+        setSteps(String(stepsFromLeaderboard));
       }
+      setGroupCheckins(checkins);
     });
-    getWingCheckins(user.wingId, today).then(setGroupCheckins);
   }, [user?.wingId, firebaseUser, today]);
 
   async function handleSave() {
@@ -241,13 +249,18 @@ export default function CheckinPage() {
                     <span className="text-slate-600">{enc.text}</span>
                   </div>
                 ))}
-                {c.userId !== firebaseUser?.uid && (
+                {(c.userId !== firebaseUser?.uid ||
+                  (c.encouragements ?? []).length > 0) && (
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={encourageTexts[c.id] ?? ""}
                       onChange={(e) => setEncourageTexts((prev) => ({ ...prev, [c.id]: e.target.value }))}
-                      placeholder={`עודד את ${c.userName}...`}
+                      placeholder={
+                        c.userId === firebaseUser?.uid
+                          ? "הגב / תודה על העידוד..."
+                          : `עודד את ${c.userName}...`
+                      }
                       className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-wing-primary bg-slate-50"
                       onKeyDown={(e) => { if (e.key === "Enter") handleSendEncouragement(c); }}
                     />

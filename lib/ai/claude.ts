@@ -59,6 +59,46 @@ export async function analyzeMealImage(
   return JSON.parse(jsonMatch[0]) as MealAnalysis;
 }
 
+export async function analyzeMealText(description: string): Promise<MealAnalysis> {
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 1024,
+    messages: [
+      {
+        role: "user",
+        content: `המשתמש תיאר את הארוחה שלו: "${description}"
+
+אנא נתח את הארוחה ותן לי:
+1. תיאור קצר בעברית
+2. ערכים תזונתיים משוערים: קלוריות, חלבון, פחמימות, שומן, סיבים
+3. ציון בריאותי מ-1 עד 10
+4. טיפ קצר בעברית לשיפור (אופציונלי)
+
+ענה אך ורק ב-JSON תקני בפורמט הבא, ללא טקסט נוסף:
+{
+  "description": "תיאור הארוחה",
+  "calories": 0,
+  "protein": 0,
+  "carbs": 0,
+  "fat": 0,
+  "fiber": 0,
+  "items": [
+    { "name": "שם הרכיב", "estimatedGrams": 0, "calories": 0 }
+  ],
+  "healthScore": 7,
+  "tips": "טיפ אופציונלי"
+}`,
+      },
+    ],
+  });
+
+  const text =
+    response.content[0].type === "text" ? response.content[0].text : "";
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("Claude did not return valid JSON");
+  return JSON.parse(jsonMatch[0]) as MealAnalysis;
+}
+
 export async function generateDailySummary(
   wingName: string,
   membersData: {

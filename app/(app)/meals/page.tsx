@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { addMeal } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
-import { Camera, ChevronDown } from "lucide-react";
+import { Camera, ChevronDown, PenLine } from "lucide-react";
 import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 
@@ -20,6 +20,14 @@ export default function MealsPage() {
   const { user, firebaseUser } = useAuth();
   const { meals, loading } = useMeals(user?.wingId);
   const [showCamera, setShowCamera] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualDescription, setManualDescription] = useState("");
+  const [manualCalories, setManualCalories] = useState("");
+  const [manualProtein, setManualProtein] = useState("");
+  const [manualCarbs, setManualCarbs] = useState("");
+  const [manualFat, setManualFat] = useState("");
+  const [manualMealType, setManualMealType] = useState<typeof mealTypes[number]>("lunch");
+  const [savingManual, setSavingManual] = useState(false);
   const [pendingAnalysis, setPendingAnalysis] = useState<{
     analysis: MealAnalysis;
     imageDataUrl: string;
@@ -35,6 +43,40 @@ export default function MealsPage() {
     setHint("");
     setEditingValues(false);
     setPendingAnalysis({ analysis, imageDataUrl });
+  }
+
+  async function saveManualMeal() {
+    if (!user || !firebaseUser || !user.wingId || !manualDescription.trim()) return;
+    setSavingManual(true);
+    try {
+      await addMeal(user.wingId, {
+        wingId: user.wingId,
+        userId: firebaseUser.uid,
+        userName: user.displayName,
+        analysis: {
+          description: manualDescription.trim(),
+          calories: Number(manualCalories) || 0,
+          protein: Number(manualProtein) || 0,
+          carbs: Number(manualCarbs) || 0,
+          fat: Number(manualFat) || 0,
+          fiber: 0,
+          items: [],
+          healthScore: 5,
+        },
+        mealType: manualMealType,
+      });
+      toast.success("הארוחה נשמרה! 🍽️");
+      setShowManualForm(false);
+      setManualDescription("");
+      setManualCalories("");
+      setManualProtein("");
+      setManualCarbs("");
+      setManualFat("");
+    } catch {
+      toast.error("שגיאה בשמירת הארוחה");
+    } finally {
+      setSavingManual(false);
+    }
   }
 
   async function handleReanalyze() {
@@ -70,16 +112,19 @@ export default function MealsPage() {
     if (!pendingAnalysis || !user || !firebaseUser || !user.wingId) return;
     setSaving(true);
     try {
-      const storage = getStorage();
-      const imageRef = ref(storage, `meals/${firebaseUser.uid}/${nanoid()}.jpg`);
-      await uploadString(imageRef, pendingAnalysis.imageDataUrl, "data_url");
-      const imageURL = await getDownloadURL(imageRef);
+      let imageURL: string | undefined;
+      if (pendingAnalysis.imageDataUrl) {
+        const storage = getStorage();
+        const imageRef = ref(storage, `meals/${firebaseUser.uid}/${nanoid()}.jpg`);
+        await uploadString(imageRef, pendingAnalysis.imageDataUrl, "data_url");
+        imageURL = await getDownloadURL(imageRef);
+      }
 
       await addMeal(user.wingId, {
         wingId: user.wingId,
         userId: firebaseUser.uid,
         userName: user.displayName,
-        imageURL,
+        ...(imageURL ? { imageURL } : {}),
         analysis: pendingAnalysis.analysis,
         mealType,
       });
@@ -97,15 +142,75 @@ export default function MealsPage() {
     <div className="p-4 space-y-4">
       <div className="pt-4 flex items-center justify-between">
         <h1 className="text-xl font-bold text-slate-800">ארוחות המבנה</h1>
-        <Button
-          size="sm"
-          onClick={() => setShowCamera(true)}
-          className="flex items-center gap-1.5"
-        >
-          <Camera size={16} />
-          צלם
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => { setShowManualForm(true); setPendingAnalysis(null); }}
+            className="flex items-center gap-1.5"
+          >
+            <PenLine size={16} />
+            ידנית
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setShowCamera(true)}
+            className="flex items-center gap-1.5"
+          >
+            <Camera size={16} />
+            צלם
+          </Button>
+        </div>
       </div>
+
+      {/* Manual meal form */}
+      {showManualForm && (
+        <div className="bg-white rounded-3xl shadow-card p-4 space-y-3 border-2 border-slate-200">
+          <h2 className="font-bold text-slate-800">הוספה ידנית 📝</h2>
+          <input
+            type="text"
+            value={manualDescription}
+            onChange={(e) => setManualDescription(e.target.value)}
+            placeholder="שם / תיאור הארוחה"
+            className="w-full border border-slate-200 rounded-2xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
+          />
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              ["manualCalories", "🔥 קק\"ל", manualCalories, setManualCalories],
+              ["manualProtein", "🥩 חלבון g", manualProtein, setManualProtein],
+              ["manualCarbs", "🌾 פחמימות g", manualCarbs, setManualCarbs],
+              ["manualFat", "🧈 שומן g", manualFat, setManualFat],
+            ] as [string, string, string, (v: string) => void][]).map(([key, label, val, setter]) => (
+              <label key={key} className="flex flex-col gap-0.5">
+                <span className="text-xs text-slate-400">{label}</span>
+                <input
+                  type="number"
+                  value={val}
+                  onChange={(e) => setter(e.target.value)}
+                  className="border border-slate-200 rounded-xl px-2 py-1.5 text-sm w-full"
+                  inputMode="numeric"
+                />
+              </label>
+            ))}
+          </div>
+          <div className="relative">
+            <select
+              value={manualMealType}
+              onChange={(e) => setManualMealType(e.target.value as typeof mealTypes[number])}
+              className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary"
+            >
+              {mealTypes.map((t) => (
+                <option key={t} value={t}>{mealTypeLabels[t]}</option>
+              ))}
+            </select>
+            <ChevronDown size={16} className="absolute left-3 top-3 text-slate-400 pointer-events-none" />
+          </div>
+          <div className="flex gap-3">
+            <Button variant="secondary" onClick={() => setShowManualForm(false)} className="flex-1">בטל</Button>
+            <Button onClick={saveManualMeal} loading={savingManual} disabled={!manualDescription.trim()} className="flex-1">שמור</Button>
+          </div>
+        </div>
+      )}
 
       {/* Pending analysis review */}
       {pendingAnalysis && (
