@@ -196,13 +196,20 @@ export default function CheckinPage() {
           <h3 className="font-semibold text-slate-800 mb-3">המבנה היום</h3>
           <div className="space-y-2">
             {groupCheckins.map((c) => (
-              <div key={c.id} className="flex items-center justify-between text-sm">
-                <span className="text-slate-700">{c.userName}</span>
-                <div className="flex gap-3 text-slate-500">
-                  <span>💧 {c.waterGlasses.toFixed(1)}L</span>
-                  <span>🥦 {c.vegetablesServings}</span>
-                  <span>{moods.find((m) => m.value === c.mood)?.emoji}</span>
+              <div key={c.id} className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-700 font-medium">{c.userName}</span>
+                  <div className="flex gap-3 text-slate-500">
+                    <span>💧 {c.waterGlasses.toFixed(1)}L</span>
+                    <span>🥦 {c.vegetablesServings}</span>
+                    <span>{moods.find((m) => m.value === c.mood)?.emoji}</span>
+                  </div>
                 </div>
+                {c.notes && (
+                  <p className="text-xs text-slate-500 bg-slate-50 rounded-xl px-3 py-1.5 italic">
+                    &ldquo;{c.notes}&rdquo;
+                  </p>
+                )}
               </div>
             ))}
           </div>
