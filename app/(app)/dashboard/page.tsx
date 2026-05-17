@@ -40,7 +40,9 @@ export default function DashboardPage() {
     const d = m.createdAt?.toDate?.();
     return d && format(d, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
   });
-  const todayCalories = todayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
+  const todayCalories = todayMeals
+    .filter((m) => m.userId === firebaseUser?.uid)
+    .reduce((sum, m) => sum + m.analysis.calories, 0);
   const dailyTarget = user?.profile?.dailyCalorieTarget ?? 2000;
 
   return (
