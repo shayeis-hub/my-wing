@@ -11,7 +11,8 @@ interface MealCameraProps {
 }
 
 export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,24 +80,33 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
         ) : (
           <div className="space-y-3">
             <button
-              onClick={() => fileRef.current?.click()}
-              className="w-full flex flex-col items-center justify-center gap-3 h-40 border-2 border-dashed border-wing-accent rounded-2xl bg-wing-soft hover:bg-sky-100 transition-colors"
+              onClick={() => cameraRef.current?.click()}
+              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-accent rounded-2xl bg-wing-soft hover:bg-sky-100 transition-colors"
             >
-              <Camera size={36} className="text-wing-primary" />
-              <span className="text-sm font-medium text-wing-primary">
-                צלם תמונה / בחר מהגלריה
-              </span>
+              <Camera size={22} className="text-wing-primary" />
+              <span className="text-sm font-medium text-wing-primary">צלם תמונה</span>
+            </button>
+            <button
+              onClick={() => galleryRef.current?.click()}
+              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white hover:bg-slate-50 transition-colors"
+            >
+              <Upload size={22} className="text-slate-500" />
+              <span className="text-sm font-medium text-slate-600">בחר מהגלריה</span>
             </button>
             <input
-              ref={fileRef}
+              ref={cameraRef}
               type="file"
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFile(file);
-              }}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+            />
+            <input
+              ref={galleryRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
             />
           </div>
         )}
