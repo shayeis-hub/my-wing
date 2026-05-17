@@ -68,6 +68,16 @@ export async function joinWing(
   return { ...(wingDoc.data() as Omit<Wing, "id">), id: wingDoc.id };
 }
 
+export async function renameWing(wingId: string, name: string): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId), { name });
+}
+
+export async function regenerateInviteToken(wingId: string): Promise<string> {
+  const token = nanoid(10);
+  await updateDoc(doc(db, "wings", wingId), { inviteToken: token });
+  return token;
+}
+
 export async function getWing(wingId: string): Promise<Wing | null> {
   const snap = await getDoc(doc(db, "wings", wingId));
   return snap.exists() ? { ...(snap.data() as Omit<Wing, "id">), id: snap.id } : null;

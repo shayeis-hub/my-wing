@@ -1,26 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { SOSButton } from "@/components/wing/SOSButton";
+import { renameWing, regenerateInviteToken } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 
 export default function WingPage() {
   const { user, firebaseUser } = useAuth();
   const { wing, loading } = useWing(user?.wingId);
+
   const [wingName, setWingName] = useState("");
   const [inviteToken, setInviteToken] = useState("");
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-  const inviteLink = wing
-    ? `${appUrl}/join/${wing.inviteToken}`
-    : "";
+  // Rename state
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [renamingWing, setRenamingWing] = useState(false);
+
+  // Build invite link using window.location.origin so it works everywhere
+  const [origin, setOrigin] = useState("");
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  // Auto-fix missing inviteToken when wing loads
+  useEffect(() => {
+    if (wing && !wing.inviteToken && firebaseUser) {
+      regenerateInviteToken(wing.id).catch(() => {});
+    }
+  }, [wing, firebaseUser]);
+
+  const inviteLink = wing?.inviteToken ? `${origin}/join/${wing.inviteToken}` : "";
 
   async function handleCreate() {
     if (!wingName.trim() || !firebaseUser || !user) return;
@@ -62,14 +79,32 @@ export default function WingPage() {
       if (!res.ok) throw new Error("token-invalid");
       toast.success("הצטרפת למבנה! 🎉");
       window.location.reload();
-    } catch (err) {
+    } catch {
       toast.error("קישור לא תקין. בדוק ונסה שוב.");
     } finally {
       setJoining(false);
     }
   }
 
+  async function handleRename() {
+    if (!newName.trim() || !wing) return;
+    setRenamingWing(true);
+    try {
+      await renameWing(wing.id, newName.trim());
+      toast.success("שם המבנה עודכן!");
+      setEditingName(false);
+    } catch {
+      toast.error("שגיאה בעדכון השם");
+    } finally {
+      setRenamingWing(false);
+    }
+  }
+
   async function copyInvite() {
+    if (!inviteLink) {
+      toast.error("הקישור עדיין נוצר, נסה שוב בעוד שנייה");
+      return;
+    }
     await navigator.clipboard.writeText(inviteLink);
     toast.success("הקישור הועתק! שלח לחברים 📤");
   }
@@ -96,8 +131,47 @@ export default function WingPage() {
           <Card>
             <div className="flex items-center gap-3 mb-4">
               <div className="text-3xl">🪽</div>
-              <div>
-                <h2 className="font-bold text-slate-800 text-lg">{wing.name}</h2>
+              <div className="flex-1 min-w-0">
+                {editingName ? (
+                  <div className="flex gap-2 items-center">
+                    <input
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="flex-1 text-lg font-bold text-slate-800 border-b-2 border-wing-primary bg-transparent outline-none"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleRename();
+                        if (e.key === "Escape") setEditingName(false);
+                      }}
+                    />
+                    <button
+                      onClick={handleRename}
+                      disabled={renamingWing}
+                      className="text-xs text-wing-primary font-semibold px-2 py-1"
+                    >
+                      {renamingWing ? "..." : "שמור"}
+                    </button>
+                    <button
+                      onClick={() => setEditingName(false)}
+                      className="text-xs text-slate-400 px-1 py-1"
+                    >
+                      ביטול
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name}</h2>
+                    {firebaseUser?.uid === wing.ownerId && (
+                      <button
+                        onClick={() => { setNewName(wing.name); setEditingName(true); }}
+                        className="text-slate-400 hover:text-slate-600 transition-colors text-sm"
+                        title="שנה שם"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                  </div>
+                )}
                 <p className="text-sm text-slate-500">
                   {wing.memberIds.length} חברים
                 </p>
@@ -131,7 +205,11 @@ export default function WingPage() {
             {/* Invite */}
             <div className="bg-slate-50 rounded-2xl p-3 space-y-2">
               <p className="text-xs text-slate-500">קישור הזמנה לחברים</p>
-              <p className="text-xs text-slate-700 break-all font-mono">{inviteLink}</p>
+              {inviteLink ? (
+                <p className="text-xs text-slate-700 break-all font-mono">{inviteLink}</p>
+              ) : (
+                <p className="text-xs text-slate-400">יוצר קישור...</p>
+              )}
               <Button variant="secondary" size="sm" onClick={copyInvite} className="w-full">
                 📋 העתק קישור
               </Button>
