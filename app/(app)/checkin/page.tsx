@@ -47,6 +47,7 @@ export default function CheckinPage() {
     if (!user?.wingId || !firebaseUser) return;
     setSaving(true);
     try {
+      const trimmedNotes = notes.trim();
       await saveCheckin(user.wingId, {
         wingId: user.wingId,
         userId: firebaseUser.uid,
@@ -55,7 +56,7 @@ export default function CheckinPage() {
         waterGlasses: water,
         vegetablesServings: vegetables,
         mood,
-        notes: notes.trim() || undefined,
+        ...(trimmedNotes ? { notes: trimmedNotes } : {}),
       });
       toast.success("הצ'ק-אין נשמר! 💪");
       setMyCheckin({
@@ -67,7 +68,7 @@ export default function CheckinPage() {
         waterGlasses: water,
         vegetablesServings: vegetables,
         mood,
-        notes: notes.trim() || undefined,
+        ...(trimmedNotes ? { notes: trimmedNotes } : {}),
         createdAt: null as unknown as DailyCheckin["createdAt"],
       });
     } catch {
