@@ -132,46 +132,7 @@ export default function WingPage() {
             <div className="flex items-center gap-3 mb-4">
               <div className="text-3xl">🪽</div>
               <div className="flex-1 min-w-0">
-                {editingName ? (
-                  <div className="flex gap-2 items-center">
-                    <input
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      className="flex-1 text-lg font-bold text-slate-800 border-b-2 border-wing-primary bg-transparent outline-none"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleRename();
-                        if (e.key === "Escape") setEditingName(false);
-                      }}
-                    />
-                    <button
-                      onClick={handleRename}
-                      disabled={renamingWing}
-                      className="text-xs text-wing-primary font-semibold px-2 py-1"
-                    >
-                      {renamingWing ? "..." : "שמור"}
-                    </button>
-                    <button
-                      onClick={() => setEditingName(false)}
-                      className="text-xs text-slate-400 px-1 py-1"
-                    >
-                      ביטול
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name}</h2>
-                    {firebaseUser?.uid === wing.ownerId && (
-                      <button
-                        onClick={() => { setNewName(wing.name); setEditingName(true); }}
-                        className="text-slate-400 hover:text-slate-600 transition-colors text-sm"
-                        title="שנה שם"
-                      >
-                        ✏️
-                      </button>
-                    )}
-                  </div>
-                )}
+                  <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name}</h2>
                 <p className="text-sm text-slate-500">
                   {wing.memberIds.length} חברים
                 </p>
@@ -201,6 +162,49 @@ export default function WingPage() {
                 </div>
               ))}
             </div>
+
+            {/* Rename — owner only */}
+            {firebaseUser?.uid === wing.ownerId && (
+              <div className="mb-4">
+                {editingName ? (
+                  <div className="space-y-2">
+                    <input
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-2xl border-2 border-wing-primary bg-white text-slate-800 font-medium outline-none text-sm"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleRename();
+                        if (e.key === "Escape") setEditingName(false);
+                      }}
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleRename}
+                        disabled={renamingWing}
+                        className="flex-1 py-2 bg-wing-primary text-white rounded-2xl text-sm font-medium"
+                      >
+                        {renamingWing ? "שומר..." : "שמור שם"}
+                      </button>
+                      <button
+                        onClick={() => setEditingName(false)}
+                        className="flex-1 py-2 bg-slate-100 text-slate-600 rounded-2xl text-sm font-medium"
+                      >
+                        ביטול
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setNewName(wing.name); setEditingName(true); }}
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50 rounded-2xl text-sm text-slate-600 hover:bg-slate-100 transition-colors"
+                  >
+                    <span>שנה שם מבנה</span>
+                    <span className="text-slate-400">✏️</span>
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Invite */}
             <div className="bg-slate-50 rounded-2xl p-3 space-y-2">

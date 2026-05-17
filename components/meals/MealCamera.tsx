@@ -49,7 +49,7 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl w-full max-w-md p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-lg text-slate-800">צלם את הארוחה</h2>
