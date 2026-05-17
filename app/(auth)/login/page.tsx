@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { signIn, signInWithGoogle } from "@/lib/firebase/auth";
 import { Input } from "@/components/ui/Input";
@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? "/dashboard";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +23,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      router.replace("/dashboard");
+      router.replace(redirectTo);
     } catch {
       toast.error("אימייל או סיסמה שגויים");
     } finally {
@@ -32,7 +35,7 @@ export default function LoginPage() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      router.replace("/dashboard");
+      router.replace(redirectTo);
     } catch {
       toast.error("ההתחברות עם Google נכשלה");
     } finally {
@@ -103,7 +106,10 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-slate-500">
           אין לך חשבון?{" "}
-          <Link href="/register" className="text-wing-primary font-medium hover:underline">
+          <Link
+            href={redirectTo !== "/dashboard" ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}
+            className="text-wing-primary font-medium hover:underline"
+          >
             הירשם
           </Link>
         </p>

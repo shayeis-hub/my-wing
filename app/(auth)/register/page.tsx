@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { signUp } from "@/lib/firebase/auth";
 import { Input } from "@/components/ui/Input";
@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/Button";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? "/dashboard";
+
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +28,7 @@ export default function RegisterPage() {
     try {
       await signUp(email, password, displayName);
       toast.success(`ברוך הבא ${displayName}! 🎉`);
-      router.replace("/dashboard");
+      router.replace(redirectTo);
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes("email-already-in-use")) {
         toast.error("אימייל זה כבר קיים במערכת");
@@ -80,7 +83,10 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-slate-500">
           כבר יש לך חשבון?{" "}
-          <Link href="/login" className="text-wing-primary font-medium hover:underline">
+          <Link
+            href={redirectTo !== "/dashboard" ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"}
+            className="text-wing-primary font-medium hover:underline"
+          >
             התחבר
           </Link>
         </p>
