@@ -59,7 +59,7 @@ export async function joinWing(
   if (snap.empty) return null;
 
   const wingDoc = snap.docs[0];
-  const member: WingMember = { uid: userId, displayName, photoURL };
+  const member: WingMember = { uid: userId, displayName, ...(photoURL ? { photoURL } : {}) };
   await updateDoc(wingDoc.ref, {
     memberIds: arrayUnion(userId),
     members: arrayUnion(member),
