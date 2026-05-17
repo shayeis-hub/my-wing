@@ -18,23 +18,43 @@ export function useAuth(): AuthState {
   });
 
   useEffect(() => {
-    let unsub: (() => void) | undefined;
+    let unsubUser: (() => void) | undefined;
 
-    Promise.all([
-      import("firebase/auth"),
-      import("@/lib/firebase/auth"),
-    ]).then(([{ onAuthStateChanged }, { auth, getUserDoc }]) => {
-      unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubAuth = (async () => {
+      const [{ onAuthStateChanged }, { auth }] = await Promise.all([
+        import("firebase/auth"),
+        import("@/lib/firebase/auth"),
+      ]);
+
+      return onAuthStateChanged(auth, async (firebaseUser) => {
+        // Cancel previous Firestore listener
+        unsubUser?.();
+
         if (!firebaseUser) {
           setState({ firebaseUser: null, user: null, loading: false });
           return;
         }
-        const user = await getUserDoc(firebaseUser.uid);
-        setState({ firebaseUser, user, loading: false });
-      });
-    });
 
-    return () => unsub?.();
+        // Subscribe to live Firestore user doc so profile updates reflect immediately
+        const [{ onSnapshot, doc }, { db }] = await Promise.all([
+          import("firebase/firestore"),
+          import("@/lib/firebase/config"),
+        ]);
+
+        unsubUser = onSnapshot(
+          doc(db, "users", firebaseUser.uid),
+          (snap) => {
+            const user = snap.exists() ? (snap.data() as User) : null;
+            setState({ firebaseUser, user, loading: false });
+          }
+        );
+      });
+    })();
+
+    return () => {
+      unsubAuth.then((unsub) => unsub?.());
+      unsubUser?.();
+    };
   }, []);
 
   return state;
