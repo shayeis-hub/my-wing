@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { Card, CardTitle } from "@/components/ui/Card";
@@ -11,9 +12,26 @@ import { useMeals } from "@/hooks/useMeals";
 import Link from "next/link";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
+import { requestNotificationPermission } from "@/lib/firebase/messaging";
 
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
+  const [showNotifBanner, setShowNotifBanner] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") setShowNotifBanner(true);
+    }
+  }, []);
+
+  async function handleEnableNotifications() {
+    if (!firebaseUser) return;
+    const token = await requestNotificationPermission(firebaseUser.uid);
+    setShowNotifBanner(false);
+    if (token) {
+      // toast handled silently — permission granted
+    }
+  }
   const { wing } = useWing(user?.wingId);
   const { meals } = useMeals(user?.wingId);
 
@@ -27,6 +45,17 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 space-y-4">
+      {/* Notification permission banner */}
+      {showNotifBanner && (
+        <div className="bg-wing-soft border border-wing-accent rounded-2xl p-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-wing-primary font-medium">🔔 אפשר התראות כדי לקבל SOS מהחברים</p>
+          <div className="flex gap-2 shrink-0">
+            <button onClick={() => setShowNotifBanner(false)} className="text-xs text-slate-400 px-2 py-1">לא עכשיו</button>
+            <button onClick={handleEnableNotifications} className="text-xs bg-wing-primary text-white px-3 py-1 rounded-xl font-medium">אפשר</button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="pt-4">
         <p className="text-slate-500 text-sm">{today}</p>

@@ -1,46 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
-
 export const dynamic = "force-dynamic";
-import { getDocs, query, collection, where } from "firebase/firestore";
+
+import { getDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { admin } from "@/lib/firebase/admin";
 
 export async function POST(req: NextRequest) {
   try {
     const { wingId, userId, userName } = await req.json();
 
-    // Get all member FCM tokens from the wing
-    const wingSnap = await getDocs(
-      query(collection(db, "wings"), where("__name__", "==", wingId))
-    );
-
-    if (wingSnap.empty) {
+    const wingSnap = await getDoc(doc(db, "wings", wingId));
+    if (!wingSnap.exists()) {
       return NextResponse.json({ error: "Wing not found" }, { status: 404 });
     }
 
-    const wing = wingSnap.docs[0].data();
-    const memberIds: string[] = wing.memberIds.filter((id: string) => id !== userId);
+    const memberIds: string[] = (wingSnap.data().memberIds ?? []).filter(
+      (id: string) => id !== userId
+    );
 
-    // Get FCM tokens for all members
     const tokens: string[] = [];
     for (const memberId of memberIds) {
-      const userDocs = await getDocs(
-        query(collection(db, "users"), where("__name__", "==", memberId))
-      );
-      if (!userDocs.empty) {
-        const token = userDocs.docs[0].data().fcmToken;
+      const userSnap = await getDoc(doc(db, "users", memberId));
+      if (userSnap.exists()) {
+        const token = userSnap.data().fcmToken;
         if (token) tokens.push(token);
       }
     }
 
-    // Send FCM notifications via Firebase Admin or FCM HTTP v1
-    // In production: use Firebase Admin SDK or FCM REST API
-    // For now we log and return success; wire up FCM send in Cloud Function
-    console.log(
-      `SOS from ${userName} in wing ${wingId}. Tokens to notify:`,
-      tokens
+    if (tokens.length === 0) {
+      return NextResponse.json({ success: true, notified: 0 });
+    }
+
+    const results = await Promise.allSettled(
+      tokens.map((token) =>
+        admin.messaging().send({
+          token,
+          notification: {
+            title: "SOS – צריך תמיכה! 🆘",
+            body: `${userName} זקוק/ה לחיזוק עכשיו. היכנסו לאפליקציה 💪`,
+          },
+          android: { notification: { sound: "default", channelId: "sos", priority: "high" } },
+          apns: { payload: { aps: { sound: "default", badge: 1 } } },
+          webpush: {
+            notification: { icon: "/icons/icon-192.png", badge: "/icons/icon-192.png", dir: "rtl", lang: "he" },
+            fcmOptions: { link: "/wing" },
+          },
+        })
+      )
     );
 
-    return NextResponse.json({ success: true, notified: tokens.length });
+    const notified = results.filter((r) => r.status === "fulfilled").length;
+    return NextResponse.json({ success: true, notified });
   } catch (err) {
     console.error("SOS notification error:", err);
     return NextResponse.json({ error: "Failed" }, { status: 500 });
