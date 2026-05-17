@@ -134,20 +134,20 @@ export default function WingPage() {
               <div className="flex-1 min-w-0">
                   <h2 className="font-bold text-slate-800 text-lg truncate">{wing.name}</h2>
                 <p className="text-sm text-slate-500">
-                  {wing.memberIds.length} חברים
+                  {wing.memberIds?.length ?? 0} חברים
                 </p>
               </div>
             </div>
 
             {/* Members */}
             <div className="space-y-2 mb-4">
-              {(wing.members ?? []).map((m) => (
+              {Array.isArray(wing.members) && wing.members.map((m) => (
                 <div key={m.uid} className="flex items-center gap-3 px-1">
                   <div className="w-9 h-9 rounded-full bg-wing-soft flex items-center justify-center text-wing-primary font-bold text-sm">
-                    {m.displayName.charAt(0).toUpperCase()}
+                    {(m.displayName ?? "?").charAt(0).toUpperCase()}
                   </div>
                   <span className="text-sm text-slate-700 font-medium">
-                    {m.displayName}
+                    {m.displayName ?? ""}
                   </span>
                   {m.uid === wing.ownerId && (
                     <span className="text-xs text-wing-muted bg-slate-100 px-2 py-0.5 rounded-full">
