@@ -28,6 +28,23 @@ import { nanoid } from "@/lib/utils/nanoid";
 
 // ── Wings ────────────────────────────────────────────────────────────────────
 
+// Normalizes old wing documents (createdBy→ownerId, missing members array)
+function normalizeWing(data: Record<string, unknown>, id: string): Wing {
+  const memberIds = Array.isArray(data.memberIds) ? (data.memberIds as string[]) : [];
+  const members = Array.isArray(data.members)
+    ? (data.members as WingMember[])
+    : memberIds.map((uid) => ({ uid, displayName: uid.slice(0, 8) }));
+  return {
+    ...(data as Omit<Wing, "id" | "ownerId" | "members" | "memberIds">),
+    id,
+    ownerId: (data.ownerId ?? data.createdBy ?? "") as string,
+    members,
+    memberIds,
+    name: (data.name ?? "") as string,
+    inviteToken: (data.inviteToken ?? "") as string,
+  } as Wing;
+}
+
 export async function createWing(
   ownerId: string,
   ownerName: string,
@@ -65,7 +82,7 @@ export async function joinWing(
     members: arrayUnion(member),
   });
   await updateDoc(doc(db, "users", userId), { wingId: wingDoc.id });
-  return { ...(wingDoc.data() as Omit<Wing, "id">), id: wingDoc.id };
+  return normalizeWing(wingDoc.data() as Record<string, unknown>, wingDoc.id);
 }
 
 export async function renameWing(wingId: string, name: string): Promise<void> {
@@ -88,7 +105,7 @@ export function subscribeToWing(
   cb: (wing: Wing) => void
 ): Unsubscribe {
   return onSnapshot(doc(db, "wings", wingId), (snap) => {
-    if (snap.exists()) cb({ ...(snap.data() as Omit<Wing, "id">), id: snap.id });
+    if (snap.exists()) cb(normalizeWing(snap.data() as Record<string, unknown>, snap.id));
   });
 }
 
