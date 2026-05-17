@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { generateDailySummary } from "@/lib/ai/claude";
 
 export async function POST(req: NextRequest) {
