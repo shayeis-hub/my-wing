@@ -26,10 +26,44 @@ export default function MealsPage() {
   } | null>(null);
   const [mealType, setMealType] = useState<typeof mealTypes[number]>("lunch");
   const [saving, setSaving] = useState(false);
+  const [hint, setHint] = useState("");
+  const [reanalyzing, setReanalyzing] = useState(false);
+  const [editingValues, setEditingValues] = useState(false);
 
   async function handleAnalysis(analysis: MealAnalysis, imageDataUrl: string) {
     setShowCamera(false);
+    setHint("");
+    setEditingValues(false);
     setPendingAnalysis({ analysis, imageDataUrl });
+  }
+
+  async function handleReanalyze() {
+    if (!pendingAnalysis || !hint.trim()) return;
+    setReanalyzing(true);
+    try {
+      const base64 = pendingAnalysis.imageDataUrl.split(",")[1];
+      const mediaType = pendingAnalysis.imageDataUrl.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+      const res = await fetch("/api/ai/analyze-meal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ base64Image: base64, mediaType, hint: hint.trim() }),
+      });
+      if (!res.ok) throw new Error();
+      const analysis: MealAnalysis = await res.json();
+      setPendingAnalysis((prev) => prev ? { ...prev, analysis } : null);
+      setHint("");
+      toast.success("הניתוח עודכן ✨");
+    } catch {
+      toast.error("שגיאה בניתוח מחדש");
+    } finally {
+      setReanalyzing(false);
+    }
+  }
+
+  function updateAnalysisField(field: keyof MealAnalysis, value: string | number) {
+    setPendingAnalysis((prev) =>
+      prev ? { ...prev, analysis: { ...prev.analysis, [field]: value } } : null
+    );
   }
 
   async function saveMeal() {
@@ -83,19 +117,68 @@ export default function MealsPage() {
             alt="meal"
             className="w-full h-44 object-cover rounded-2xl"
           />
-          <div className="space-y-1 text-sm text-slate-700">
+          <div className="space-y-2 text-sm text-slate-700">
             <p className="font-medium">{pendingAnalysis.analysis.description}</p>
-            <div className="flex gap-4 text-xs text-slate-500">
-              <span>🔥 {pendingAnalysis.analysis.calories} קק&quot;ל</span>
-              <span>🥩 {pendingAnalysis.analysis.protein}g חלבון</span>
-              <span>🌾 {pendingAnalysis.analysis.carbs}g פחמ&apos;</span>
-              <span>🧈 {pendingAnalysis.analysis.fat}g שומן</span>
-            </div>
+
+            {editingValues ? (
+              <div className="grid grid-cols-2 gap-2">
+                {(["calories", "protein", "carbs", "fat"] as const).map((field) => (
+                  <label key={field} className="flex flex-col gap-0.5">
+                    <span className="text-xs text-slate-400">
+                      {field === "calories" ? "🔥 קק\"ל" : field === "protein" ? "🥩 חלבון g" : field === "carbs" ? "🌾 פחמימות g" : "🧈 שומן g"}
+                    </span>
+                    <input
+                      type="number"
+                      value={pendingAnalysis.analysis[field] as number}
+                      onChange={(e) => updateAnalysisField(field, Number(e.target.value))}
+                      className="border border-slate-200 rounded-xl px-2 py-1 text-sm w-full"
+                    />
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="flex gap-4 text-xs text-slate-500">
+                <span>🔥 {pendingAnalysis.analysis.calories} קק&quot;ל</span>
+                <span>🥩 {pendingAnalysis.analysis.protein}g חלבון</span>
+                <span>🌾 {pendingAnalysis.analysis.carbs}g פחמ&apos;</span>
+                <span>🧈 {pendingAnalysis.analysis.fat}g שומן</span>
+              </div>
+            )}
+
+            <button
+              onClick={() => setEditingValues((v) => !v)}
+              className="text-xs text-slate-400 underline"
+            >
+              {editingValues ? "סגור עריכה" : "ערוך ערכים ידנית"}
+            </button>
+
             {pendingAnalysis.analysis.tips && (
               <p className="text-xs text-wing-primary bg-wing-soft px-3 py-2 rounded-xl">
                 💡 {pendingAnalysis.analysis.tips}
               </p>
             )}
+          </div>
+
+          {/* Re-analyze with hint */}
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={hint}
+                onChange={(e) => setHint(e.target.value)}
+                placeholder="לא מדויק? כתוב מה יש בצלחת..."
+                className="flex-1 border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
+                onKeyDown={(e) => { if (e.key === "Enter") handleReanalyze(); }}
+              />
+              <Button
+                size="sm"
+                onClick={handleReanalyze}
+                loading={reanalyzing}
+                disabled={!hint.trim()}
+              >
+                נתח מחדש
+              </Button>
+            </div>
           </div>
 
           {/* Meal type selector */}

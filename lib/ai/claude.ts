@@ -7,7 +7,8 @@ const client = new Anthropic({
 
 export async function analyzeMealImage(
   base64Image: string,
-  mediaType: "image/jpeg" | "image/png" | "image/webp"
+  mediaType: "image/jpeg" | "image/png" | "image/webp",
+  hint?: string
 ): Promise<MealAnalysis> {
   const response = await client.messages.create({
     model: "claude-sonnet-4-6",
@@ -22,7 +23,7 @@ export async function analyzeMealImage(
           },
           {
             type: "text",
-            text: `אנא נתח את הצלחת בתמונה הזו ותן לי:
+            text: `${hint ? `המשתמש מציין שהארוחה היא: "${hint}". השתמש במידע זה לצד התמונה לניתוח מדויק יותר.\n\n` : ""}אנא נתח את הצלחת בתמונה הזו ותן לי:
 1. תיאור קצר של הארוחה בעברית
 2. רשימת רכיבים עם משקל משוער בגרמים לכל אחד
 3. ערכים תזונתיים: קלוריות, חלבון, פחמימות, שומן, סיבים
