@@ -81,6 +81,19 @@ function LoginForm() {
           הירשם
         </Link>
       </p>
+
+      <div className="flex justify-center flex-wrap gap-x-4 gap-y-1 pt-2">
+        {[
+          { href: "/privacy", label: "מדיניות פרטיות" },
+          { href: "/terms", label: "תנאי שימוש" },
+          { href: "/contact", label: "צור קשר" },
+          { href: "/delete-account", label: "מחיקת חשבון" },
+        ].map(({ href, label }) => (
+          <Link key={href} href={href} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+            {label}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
