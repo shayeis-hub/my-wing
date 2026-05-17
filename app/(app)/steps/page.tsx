@@ -6,7 +6,7 @@ import { Leaderboard } from "@/components/steps/Leaderboard";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { saveSteps, getWingSteps } from "@/lib/firebase/firestore";
+import { saveSteps, getWingSteps, getTodayCheckin } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import type { StepsEntry } from "@/types";
@@ -19,9 +19,31 @@ export default function StepsPage() {
   const today = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
-    if (!user?.wingId) return;
-    getWingSteps(user.wingId, today).then(setEntries);
-  }, [user?.wingId, today]);
+    if (!user?.wingId || !firebaseUser) return;
+    Promise.all([
+      getWingSteps(user.wingId, today),
+      getTodayCheckin(user.wingId, firebaseUser.uid, today),
+    ]).then(([stepsEntries, checkin]) => {
+      // If steps were saved via check-in but not yet in steps collection, show them
+      const hasMyEntry = stepsEntries.some((e) => e.userId === firebaseUser.uid);
+      if (!hasMyEntry && checkin?.steps) {
+        setEntries([
+          ...stepsEntries,
+          {
+            id: `${firebaseUser.uid}_${today}`,
+            wingId: user.wingId!,
+            userId: firebaseUser.uid,
+            userName: user.displayName,
+            date: today,
+            steps: checkin.steps,
+            createdAt: null as unknown as import("firebase/firestore").Timestamp,
+          },
+        ]);
+      } else {
+        setEntries(stepsEntries);
+      }
+    });
+  }, [user?.wingId, firebaseUser, today]);
 
   const myEntry = entries.find((e) => e.userId === firebaseUser?.uid);
 

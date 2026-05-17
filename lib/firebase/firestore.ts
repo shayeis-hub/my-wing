@@ -168,16 +168,20 @@ export async function saveCheckin(
     ...checkin,
     createdAt: serverTimestamp(),
   });
-  // Sync steps to the steps collection so leaderboard stays consistent
+  // Sync steps to the steps collection so leaderboard stays consistent (best-effort)
   if (checkin.steps) {
-    await setDoc(doc(db, "wings", wingId, "steps", id), {
-      wingId,
-      userId: checkin.userId,
-      userName: checkin.userName,
-      date: checkin.date,
-      steps: checkin.steps,
-      createdAt: serverTimestamp(),
-    });
+    try {
+      await setDoc(doc(db, "wings", wingId, "steps", id), {
+        wingId,
+        userId: checkin.userId,
+        userName: checkin.userName,
+        date: checkin.date,
+        steps: checkin.steps,
+        createdAt: serverTimestamp(),
+      });
+    } catch {
+      // non-critical — checkin was saved, leaderboard sync failed silently
+    }
   }
 }
 
