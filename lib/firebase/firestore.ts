@@ -97,6 +97,28 @@ export async function regenerateInviteToken(wingId: string): Promise<string> {
   return token;
 }
 
+export async function syncWingMemberUid(
+  wingId: string,
+  uid: string,
+  displayName: string
+): Promise<void> {
+  const wingSnap = await getDoc(doc(db, "wings", wingId));
+  if (!wingSnap.exists()) return;
+  const data = wingSnap.data();
+  const members = (data.members ?? []) as WingMember[];
+  if (members.some((m) => m.uid === uid)) return; // already correct
+
+  const idx = members.findIndex((m) => m.displayName === displayName);
+  if (idx === -1) return;
+
+  const oldUid = members[idx].uid;
+  const updated = members.map((m, i) => (i === idx ? { ...m, uid } : m));
+  const memberIds = ((data.memberIds ?? []) as string[]).map((id) =>
+    id === oldUid ? uid : id
+  );
+  await updateDoc(doc(db, "wings", wingId), { members: updated, memberIds });
+}
+
 export async function getWing(wingId: string): Promise<Wing | null> {
   const snap = await getDoc(doc(db, "wings", wingId));
   return snap.exists() ? { ...(snap.data() as Omit<Wing, "id">), id: snap.id } : null;

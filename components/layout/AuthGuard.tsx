@@ -1,13 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { syncWingMemberUid } from "@/lib/firebase/firestore";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { firebaseUser, user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const syncedRef = useRef(false);
+
+  useEffect(() => {
+    if (!firebaseUser || !user?.wingId || !user?.displayName || syncedRef.current) return;
+    syncedRef.current = true;
+    syncWingMemberUid(user.wingId, firebaseUser.uid, user.displayName).catch(() => {});
+  }, [firebaseUser, user]);
 
   useEffect(() => {
     if (loading) return;
