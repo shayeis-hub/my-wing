@@ -4,12 +4,12 @@ import { useState } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { addMealComment } from "@/lib/firebase/firestore";
+import { addMealComment, updateMeal } from "@/lib/firebase/firestore";
 import type { Meal, Encouragement } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
 import toast from "react-hot-toast";
-import { X } from "lucide-react";
+import { X, Pencil } from "lucide-react";
 
 interface MealCardProps {
   meal: Meal;
@@ -30,12 +30,60 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
   const [sending, setSending] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    description: meal.analysis.description,
+    calories: meal.analysis.calories,
+    protein: meal.analysis.protein,
+    carbs: meal.analysis.carbs,
+    fat: meal.analysis.fat,
+    mealType: meal.mealType,
+    mealTime: meal.mealTime ?? "",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const timeAgo = meal.createdAt?.toDate
     ? formatDistanceToNow(meal.createdAt.toDate(), { addSuffix: true, locale: he })
     : "";
 
   const isOwn = currentUserId === meal.userId;
+
+  function openEdit() {
+    setEditForm({
+      description: meal.analysis.description,
+      calories: meal.analysis.calories,
+      protein: meal.analysis.protein,
+      carbs: meal.analysis.carbs,
+      fat: meal.analysis.fat,
+      mealType: meal.mealType,
+      mealTime: meal.mealTime ?? "",
+    });
+    setEditing(true);
+  }
+
+  async function handleSaveEdit() {
+    setSavingEdit(true);
+    try {
+      await updateMeal(meal.wingId, meal.id, {
+        analysis: {
+          ...meal.analysis,
+          description: editForm.description,
+          calories: editForm.calories,
+          protein: editForm.protein,
+          carbs: editForm.carbs,
+          fat: editForm.fat,
+        },
+        mealType: editForm.mealType,
+        mealTime: editForm.mealTime || undefined,
+      });
+      toast.success("הארוחה עודכנה ✅");
+      setEditing(false);
+    } catch {
+      toast.error("שגיאה בעדכון");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   async function handleSend() {
     const trimmed = text.trim();
@@ -172,10 +220,69 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
                   {" · "}{timeAgo}
                 </p>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400">
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-1">
+                {isOwn && !editing && (
+                  <button onClick={openEdit} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400">
+                    <Pencil size={18} />
+                  </button>
+                )}
+                <button onClick={() => { setShowModal(false); setEditing(false); }} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
+
+            {editing ? (
+              <div className="p-5 space-y-3">
+                <input
+                  type="text"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                  placeholder="תיאור הארוחה"
+                  className="w-full border border-slate-200 rounded-2xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    ["calories", "🔥 קק\"ל"],
+                    ["protein", "🥩 חלבון g"],
+                    ["carbs", "🌾 פחמימות g"],
+                    ["fat", "🧈 שומן g"],
+                  ] as [keyof typeof editForm, string][]).map(([field, label]) => (
+                    <label key={field} className="flex flex-col gap-0.5">
+                      <span className="text-xs text-slate-400">{label}</span>
+                      <input
+                        type="number"
+                        value={editForm[field] as number}
+                        onChange={(e) => setEditForm((f) => ({ ...f, [field]: Number(e.target.value) }))}
+                        className="border border-slate-200 rounded-xl px-2 py-1.5 text-sm w-full"
+                        inputMode="numeric"
+                      />
+                    </label>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={editForm.mealType}
+                    onChange={(e) => setEditForm((f) => ({ ...f, mealType: e.target.value as Meal["mealType"] }))}
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-sm text-slate-700 focus:outline-none"
+                  >
+                    {(["breakfast", "lunch", "dinner", "snack"] as const).map((t) => (
+                      <option key={t} value={t}>{mealTypeLabels[t]}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="time"
+                    value={editForm.mealTime}
+                    onChange={(e) => setEditForm((f) => ({ ...f, mealTime: e.target.value }))}
+                    className="bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-sm text-slate-700 focus:outline-none w-28"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">בטל</Button>
+                  <Button onClick={handleSaveEdit} loading={savingEdit} className="flex-1">שמור</Button>
+                </div>
+              </div>
+            ) : (
 
             <div className="p-5 space-y-4">
               {/* Image */}
@@ -272,6 +379,7 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
       )}

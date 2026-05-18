@@ -134,6 +134,14 @@ export async function addMealComment(
   });
 }
 
+export async function updateMeal(
+  wingId: string,
+  mealId: string,
+  updates: Partial<Pick<Meal, "analysis" | "mealType" | "mealTime" | "notes">>
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "meals", mealId), updates);
+}
+
 export async function getWingMeals(wingId: string, limitN = 20): Promise<Meal[]> {
   const q = query(
     collection(db, "wings", wingId, "meals"),

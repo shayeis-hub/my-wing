@@ -29,8 +29,12 @@ export async function GET(req: NextRequest) {
 
   const { access_token } = await tokenRes.json();
 
+  // Use client-provided timestamps to respect local timezone
+  const startParam = req.nextUrl.searchParams.get("start");
+  const endParam = req.nextUrl.searchParams.get("end");
   const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfDay = startParam ? parseInt(startParam) : new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const endOfDay = endParam ? parseInt(endParam) : startOfDay + 86400000;
 
   const fitRes = await fetch(
     "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate",
@@ -44,7 +48,7 @@ export async function GET(req: NextRequest) {
         aggregateBy: [{ dataTypeName: "com.google.step_count.delta" }],
         bucketByTime: { durationMillis: 86400000 },
         startTimeMillis: startOfDay,
-        endTimeMillis: startOfDay + 86400000,
+        endTimeMillis: endOfDay,
       }),
     }
   );

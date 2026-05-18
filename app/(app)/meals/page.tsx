@@ -455,6 +455,15 @@ function MealsByDate({
     seen.get(key)!.push(meal);
   }
 
+  for (const group of groups) {
+    group.meals.sort((a, b) => {
+      if (!a.mealTime && !b.mealTime) return 0;
+      if (!a.mealTime) return 1;
+      if (!b.mealTime) return -1;
+      return a.mealTime.localeCompare(b.mealTime);
+    });
+  }
+
   // Today's group is open by default, past days are closed
   const todayKey = format(new Date(), "yyyy-MM-dd");
   const [openDates, setOpenDates] = useState<Set<string>>(new Set([todayKey]));
