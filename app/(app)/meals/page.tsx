@@ -425,6 +425,7 @@ import type { Meal } from "@/types";
 
 function dateLabel(dateStr: string): string {
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
   const dayName = format(d, "EEEE", { locale: he });
   const dateFormatted = format(d, "d/M/yy");
   return `${dayName} ${dateFormatted}`;
@@ -445,7 +446,8 @@ function MealsByDate({
 
   for (const meal of meals) {
     const d = meal.createdAt?.toDate?.();
-    const key = d ? format(d, "yyyy-MM-dd") : "unknown";
+    if (!d) continue;
+    const key = format(d, "yyyy-MM-dd");
     if (!seen.has(key)) {
       seen.set(key, []);
       groups.push({ date: key, meals: seen.get(key)! });
