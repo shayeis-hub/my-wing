@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { SOSButton } from "@/components/wing/SOSButton";
 import { MealCard } from "@/components/meals/MealCard";
 import { WeightChart } from "@/components/dashboard/WeightChart";
+import { MemberDashboard } from "@/components/dashboard/MemberDashboard";
 import { useMeals } from "@/hooks/useMeals";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -94,103 +96,148 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Calorie progress */}
-      <Card>
-        <CardTitle className="mb-3">קלוריות היום</CardTitle>
-        <div className="flex items-end justify-between mb-2">
-          <div>
-            <span className="text-3xl font-bold text-slate-800">{todayCalories}</span>
-            <span className="text-slate-400 text-sm mr-1">/ {effectiveTarget} קק&quot;ל</span>
-          </div>
-          <span className="text-sm text-slate-500">{myTodayMeals.length} ארוחות</span>
-        </div>
-        <ProgressBar
-          value={todayCalories}
-          max={effectiveTarget}
-          color={todayCalories > effectiveTarget ? "bg-red-400" : "bg-wing-primary"}
-        />
-        {totalBurned > 0 && (
-          <div className="mt-3 flex gap-3 text-xs text-slate-500 flex-wrap">
-            {stepsCalories > 0 && (
-              <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
-                👟 {todayCheckin?.steps?.toLocaleString()} צעדים = −{stepsCalories} קק&quot;ל
-              </span>
-            )}
-            {workoutCalories > 0 && (
-              <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
-                🏋️ אימון = −{workoutCalories} קק&quot;ל
-              </span>
-            )}
-            <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg font-medium">
-              נטו: {netCalories} קק&quot;ל
-            </span>
-          </div>
-        )}
-      </Card>
-
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-3">
-        <Link href="/meals">
-          <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-            <div className="text-3xl mb-1">🍽️</div>
-            <p className="text-sm font-semibold text-slate-700">צילום ארוחה</p>
-            <p className="text-xs text-slate-400">ניתוח AI מיידי</p>
-          </Card>
-        </Link>
-        <Link href="/checkin">
-          <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-            <div className="text-3xl mb-1">✅</div>
-            <p className="text-sm font-semibold text-slate-700">צ&apos;ק-אין יומי</p>
-            <p className="text-xs text-slate-400">מים, אימון, משקל</p>
-          </Card>
-        </Link>
-        <Link href="/steps">
-          <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-            <div className="text-3xl mb-1">👟</div>
-            <p className="text-sm font-semibold text-slate-700">צעדים</p>
-            <p className="text-xs text-slate-400">לוח תוצאות</p>
-          </Card>
-        </Link>
-        <Link href="/calculator">
-          <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-            <div className="text-3xl mb-1">🧮</div>
-            <p className="text-sm font-semibold text-slate-700">מחשבון</p>
-            <p className="text-xs text-slate-400">TDEE / BMR</p>
-          </Card>
-        </Link>
-      </div>
-
-      {/* SOS */}
-      {user && firebaseUser && (
-        <SOSButton
-          wingId={user.wingId ?? ""}
-          userId={firebaseUser.uid}
-          userName={user.displayName}
-        />
-      )}
-
-      {/* Recent meals */}
-      {myTodayMeals.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-slate-700">ארוחות היום</h2>
-            <Link href="/meals" className="text-sm text-wing-primary">הכל</Link>
-          </div>
-          {myTodayMeals.slice(0, 3).map((meal) => (
-            <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
-          ))}
+      {/* Member selector */}
+      {wing && wing.members.length > 1 && firebaseUser && (
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+          <button
+            onClick={() => setSelectedMemberId(null)}
+            className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+              selectedMemberId === null
+                ? "bg-wing-primary text-white"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+            }`}
+          >
+            שלי
+          </button>
+          {wing.members
+            .filter((m) => m.uid !== firebaseUser.uid)
+            .map((m) => (
+              <button
+                key={m.uid}
+                onClick={() => setSelectedMemberId(m.uid)}
+                className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+                  selectedMemberId === m.uid
+                    ? "bg-wing-primary text-white"
+                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                }`}
+              >
+                {m.displayName.split(" ")[0]}
+              </button>
+            ))}
         </div>
       )}
 
-      {/* Weight progress chart */}
-      {(weightLogs.length > 0 || todayCheckin?.weightKg) && (
-        <Card>
-          <CardTitle className="mb-3">⚖️ מגמת משקל</CardTitle>
-          <WeightChart
-            logs={weightLogs}
-            targetWeight={user?.profile?.targetWeightKg}
-          />
-        </Card>
+      {/* Member view */}
+      {selectedMemberId && wing && firebaseUser && user && (
+        <MemberDashboard
+          memberId={selectedMemberId}
+          memberName={wing.members.find((m) => m.uid === selectedMemberId)?.displayName ?? ""}
+          wingId={wing.id}
+          currentUserId={firebaseUser.uid}
+          currentUserName={user.displayName}
+          todayMeals={todayMeals}
+        />
+      )}
+
+      {/* Personal dashboard — hidden when viewing another member */}
+      {!selectedMemberId && (
+        <>
+          {/* Calorie progress */}
+          <Card>
+            <CardTitle className="mb-3">קלוריות היום</CardTitle>
+            <div className="flex items-end justify-between mb-2">
+              <div>
+                <span className="text-3xl font-bold text-slate-800">{todayCalories}</span>
+                <span className="text-slate-400 text-sm mr-1">/ {effectiveTarget} קק&quot;ל</span>
+              </div>
+              <span className="text-sm text-slate-500">{myTodayMeals.length} ארוחות</span>
+            </div>
+            <ProgressBar
+              value={todayCalories}
+              max={effectiveTarget}
+              color={todayCalories > effectiveTarget ? "bg-red-400" : "bg-wing-primary"}
+            />
+            {totalBurned > 0 && (
+              <div className="mt-3 flex gap-3 text-xs text-slate-500 flex-wrap">
+                {stepsCalories > 0 && (
+                  <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
+                    👟 {todayCheckin?.steps?.toLocaleString()} צעדים = −{stepsCalories} קק&quot;ל
+                  </span>
+                )}
+                {workoutCalories > 0 && (
+                  <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
+                    🏋️ אימון = −{workoutCalories} קק&quot;ל
+                  </span>
+                )}
+                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg font-medium">
+                  נטו: {netCalories} קק&quot;ל
+                </span>
+              </div>
+            )}
+          </Card>
+
+          {/* Quick actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link href="/meals">
+              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
+                <div className="text-3xl mb-1">🍽️</div>
+                <p className="text-sm font-semibold text-slate-700">צילום ארוחה</p>
+                <p className="text-xs text-slate-400">ניתוח AI מיידי</p>
+              </Card>
+            </Link>
+            <Link href="/checkin">
+              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
+                <div className="text-3xl mb-1">✅</div>
+                <p className="text-sm font-semibold text-slate-700">צ&apos;ק-אין יומי</p>
+                <p className="text-xs text-slate-400">מים, אימון, משקל</p>
+              </Card>
+            </Link>
+            <Link href="/steps">
+              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
+                <div className="text-3xl mb-1">👟</div>
+                <p className="text-sm font-semibold text-slate-700">צעדים</p>
+                <p className="text-xs text-slate-400">לוח תוצאות</p>
+              </Card>
+            </Link>
+            <Link href="/calculator">
+              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
+                <div className="text-3xl mb-1">🧮</div>
+                <p className="text-sm font-semibold text-slate-700">מחשבון</p>
+                <p className="text-xs text-slate-400">TDEE / BMR</p>
+              </Card>
+            </Link>
+          </div>
+
+          {/* SOS */}
+          {user && firebaseUser && (
+            <SOSButton
+              wingId={user.wingId ?? ""}
+              userId={firebaseUser.uid}
+              userName={user.displayName}
+            />
+          )}
+
+          {/* Recent meals */}
+          {myTodayMeals.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-slate-700">ארוחות היום</h2>
+                <Link href="/meals" className="text-sm text-wing-primary">הכל</Link>
+              </div>
+              {myTodayMeals.slice(0, 3).map((meal) => (
+                <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
+              ))}
+            </div>
+          )}
+
+          {/* Weight progress chart */}
+          {(weightLogs.length > 0 || todayCheckin?.weightKg) && (
+            <Card>
+              <CardTitle className="mb-3">⚖️ מגמת משקל</CardTitle>
+              <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} />
+            </Card>
+          )}
+        </>
       )}
 
       {/* No wing state */}
