@@ -22,6 +22,13 @@ function calcStepsCalories(steps: number, weightKg: number): number {
   return Math.round(steps * 0.0004 * weightKg);
 }
 
+function calcBMR(profile: { weightKg: number; heightCm: number; age: number; gender: "male" | "female" } | undefined): number {
+  if (!profile) return 1800;
+  const { weightKg, heightCm, age, gender } = profile;
+  const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
+  return Math.round(gender === "male" ? base + 5 : base - 161);
+}
+
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
   const [showNotifBanner, setShowNotifBanner] = useState(false);
@@ -60,15 +67,11 @@ export default function DashboardPage() {
   });
   const myTodayMeals = todayMeals.filter((m) => m.userId === firebaseUser?.uid);
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
-  const dailyTarget = user?.profile?.dailyCalorieTarget ?? 2000;
-
-  // Calories burned
   const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
+  const bmr = calcBMR(user?.profile ? { ...user.profile, weightKg } : undefined);
   const stepsCalories = todayCheckin?.steps ? calcStepsCalories(todayCheckin.steps, weightKg) : 0;
   const workoutCalories = todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0;
-  const totalBurned = stepsCalories + workoutCalories;
-  const effectiveTarget = dailyTarget + totalBurned;
-  const netCalories = todayCalories - totalBurned;
+  const totalExpenditure = bmr + stepsCalories + workoutCalories;
 
   return (
     <div className="p-4 space-y-4">
@@ -148,32 +151,40 @@ export default function DashboardPage() {
             <div className="flex items-end justify-between mb-2">
               <div>
                 <span className="text-3xl font-bold text-slate-800">{todayCalories}</span>
-                <span className="text-slate-400 text-sm mr-1">/ {effectiveTarget} קק&quot;ל</span>
+                <span className="text-slate-400 text-sm mr-1">/ {bmr} קק&quot;ל BMR</span>
               </div>
               <span className="text-sm text-slate-500">{myTodayMeals.length} ארוחות</span>
             </div>
             <ProgressBar
               value={todayCalories}
-              max={effectiveTarget}
-              color={todayCalories > effectiveTarget ? "bg-red-400" : "bg-wing-primary"}
+              max={bmr}
+              color={todayCalories > bmr ? "bg-red-400" : "bg-wing-primary"}
             />
-            {totalBurned > 0 && (
-              <div className="mt-3 flex gap-3 text-xs text-slate-500 flex-wrap">
-                {stepsCalories > 0 && (
-                  <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
-                    👟 {todayCheckin?.steps?.toLocaleString()} צעדים = −{stepsCalories} קק&quot;ל
-                  </span>
-                )}
-                {workoutCalories > 0 && (
-                  <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
-                    🏋️ אימון = −{workoutCalories} קק&quot;ל
-                  </span>
-                )}
-                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg font-medium">
-                  נטו: {netCalories} קק&quot;ל
-                </span>
+            {/* Expenditure breakdown */}
+            <div className="mt-3 space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">🔥 BMR (מנוחה)</span>
+                <span className="font-medium text-slate-700">{bmr} קק&quot;ל</span>
               </div>
-            )}
+              {stepsCalories > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">👟 צעדים ({todayCheckin?.steps?.toLocaleString()})</span>
+                  <span className="font-medium text-green-600">+{stepsCalories} קק&quot;ל</span>
+                </div>
+              )}
+              {workoutCalories > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">🏋️ אימון</span>
+                  <span className="font-medium text-green-600">+{workoutCalories} קק&quot;ל</span>
+                </div>
+              )}
+              {(stepsCalories > 0 || workoutCalories > 0) && (
+                <div className="flex justify-between text-sm pt-1 border-t border-slate-100">
+                  <span className="font-semibold text-slate-600">סה&quot;כ הוצאה</span>
+                  <span className="font-bold text-slate-800">{totalExpenditure} קק&quot;ל</span>
+                </div>
+              )}
+            </div>
           </Card>
 
           {/* Quick actions */}

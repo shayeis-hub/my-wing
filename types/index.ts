@@ -80,7 +80,9 @@ export interface Encouragement {
 
 export interface Workout {
   done: boolean;
-  description?: string;
+  type?: string;
+  intensity?: "light" | "moderate" | "intense";
+  durationMinutes?: number;
   caloriesBurned?: number;
 }
 

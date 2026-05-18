@@ -25,6 +25,33 @@ const moods = [
   { value: 5, emoji: "🤩", label: "מעולה" },
 ];
 
+const WORKOUT_TYPES: { value: string; label: string }[] = [
+  { value: "running", label: "🏃 ריצה" },
+  { value: "walking", label: "🚶 הליכה" },
+  { value: "cycling", label: "🚴 אופניים" },
+  { value: "weights", label: "🏋️ חדר כושר / משקולות" },
+  { value: "hiit", label: "⚡ HIIT" },
+  { value: "swimming", label: "🏊 שחייה" },
+  { value: "yoga", label: "🧘 יוגה / פילאטס" },
+  { value: "other", label: "🤸 אחר" },
+];
+
+const MET: Record<string, Record<"light" | "moderate" | "intense", number>> = {
+  running:  { light: 8,   moderate: 11,  intense: 14  },
+  walking:  { light: 2.5, moderate: 3.5, intense: 4.5 },
+  cycling:  { light: 4,   moderate: 8,   intense: 12  },
+  weights:  { light: 3,   moderate: 5,   intense: 6   },
+  hiit:     { light: 8,   moderate: 10,  intense: 12  },
+  swimming: { light: 5,   moderate: 7,   intense: 10  },
+  yoga:     { light: 2.5, moderate: 3,   intense: 3.5 },
+  other:    { light: 4,   moderate: 6,   intense: 8   },
+};
+
+function calcWorkoutCalories(type: string, intensity: "light" | "moderate" | "intense", durationMin: number, weightKg: number): number {
+  const met = MET[type]?.[intensity] ?? 5;
+  return Math.round(met * weightKg * (durationMin / 60));
+}
+
 async function sendEncouragementPush(targetUserId: string, authorName: string, text: string) {
   await fetch("/api/notifications/encouragement", {
     method: "POST",
@@ -43,8 +70,9 @@ export default function CheckinPage() {
   const [notes, setNotes] = useState("");
   const [steps, setSteps] = useState("");
   const [workoutDone, setWorkoutDone] = useState(false);
-  const [workoutDescription, setWorkoutDescription] = useState("");
-  const [workoutCalories, setWorkoutCalories] = useState("");
+  const [workoutType, setWorkoutType] = useState("running");
+  const [workoutIntensity, setWorkoutIntensity] = useState<"light" | "moderate" | "intense">("moderate");
+  const [workoutDuration, setWorkoutDuration] = useState("");
   const [weight, setWeight] = useState("");
   const [saving, setSaving] = useState(false);
   const [encourageTexts, setEncourageTexts] = useState<Record<string, string>>({});
@@ -70,8 +98,9 @@ export default function CheckinPage() {
         setNotes(c.notes ?? "");
         setSteps(c.steps ? String(c.steps) : stepsFromLeaderboard ? String(stepsFromLeaderboard) : "");
         setWorkoutDone(c.workout?.done ?? false);
-        setWorkoutDescription(c.workout?.description ?? "");
-        setWorkoutCalories(c.workout?.caloriesBurned ? String(c.workout.caloriesBurned) : "");
+        setWorkoutType(c.workout?.type ?? "running");
+        setWorkoutIntensity(c.workout?.intensity ?? "moderate");
+        setWorkoutDuration(c.workout?.durationMinutes ? String(c.workout.durationMinutes) : "");
         setWeight(c.weightKg ? String(c.weightKg) : "");
         if (c.daySummary) setDaySummary(c.daySummary);
       } else if (stepsFromLeaderboard) {
@@ -88,7 +117,13 @@ export default function CheckinPage() {
       const trimmedNotes = notes.trim();
       const stepsNum = steps ? parseInt(steps) : undefined;
       const weightNum = weight ? parseFloat(weight) : undefined;
-      const workoutCalNum = workoutCalories ? parseInt(workoutCalories) : undefined;
+      const durationMin = workoutDuration ? parseInt(workoutDuration) : undefined;
+      const weightForCalc = weightNum ?? user.profile?.weightKg ?? 70;
+      const workoutCalNum = (workoutDone && durationMin)
+        ? calcWorkoutCalories(workoutType, workoutIntensity, durationMin, weightForCalc)
+        : undefined;
+      const workoutTypeLabel = WORKOUT_TYPES.find(t => t.value === workoutType)?.label ?? workoutType;
+      const intensityLabel = workoutIntensity === "light" ? "קל" : workoutIntensity === "moderate" ? "בינוני" : "אינטנסיבי";
 
       await saveCheckin(user.wingId, {
         wingId: user.wingId,
@@ -103,8 +138,9 @@ export default function CheckinPage() {
         ...(weightNum ? { weightKg: weightNum } : {}),
         workout: {
           done: workoutDone,
-          ...(workoutDone && workoutDescription.trim() ? { description: workoutDescription.trim() } : {}),
-          ...(workoutDone && workoutCalNum ? { caloriesBurned: workoutCalNum } : {}),
+          ...(workoutDone ? { type: workoutType, intensity: workoutIntensity } : {}),
+          ...(workoutDone && durationMin ? { durationMinutes: durationMin, description: `${workoutTypeLabel} · ${intensityLabel} · ${durationMin} דק'` } : {}),
+          ...(workoutCalNum ? { caloriesBurned: workoutCalNum } : {}),
         },
       });
 
@@ -135,7 +171,7 @@ export default function CheckinPage() {
         ...(trimmedNotes ? { notes: trimmedNotes } : {}),
         ...(stepsNum ? { steps: stepsNum } : {}),
         ...(weightNum ? { weightKg: weightNum } : {}),
-        workout: { done: workoutDone, ...(workoutDone && workoutDescription.trim() ? { description: workoutDescription.trim() } : {}), ...(workoutDone && workoutCalNum ? { caloriesBurned: workoutCalNum } : {}) },
+        workout: { done: workoutDone, ...(workoutDone ? { type: workoutType, intensity: workoutIntensity } : {}), ...(workoutDone && durationMin ? { durationMinutes: durationMin, description: `${WORKOUT_TYPES.find(t=>t.value===workoutType)?.label} · ${workoutIntensity === "light" ? "קל" : workoutIntensity === "moderate" ? "בינוני" : "אינטנסיבי"} · ${durationMin} דק'` } : {}), ...(workoutCalNum ? { caloriesBurned: workoutCalNum } : {}) },
         createdAt: null as unknown as DailyCheckin["createdAt"],
       });
     } catch {
@@ -276,24 +312,59 @@ export default function CheckinPage() {
 
         {workoutDone && (
           <div className="mt-4 space-y-3">
-            <textarea
-              value={workoutDescription}
-              onChange={(e) => setWorkoutDescription(e.target.value)}
-              placeholder="מה עשית? (ריצה 30 דק', חדר כושר, יוגה...)"
-              rows={2}
-              className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-wing-primary"
-            />
+            {/* Workout type */}
+            <div className="grid grid-cols-2 gap-2">
+              {WORKOUT_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => setWorkoutType(t.value)}
+                  className={`text-sm px-3 py-2 rounded-2xl border-2 text-right transition-all ${
+                    workoutType === t.value
+                      ? "border-wing-primary bg-wing-soft text-wing-primary font-medium"
+                      : "border-slate-200 bg-slate-50 text-slate-600"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Intensity */}
+            <div className="flex gap-2">
+              {(["light", "moderate", "intense"] as const).map((lvl) => (
+                <button
+                  key={lvl}
+                  onClick={() => setWorkoutIntensity(lvl)}
+                  className={`flex-1 text-sm py-2 rounded-2xl border-2 transition-all ${
+                    workoutIntensity === lvl
+                      ? "border-wing-primary bg-wing-soft text-wing-primary font-medium"
+                      : "border-slate-200 bg-slate-50 text-slate-600"
+                  }`}
+                >
+                  {lvl === "light" ? "קל" : lvl === "moderate" ? "בינוני" : "אינטנסיבי"}
+                </button>
+              ))}
+            </div>
+
+            {/* Duration */}
             <div className="flex items-center gap-3">
               <input
                 type="number"
-                value={workoutCalories}
-                onChange={(e) => setWorkoutCalories(e.target.value)}
-                placeholder="קלוריות שנשרפו (אופציונלי)"
+                value={workoutDuration}
+                onChange={(e) => setWorkoutDuration(e.target.value)}
+                placeholder="משך האימון"
                 inputMode="numeric"
                 className="flex-1 px-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
               />
-              <span className="text-xs text-slate-400 shrink-0">קק&quot;ל</span>
+              <span className="text-sm text-slate-400 shrink-0">דקות</span>
             </div>
+
+            {/* Preview calories */}
+            {workoutDuration && parseInt(workoutDuration) > 0 && (
+              <p className="text-sm text-green-600 bg-green-50 rounded-2xl px-4 py-2 text-center">
+                🔥 כ-{calcWorkoutCalories(workoutType, workoutIntensity, parseInt(workoutDuration), user?.profile?.weightKg ?? 70)} קק&quot;ל
+              </p>
+            )}
           </div>
         )}
       </Card>
