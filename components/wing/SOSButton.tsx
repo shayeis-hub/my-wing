@@ -18,12 +18,18 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
     if (sending || cooldown) return;
     setSending(true);
     try {
-      await fetch("/api/notifications/sos", {
+      const res = await fetch("/api/notifications/sos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wingId, userId, userName }),
       });
-      toast.success("שלחנו סימן! החברים ידעו שאתה צריך חיזוק 💪");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(`שגיאה: ${data.error ?? res.status}`);
+        return;
+      }
+      const notified: number = data.notified ?? 0;
+      toast.success(notified > 0 ? `שלחנו סימן ל-${notified} חברים 💪` : "שלחנו סימן! (לא נמצאו טוקנים רשומים)");
       setCooldown(true);
       setTimeout(() => setCooldown(false), 10 * 60 * 1000);
     } catch {

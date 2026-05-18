@@ -4,7 +4,11 @@ function getAdminApp() {
   if (admin.apps.length) return admin.apps[0]!;
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (!raw) throw new Error("FIREBASE_SERVICE_ACCOUNT env var is missing");
-  const serviceAccount = JSON.parse(raw) as admin.ServiceAccount;
+  const serviceAccount = JSON.parse(raw) as admin.ServiceAccount & { private_key?: string };
+  // Vercel stores env vars with literal \n instead of real newlines — fix it
+  if (serviceAccount.private_key) {
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+  }
   return admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
