@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
     const notified = results.filter((r) => r.status === "fulfilled").length;
     return NextResponse.json({ success: true, notified });
   } catch (err) {
-    console.error("SOS notification error:", err);
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("SOS notification error:", msg, err);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
