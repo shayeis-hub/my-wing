@@ -37,7 +37,7 @@ export default function ProfilePage() {
     setUploading(true);
     try {
       const storage = getStorage();
-      const storageRef = ref(storage, `avatars/${firebaseUser.uid}.jpg`);
+      const storageRef = ref(storage, `avatars/${firebaseUser.uid}/avatar.jpg`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       await updateUserPhotoURL(firebaseUser.uid, user.wingId, url);
