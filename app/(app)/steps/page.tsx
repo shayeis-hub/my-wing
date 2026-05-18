@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Script from "next/script";
 import { useAuth } from "@/hooks/useAuth";
 import { Leaderboard } from "@/components/steps/Leaderboard";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { saveSteps, getWingSteps, getTodayCheckin } from "@/lib/firebase/firestore";
-import { syncGoogleFitSteps, autoSyncGoogleFitSteps, wasGoogleFitConnected } from "@/lib/fitness/googleFit";
+import { syncGoogleFitSteps, autoSyncGoogleFitSteps, hasStoredGoogleFitToken } from "@/lib/fitness/googleFit";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import type { StepsEntry } from "@/types";
@@ -20,7 +19,6 @@ export default function StepsPage() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const [gisReady, setGisReady] = useState(false);
   const today = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
@@ -73,20 +71,18 @@ export default function StepsPage() {
     setEditing(false);
   }, [user, firebaseUser, today]);
 
-  // Auto-sync when GIS script is ready and user was previously connected
+  // Auto-sync on load if a stored token exists (no popup — silent)
   useEffect(() => {
-    if (!gisReady || !firebaseUser || !user?.wingId) return;
-    if (!wasGoogleFitConnected()) return;
+    if (!firebaseUser || !user?.wingId) return;
+    if (!hasStoredGoogleFitToken()) return;
     setSyncing(true);
     autoSyncGoogleFitSteps()
       .then(async (steps) => {
-        if (steps && steps > 0) {
-          await saveAndUpdateEntries(steps);
-        }
+        if (steps && steps > 0) await saveAndUpdateEntries(steps);
       })
       .catch(() => {})
       .finally(() => setSyncing(false));
-  }, [gisReady, firebaseUser, user?.wingId]);
+  }, [firebaseUser, user?.wingId]);
 
   async function handleGoogleFitSync() {
     if (!firebaseUser || !user?.wingId) return;
@@ -127,36 +123,30 @@ export default function StepsPage() {
   const myEntry = entries.find((e) => e.userId === firebaseUser?.uid);
 
   return (
-    <>
-      <Script
-        src="https://accounts.google.com/gsi/client"
-        strategy="afterInteractive"
-        onLoad={() => setGisReady(true)}
-      />
+    <div className="p-4 space-y-4">
+      <div className="pt-4">
+        <h1 className="text-xl font-bold text-slate-800">צעדים</h1>
+        <p className="text-sm text-slate-500">{format(new Date(), "d MMMM yyyy")}</p>
+      </div>
 
-      <div className="p-4 space-y-4">
-        <div className="pt-4">
-          <h1 className="text-xl font-bold text-slate-800">צעדים</h1>
-          <p className="text-sm text-slate-500">{format(new Date(), "d MMMM yyyy")}</p>
-        </div>
+      <Card>
+        <h3 className="font-semibold text-slate-800 mb-3">הצעדים שלי היום</h3>
 
-        <Card>
-          <h3 className="font-semibold text-slate-800 mb-3">הצעדים שלי היום</h3>
+        {syncing && !myEntry && (
+          <div className="text-center py-6 text-slate-400 text-sm animate-pulse">
+            🔄 מסנכרן מ-Google Fit...
+          </div>
+        )}
 
-          {syncing && !myEntry && (
-            <div className="text-center py-6 text-slate-400 text-sm animate-pulse">
-              🔄 מסנכרן מ-Google Fit...
-            </div>
-          )}
-
-          {myEntry && !editing ? (
-            <div className="text-center py-3 space-y-3">
-              <p className="text-4xl font-bold text-wing-primary">
-                {myEntry.steps.toLocaleString()}
-              </p>
-              <p className="text-slate-400 text-sm">צעדים</p>
-              {syncing && <p className="text-xs text-slate-400 animate-pulse">מסנכרן מ-Google Fit...</p>}
-              {!syncing && (
+        {myEntry && !editing ? (
+          <div className="text-center py-3 space-y-3">
+            <p className="text-4xl font-bold text-wing-primary">
+              {myEntry.steps.toLocaleString()}
+            </p>
+            <p className="text-slate-400 text-sm">צעדים</p>
+            {syncing
+              ? <p className="text-xs text-slate-400 animate-pulse">מסנכרן מ-Google Fit...</p>
+              : (
                 <div className="flex justify-center gap-3">
                   <button
                     onClick={() => { setManualSteps(String(myEntry.steps)); setEditing(true); }}
@@ -164,51 +154,48 @@ export default function StepsPage() {
                   >
                     עדכן ידנית
                   </button>
-                  <button
-                    onClick={handleGoogleFitSync}
-                    className="text-sm text-wing-primary underline"
-                  >
+                  <button onClick={handleGoogleFitSync} className="text-sm text-wing-primary underline">
                     🔄 עדכן מ-Google Fit
                   </button>
                 </div>
+              )
+            }
+          </div>
+        ) : !syncing && (
+          <div className="space-y-3">
+            <button
+              onClick={handleGoogleFitSync}
+              disabled={syncing}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-slate-200 text-sm font-medium text-slate-500 hover:border-wing-primary hover:text-wing-primary transition-colors disabled:opacity-50"
+            >
+              <span>🔄</span>
+              סנכרן מ-Google Fit
+            </button>
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span>או הכנס ידנית</span>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+            <Input
+              type="number"
+              value={manualSteps}
+              onChange={(e) => setManualSteps(e.target.value)}
+              placeholder="הכנס מספר צעדים..."
+              dir="ltr"
+            />
+            <div className="flex gap-2">
+              {editing && (
+                <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">בטל</Button>
               )}
+              <Button onClick={handleSave} loading={saving} className="flex-1">שמור צעדים</Button>
             </div>
-          ) : !syncing && (
-            <div className="space-y-3">
-              <button
-                onClick={handleGoogleFitSync}
-                disabled={syncing}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-slate-200 text-sm font-medium text-slate-500 hover:border-wing-primary hover:text-wing-primary transition-colors disabled:opacity-50"
-              >
-                <span>🔄</span>
-                סנכרן מ-Google Fit
-              </button>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <div className="flex-1 h-px bg-slate-200" />
-                <span>או הכנס ידנית</span>
-                <div className="flex-1 h-px bg-slate-200" />
-              </div>
-              <Input
-                type="number"
-                value={manualSteps}
-                onChange={(e) => setManualSteps(e.target.value)}
-                placeholder="הכנס מספר צעדים..."
-                dir="ltr"
-              />
-              <div className="flex gap-2">
-                {editing && (
-                  <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">בטל</Button>
-                )}
-                <Button onClick={handleSave} loading={saving} className="flex-1">שמור צעדים</Button>
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {user && firebaseUser && (
-          <Leaderboard entries={entries} currentUserId={firebaseUser.uid} />
+          </div>
         )}
-      </div>
-    </>
+      </Card>
+
+      {user && firebaseUser && (
+        <Leaderboard entries={entries} currentUserId={firebaseUser.uid} />
+      )}
+    </div>
   );
 }
