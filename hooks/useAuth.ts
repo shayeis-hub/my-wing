@@ -48,6 +48,13 @@ export function useAuth(): AuthState {
             setState({ firebaseUser, user, loading: false });
           }
         );
+
+        // Silently refresh FCM token whenever user logs in and permission is already granted
+        if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+          import("@/lib/firebase/messaging")
+            .then(({ requestNotificationPermission }) => requestNotificationPermission(firebaseUser.uid))
+            .catch(() => {});
+        }
       });
     })();
 
