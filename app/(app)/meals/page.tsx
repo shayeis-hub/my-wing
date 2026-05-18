@@ -10,7 +10,8 @@ import { addMeal } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
 import { Camera, ChevronDown, PenLine, Clock } from "lucide-react";
-import { format } from "date-fns";
+import { format, isToday, isYesterday } from "date-fns";
+import { he } from "date-fns/locale";
 import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 
@@ -356,11 +357,7 @@ export default function MealsPage() {
           <p>עדיין אין ארוחות. צלם את הארוחה הראשונה!</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {meals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
-          ))}
-        </div>
+        <MealsByDate meals={meals} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
       )}
 
       {showCamera && (
@@ -369,6 +366,103 @@ export default function MealsPage() {
           onCancel={() => setShowCamera(false)}
         />
       )}
+    </div>
+  );
+}
+
+// ── Grouped meals by date ──────────────────────────────────────────
+
+import type { Meal } from "@/types";
+
+function dateLabel(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isToday(d)) return "היום";
+  if (isYesterday(d)) return "אתמול";
+  return format(d, "EEEE, d בMMMM", { locale: he });
+}
+
+function MealsByDate({
+  meals,
+  currentUserId,
+  currentUserName,
+}: {
+  meals: Meal[];
+  currentUserId?: string;
+  currentUserName?: string;
+}) {
+  // Group meals by date string yyyy-MM-dd
+  const groups: { date: string; meals: Meal[] }[] = [];
+  const seen = new Map<string, Meal[]>();
+
+  for (const meal of meals) {
+    const d = meal.createdAt?.toDate?.();
+    const key = d ? format(d, "yyyy-MM-dd") : "unknown";
+    if (!seen.has(key)) {
+      seen.set(key, []);
+      groups.push({ date: key, meals: seen.get(key)! });
+    }
+    seen.get(key)!.push(meal);
+  }
+
+  // Today's group is open by default, past days are closed
+  const todayKey = format(new Date(), "yyyy-MM-dd");
+  const [openDates, setOpenDates] = useState<Set<string>>(new Set([todayKey]));
+
+  function toggle(date: string) {
+    setOpenDates((prev) => {
+      const next = new Set(prev);
+      next.has(date) ? next.delete(date) : next.add(date);
+      return next;
+    });
+  }
+
+  return (
+    <div className="space-y-3">
+      {groups.map(({ date, meals: dayMeals }) => {
+        const isOpen = openDates.has(date);
+        const isTodays = date === todayKey;
+        const totalCal = dayMeals.reduce((s, m) => s + m.analysis.calories, 0);
+
+        return (
+          <div key={date}>
+            {isTodays ? (
+              // Today: always show meals directly, no toggle
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-slate-500 px-1">
+                  היום · {totalCal} קק&quot;ל
+                </p>
+                {dayMeals.map((meal) => (
+                  <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
+                ))}
+              </div>
+            ) : (
+              // Past days: collapsible
+              <div className="rounded-3xl overflow-hidden border border-slate-200 bg-white">
+                <button
+                  onClick={() => toggle(date)}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-700 text-base">{dateLabel(date)}</p>
+                    <p className="text-sm text-slate-400">{dayMeals.length} ארוחות · {totalCal} קק&quot;ל</p>
+                  </div>
+                  <ChevronDown
+                    size={20}
+                    className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="px-3 pb-3 space-y-3 border-t border-slate-100 pt-3">
+                    {dayMeals.map((meal) => (
+                      <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
