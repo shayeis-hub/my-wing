@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   type User as FirebaseUser,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "./config";
 import type { User, UserProfile } from "@/types";
 
@@ -73,6 +73,23 @@ export async function updateUserProfile(uid: string, profile: Partial<UserProfil
     { profile },
     { merge: true }
   );
+}
+
+export async function updateUserPhotoURL(
+  uid: string,
+  wingId: string | null | undefined,
+  photoURL: string
+): Promise<void> {
+  await setDoc(doc(db, "users", uid), { photoURL }, { merge: true });
+  await updateProfile(auth.currentUser!, { photoURL });
+  if (wingId) {
+    const wingSnap = await getDoc(doc(db, "wings", wingId));
+    if (wingSnap.exists()) {
+      const members = (wingSnap.data().members ?? []) as { uid: string; [k: string]: unknown }[];
+      const updated = members.map((m) => m.uid === uid ? { ...m, photoURL } : m);
+      await updateDoc(doc(db, "wings", wingId), { members: updated });
+    }
+  }
 }
 
 export { onAuthStateChanged, auth };

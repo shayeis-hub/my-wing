@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useWing } from "@/hooks/useWing";
 import { Leaderboard } from "@/components/steps/Leaderboard";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +17,7 @@ import { Suspense } from "react";
 
 function StepsPageInner() {
   const { user, firebaseUser } = useAuth();
+  const { wing } = useWing(user?.wingId);
   const searchParams = useSearchParams();
   const [entries, setEntries] = useState<StepsEntry[]>([]);
   const [manualSteps, setManualSteps] = useState("");
@@ -210,7 +212,7 @@ function StepsPageInner() {
       </Card>
 
       {user && firebaseUser && (
-        <Leaderboard entries={entries} currentUserId={firebaseUser.uid} />
+        <Leaderboard entries={entries} currentUserId={firebaseUser.uid} members={wing?.members} />
       )}
     </div>
   );

@@ -1,16 +1,19 @@
 import { Trophy } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import type { StepsEntry } from "@/types";
+import { Avatar } from "@/components/ui/Avatar";
+import type { StepsEntry, WingMember } from "@/types";
 
 interface LeaderboardProps {
   entries: StepsEntry[];
   currentUserId: string;
+  members?: WingMember[];
 }
 
 const medals = ["🥇", "🥈", "🥉"];
 
-export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
+export function Leaderboard({ entries, currentUserId, members = [] }: LeaderboardProps) {
   const sorted = [...entries].sort((a, b) => b.steps - a.steps);
+  const memberMap = Object.fromEntries(members.map((m) => [m.uid, m]));
 
   return (
     <Card>
@@ -32,6 +35,11 @@ export function Leaderboard({ entries, currentUserId }: LeaderboardProps) {
               <span className="text-lg w-7 text-center">
                 {i < 3 ? medals[i] : `${i + 1}.`}
               </span>
+              <Avatar
+                name={entry.userName}
+                photoURL={memberMap[entry.userId]?.photoURL}
+                size={32}
+              />
               <span className={`font-medium text-sm ${
                 entry.userId === currentUserId ? "text-wing-primary" : "text-slate-700"
               }`}>

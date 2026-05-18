@@ -12,6 +12,7 @@ import { WeightChart } from "@/components/dashboard/WeightChart";
 import { MemberDashboard } from "@/components/dashboard/MemberDashboard";
 import { useMeals } from "@/hooks/useMeals";
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
@@ -81,16 +82,21 @@ export default function DashboardPage() {
       )}
 
       {/* Header */}
-      <div className="pt-4">
-        <p className="text-slate-500 text-sm">{today}</p>
-        <h1 className="text-2xl font-bold text-slate-800">
-          שלום, {user?.displayName?.split(" ")[0] ?? "חבר"} 👋
-        </h1>
-        {wing && (
-          <p className="text-wing-primary text-sm font-medium mt-0.5">
-            מבנה: {wing.name} · {wing.memberIds.length} חברים
-          </p>
-        )}
+      <div className="pt-4 flex items-start justify-between">
+        <div>
+          <p className="text-slate-500 text-sm">{today}</p>
+          <h1 className="text-2xl font-bold text-slate-800">
+            שלום, {user?.displayName?.split(" ")[0] ?? "חבר"} 👋
+          </h1>
+          {wing && (
+            <p className="text-wing-primary text-sm font-medium mt-0.5">
+              מבנה: {wing.name} · {wing.memberIds.length} חברים
+            </p>
+          )}
+        </div>
+        <Link href="/profile" className="mt-1">
+          <Avatar name={user?.displayName ?? ""} photoURL={user?.photoURL} size={44} className="border-2 border-white shadow-sm" />
+        </Link>
       </div>
 
       {/* Member selector */}

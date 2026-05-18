@@ -11,6 +11,7 @@ import { addMeal } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
 import { Camera, ChevronDown, PenLine, Clock } from "lucide-react";
+import { Avatar } from "@/components/ui/Avatar";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import type { MealAnalysis } from "@/types";
@@ -191,31 +192,38 @@ export default function MealsPage() {
             הכל
           </button>
           {/* "שלי" always uses firebaseUser.uid directly */}
-          <button
-            onClick={() => setSelectedUserId(firebaseUser.uid)}
-            className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
-              selectedUserId === firebaseUser.uid
-                ? "bg-wing-primary text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-            }`}
-          >
-            שלי
-          </button>
-          {wing.members
-            .filter((m) => m.uid !== firebaseUser.uid)
-            .map((m) => (
+          {(() => {
+            const selfMember = wing.members.find((m) => m.uid === firebaseUser.uid);
+            const active = selectedUserId === firebaseUser.uid;
+            return (
               <button
-                key={m.uid}
-                onClick={() => setSelectedUserId(m.uid)}
-                className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
-                  selectedUserId === m.uid
-                    ? "bg-wing-primary text-white"
-                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                onClick={() => setSelectedUserId(firebaseUser.uid)}
+                className={`flex-shrink-0 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-medium transition-all ${
+                  active ? "bg-wing-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                 }`}
               >
-                {m.displayName.split(" ")[0]}
+                <Avatar name={selfMember?.displayName ?? "שלי"} photoURL={selfMember?.photoURL} size={20} />
+                שלי
               </button>
-            ))}
+            );
+          })()}
+          {wing.members
+            .filter((m) => m.uid !== firebaseUser.uid)
+            .map((m) => {
+              const active = selectedUserId === m.uid;
+              return (
+                <button
+                  key={m.uid}
+                  onClick={() => setSelectedUserId(m.uid)}
+                  className={`flex-shrink-0 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-medium transition-all ${
+                    active ? "bg-wing-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  }`}
+                >
+                  <Avatar name={m.displayName} photoURL={m.photoURL} size={20} />
+                  {m.displayName.split(" ")[0]}
+                </button>
+              );
+            })}
         </div>
       )}
 
