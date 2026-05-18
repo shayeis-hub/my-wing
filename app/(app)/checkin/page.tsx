@@ -346,7 +346,7 @@ export default function CheckinPage() {
                   </p>
                 )}
                 {(c.encouragements ?? []).map((enc, i) => (
-                  <div key={i} className="text-xs bg-wing-soft rounded-xl px-3 py-1.5">
+                  <div key={i} className="text-sm bg-wing-soft rounded-xl px-3 py-2">
                     <span className="font-medium text-wing-primary">{enc.authorName}: </span>
                     <span className="text-slate-600">{enc.text}</span>
                   </div>
@@ -363,7 +363,7 @@ export default function CheckinPage() {
                           ? "הגב / תודה על העידוד..."
                           : `עודד את ${c.userName}...`
                       }
-                      className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-wing-primary bg-slate-50"
+                      className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wing-primary bg-slate-50"
                       onKeyDown={(e) => { if (e.key === "Enter") handleSendEncouragement(c); }}
                     />
                     <Button size="sm" onClick={() => handleSendEncouragement(c)}
