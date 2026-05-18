@@ -53,6 +53,16 @@ service cloud.firestore {
           request.auth.uid == resource.data.userId;
       }
 
+      // Weight logs: members can read all; only owner can write own entry
+      match /weightLogs/{logId} {
+        allow read: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow create: if request.auth != null &&
+          request.auth.uid == request.resource.data.userId;
+        allow update, delete: if request.auth != null &&
+          request.auth.uid == resource.data.userId;
+      }
+
       // Challenges
       match /challenges/{challengeId} {
         allow read: if request.auth != null &&

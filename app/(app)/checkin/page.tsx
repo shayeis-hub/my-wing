@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement } from "@/lib/firebase/firestore";
+import {
+  saveCheckin,
+  getTodayCheckin,
+  getWingCheckins,
+  getWingSteps,
+  addEncouragement,
+  saveWeightLog,
+} from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -35,6 +42,10 @@ export default function CheckinPage() {
   const [mood, setMood] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [notes, setNotes] = useState("");
   const [steps, setSteps] = useState("");
+  const [workoutDone, setWorkoutDone] = useState(false);
+  const [workoutDescription, setWorkoutDescription] = useState("");
+  const [workoutCalories, setWorkoutCalories] = useState("");
+  const [weight, setWeight] = useState("");
   const [saving, setSaving] = useState(false);
   const [encourageTexts, setEncourageTexts] = useState<Record<string, string>>({});
   const [sendingEnc, setSendingEnc] = useState<string | null>(null);
@@ -49,13 +60,17 @@ export default function CheckinPage() {
       getWingCheckins(user.wingId, today),
     ]).then(([c, stepsEntries, checkins]) => {
       const stepsFromLeaderboard = stepsEntries.find((e) => e.userId === uid)?.steps;
-      if (c && c.waterGlasses !== undefined) {
+      if (c) {
         setMyCheckin(c);
         setWater(c.waterGlasses ?? 0);
         setVegetables(c.vegetablesServings ?? 0);
         setMood(c.mood ?? 3);
         setNotes(c.notes ?? "");
         setSteps(c.steps ? String(c.steps) : stepsFromLeaderboard ? String(stepsFromLeaderboard) : "");
+        setWorkoutDone(c.workout?.done ?? false);
+        setWorkoutDescription(c.workout?.description ?? "");
+        setWorkoutCalories(c.workout?.caloriesBurned ? String(c.workout.caloriesBurned) : "");
+        setWeight(c.weightKg ? String(c.weightKg) : "");
       } else if (stepsFromLeaderboard) {
         setSteps(String(stepsFromLeaderboard));
       }
@@ -69,6 +84,9 @@ export default function CheckinPage() {
     try {
       const trimmedNotes = notes.trim();
       const stepsNum = steps ? parseInt(steps) : undefined;
+      const weightNum = weight ? parseFloat(weight) : undefined;
+      const workoutCalNum = workoutCalories ? parseInt(workoutCalories) : undefined;
+
       await saveCheckin(user.wingId, {
         wingId: user.wingId,
         userId: firebaseUser.uid,
@@ -79,7 +97,28 @@ export default function CheckinPage() {
         mood,
         ...(trimmedNotes ? { notes: trimmedNotes } : {}),
         ...(stepsNum ? { steps: stepsNum } : {}),
+        ...(weightNum ? { weightKg: weightNum } : {}),
+        workout: {
+          done: workoutDone,
+          ...(workoutDone && workoutDescription.trim() ? { description: workoutDescription.trim() } : {}),
+          ...(workoutDone && workoutCalNum ? { caloriesBurned: workoutCalNum } : {}),
+        },
       });
+
+      // Save weight log separately for history tracking
+      if (weightNum && user.wingId) {
+        try {
+          await saveWeightLog(user.wingId, {
+            userId: firebaseUser.uid,
+            userName: user.displayName,
+            date: today,
+            weightKg: weightNum,
+          });
+        } catch {
+          // non-critical
+        }
+      }
+
       toast.success("הצ'ק-אין נשמר! 💪");
       setMyCheckin({
         id: `${firebaseUser.uid}_${today}`,
@@ -92,6 +131,8 @@ export default function CheckinPage() {
         mood,
         ...(trimmedNotes ? { notes: trimmedNotes } : {}),
         ...(stepsNum ? { steps: stepsNum } : {}),
+        ...(weightNum ? { weightKg: weightNum } : {}),
+        workout: { done: workoutDone, ...(workoutDone && workoutDescription.trim() ? { description: workoutDescription.trim() } : {}), ...(workoutDone && workoutCalNum ? { caloriesBurned: workoutCalNum } : {}) },
         createdAt: null as unknown as DailyCheckin["createdAt"],
       });
     } catch {
@@ -192,6 +233,42 @@ export default function CheckinPage() {
         />
       </Card>
 
+      {/* Workout */}
+      <Card>
+        <label className="flex items-center gap-3 cursor-pointer select-none">
+          <div
+            onClick={() => setWorkoutDone((v) => !v)}
+            className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${workoutDone ? "bg-wing-primary border-wing-primary" : "border-slate-300 bg-white"}`}
+          >
+            {workoutDone && <span className="text-white text-sm font-bold">✓</span>}
+          </div>
+          <span className="font-semibold text-slate-800">🏋️ התאמנתי היום</span>
+        </label>
+
+        {workoutDone && (
+          <div className="mt-4 space-y-3">
+            <textarea
+              value={workoutDescription}
+              onChange={(e) => setWorkoutDescription(e.target.value)}
+              placeholder="מה עשית? (ריצה 30 דק', חדר כושר, יוגה...)"
+              rows={2}
+              className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-wing-primary"
+            />
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                value={workoutCalories}
+                onChange={(e) => setWorkoutCalories(e.target.value)}
+                placeholder="קלוריות שנשרפו (אופציונלי)"
+                inputMode="numeric"
+                className="flex-1 px-4 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
+              />
+              <span className="text-xs text-slate-400 shrink-0">קק&quot;ל</span>
+            </div>
+          </div>
+        )}
+      </Card>
+
       {/* Mood */}
       <Card>
         <h3 className="font-semibold text-slate-800 mb-3">😊 מצב רוח</h3>
@@ -203,6 +280,23 @@ export default function CheckinPage() {
               <span className="text-[10px] text-slate-500">{m.label}</span>
             </button>
           ))}
+        </div>
+      </Card>
+
+      {/* Weight update */}
+      <Card>
+        <h3 className="font-semibold text-slate-800 mb-2">⚖️ עדכון משקל <span className="text-xs font-normal text-slate-400">(אופציונלי)</span></h3>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            placeholder={user?.profile?.weightKg ? `משקל רשום: ${user.profile.weightKg}` : "משקל היום..."}
+            inputMode="decimal"
+            step="0.1"
+            className="flex-1 px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
+          />
+          <span className="text-sm text-slate-400 shrink-0">ק&quot;ג</span>
         </div>
       </Card>
 
@@ -222,7 +316,7 @@ export default function CheckinPage() {
         {myCheckin ? "עדכן צ'ק-אין" : "שמור צ'ק-אין"}
       </Button>
 
-      {/* Group summary with encouragements */}
+      {/* Group summary */}
       {groupCheckins.length > 0 && (
         <Card>
           <h3 className="font-semibold text-slate-800 mb-3">המבנה היום</h3>
@@ -231,13 +325,21 @@ export default function CheckinPage() {
               <div key={c.id} className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-700 font-medium">{c.userName}</span>
-                  <div className="flex gap-2 text-slate-500 text-xs">
+                  <div className="flex gap-2 text-slate-500 text-xs flex-wrap justify-end">
                     <span>💧 {c.waterGlasses.toFixed(1)}L</span>
                     <span>🥦 {c.vegetablesServings}</span>
                     {c.steps ? <span>👟 {c.steps.toLocaleString()}</span> : null}
+                    {c.workout?.done && <span>🏋️ אימון</span>}
+                    {c.weightKg ? <span>⚖️ {c.weightKg}ק&quot;ג</span> : null}
                     <span>{moods.find((m) => m.value === c.mood)?.emoji}</span>
                   </div>
                 </div>
+                {c.workout?.done && c.workout.description && (
+                  <p className="text-xs text-slate-500 bg-green-50 rounded-xl px-3 py-1.5">
+                    🏋️ {c.workout.description}
+                    {c.workout.caloriesBurned ? ` · ${c.workout.caloriesBurned} קק"ל` : ""}
+                  </p>
+                )}
                 {c.notes && (
                   <p className="text-xs text-slate-500 bg-slate-50 rounded-xl px-3 py-1.5 italic">
                     &ldquo;{c.notes}&rdquo;

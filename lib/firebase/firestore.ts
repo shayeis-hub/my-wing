@@ -24,6 +24,7 @@ import type {
   StepsEntry,
   Challenge,
   WingMember,
+  WeightLog,
 } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 
@@ -268,6 +269,35 @@ export async function getWingSteps(
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({
     ...(d.data() as Omit<StepsEntry, "id">),
+    id: d.id,
+  }));
+}
+
+// ── Weight logs ───────────────────────────────────────────────────────────────
+
+export async function saveWeightLog(
+  wingId: string,
+  entry: { userId: string; userName: string; date: string; weightKg: number }
+): Promise<void> {
+  const id = `${entry.userId}_${entry.date}`;
+  await setDoc(doc(db, "wings", wingId, "weightLogs", id), {
+    ...entry,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function getWeightHistory(
+  wingId: string,
+  userId: string
+): Promise<WeightLog[]> {
+  const q = query(
+    collection(db, "wings", wingId, "weightLogs"),
+    where("userId", "==", userId),
+    orderBy("date", "asc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({
+    ...(d.data() as Omit<WeightLog, "id">),
     id: d.id,
   }));
 }

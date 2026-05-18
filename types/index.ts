@@ -77,6 +77,12 @@ export interface Encouragement {
   createdAt: number;
 }
 
+export interface Workout {
+  done: boolean;
+  description?: string;
+  caloriesBurned?: number;
+}
+
 export interface DailyCheckin {
   id: string;
   wingId: string;
@@ -88,7 +94,18 @@ export interface DailyCheckin {
   mood: 1 | 2 | 3 | 4 | 5;
   notes?: string;
   steps?: number;
+  workout?: Workout;
+  weightKg?: number;
   encouragements?: Encouragement[];
+  createdAt: Timestamp;
+}
+
+export interface WeightLog {
+  id: string;
+  userId: string;
+  userName: string;
+  date: string;
+  weightKg: number;
   createdAt: Timestamp;
 }
 
