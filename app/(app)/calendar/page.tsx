@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useWing } from "@/hooks/useWing";
 import { getMonthCheckins } from "@/lib/firebase/firestore";
 import {
   format,
@@ -10,20 +11,28 @@ import {
   eachDayOfInterval,
   getDay,
   isToday,
+  addDays,
+  subDays,
   parseISO,
+  isFuture,
 } from "date-fns";
 import { he } from "date-fns/locale";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { DayModal } from "@/components/calendar/DayModal";
+import { DayPanel } from "@/components/calendar/DayPanel";
 import type { DailyCheckin, Encouragement } from "@/types";
 
 const DAY_LABELS = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
 
+function todayStr() {
+  return format(new Date(), "yyyy-MM-dd");
+}
+
 export default function CalendarPage() {
   const { user, firebaseUser } = useAuth();
+  const { wing } = useWing(user?.wingId);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [checkins, setCheckins] = useState<DailyCheckin[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr());
   const [loading, setLoading] = useState(false);
 
   const yearMonth = format(currentDate, "yyyy-MM");
@@ -35,6 +44,17 @@ export default function CalendarPage() {
       .then(setCheckins)
       .finally(() => setLoading(false));
   }, [user?.wingId, yearMonth]);
+
+  // When selected date changes, make sure the calendar month follows
+  useEffect(() => {
+    const d = parseISO(selectedDate);
+    if (
+      d.getFullYear() !== currentDate.getFullYear() ||
+      d.getMonth() !== currentDate.getMonth()
+    ) {
+      setCurrentDate(new Date(d.getFullYear(), d.getMonth(), 1));
+    }
+  }, [selectedDate]);
 
   const days = eachDayOfInterval({
     start: startOfMonth(currentDate),
@@ -57,8 +77,37 @@ export default function CalendarPage() {
     );
   }
 
+  function goToPrevDay() {
+    setSelectedDate((d) => format(subDays(parseISO(d), 1), "yyyy-MM-dd"));
+  }
+
+  function goToNextDay() {
+    const next = addDays(parseISO(selectedDate), 1);
+    if (!isFuture(next) || format(next, "yyyy-MM-dd") === todayStr()) {
+      setSelectedDate(format(next, "yyyy-MM-dd"));
+    }
+  }
+
+  const canGoNext = !isFuture(addDays(parseISO(selectedDate), 1));
+
+  // Swipe handling
+  const touchStartX = useRef<number | null>(null);
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) goToNextDay();   // swiped left → next day
+      else goToPrevDay();            // swiped right → prev day
+    }
+    touchStartX.current = null;
+  }
+
   return (
     <div className="p-4 space-y-4">
+      {/* Month navigation */}
       <div className="pt-4 flex items-center justify-between">
         <button
           onClick={() =>
@@ -104,19 +153,29 @@ export default function CalendarPage() {
           const dayCheckins = getDayCheckins(dateStr);
           const hasCheckins = dayCheckins.length > 0;
           const today = isToday(day);
-          const isFuture = day > new Date();
+          const future = isFuture(day) && !today;
+          const isSelected = dateStr === selectedDate;
 
           return (
             <button
               key={dateStr}
-              onClick={() => !isFuture ? setSelectedDate(dateStr) : undefined}
-              disabled={isFuture}
+              onClick={() => !future && setSelectedDate(dateStr)}
+              disabled={future}
               className={[
                 "relative aspect-square flex flex-col items-center justify-center rounded-xl text-sm transition-all",
-                today ? "bg-wing-primary text-white font-bold shadow-md" : "",
-                hasCheckins && !today ? "bg-wing-soft text-wing-primary font-semibold" : "",
-                !hasCheckins && !today && !isFuture ? "text-slate-500 hover:bg-slate-50" : "",
-                isFuture ? "text-slate-200 cursor-default" : "cursor-pointer",
+                isSelected && !today
+                  ? "ring-2 ring-wing-primary bg-wing-soft text-wing-primary font-bold"
+                  : "",
+                today
+                  ? "bg-wing-primary text-white font-bold shadow-md"
+                  : "",
+                hasCheckins && !today && !isSelected
+                  ? "bg-wing-soft/60 text-wing-primary font-semibold"
+                  : "",
+                !hasCheckins && !today && !isSelected && !future
+                  ? "text-slate-500 hover:bg-slate-50"
+                  : "",
+                future ? "text-slate-200 cursor-default" : "cursor-pointer",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -127,7 +186,7 @@ export default function CalendarPage() {
                   {dayCheckins.slice(0, 4).map((_, i) => (
                     <div
                       key={i}
-                      className={`w-1 h-1 rounded-full ${today ? "bg-white/80" : "bg-wing-primary"}`}
+                      className={`w-1 h-1 rounded-full ${today || isSelected ? "bg-white/80" : "bg-wing-primary"}`}
                     />
                   ))}
                 </div>
@@ -138,25 +197,28 @@ export default function CalendarPage() {
       </div>
 
       {loading && (
-        <div className="text-center py-4 text-slate-400 text-sm">טוען...</div>
+        <div className="text-center py-2 text-slate-400 text-sm">טוען...</div>
       )}
 
-      {!loading && checkins.length === 0 && (
-        <p className="text-center text-slate-400 text-sm py-4">
-          אין צ&apos;ק-אינים לחודש זה
-        </p>
-      )}
-
-      {selectedDate && user && firebaseUser && (
-        <DayModal
-          date={selectedDate}
-          checkins={getDayCheckins(selectedDate)}
-          wingId={user.wingId ?? ""}
-          currentUserId={firebaseUser.uid}
-          currentUserName={user.displayName}
-          onClose={() => setSelectedDate(null)}
-          onEncouragementSent={handleEncouragementSent}
-        />
+      {/* Day panel */}
+      {user && firebaseUser && (
+        <div
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <DayPanel
+            date={selectedDate}
+            checkins={getDayCheckins(selectedDate)}
+            members={wing?.members ?? [{ uid: firebaseUser.uid, displayName: user.displayName }]}
+            wingId={user.wingId ?? ""}
+            currentUserId={firebaseUser.uid}
+            currentUserName={user.displayName}
+            onPrevDay={goToPrevDay}
+            onNextDay={goToNextDay}
+            canGoNext={canGoNext}
+            onEncouragementSent={handleEncouragementSent}
+          />
+        </div>
       )}
     </div>
   );
