@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
 import { getTodayCheckin, getWeightHistory } from "@/lib/firebase/firestore";
-import { calculateBMR } from "@/lib/utils/calculator";
+import { calculateTDEE } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
 
 function calcStepsCalories(steps: number, weightKg: number): number {
@@ -62,7 +62,7 @@ export default function DashboardPage() {
   const myTodayMeals = todayMeals.filter((m) => m.userId === firebaseUser?.uid);
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
   const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
-  const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
+  const bmr = user?.profile ? calculateTDEE({ ...user.profile, weightKg }) : 1800;
   const stepsCalories = todayCheckin?.steps ? calcStepsCalories(todayCheckin.steps, weightKg) : 0;
   const workoutCalories = todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0;
   const totalExpenditure = bmr + stepsCalories + workoutCalories;
@@ -145,7 +145,7 @@ export default function DashboardPage() {
             <div className="flex items-end justify-between mb-2">
               <div>
                 <span className="text-3xl font-bold text-slate-800">{todayCalories}</span>
-                <span className="text-slate-400 text-sm mr-1">/ {bmr} קק&quot;ל BMR</span>
+                <span className="text-slate-400 text-sm mr-1">/ {bmr} קק&quot;ל TDEE</span>
               </div>
               <span className="text-sm text-slate-500">{myTodayMeals.length} ארוחות</span>
             </div>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
             {/* Expenditure breakdown */}
             <div className="mt-3 space-y-1.5">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">🔥 BMR (מנוחה)</span>
+                <span className="text-slate-500">🔥 TDEE (יעד יומי)</span>
                 <span className="font-medium text-slate-700">{bmr} קק&quot;ל</span>
               </div>
               {stepsCalories > 0 && (
