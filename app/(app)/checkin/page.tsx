@@ -257,10 +257,10 @@ export default function CheckinPage() {
           className="w-full h-2 rounded-full appearance-none cursor-pointer accent-wing-primary bg-slate-200"
         />
         <div className="flex justify-between text-xs text-slate-400 mt-1">
-          <span>0</span><span>1L</span><span>2L</span><span>3L</span>
+          <span>0</span><span>1L</span><span>2L</span><span>3L</span><span>4L</span>
         </div>
         <div className="flex justify-center gap-2 mt-3">
-          {[0.5, 1, 1.5, 2, 2.5, 3].map((v) => (
+          {[0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4].map((v) => (
             <button key={v} onClick={() => setWater(v)}
               className={`text-xs px-2 py-1 rounded-full transition-all ${water === v ? "bg-wing-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}>
               {v}L
