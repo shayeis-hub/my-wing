@@ -8,15 +8,24 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Button } from "@/components/ui/Button";
 import { SOSButton } from "@/components/wing/SOSButton";
 import { MealCard } from "@/components/meals/MealCard";
+import { WeightChart } from "@/components/dashboard/WeightChart";
 import { useMeals } from "@/hooks/useMeals";
 import Link from "next/link";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
+import { getTodayCheckin, getWeightHistory } from "@/lib/firebase/firestore";
+import type { DailyCheckin, WeightLog } from "@/types";
+
+function calcStepsCalories(steps: number, weightKg: number): number {
+  return Math.round(steps * 0.0004 * weightKg);
+}
 
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
   const [showNotifBanner, setShowNotifBanner] = useState(false);
+  const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
+  const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -24,25 +33,40 @@ export default function DashboardPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!user?.wingId || !firebaseUser) return;
+    const today = format(new Date(), "yyyy-MM-dd");
+    getTodayCheckin(user.wingId, firebaseUser.uid, today).then(setTodayCheckin);
+    getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
+  }, [user?.wingId, firebaseUser]);
+
   async function handleEnableNotifications() {
     if (!firebaseUser) return;
-    const token = await requestNotificationPermission(firebaseUser.uid);
+    await requestNotificationPermission(firebaseUser.uid);
     setShowNotifBanner(false);
-    if (token) {
-      // toast handled silently — permission granted
-    }
   }
+
   const { wing } = useWing(user?.wingId);
   const { meals } = useMeals(user?.wingId);
 
   const today = format(new Date(), "EEEE, d MMMM", { locale: he });
+  const todayDateStr = format(new Date(), "yyyy-MM-dd");
+
   const todayMeals = meals.filter((m) => {
     const d = m.createdAt?.toDate?.();
-    return d && format(d, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+    return d && format(d, "yyyy-MM-dd") === todayDateStr;
   });
   const myTodayMeals = todayMeals.filter((m) => m.userId === firebaseUser?.uid);
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
   const dailyTarget = user?.profile?.dailyCalorieTarget ?? 2000;
+
+  // Calories burned
+  const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
+  const stepsCalories = todayCheckin?.steps ? calcStepsCalories(todayCheckin.steps, weightKg) : 0;
+  const workoutCalories = todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0;
+  const totalBurned = stepsCalories + workoutCalories;
+  const effectiveTarget = dailyTarget + totalBurned;
+  const netCalories = todayCalories - totalBurned;
 
   return (
     <div className="p-4 space-y-4">
@@ -76,15 +100,32 @@ export default function DashboardPage() {
         <div className="flex items-end justify-between mb-2">
           <div>
             <span className="text-3xl font-bold text-slate-800">{todayCalories}</span>
-            <span className="text-slate-400 text-sm mr-1">/ {dailyTarget} קק&quot;ל</span>
+            <span className="text-slate-400 text-sm mr-1">/ {effectiveTarget} קק&quot;ל</span>
           </div>
           <span className="text-sm text-slate-500">{myTodayMeals.length} ארוחות</span>
         </div>
         <ProgressBar
           value={todayCalories}
-          max={dailyTarget}
-          color={todayCalories > dailyTarget ? "bg-red-400" : "bg-wing-primary"}
+          max={effectiveTarget}
+          color={todayCalories > effectiveTarget ? "bg-red-400" : "bg-wing-primary"}
         />
+        {totalBurned > 0 && (
+          <div className="mt-3 flex gap-3 text-xs text-slate-500 flex-wrap">
+            {stepsCalories > 0 && (
+              <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
+                👟 {todayCheckin?.steps?.toLocaleString()} צעדים = −{stepsCalories} קק&quot;ל
+              </span>
+            )}
+            {workoutCalories > 0 && (
+              <span className="bg-green-50 text-green-600 px-2 py-1 rounded-lg">
+                🏋️ אימון = −{workoutCalories} קק&quot;ל
+              </span>
+            )}
+            <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg font-medium">
+              נטו: {netCalories} קק&quot;ל
+            </span>
+          </div>
+        )}
       </Card>
 
       {/* Quick actions */}
@@ -100,7 +141,7 @@ export default function DashboardPage() {
           <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
             <div className="text-3xl mb-1">✅</div>
             <p className="text-sm font-semibold text-slate-700">צ&apos;ק-אין יומי</p>
-            <p className="text-xs text-slate-400">מים וירקות</p>
+            <p className="text-xs text-slate-400">מים, אימון, משקל</p>
           </Card>
         </Link>
         <Link href="/steps">
@@ -129,16 +170,27 @@ export default function DashboardPage() {
       )}
 
       {/* Recent meals */}
-      {todayMeals.length > 0 && (
+      {myTodayMeals.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-slate-700">ארוחות היום</h2>
             <Link href="/meals" className="text-sm text-wing-primary">הכל</Link>
           </div>
-          {todayMeals.slice(0, 3).map((meal) => (
+          {myTodayMeals.slice(0, 3).map((meal) => (
             <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
           ))}
         </div>
+      )}
+
+      {/* Weight progress chart */}
+      {(weightLogs.length > 0 || todayCheckin?.weightKg) && (
+        <Card>
+          <CardTitle className="mb-3">⚖️ מגמת משקל</CardTitle>
+          <WeightChart
+            logs={weightLogs}
+            targetWeight={user?.profile?.targetWeightKg}
+          />
+        </Card>
       )}
 
       {/* No wing state */}
