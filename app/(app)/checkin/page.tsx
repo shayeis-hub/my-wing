@@ -187,7 +187,7 @@ export default function CheckinPage() {
           <span className="text-lg font-bold text-wing-primary">{water.toFixed(1)} ליטר</span>
         </div>
         <input
-          type="range" min={0} max={3} step={0.1} value={water}
+          type="range" min={0} max={4} step={0.1} value={water}
           onChange={(e) => setWater(parseFloat(e.target.value))}
           className="w-full h-2 rounded-full appearance-none cursor-pointer accent-wing-primary bg-slate-200"
         />
