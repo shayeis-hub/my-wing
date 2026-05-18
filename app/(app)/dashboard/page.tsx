@@ -16,17 +16,11 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
 import { getTodayCheckin, getWeightHistory } from "@/lib/firebase/firestore";
+import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
 
 function calcStepsCalories(steps: number, weightKg: number): number {
   return Math.round(steps * 0.0004 * weightKg);
-}
-
-function calcBMR(profile: { weightKg: number; heightCm: number; age: number; gender: "male" | "female" } | undefined): number {
-  if (!profile) return 1800;
-  const { weightKg, heightCm, age, gender } = profile;
-  const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
-  return Math.round(gender === "male" ? base + 5 : base - 161);
 }
 
 export default function DashboardPage() {
@@ -68,7 +62,7 @@ export default function DashboardPage() {
   const myTodayMeals = todayMeals.filter((m) => m.userId === firebaseUser?.uid);
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
   const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
-  const bmr = calcBMR(user?.profile ? { ...user.profile, weightKg } : undefined);
+  const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
   const stepsCalories = todayCheckin?.steps ? calcStepsCalories(todayCheckin.steps, weightKg) : 0;
   const workoutCalories = todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0;
   const totalExpenditure = bmr + stepsCalories + workoutCalories;
