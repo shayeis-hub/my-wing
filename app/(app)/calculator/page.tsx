@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { calculateBMI, getBMICategory, calculateTDEE, calculateDailyTarget } from "@/lib/utils/calculator";
+import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE, calculateDailyTarget } from "@/lib/utils/calculator";
 import { updateUserProfile } from "@/lib/firebase/auth";
 import toast from "react-hot-toast";
 import type { UserProfile } from "@/types";
@@ -82,6 +82,7 @@ export default function CalculatorPage() {
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{
     bmi: number;
+    bmr: number;
     tdee: number;
     dailyTarget: number;
     bmiCategory: { label: string; color: string };
@@ -99,9 +100,10 @@ export default function CalculatorPage() {
     };
     const bmi = calculateBMI(+weight, +height);
     const bmiCategory = getBMICategory(bmi);
+    const bmr = Math.round(calculateBMR(profile));
     const tdee = calculateTDEE(profile);
     const dailyTarget = calculateDailyTarget(profile);
-    setResult({ bmi, tdee, dailyTarget, bmiCategory });
+    setResult({ bmi, bmr, tdee, dailyTarget, bmiCategory });
   }
 
   async function saveToProfile() {
@@ -190,7 +192,7 @@ export default function CalculatorPage() {
         <Card className="space-y-4">
           <h3 className="font-bold text-slate-800">התוצאות שלך</h3>
           <p className="text-xs text-slate-400">לחץ על כל נתון לקבלת הסבר</p>
-          <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="grid grid-cols-2 gap-3 text-center">
             <button
               onClick={() => setActiveInfo("BMI")}
               className="bg-slate-50 rounded-2xl p-3 text-center active:scale-95 transition-transform"
@@ -199,13 +201,18 @@ export default function CalculatorPage() {
               <p className="text-xs text-slate-400 mt-1">BMI ⓘ</p>
               <p className={`text-xs font-medium mt-0.5 ${result.bmiCategory.color}`}>{result.bmiCategory.label}</p>
             </button>
+            <div className="bg-slate-50 rounded-2xl p-3 text-center">
+              <p className="text-2xl font-bold text-slate-700">{result.bmr}</p>
+              <p className="text-xs text-slate-400 mt-1">BMR</p>
+              <p className="text-xs text-slate-500 mt-0.5">חילוף חומרים בסיסי</p>
+            </div>
             <button
               onClick={() => setActiveInfo("TDEE")}
               className="bg-slate-50 rounded-2xl p-3 text-center active:scale-95 transition-transform"
             >
               <p className="text-2xl font-bold text-slate-700">{result.tdee}</p>
               <p className="text-xs text-slate-400 mt-1">TDEE ⓘ</p>
-              <p className="text-xs text-slate-500 mt-0.5">קק&quot;ל/יום</p>
+              <p className="text-xs text-slate-500 mt-0.5">כולל פעילות</p>
             </button>
             <button
               onClick={() => setActiveInfo("יעד יומי")}
@@ -213,7 +220,7 @@ export default function CalculatorPage() {
             >
               <p className="text-2xl font-bold text-wing-primary">{result.dailyTarget}</p>
               <p className="text-xs text-slate-400 mt-1">יעד יומי ⓘ</p>
-              <p className="text-xs text-wing-primary mt-0.5">קק&quot;ל/יום</p>
+              <p className="text-xs text-wing-primary mt-0.5">לירידה במשקל</p>
             </button>
           </div>
 
