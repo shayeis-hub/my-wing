@@ -8,7 +8,15 @@ export async function POST(req: NextRequest) {
     const { wingId, userId, userName } = await req.json();
 
     getAdminApp();
-    const wingSnap = await admin.firestore().doc(`wings/${wingId}`).get();
+
+    let wingSnap;
+    try {
+      wingSnap = await admin.firestore().doc(`wings/${wingId}`).get();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return NextResponse.json({ error: `Firestore wings read failed: ${msg}` }, { status: 500 });
+    }
+
     if (!wingSnap.exists) {
       return NextResponse.json({ error: "Wing not found" }, { status: 404 });
     }
@@ -19,10 +27,15 @@ export async function POST(req: NextRequest) {
 
     const tokens: string[] = [];
     for (const memberId of memberIds) {
-      const userSnap = await admin.firestore().doc(`users/${memberId}`).get();
-      if (userSnap.exists) {
-        const token = userSnap.data()?.fcmToken;
-        if (token) tokens.push(token);
+      try {
+        const userSnap = await admin.firestore().doc(`users/${memberId}`).get();
+        if (userSnap.exists) {
+          const token = userSnap.data()?.fcmToken;
+          if (token) tokens.push(token);
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return NextResponse.json({ error: `Firestore users read failed for ${memberId}: ${msg}` }, { status: 500 });
       }
     }
 
