@@ -46,6 +46,7 @@ export default function StepsPage() {
   }, [user?.wingId, firebaseUser, today]);
 
   const myEntry = entries.find((e) => e.userId === firebaseUser?.uid);
+  const [editing, setEditing] = useState(false);
 
   async function handleSave() {
     if (!user?.wingId || !firebaseUser || !manualSteps) return;
@@ -77,6 +78,7 @@ export default function StepsPage() {
       });
       toast.success(`${steps.toLocaleString()} צעדים נשמרו! 👟`);
       setManualSteps("");
+      setEditing(false);
     } catch {
       toast.error("שגיאה בשמירה");
     } finally {
@@ -94,12 +96,18 @@ export default function StepsPage() {
       {/* My steps */}
       <Card>
         <h3 className="font-semibold text-slate-800 mb-3">הצעדים שלי היום</h3>
-        {myEntry ? (
-          <div className="text-center py-3">
+        {myEntry && !editing ? (
+          <div className="text-center py-3 space-y-3">
             <p className="text-4xl font-bold text-wing-primary">
               {myEntry.steps.toLocaleString()}
             </p>
-            <p className="text-slate-400 text-sm mt-1">צעדים</p>
+            <p className="text-slate-400 text-sm">צעדים</p>
+            <button
+              onClick={() => { setManualSteps(String(myEntry.steps)); setEditing(true); }}
+              className="text-sm text-wing-primary underline"
+            >
+              עדכן
+            </button>
           </div>
         ) : (
           <div className="space-y-3">
@@ -110,12 +118,16 @@ export default function StepsPage() {
               placeholder="הכנס מספר צעדים..."
               dir="ltr"
             />
-            <Button onClick={handleSave} loading={saving} className="w-full">
-              שמור צעדים
-            </Button>
-            <p className="text-xs text-slate-400 text-center">
-              * ניתן לסנכרן מ-Apple Health / Google Fit בעתיד
-            </p>
+            <div className="flex gap-2">
+              {editing && (
+                <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">
+                  בטל
+                </Button>
+              )}
+              <Button onClick={handleSave} loading={saving} className="flex-1">
+                שמור צעדים
+              </Button>
+            </div>
           </div>
         )}
       </Card>
