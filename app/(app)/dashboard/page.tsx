@@ -245,6 +245,20 @@ export default function DashboardPage() {
         </>
       )}
 
+      {/* Sign out */}
+      <div className="text-center pb-2">
+        <button
+          onClick={async () => {
+            const { signOut } = await import("firebase/auth");
+            const { auth } = await import("@/lib/firebase/config");
+            await signOut(auth);
+          }}
+          className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          התנתק
+        </button>
+      </div>
+
       {/* No wing state */}
       {!user?.wingId && (
         <Card className="text-center py-8 space-y-3">
