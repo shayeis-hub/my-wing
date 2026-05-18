@@ -31,20 +31,41 @@ export default function ProfilePage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
+  async function compressImage(file: File): Promise<Blob> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 512;
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
+        } else {
+          if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.85);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !firebaseUser || !user) return;
     setUploading(true);
     try {
+      const compressed = await compressImage(file);
       const storage = getStorage();
       const storageRef = ref(storage, `avatars/${firebaseUser.uid}/avatar.jpg`);
-      await uploadBytes(storageRef, file);
+      await uploadBytes(storageRef, compressed, { contentType: "image/jpeg" });
       const url = await getDownloadURL(storageRef);
       await updateUserPhotoURL(firebaseUser.uid, user.wingId, url);
       toast.success("תמונת הפרופיל עודכנה ✅");
-    } catch (err) {
-      console.error("Avatar upload error:", err);
-      toast.error("שגיאה בהעלאת התמונה: " + (err instanceof Error ? err.message : String(err)));
+    } catch {
+      toast.error("שגיאה בהעלאת התמונה");
     } finally {
       setUploading(false);
     }
