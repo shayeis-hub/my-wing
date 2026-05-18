@@ -42,8 +42,9 @@ export default function ProfilePage() {
       const url = await getDownloadURL(storageRef);
       await updateUserPhotoURL(firebaseUser.uid, user.wingId, url);
       toast.success("תמונת הפרופיל עודכנה ✅");
-    } catch {
-      toast.error("שגיאה בהעלאת התמונה");
+    } catch (err) {
+      console.error("Avatar upload error:", err);
+      toast.error("שגיאה בהעלאת התמונה: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setUploading(false);
     }
