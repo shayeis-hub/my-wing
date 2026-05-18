@@ -42,13 +42,24 @@ export function DayPanel({
   canGoNext,
   onEncouragementSent,
 }: DayPanelProps) {
-  const [selectedMemberId, setSelectedMemberId] = useState<string>(currentUserId);
+  const [selectedMemberId, setSelectedMemberId] = useState<string>(
+    () => members.find((m) => m.uid === currentUserId)?.uid ?? members[0]?.uid ?? currentUserId
+  );
   const [texts, setTexts] = useState<Record<string, string>>({});
   const [sending, setSending] = useState<string | null>(null);
 
   const dateFormatted = format(parseISO(date), "EEEE, d MMMM", { locale: he });
 
-  const checkin = checkins.find((c) => c.userId === selectedMemberId) ?? null;
+  // Self member: match by UID first, fallback to display name (handles legacy UID mismatch)
+  const selfMember =
+    members.find((m) => m.uid === currentUserId) ??
+    members.find((m) => m.displayName === currentUserName);
+  const selfUid = selfMember?.uid ?? currentUserId;
+
+  // When self tab is selected, always search checkins by firebaseUser uid
+  const isSelfSelected = selectedMemberId === selfUid || selectedMemberId === currentUserId;
+  const checkinUserId = isSelfSelected ? currentUserId : selectedMemberId;
+  const checkin = checkins.find((c) => c.userId === checkinUserId) ?? null;
   const selectedMember = members.find((m) => m.uid === selectedMemberId);
 
   async function handleSend() {
@@ -102,12 +113,12 @@ export function DayPanel({
               key={m.uid}
               onClick={() => setSelectedMemberId(m.uid)}
               className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                selectedMemberId === m.uid
+                (isSelfSelected && m.uid === selfUid) || (!isSelfSelected && selectedMemberId === m.uid)
                   ? "bg-wing-primary text-white"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >
-              {m.uid === currentUserId ? "שלי" : m.displayName.split(" ")[0]}
+              {m.uid === selfUid ? "שלי" : m.displayName.split(" ")[0]}
             </button>
           ))}
         </div>
