@@ -98,6 +98,7 @@ export interface DailyCheckin {
   workout?: Workout;
   weightKg?: number;
   encouragements?: Encouragement[];
+  daySummary?: { summary: string; insights: string[]; tip: string };
   createdAt: Timestamp;
 }
 

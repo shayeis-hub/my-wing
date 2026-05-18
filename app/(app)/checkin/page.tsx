@@ -49,6 +49,8 @@ export default function CheckinPage() {
   const [saving, setSaving] = useState(false);
   const [encourageTexts, setEncourageTexts] = useState<Record<string, string>>({});
   const [sendingEnc, setSendingEnc] = useState<string | null>(null);
+  const [closingDay, setClosingDay] = useState(false);
+  const [daySummary, setDaySummary] = useState<{ summary: string; insights: string[]; tip: string } | null>(null);
   const today = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function CheckinPage() {
         setWorkoutDescription(c.workout?.description ?? "");
         setWorkoutCalories(c.workout?.caloriesBurned ? String(c.workout.caloriesBurned) : "");
         setWeight(c.weightKg ? String(c.weightKg) : "");
+        if (c.daySummary) setDaySummary(c.daySummary);
       } else if (stepsFromLeaderboard) {
         setSteps(String(stepsFromLeaderboard));
       }
@@ -168,6 +171,32 @@ export default function CheckinPage() {
       toast.error("שגיאה בשליחה");
     } finally {
       setSendingEnc(null);
+    }
+  }
+
+  async function handleCloseDay() {
+    if (!myCheckin || !user?.wingId || !firebaseUser) return;
+    setClosingDay(true);
+    try {
+      const res = await fetch("/api/ai/close-day", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wingId: user.wingId,
+          userId: firebaseUser.uid,
+          date: today,
+          checkin: myCheckin,
+          userProfile: user.profile,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const summary = await res.json();
+      setDaySummary(summary);
+      toast.success("סיכום היום נוצר! ✨");
+    } catch {
+      toast.error("שגיאה ביצירת הסיכום");
+    } finally {
+      setClosingDay(false);
     }
   }
 
@@ -315,6 +344,48 @@ export default function CheckinPage() {
       <Button onClick={handleSave} loading={saving} size="lg" className="w-full">
         {myCheckin ? "עדכן צ'ק-אין" : "שמור צ'ק-אין"}
       </Button>
+
+      {/* Close day button */}
+      {myCheckin && !daySummary && (
+        <Button
+          onClick={handleCloseDay}
+          loading={closingDay}
+          size="lg"
+          variant="secondary"
+          className="w-full"
+        >
+          {closingDay ? "מייצר סיכום AI..." : "🌙 סגירת יום"}
+        </Button>
+      )}
+
+      {/* Day summary card */}
+      {daySummary && (
+        <Card className="border-2 border-wing-accent bg-gradient-to-br from-wing-soft to-white">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">🌙</span>
+            <h3 className="font-bold text-lg text-slate-800">סיכום היום שלך</h3>
+          </div>
+          <p className="text-base text-slate-700 leading-relaxed mb-4">{daySummary.summary}</p>
+          <div className="space-y-2 mb-4">
+            {daySummary.insights.map((insight, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                <span className="text-wing-primary mt-0.5">•</span>
+                <span>{insight}</span>
+              </div>
+            ))}
+          </div>
+          <div className="bg-wing-primary/10 rounded-2xl px-4 py-3">
+            <p className="text-sm font-medium text-wing-primary">💡 טיפ למחר</p>
+            <p className="text-sm text-slate-700 mt-1">{daySummary.tip}</p>
+          </div>
+          <button
+            onClick={() => setDaySummary(null)}
+            className="mt-3 text-xs text-slate-400 underline w-full text-center"
+          >
+            הסתר סיכום
+          </button>
+        </Card>
+      )}
 
       {/* Group summary */}
       {groupCheckins.length > 0 && (
