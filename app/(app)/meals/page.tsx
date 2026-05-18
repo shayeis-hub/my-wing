@@ -421,16 +421,13 @@ function MealsByDate({
       {groups.map(({ date, meals: dayMeals }) => {
         const isOpen = openDates.has(date);
         const isTodays = date === todayKey;
-        const totalCal = dayMeals.reduce((s, m) => s + m.analysis.calories, 0);
 
         return (
           <div key={date}>
             {isTodays ? (
               // Today: always show meals directly, no toggle
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-slate-500 px-1">
-                  היום · {totalCal} קק&quot;ל
-                </p>
+                <p className="text-sm font-semibold text-slate-500 px-1">היום</p>
                 {dayMeals.map((meal) => (
                   <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
                 ))}
@@ -444,7 +441,6 @@ function MealsByDate({
                 >
                   <div className="text-right">
                     <p className="font-semibold text-slate-700 text-base">{dateLabel(date)}</p>
-                    <p className="text-sm text-slate-400">{dayMeals.length} ארוחות · {totalCal} קק&quot;ל</p>
                   </div>
                   <ChevronDown
                     size={20}
