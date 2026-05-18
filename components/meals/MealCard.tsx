@@ -79,7 +79,11 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="font-semibold text-sm text-slate-800 truncate">{meal.userName}</p>
-              <p className="text-xs text-wing-muted">{mealTypeLabels[meal.mealType]} · {timeAgo}</p>
+              <p className="text-xs text-wing-muted">
+                {mealTypeLabels[meal.mealType]}
+                {meal.mealTime && ` · ${meal.mealTime}`}
+                {" · "}{timeAgo}
+              </p>
             </div>
             <div className="text-right flex-shrink-0">
               <span className="font-bold text-wing-primary text-sm">{meal.analysis.calories}</span>

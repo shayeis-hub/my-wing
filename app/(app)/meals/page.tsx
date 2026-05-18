@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeals } from "@/hooks/useMeals";
 import { MealCard } from "@/components/meals/MealCard";
@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { addMeal } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
-import { Camera, ChevronDown, PenLine } from "lucide-react";
+import { Camera, ChevronDown, PenLine, Clock } from "lucide-react";
+import { format } from "date-fns";
 import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 
@@ -33,10 +34,17 @@ export default function MealsPage() {
     imageDataUrl: string;
   } | null>(null);
   const [mealType, setMealType] = useState<typeof mealTypes[number]>("lunch");
+  const [mealTime, setMealTime] = useState(() => format(new Date(), "HH:mm"));
+  const [manualTime, setManualTime] = useState(() => format(new Date(), "HH:mm"));
   const [saving, setSaving] = useState(false);
   const [hint, setHint] = useState("");
   const [reanalyzing, setReanalyzing] = useState(false);
   const [editingValues, setEditingValues] = useState(false);
+
+  // Reset time to now when opening a new meal entry
+  useEffect(() => {
+    if (showCamera) setMealTime(format(new Date(), "HH:mm"));
+  }, [showCamera]);
 
   async function handleAnalysis(analysis: MealAnalysis, imageDataUrl: string) {
     setShowCamera(false);
@@ -64,6 +72,7 @@ export default function MealsPage() {
           healthScore: 5,
         },
         mealType: manualMealType,
+        mealTime: manualTime,
       });
       toast.success("הארוחה נשמרה! 🍽️");
       setShowManualForm(false);
@@ -127,6 +136,7 @@ export default function MealsPage() {
         ...(imageURL ? { imageURL } : {}),
         analysis: pendingAnalysis.analysis,
         mealType,
+        mealTime,
       });
 
       toast.success("הארוחה נשמרה! 🍽️");
@@ -193,17 +203,28 @@ export default function MealsPage() {
               </label>
             ))}
           </div>
-          <div className="relative">
-            <select
-              value={manualMealType}
-              onChange={(e) => setManualMealType(e.target.value as typeof mealTypes[number])}
-              className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary"
-            >
-              {mealTypes.map((t) => (
-                <option key={t} value={t}>{mealTypeLabels[t]}</option>
-              ))}
-            </select>
-            <ChevronDown size={16} className="absolute left-3 top-3 text-slate-400 pointer-events-none" />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <select
+                value={manualMealType}
+                onChange={(e) => setManualMealType(e.target.value as typeof mealTypes[number])}
+                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary"
+              >
+                {mealTypes.map((t) => (
+                  <option key={t} value={t}>{mealTypeLabels[t]}</option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="absolute left-3 top-3 text-slate-400 pointer-events-none" />
+            </div>
+            <div className="relative flex-shrink-0">
+              <Clock size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
+              <input
+                type="time"
+                value={manualTime}
+                onChange={(e) => setManualTime(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-2xl pr-8 pl-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary w-28"
+              />
+            </div>
           </div>
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setShowManualForm(false)} className="flex-1">בטל</Button>
@@ -286,18 +307,29 @@ export default function MealsPage() {
             </div>
           </div>
 
-          {/* Meal type selector */}
-          <div className="relative">
-            <select
-              value={mealType}
-              onChange={(e) => setMealType(e.target.value as typeof mealTypes[number])}
-              className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary"
-            >
-              {mealTypes.map((t) => (
-                <option key={t} value={t}>{mealTypeLabels[t]}</option>
-              ))}
-            </select>
-            <ChevronDown size={16} className="absolute left-3 top-3 text-slate-400 pointer-events-none" />
+          {/* Meal type + time */}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <select
+                value={mealType}
+                onChange={(e) => setMealType(e.target.value as typeof mealTypes[number])}
+                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary"
+              >
+                {mealTypes.map((t) => (
+                  <option key={t} value={t}>{mealTypeLabels[t]}</option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="absolute left-3 top-3 text-slate-400 pointer-events-none" />
+            </div>
+            <div className="relative flex-shrink-0">
+              <Clock size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
+              <input
+                type="time"
+                value={mealTime}
+                onChange={(e) => setMealTime(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-2xl pr-8 pl-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary w-28"
+              />
+            </div>
           </div>
 
           <div className="flex gap-3">

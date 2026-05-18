@@ -49,6 +49,7 @@ export interface Meal {
   notes?: string;
   comments?: Encouragement[];
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  mealTime?: string;
   createdAt: Timestamp;
 }
 
