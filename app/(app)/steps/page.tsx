@@ -7,19 +7,35 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { saveSteps, getWingSteps, getTodayCheckin } from "@/lib/firebase/firestore";
-import { syncGoogleFitSteps, autoSyncGoogleFitSteps, hasStoredGoogleFitToken } from "@/lib/fitness/googleFit";
+import { connectGoogleFit, fetchStepsFromServer } from "@/lib/fitness/googleFit";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
+import { useSearchParams } from "next/navigation";
 import type { StepsEntry } from "@/types";
+import { Suspense } from "react";
 
-export default function StepsPage() {
+function StepsPageInner() {
   const { user, firebaseUser } = useAuth();
+  const searchParams = useSearchParams();
   const [entries, setEntries] = useState<StepsEntry[]>([]);
   const [manualSteps, setManualSteps] = useState("");
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [fitConnected, setFitConnected] = useState<boolean | null>(null);
   const today = format(new Date(), "yyyy-MM-dd");
+
+  // Handle redirect back from OAuth
+  useEffect(() => {
+    if (searchParams.get("fitConnected") === "1") {
+      toast.success("Google Fit חובר בהצלחה! 🎉");
+      window.history.replaceState({}, "", "/steps");
+    }
+    if (searchParams.get("fitError")) {
+      toast.error("שגיאה בחיבור Google Fit");
+      window.history.replaceState({}, "", "/steps");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!user?.wingId || !firebaseUser) return;
@@ -71,36 +87,29 @@ export default function StepsPage() {
     setEditing(false);
   }, [user, firebaseUser, today]);
 
-  // Auto-sync on load if a stored token exists (no popup — silent)
+  // Auto-sync from server on page load
   useEffect(() => {
-    if (!firebaseUser || !user?.wingId) return;
-    if (!hasStoredGoogleFitToken()) return;
+    if (!firebaseUser) return;
     setSyncing(true);
-    autoSyncGoogleFitSteps()
-      .then(async (steps) => {
-        if (steps && steps > 0) await saveAndUpdateEntries(steps);
+    fetchStepsFromServer(firebaseUser.uid)
+      .then(async ({ connected, steps }) => {
+        setFitConnected(connected);
+        if (connected && steps && steps > 0) {
+          await saveAndUpdateEntries(steps);
+        }
       })
-      .catch(() => {})
+      .catch(() => setFitConnected(false))
       .finally(() => setSyncing(false));
-  }, [firebaseUser, user?.wingId]);
+  }, [firebaseUser]);
 
-  async function handleGoogleFitSync() {
-    if (!firebaseUser || !user?.wingId) return;
+  async function handleManualSync() {
+    if (!firebaseUser) return;
     setSyncing(true);
-    try {
-      const steps = await syncGoogleFitSteps(firebaseUser);
-      if (steps === 0) {
-        toast("לא נמצאו צעדים היום ב-Google Fit", { icon: "👟" });
-        return;
-      }
+    const { connected, steps } = await fetchStepsFromServer(firebaseUser.uid).finally(() => setSyncing(false));
+    setFitConnected(connected);
+    if (connected && steps && steps > 0) {
       await saveAndUpdateEntries(steps);
-      toast.success(`סונכרן מ-Google Fit: ${steps.toLocaleString()} צעדים 🎉`);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "שגיאה";
-      if (msg.includes("popup-closed")) return;
-      toast.error(`שגיאה בסנכרון: ${msg}`);
-    } finally {
-      setSyncing(false);
+      toast.success(`סונכרן: ${steps.toLocaleString()} צעדים 🎉`);
     }
   }
 
@@ -145,7 +154,7 @@ export default function StepsPage() {
             </p>
             <p className="text-slate-400 text-sm">צעדים</p>
             {syncing
-              ? <p className="text-xs text-slate-400 animate-pulse">מסנכרן מ-Google Fit...</p>
+              ? <p className="text-xs text-slate-400 animate-pulse">מסנכרן...</p>
               : (
                 <div className="flex justify-center gap-3">
                   <button
@@ -154,28 +163,35 @@ export default function StepsPage() {
                   >
                     עדכן ידנית
                   </button>
-                  <button onClick={handleGoogleFitSync} className="text-sm text-wing-primary underline">
-                    🔄 עדכן מ-Google Fit
-                  </button>
+                  {fitConnected && (
+                    <button onClick={handleManualSync} className="text-sm text-wing-primary underline">
+                      🔄 רענן
+                    </button>
+                  )}
                 </div>
               )
             }
           </div>
         ) : !syncing && (
           <div className="space-y-3">
-            <button
-              onClick={handleGoogleFitSync}
-              disabled={syncing}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-slate-200 text-sm font-medium text-slate-500 hover:border-wing-primary hover:text-wing-primary transition-colors disabled:opacity-50"
-            >
-              <span>🔄</span>
-              סנכרן מ-Google Fit
-            </button>
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <div className="flex-1 h-px bg-slate-200" />
-              <span>או הכנס ידנית</span>
-              <div className="flex-1 h-px bg-slate-200" />
-            </div>
+            {fitConnected === false && firebaseUser && (
+              <button
+                onClick={() => connectGoogleFit(firebaseUser.uid)}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white border-2 border-slate-200 text-sm font-medium text-slate-600 hover:border-wing-primary hover:text-wing-primary transition-colors"
+              >
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_android_48dp.png" alt="" className="w-5 h-5" />
+                חבר Google Fit לסנכרון אוטומטי
+              </button>
+            )}
+
+            {fitConnected === false && (
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex-1 h-px bg-slate-200" />
+                <span>או הכנס ידנית</span>
+                <div className="flex-1 h-px bg-slate-200" />
+              </div>
+            )}
+
             <Input
               type="number"
               value={manualSteps}
@@ -197,5 +213,13 @@ export default function StepsPage() {
         <Leaderboard entries={entries} currentUserId={firebaseUser.uid} />
       )}
     </div>
+  );
+}
+
+export default function StepsPage() {
+  return (
+    <Suspense>
+      <StepsPageInner />
+    </Suspense>
   );
 }
