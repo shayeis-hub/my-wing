@@ -83,6 +83,7 @@ export interface Workout {
   type?: string;
   intensity?: "light" | "moderate" | "intense";
   durationMinutes?: number;
+  description?: string;
   caloriesBurned?: number;
 }
 
