@@ -277,7 +277,7 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
                     className="bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-sm text-slate-700 focus:outline-none w-28"
                   />
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 sticky bottom-0 bg-white pt-2 pb-1">
                   <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">בטל</Button>
                   <Button onClick={handleSaveEdit} loading={savingEdit} className="flex-1">שמור</Button>
                 </div>
