@@ -7,7 +7,8 @@ function getAdminApp() {
 
   let serviceAccount: admin.ServiceAccount & { private_key?: string };
   try {
-    serviceAccount = JSON.parse(raw);
+    // Strip UTF-8 BOM if present (added by Windows Notepad / some editors)
+    serviceAccount = JSON.parse(raw.replace(/^﻿/, "").trim());
   } catch {
     throw new Error(`FIREBASE_SERVICE_ACCOUNT is not valid JSON: ${raw.slice(0, 80)}`);
   }
