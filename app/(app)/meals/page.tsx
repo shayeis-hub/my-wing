@@ -178,7 +178,7 @@ export default function MealsPage() {
       </div>
 
       {/* Member tabs */}
-      {wing && wing.members.length > 1 && (
+      {wing && wing.members.length > 1 && firebaseUser && (
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
           <button
             onClick={() => setSelectedUserId("all")}
@@ -190,19 +190,32 @@ export default function MealsPage() {
           >
             הכל
           </button>
-          {wing.members.map((m) => (
-            <button
-              key={m.uid}
-              onClick={() => setSelectedUserId(m.uid)}
-              className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
-                selectedUserId === m.uid
-                  ? "bg-wing-primary text-white"
-                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-              }`}
-            >
-              {m.uid === firebaseUser?.uid ? "שלי" : m.displayName.split(" ")[0]}
-            </button>
-          ))}
+          {/* "שלי" always uses firebaseUser.uid directly */}
+          <button
+            onClick={() => setSelectedUserId(firebaseUser.uid)}
+            className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
+              selectedUserId === firebaseUser.uid
+                ? "bg-wing-primary text-white"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+            }`}
+          >
+            שלי
+          </button>
+          {wing.members
+            .filter((m) => m.uid !== firebaseUser.uid)
+            .map((m) => (
+              <button
+                key={m.uid}
+                onClick={() => setSelectedUserId(m.uid)}
+                className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
+                  selectedUserId === m.uid
+                    ? "bg-wing-primary text-white"
+                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                }`}
+              >
+                {m.displayName.split(" ")[0]}
+              </button>
+            ))}
         </div>
       )}
 

@@ -151,7 +151,7 @@ export function subscribeToMeals(
   const q = query(
     collection(db, "wings", wingId, "meals"),
     orderBy("createdAt", "desc"),
-    limit(30)
+    limit(200)
   );
   return onSnapshot(q, (snap) => {
     cb(snap.docs.map((d) => ({ ...(d.data() as Omit<Meal, "id">), id: d.id })));
