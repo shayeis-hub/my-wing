@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeals } from "@/hooks/useMeals";
+import { useWing } from "@/hooks/useWing";
 import { MealCard } from "@/components/meals/MealCard";
 import { MealCamera } from "@/components/meals/MealCamera";
 import { Button } from "@/components/ui/Button";
@@ -21,6 +22,8 @@ const mealTypeLabels = { breakfast: "בוקר", lunch: "צהריים", dinner: "
 export default function MealsPage() {
   const { user, firebaseUser } = useAuth();
   const { meals, loading } = useMeals(user?.wingId);
+  const { wing } = useWing(user?.wingId);
+  const [selectedUserId, setSelectedUserId] = useState<string | "all">("all");
   const [showCamera, setShowCamera] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
   const [manualDescription, setManualDescription] = useState("");
@@ -173,6 +176,35 @@ export default function MealsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Member tabs */}
+      {wing && wing.members.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+          <button
+            onClick={() => setSelectedUserId("all")}
+            className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
+              selectedUserId === "all"
+                ? "bg-wing-primary text-white"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+            }`}
+          >
+            הכל
+          </button>
+          {wing.members.map((m) => (
+            <button
+              key={m.uid}
+              onClick={() => setSelectedUserId(m.uid)}
+              className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
+                selectedUserId === m.uid
+                  ? "bg-wing-primary text-white"
+                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+              }`}
+            >
+              {m.uid === firebaseUser?.uid ? "שלי" : m.displayName.split(" ")[0]}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Manual meal form */}
       {showManualForm && (
@@ -357,7 +389,11 @@ export default function MealsPage() {
           <p>עדיין אין ארוחות. צלם את הארוחה הראשונה!</p>
         </div>
       ) : (
-        <MealsByDate meals={meals} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
+        <MealsByDate
+          meals={selectedUserId === "all" ? meals : meals.filter((m) => m.userId === selectedUserId)}
+          currentUserId={firebaseUser?.uid}
+          currentUserName={user?.displayName}
+        />
       )}
 
       {showCamera && (
