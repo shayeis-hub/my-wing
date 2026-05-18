@@ -10,7 +10,7 @@ import { addMeal } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
 import { Camera, ChevronDown, PenLine, Clock } from "lucide-react";
-import { format, isToday, isYesterday } from "date-fns";
+import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
@@ -376,9 +376,9 @@ import type { Meal } from "@/types";
 
 function dateLabel(dateStr: string): string {
   const d = new Date(dateStr);
-  if (isToday(d)) return "היום";
-  if (isYesterday(d)) return "אתמול";
-  return format(d, "EEEE, d בMMMM", { locale: he });
+  const dayName = format(d, "EEEE", { locale: he });
+  const dateFormatted = format(d, "d/M/yy");
+  return `${dayName} ${dateFormatted}`;
 }
 
 function MealsByDate({
