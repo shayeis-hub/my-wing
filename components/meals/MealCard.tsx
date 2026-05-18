@@ -198,18 +198,13 @@ export function MealCard({ meal, currentUserId, currentUserName }: MealCardProps
       {/* Detail modal */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto"
+            className="bg-white w-full max-w-md rounded-3xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle bar */}
-            <div className="flex justify-center pt-3 pb-1 sm:hidden">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
               <div>
