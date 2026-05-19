@@ -238,7 +238,7 @@ export function DayPanel({
                 href={`/checkin?date=${date}`}
                 className="flex items-center justify-center gap-2 w-full text-sm font-medium text-wing-primary bg-wing-soft px-4 py-2.5 rounded-2xl hover:bg-wing-accent/20 transition-colors"
               >
-                🌙 סגירת יום רטרואקטיבית
+                🌙 סגירת יום
               </Link>
             )}
 
