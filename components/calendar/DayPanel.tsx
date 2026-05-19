@@ -128,19 +128,11 @@ export function DayPanel({
       {/* Content */}
       <div className="p-4">
         {!checkin ? (
-          <div className="text-center py-8 space-y-3">
+          <div className="text-center py-8 space-y-1">
             <p className="text-2xl">📋</p>
             <p className="text-slate-400 text-sm">
               {selectedMember?.displayName?.split(" ")[0] ?? "המשתמש"} לא עשה צ׳ק-אין ביום זה
             </p>
-            {isSelfSelected && date < format(new Date(), "yyyy-MM-dd") && (
-              <Link
-                href={`/checkin?date=${date}`}
-                className="inline-block text-sm font-medium text-wing-primary bg-wing-soft px-4 py-2 rounded-2xl hover:bg-wing-accent/20 transition-colors"
-              >
-                ✏️ הוסף צ׳ק-אין לתאריך זה
-              </Link>
-            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -238,6 +230,16 @@ export function DayPanel({
                   </div>
                 ))}
               </div>
+            )}
+
+            {/* Retroactive close day */}
+            {isSelfSelected && !checkin.daySummary && date < format(new Date(), "yyyy-MM-dd") && (
+              <Link
+                href={`/checkin?date=${date}`}
+                className="flex items-center justify-center gap-2 w-full text-sm font-medium text-wing-primary bg-wing-soft px-4 py-2.5 rounded-2xl hover:bg-wing-accent/20 transition-colors"
+              >
+                🌙 סגירת יום רטרואקטיבית
+              </Link>
             )}
 
             {/* Encouragement input */}
