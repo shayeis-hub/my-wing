@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils/cn";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "ink" | "danger";
   size?: "sm" | "md" | "lg";
   loading?: boolean;
 }
@@ -14,14 +14,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={cn(
-          "inline-flex items-center justify-center font-medium transition-all rounded-2xl focus:outline-none focus:ring-2 focus:ring-offset-2",
+          "inline-flex items-center justify-center font-extrabold transition-all rounded-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-[0.97]",
           {
-            "bg-wing-primary text-white hover:bg-sky-600 focus:ring-wing-primary shadow-sm":
+            "bg-sunrise text-wing-ink focus:ring-wing-honey shadow-sm":
               variant === "primary",
-            "bg-wing-soft text-wing-primary hover:bg-sky-100 focus:ring-wing-primary":
+            "bg-white text-wing-ink border border-wing-border hover:bg-wing-elevated focus:ring-wing-border":
               variant === "secondary",
-            "bg-transparent text-wing-muted hover:bg-gray-100 focus:ring-gray-300":
+            "bg-transparent text-wing-muted hover:bg-wing-divider focus:ring-wing-border":
               variant === "ghost",
+            "bg-wing-ink text-wing-elevated focus:ring-wing-ink":
+              variant === "ink",
             "bg-red-50 text-red-500 hover:bg-red-100 focus:ring-red-400":
               variant === "danger",
             "px-3 py-1.5 text-sm": size === "sm",

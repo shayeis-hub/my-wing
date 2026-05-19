@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState, useCallback } from "react";
 import { Camera, Upload, X, Loader2, PencilLine } from "lucide-react";
@@ -76,9 +76,9 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl w-full max-w-md p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-lg text-slate-800">הוסף ארוחה</h2>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-100 rounded-full">
-            <X size={20} className="text-slate-500" />
+          <h2 className="font-bold text-lg text-wing-ink">הוסף ארוחה</h2>
+          <button onClick={onCancel} className="p-2 hover:bg-wing-elevated rounded-full">
+            <X size={20} className="text-wing-muted" />
           </button>
         </div>
 
@@ -105,7 +105,7 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
               onChange={(e) => setTextInput(e.target.value)}
               placeholder="תאר מה אכלת, לדוגמה: חזה עוף 150 גרם, אורז 100 גרם, סלט ירקות..."
               rows={4}
-              className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-wing-primary"
+              className="w-full px-4 py-3 rounded-2xl border border-wing-border bg-wing-elevated text-wing-ink placeholder:text-wing-subtle text-sm resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink"
             />
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
             <div className="flex gap-3">
@@ -122,24 +122,24 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
           <div className="space-y-3">
             <button
               onClick={() => cameraRef.current?.click()}
-              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-accent rounded-2xl bg-wing-soft hover:bg-sky-100 transition-colors"
+              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-wing-elevated hover:bg-wing-elevated transition-colors"
             >
-              <Camera size={22} className="text-wing-primary" />
-              <span className="text-sm font-medium text-wing-primary">צלם תמונה</span>
+              <Camera size={22} className="text-wing-heat" />
+              <span className="text-sm font-medium text-wing-heat">צלם תמונה</span>
             </button>
             <button
               onClick={() => galleryRef.current?.click()}
-              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-white hover:bg-wing-elevated transition-colors"
             >
-              <Upload size={22} className="text-slate-500" />
-              <span className="text-sm font-medium text-slate-600">בחר מהגלריה</span>
+              <Upload size={22} className="text-wing-muted" />
+              <span className="text-sm font-medium text-wing-muted">בחר מהגלריה</span>
             </button>
             <button
               onClick={() => setMode("text")}
-              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-white hover:bg-wing-elevated transition-colors"
             >
-              <PencilLine size={22} className="text-slate-500" />
-              <span className="text-sm font-medium text-slate-600">הקלד ידנית</span>
+              <PencilLine size={22} className="text-wing-muted" />
+              <span className="text-sm font-medium text-wing-muted">הקלד ידנית</span>
             </button>
             <input
               ref={cameraRef}
@@ -160,7 +160,7 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
         )}
 
         {analyzing && (
-          <div className="flex items-center justify-center gap-2 text-wing-primary py-2">
+          <div className="flex items-center justify-center gap-2 text-wing-heat py-2">
             <Loader2 size={18} className="animate-spin" />
             <span className="text-sm">Claude AI מנתח את הארוחה...</span>
           </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -113,31 +113,31 @@ export default function CalendarPage() {
           onClick={() =>
             setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
           }
-          className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-2 hover:bg-wing-elevated rounded-xl transition-colors"
         >
-          <ChevronRight size={20} className="text-slate-600" />
+          <ChevronRight size={20} className="text-wing-muted" />
         </button>
-        <h1 className="text-xl font-bold text-slate-800">
+        <h1 className="text-xl font-bold text-wing-ink">
           {format(currentDate, "MMMM yyyy", { locale: he })}
         </h1>
         <button
           onClick={() =>
             setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
           }
-          className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+          className="p-2 hover:bg-wing-elevated rounded-xl transition-colors"
           disabled={
             currentDate.getFullYear() === new Date().getFullYear() &&
             currentDate.getMonth() === new Date().getMonth()
           }
         >
-          <ChevronLeft size={20} className="text-slate-600 disabled:opacity-30" />
+          <ChevronLeft size={20} className="text-wing-muted disabled:opacity-30" />
         </button>
       </div>
 
       {/* Day labels */}
       <div className="grid grid-cols-7 gap-1 text-center">
         {DAY_LABELS.map((d) => (
-          <div key={d} className="text-xs text-slate-400 font-medium py-1">
+          <div key={d} className="text-xs text-wing-subtle font-medium py-1">
             {d}
           </div>
         ))}
@@ -164,18 +164,18 @@ export default function CalendarPage() {
               className={[
                 "relative aspect-square flex flex-col items-center justify-center rounded-xl text-sm transition-all",
                 isSelected && !today
-                  ? "ring-2 ring-wing-primary bg-wing-soft text-wing-primary font-bold"
+                  ? "ring-2 ring-wing-ink bg-wing-elevated text-wing-heat font-bold"
                   : "",
                 today
                   ? "bg-wing-primary text-white font-bold shadow-md"
                   : "",
                 hasCheckins && !today && !isSelected
-                  ? "bg-wing-soft/60 text-wing-primary font-semibold"
+                  ? "bg-wing-elevated/60 text-wing-heat font-semibold"
                   : "",
                 !hasCheckins && !today && !isSelected && !future
-                  ? "text-slate-500 hover:bg-slate-50"
+                  ? "text-wing-muted hover:bg-wing-elevated"
                   : "",
-                future ? "text-slate-200 cursor-default" : "cursor-pointer",
+                future ? "text-wing-border cursor-default" : "cursor-pointer",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -197,7 +197,7 @@ export default function CalendarPage() {
       </div>
 
       {loading && (
-        <div className="text-center py-2 text-slate-400 text-sm">טוען...</div>
+        <div className="text-center py-2 text-wing-subtle text-sm">טוען...</div>
       )}
 
       {/* Day panel */}

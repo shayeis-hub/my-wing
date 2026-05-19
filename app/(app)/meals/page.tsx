@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -156,7 +156,7 @@ export default function MealsPage() {
   return (
     <div className="p-4 space-y-4">
       <div className="pt-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-800">ארוחות המבנה</h1>
+        <h1 className="text-xl font-bold text-wing-ink">ארוחות המבנה</h1>
         <div className="flex gap-2">
           <Button
             size="sm"
@@ -180,13 +180,13 @@ export default function MealsPage() {
 
       {/* Member tabs */}
       {wing && wing.members.length > 1 && firebaseUser && (
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
           <button
             onClick={() => setSelectedUserId("all")}
-            className={`flex-shrink-0 text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
+            className={`flex-shrink-0 whitespace-nowrap text-sm px-4 py-1.5 rounded-full font-medium transition-all ${
               selectedUserId === "all"
-                ? "bg-wing-primary text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                ? "bg-wing-ink text-wing-elevated"
+                : "bg-wing-elevated border border-wing-border text-wing-muted"
             }`}
           >
             הכל
@@ -198,11 +198,11 @@ export default function MealsPage() {
             return (
               <button
                 onClick={() => setSelectedUserId(firebaseUser.uid)}
-                className={`flex-shrink-0 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-medium transition-all ${
-                  active ? "bg-wing-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-medium transition-all ${
+                  active ? "bg-wing-ink text-wing-elevated" : "bg-wing-elevated border border-wing-border text-wing-muted"
                 }`}
               >
-                <Avatar name={selfMember?.displayName ?? "שלי"} photoURL={selfMember?.photoURL} size={20} />
+                <Avatar name={selfMember?.displayName ?? "שלי"} photoURL={selfMember?.photoURL} size={20} isCurrentUser />
                 שלי
               </button>
             );
@@ -215,8 +215,8 @@ export default function MealsPage() {
                 <button
                   key={m.uid}
                   onClick={() => setSelectedUserId(m.uid)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-medium transition-all ${
-                    active ? "bg-wing-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-medium transition-all ${
+                    active ? "bg-wing-ink text-wing-elevated" : "bg-wing-elevated border border-wing-border text-wing-muted"
                   }`}
                 >
                   <Avatar name={m.displayName} photoURL={m.photoURL} size={20} />
@@ -229,14 +229,14 @@ export default function MealsPage() {
 
       {/* Manual meal form */}
       {showManualForm && (
-        <div className="bg-white rounded-3xl shadow-card p-4 space-y-3 border-2 border-slate-200">
-          <h2 className="font-bold text-slate-800">הוספה ידנית 📝</h2>
+        <div className="bg-white rounded-3xl shadow-card p-4 space-y-3 border-2 border-wing-border">
+          <h2 className="font-bold text-wing-ink">הוספה ידנית 📝</h2>
           <input
             type="text"
             value={manualDescription}
             onChange={(e) => setManualDescription(e.target.value)}
             placeholder="שם / תיאור הארוחה"
-            className="w-full border border-slate-200 rounded-2xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
+            className="w-full border border-wing-border rounded-2xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink"
           />
           <div className="grid grid-cols-2 gap-2">
             {([
@@ -246,12 +246,12 @@ export default function MealsPage() {
               ["manualFat", "🧈 שומן g", manualFat, setManualFat],
             ] as [string, string, string, (v: string) => void][]).map(([key, label, val, setter]) => (
               <label key={key} className="flex flex-col gap-0.5">
-                <span className="text-xs text-slate-400">{label}</span>
+                <span className="text-xs text-wing-subtle">{label}</span>
                 <input
                   type="number"
                   value={val}
                   onChange={(e) => setter(e.target.value)}
-                  className="border border-slate-200 rounded-xl px-2 py-1.5 text-sm w-full"
+                  className="border border-wing-border rounded-xl px-2 py-1.5 text-sm w-full"
                   inputMode="numeric"
                 />
               </label>
@@ -262,21 +262,21 @@ export default function MealsPage() {
               <select
                 value={manualMealType}
                 onChange={(e) => setManualMealType(e.target.value as typeof mealTypes[number])}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary"
+                className="w-full appearance-none bg-wing-elevated border border-wing-border rounded-2xl px-4 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
               >
                 {mealTypes.map((t) => (
                   <option key={t} value={t}>{mealTypeLabels[t]}</option>
                 ))}
               </select>
-              <ChevronDown size={16} className="absolute left-3 top-3 text-slate-400 pointer-events-none" />
+              <ChevronDown size={16} className="absolute left-3 top-3 text-wing-subtle pointer-events-none" />
             </div>
             <div className="relative flex-shrink-0">
-              <Clock size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
+              <Clock size={14} className="absolute right-3 top-3.5 text-wing-subtle pointer-events-none" />
               <input
                 type="time"
                 value={manualTime}
                 onChange={(e) => setManualTime(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-2xl pr-8 pl-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary w-28"
+                className="bg-wing-elevated border border-wing-border rounded-2xl pr-8 pl-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink w-28"
               />
             </div>
           </div>
@@ -289,35 +289,35 @@ export default function MealsPage() {
 
       {/* Pending analysis review */}
       {pendingAnalysis && (
-        <div className="bg-white rounded-3xl shadow-card p-4 space-y-4 border-2 border-wing-accent">
-          <h2 className="font-bold text-slate-800">תוצאות הניתוח ✨</h2>
+        <div className="bg-white rounded-3xl shadow-card p-4 space-y-4 border-2 border-wing-border">
+          <h2 className="font-bold text-wing-ink">תוצאות הניתוח ✨</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={pendingAnalysis.imageDataUrl}
             alt="meal"
             className="w-full h-44 object-cover rounded-2xl"
           />
-          <div className="space-y-2 text-sm text-slate-700">
+          <div className="space-y-2 text-sm text-wing-ink">
             <p className="font-medium">{pendingAnalysis.analysis.description}</p>
 
             {editingValues ? (
               <div className="grid grid-cols-2 gap-2">
                 {(["calories", "protein", "carbs", "fat"] as const).map((field) => (
                   <label key={field} className="flex flex-col gap-0.5">
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-wing-subtle">
                       {field === "calories" ? "🔥 קק\"ל" : field === "protein" ? "🥩 חלבון g" : field === "carbs" ? "🌾 פחמימות g" : "🧈 שומן g"}
                     </span>
                     <input
                       type="number"
                       value={pendingAnalysis.analysis[field] as number}
                       onChange={(e) => updateAnalysisField(field, Number(e.target.value))}
-                      className="border border-slate-200 rounded-xl px-2 py-1 text-sm w-full"
+                      className="border border-wing-border rounded-xl px-2 py-1 text-sm w-full"
                     />
                   </label>
                 ))}
               </div>
             ) : (
-              <div className="flex gap-4 text-xs text-slate-500">
+              <div className="flex gap-4 text-xs text-wing-muted">
                 <span>🔥 {pendingAnalysis.analysis.calories} קק&quot;ל</span>
                 <span>🥩 {pendingAnalysis.analysis.protein}g חלבון</span>
                 <span>🌾 {pendingAnalysis.analysis.carbs}g פחמ&apos;</span>
@@ -327,13 +327,13 @@ export default function MealsPage() {
 
             <button
               onClick={() => setEditingValues((v) => !v)}
-              className="text-xs text-slate-400 underline"
+              className="text-xs text-wing-subtle underline"
             >
               {editingValues ? "סגור עריכה" : "ערוך ערכים ידנית"}
             </button>
 
             {pendingAnalysis.analysis.tips && (
-              <p className="text-xs text-wing-primary bg-wing-soft px-3 py-2 rounded-xl">
+              <p className="text-xs text-wing-heat bg-wing-elevated px-3 py-2 rounded-xl">
                 💡 {pendingAnalysis.analysis.tips}
               </p>
             )}
@@ -347,7 +347,7 @@ export default function MealsPage() {
                 value={hint}
                 onChange={(e) => setHint(e.target.value)}
                 placeholder="לא מדויק? כתוב מה יש בצלחת..."
-                className="flex-1 border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-primary"
+                className="flex-1 border border-wing-border rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink"
                 onKeyDown={(e) => { if (e.key === "Enter") handleReanalyze(); }}
               />
               <Button
@@ -367,21 +367,21 @@ export default function MealsPage() {
               <select
                 value={mealType}
                 onChange={(e) => setMealType(e.target.value as typeof mealTypes[number])}
-                className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary"
+                className="w-full appearance-none bg-wing-elevated border border-wing-border rounded-2xl px-4 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
               >
                 {mealTypes.map((t) => (
                   <option key={t} value={t}>{mealTypeLabels[t]}</option>
                 ))}
               </select>
-              <ChevronDown size={16} className="absolute left-3 top-3 text-slate-400 pointer-events-none" />
+              <ChevronDown size={16} className="absolute left-3 top-3 text-wing-subtle pointer-events-none" />
             </div>
             <div className="relative flex-shrink-0">
-              <Clock size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
+              <Clock size={14} className="absolute right-3 top-3.5 text-wing-subtle pointer-events-none" />
               <input
                 type="time"
                 value={mealTime}
                 onChange={(e) => setMealTime(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-2xl pr-8 pl-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary w-28"
+                className="bg-wing-elevated border border-wing-border rounded-2xl pr-8 pl-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink w-28"
               />
             </div>
           </div>
@@ -401,11 +401,11 @@ export default function MealsPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-28 bg-slate-100 rounded-3xl animate-pulse" />
+            <div key={i} className="h-28 bg-wing-elevated rounded-3xl animate-pulse" />
           ))}
         </div>
       ) : meals.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
+        <div className="text-center py-12 text-wing-subtle">
           <div className="text-4xl mb-3">🍽️</div>
           <p>עדיין אין ארוחות. צלם את הארוחה הראשונה!</p>
         </div>
@@ -493,30 +493,39 @@ function MealsByDate({
         return (
           <div key={date}>
             {isTodays ? (
-              // Today: always show meals directly, no toggle
+              // Today: hero card first (most recent), then compact rows
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-slate-500 px-1">היום</p>
-                {dayMeals.map((meal) => (
+                <p className="text-sm font-semibold text-wing-muted px-1">היום</p>
+                {/* Most recent meal = hero at top */}
+                <MealCard
+                  key={dayMeals[dayMeals.length - 1].id}
+                  meal={dayMeals[dayMeals.length - 1]}
+                  currentUserId={currentUserId}
+                  currentUserName={currentUserName}
+                  hero
+                />
+                {/* Remaining meals as compact rows */}
+                {dayMeals.slice(0, dayMeals.length - 1).reverse().map((meal) => (
                   <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
                 ))}
               </div>
             ) : (
               // Past days: collapsible
-              <div className="rounded-3xl overflow-hidden border border-slate-200 bg-white">
+              <div className="rounded-3xl overflow-hidden border border-wing-border bg-white">
                 <button
                   onClick={() => toggle(date)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-wing-elevated transition-colors"
                 >
                   <div className="text-right">
-                    <p className="font-semibold text-slate-700 text-base">{dateLabel(date)}</p>
+                    <p className="font-semibold text-wing-ink text-base">{dateLabel(date)}</p>
                   </div>
                   <ChevronDown
                     size={20}
-                    className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    className={`text-wing-subtle transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                   />
                 </button>
                 {isOpen && (
-                  <div className="px-3 pb-3 space-y-3 border-t border-slate-100 pt-3">
+                  <div className="px-3 pb-3 space-y-3 border-t border-wing-border pt-3">
                     {dayMeals.map((meal) => (
                       <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
                     ))}

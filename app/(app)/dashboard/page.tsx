@@ -1,11 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
-import { Card, CardTitle } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Button } from "@/components/ui/Button";
 import { SOSButton } from "@/components/wing/SOSButton";
 import { MealCard } from "@/components/meals/MealCard";
 import { WeightChart } from "@/components/dashboard/WeightChart";
@@ -19,10 +17,11 @@ import { requestNotificationPermission } from "@/lib/firebase/messaging";
 import { getTodayCheckin, getWeightHistory } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
+import { Bell, Footprints, Scale, CheckSquare, ChevronLeft, Droplets, Flame } from "lucide-react";
+import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
+import { calcStreak } from "@/lib/utils/streak";
+import type { StepsEntry } from "@/types";
 
-function calcStepsCalories(steps: number, weightKg: number): number {
-  return Math.round(steps * 0.0004 * weightKg);
-}
 
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
@@ -30,6 +29,8 @@ export default function DashboardPage() {
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [wingSteps, setWingSteps] = useState<StepsEntry[]>([]);
+  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -42,6 +43,8 @@ export default function DashboardPage() {
     const today = format(new Date(), "yyyy-MM-dd");
     getTodayCheckin(user.wingId, firebaseUser.uid, today).then(setTodayCheckin);
     getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
+    getWingSteps(user.wingId, today).then(setWingSteps);
+    getUserCheckinDates(user.wingId, firebaseUser.uid).then((dates) => setStreak(calcStreak(dates)));
   }, [user?.wingId, firebaseUser]);
 
   async function handleEnableNotifications() {
@@ -64,19 +67,20 @@ export default function DashboardPage() {
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
   const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
   const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
-  const stepsCalories = todayCheckin?.steps ? calcStepsCalories(todayCheckin.steps, weightKg) : 0;
-  const workoutCalories = todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0;
-  const totalExpenditure = bmr + stepsCalories + workoutCalories;
+
+  const otherMembers = (wing?.members ?? []).filter((m) => m.uid !== firebaseUser?.uid);
 
   return (
     <div className="p-4 space-y-4">
-      {/* Notification permission banner */}
+      {/* Notification banner */}
       {showNotifBanner && (
-        <div className="bg-wing-soft border border-wing-accent rounded-2xl p-3 flex items-center justify-between gap-3">
-          <p className="text-sm text-wing-primary font-medium">🔔 אפשר התראות כדי לקבל SOS מהחברים</p>
+        <div className="bg-wing-surface border border-wing-border rounded-2xl p-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-wing-heat font-medium flex items-center gap-1.5">
+            <Bell size={14} /> אפשר התראות לקבל SOS מהחברים
+          </p>
           <div className="flex gap-2 shrink-0">
-            <button onClick={() => setShowNotifBanner(false)} className="text-xs text-slate-400 px-2 py-1">לא עכשיו</button>
-            <button onClick={handleEnableNotifications} className="text-xs bg-wing-primary text-white px-3 py-1 rounded-xl font-medium">אפשר</button>
+            <button onClick={() => setShowNotifBanner(false)} className="text-xs text-wing-muted px-2 py-1">לא עכשיו</button>
+            <button onClick={handleEnableNotifications} className="text-xs bg-wing-ink text-wing-elevated px-3 py-1 rounded-xl font-bold">אפשר</button>
           </div>
         </div>
       )}
@@ -84,49 +88,54 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="pt-4 flex items-start justify-between">
         <div>
-          <p className="text-slate-500 text-sm">{today}</p>
-          <h1 className="text-2xl font-bold text-slate-800">
-            שלום, {user?.displayName?.split(" ")[0] ?? "חבר"} 👋
+          <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted">{today}</p>
+          <h1 className="text-[28px] font-black text-wing-ink tracking-[-0.025em] mt-0.5">
+            שלום, {user?.displayName?.split(" ")[0] ?? "חבר"}
           </h1>
           {wing && (
-            <p className="text-wing-primary text-sm font-medium mt-0.5">
-              מבנה: {wing.name} · {wing.memberIds.length} חברים
+            <p className="text-sm text-wing-muted mt-0.5">
+              {wing.name} · {wing.memberIds.length} חברים ({wingSteps.length} פעילים היום)
             </p>
           )}
         </div>
         <Link href="/profile" className="mt-1">
-          <Avatar name={user?.displayName ?? ""} photoURL={user?.photoURL} size={44} className="border-2 border-white shadow-sm" />
+          <Avatar
+            name={user?.displayName ?? ""}
+            photoURL={user?.photoURL}
+            size={44}
+            isCurrentUser
+            className="border-2 border-white shadow-sm"
+          />
         </Link>
       </div>
 
-      {/* Member selector */}
-      {wing && wing.members.length > 1 && firebaseUser && (
+      {/* Member selector strip */}
+      {wing && otherMembers.length > 0 && firebaseUser && (
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
           <button
             onClick={() => setSelectedMemberId(null)}
-            className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+            className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-bold transition-all ${
               selectedMemberId === null
-                ? "bg-wing-primary text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                ? "bg-wing-ink text-wing-elevated"
+                : "bg-wing-elevated border border-wing-border text-wing-muted"
             }`}
           >
             שלי
           </button>
-          {wing.members
-            .filter((m) => m.uid !== firebaseUser.uid)
-            .map((m) => (
-              <button
-                key={m.uid}
-                onClick={() => setSelectedMemberId(m.uid)}
-                className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                  selectedMemberId === m.uid
-                    ? "bg-wing-primary text-white"
-                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                }`}
-              >
-                {m.displayName.split(" ")[0]}
-              </button>
-            ))}
+          {otherMembers.map((m) => (
+            <button
+              key={m.uid}
+              onClick={() => setSelectedMemberId(m.uid)}
+              className={`flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+                selectedMemberId === m.uid
+                  ? "bg-wing-ink text-wing-elevated"
+                  : "bg-wing-elevated border border-wing-border text-wing-muted"
+              }`}
+            >
+              <Avatar name={m.displayName} photoURL={m.photoURL} size={18} />
+              {m.displayName.split(" ")[0]}
+            </button>
+          ))}
         </div>
       )}
 
@@ -142,98 +151,99 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Personal dashboard — hidden when viewing another member */}
+      {/* Personal dashboard */}
       {!selectedMemberId && (
         <>
-          {/* Calorie progress */}
-          <Card>
-            <CardTitle className="mb-3">קלוריות היום</CardTitle>
-            <div className="flex items-end justify-between mb-2">
-              <div>
-                <span className="text-3xl font-bold text-slate-800">{todayCalories}</span>
-                <span className="text-slate-400 text-sm mr-1">/ {bmr} קק&quot;ל BMR</span>
-              </div>
-              <span className="text-sm text-slate-500">{myTodayMeals.length} ארוחות</span>
+          {/* Hero calorie card */}
+          <div
+            className="rounded-[20px] p-5"
+            style={{ background: "linear-gradient(135deg, #fff3b8, #ffc89a)" }}
+          >
+            <div className="flex items-start justify-between mb-1">
+              <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#c79a00]">קלוריות היום</span>
+              <span className="text-xs text-wing-ink/60">{myTodayMeals.length} ארוחות</span>
+            </div>
+            <div className="flex items-end gap-3 mb-3">
+              <span
+                className="font-black tabular text-wing-ink"
+                style={{ fontSize: 52, letterSpacing: "-0.05em", fontFeatureSettings: '"tnum"', lineHeight: 1 }}
+              >
+                {todayCalories}
+              </span>
+              <span className="text-sm text-wing-ink/60 mb-2">/ {bmr} קק&quot;ל</span>
             </div>
             <ProgressBar
               value={todayCalories}
               max={bmr}
-              color={todayCalories > bmr ? "bg-red-400" : "bg-wing-primary"}
+              height="sm"
+              color={todayCalories > bmr ? "bg-red-500" : "bg-[#1a1814]"}
             />
-            {/* Expenditure breakdown */}
-            <div className="mt-3 space-y-1.5">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">🔥 BMR (חילוף חומרים בסיסי)</span>
-                <span className="font-medium text-slate-700">{bmr} קק&quot;ל</span>
-              </div>
-              {stepsCalories > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">👟 צעדים ({todayCheckin?.steps?.toLocaleString()})</span>
-                  <span className="font-medium text-green-600">+{stepsCalories} קק&quot;ל</span>
-                </div>
-              )}
-              {workoutCalories > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">🏋️ אימון</span>
-                  <span className="font-medium text-green-600">+{workoutCalories} קק&quot;ל</span>
-                </div>
-              )}
-              {(stepsCalories > 0 || workoutCalories > 0) && (
-                <div className="flex justify-between text-sm pt-1 border-t border-slate-100">
-                  <span className="font-semibold text-slate-600">סה&quot;כ הוצאה</span>
-                  <span className="font-bold text-slate-800">{totalExpenditure} קק&quot;ל</span>
-                </div>
-              )}
-            </div>
-          </Card>
 
-          {/* Quick actions */}
+            {/* Mini stats: צעדים / מים / סטריק */}
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
+                <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
+                  <Footprints size={9} /> צעדים
+                </p>
+                <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
+                  {todayCheckin?.steps
+                    ? todayCheckin.steps >= 1000
+                      ? `${(todayCheckin.steps / 1000).toFixed(1)}k`
+                      : todayCheckin.steps
+                    : "—"}
+                </p>
+              </div>
+              <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
+                <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
+                  <Droplets size={9} /> מים
+                </p>
+                <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
+                  {todayCheckin?.waterGlasses ? `${todayCheckin.waterGlasses.toFixed(1)}L` : "—"}
+                </p>
+              </div>
+              <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
+                <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
+                  <Flame size={9} /> סטריק
+                </p>
+                <p className="font-black text-base tabular" style={{ letterSpacing: "-0.03em", color: streak > 0 ? "#d4541a" : "#1a1814" }}>
+                  {streak > 0 ? streak : "—"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+
+          {/* Secondary 2-col grid */}
           <div className="grid grid-cols-2 gap-3">
-            <Link href="/meals">
-              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-                <div className="text-3xl mb-1">🍽️</div>
-                <p className="text-sm font-semibold text-slate-700">צילום ארוחה</p>
-                <p className="text-xs text-slate-400">ניתוח AI מיידי</p>
-              </Card>
-            </Link>
             <Link href="/checkin">
-              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-                <div className="text-3xl mb-1">✅</div>
-                <p className="text-sm font-semibold text-slate-700">צ&apos;ק-אין יומי</p>
-                <p className="text-xs text-slate-400">מים, אימון, משקל</p>
-              </Card>
+              <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center hover:border-wing-ink transition-colors">
+                <CheckSquare size={24} className="mx-auto mb-2 text-wing-heat" />
+                <p className="text-sm font-bold text-wing-ink">צ׳ק-אין</p>
+                <p className="text-xs text-wing-muted mt-0.5">מים, אימון, משקל</p>
+              </div>
             </Link>
             <Link href="/steps">
-              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-                <div className="text-3xl mb-1">👟</div>
-                <p className="text-sm font-semibold text-slate-700">צעדים</p>
-                <p className="text-xs text-slate-400">לוח תוצאות</p>
-              </Card>
-            </Link>
-            <Link href="/calculator">
-              <Card className="text-center py-5 cursor-pointer hover:shadow-card-hover transition-shadow">
-                <div className="text-3xl mb-1">🧮</div>
-                <p className="text-sm font-semibold text-slate-700">מחשבון</p>
-                <p className="text-xs text-slate-400">TDEE / BMR</p>
-              </Card>
+              <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center hover:border-wing-ink transition-colors">
+                <Footprints size={24} className="mx-auto mb-2 text-wing-heat" />
+                <p className="text-sm font-bold text-wing-ink">צעדים</p>
+                <p className="text-xs text-wing-muted mt-0.5">לוח תוצאות</p>
+              </div>
             </Link>
           </div>
 
           {/* SOS */}
           {user && firebaseUser && (
-            <SOSButton
-              wingId={user.wingId ?? ""}
-              userId={firebaseUser.uid}
-              userName={user.displayName}
-            />
+            <SOSButton wingId={user.wingId ?? ""} userId={firebaseUser.uid} userName={user.displayName} />
           )}
 
           {/* Recent meals */}
           {myTodayMeals.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-slate-700">ארוחות היום</h2>
-                <Link href="/meals" className="text-sm text-wing-primary">הכל</Link>
+                <h2 className="font-bold text-wing-ink">ארוחות היום</h2>
+                <Link href="/meals" className="text-sm text-wing-heat font-medium flex items-center gap-0.5">
+                  הכל <ChevronLeft size={14} />
+                </Link>
               </div>
               {myTodayMeals.slice(0, 3).map((meal) => (
                 <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
@@ -241,41 +251,49 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Weight progress chart */}
+          {/* Weight chart */}
           {(weightLogs.length > 0 || todayCheckin?.weightKg) && (
-            <Card>
-              <CardTitle className="mb-3">⚖️ מגמת משקל</CardTitle>
+            <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Scale size={15} className="text-wing-muted" />
+                <span className="font-bold text-wing-ink text-sm">מגמת משקל</span>
+              </div>
               <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} />
-            </Card>
+            </div>
+          )}
+
+          {/* No wing state */}
+          {!user?.wingId && (
+            <div className="bg-wing-surface border border-wing-border rounded-[20px] p-8 text-center space-y-3">
+              <div className="text-4xl">🪽</div>
+              <p className="font-bold text-wing-ink">עדיין לא במבנה כנף</p>
+              <p className="text-sm text-wing-muted">צור מבנה חדש או הצטרף לאחד קיים</p>
+              <Link href="/wing">
+                <button
+                  className="mt-2 px-6 py-2.5 rounded-[14px] font-bold text-sm text-wing-ink transition-all active:scale-[0.97]"
+                  style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+                >
+                  הצטרף / צור מבנה
+                </button>
+              </Link>
+            </div>
           )}
         </>
       )}
 
       {/* Sign out */}
-      <div className="text-center pb-2">
+      <div className="text-center pb-4">
         <button
           onClick={async () => {
             const { signOut } = await import("firebase/auth");
             const { auth } = await import("@/lib/firebase/config");
             await signOut(auth);
           }}
-          className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+          className="text-xs font-mono text-wing-subtle hover:text-wing-muted transition-colors tracking-widest uppercase"
         >
           התנתק
         </button>
       </div>
-
-      {/* No wing state */}
-      {!user?.wingId && (
-        <Card className="text-center py-8 space-y-3">
-          <div className="text-4xl">🪽</div>
-          <p className="font-semibold text-slate-700">עדיין לא במבנה כנף</p>
-          <p className="text-sm text-slate-500">צור מבנה חדש או הצטרף לאחד קיים</p>
-          <Link href="/wing">
-            <Button className="mt-2">הצטרף / צור מבנה</Button>
-          </Link>
-        </Card>
-      )}
     </div>
   );
 }

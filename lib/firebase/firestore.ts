@@ -87,6 +87,10 @@ export async function joinWing(
   return normalizeWing(wingDoc.data() as Record<string, unknown>, wingDoc.id);
 }
 
+export async function updateUserStepsGoal(uid: string, stepsGoal: number): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { "profile.stepsGoal": stepsGoal });
+}
+
 export async function renameWing(wingId: string, name: string): Promise<void> {
   await updateDoc(doc(db, "wings", wingId), { name });
 }
@@ -288,6 +292,33 @@ export async function saveSteps(
   );
 }
 
+export async function getUserTodayMeals(
+  wingId: string,
+  userId: string,
+  date: string
+): Promise<Meal[]> {
+  const q = query(
+    collection(db, "wings", wingId, "meals"),
+    where("userId", "==", userId)
+  );
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => ({ ...(d.data() as Omit<Meal, "id">), id: d.id }))
+    .filter((m) => {
+      const ts = m.createdAt as unknown as { toDate?: () => Date; _seconds?: number };
+      if (!ts) return false;
+      const d = ts.toDate ? ts.toDate() : new Date((ts._seconds ?? 0) * 1000);
+      return d.toISOString().slice(0, 10) === date;
+    })
+    .sort((a, b) => {
+      const toMs = (m: Meal) => {
+        const ts = m.createdAt as unknown as { toDate?: () => Date; _seconds?: number };
+        return ts?.toDate ? ts.toDate().getTime() : (ts?._seconds ?? 0) * 1000;
+      };
+      return toMs(a) - toMs(b);
+    });
+}
+
 export async function getWingSteps(
   wingId: string,
   date: string
@@ -330,6 +361,21 @@ export async function getWeightHistory(
     ...(d.data() as Omit<WeightLog, "id">),
     id: d.id,
   }));
+}
+
+export async function getUserCheckinDates(
+  wingId: string,
+  userId: string,
+  days = 60
+): Promise<string[]> {
+  const q = query(
+    collection(db, "wings", wingId, "checkins"),
+    where("userId", "==", userId),
+    orderBy("date", "desc"),
+    limit(days)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => (d.data() as { date: string }).date);
 }
 
 // ── Challenges ────────────────────────────────────────────────────────────────

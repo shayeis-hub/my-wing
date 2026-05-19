@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface SOSButtonProps {
@@ -29,7 +29,7 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
         return;
       }
       const notified: number = data.notified ?? 0;
-      toast.success(notified > 0 ? `שלחנו סימן ל-${notified} חברים 💪` : "שלחנו סימן! (לא נמצאו טוקנים רשומים)");
+      toast.success(notified > 0 ? `שלחנו סימן ל-${notified} חברים 💪` : "שלחנו סימן!");
       setCooldown(true);
       setTimeout(() => setCooldown(false), 10 * 60 * 1000);
     } catch {
@@ -43,20 +43,12 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
     <button
       onClick={handleSOS}
       disabled={sending || cooldown}
-      className="
-        flex flex-col items-center justify-center gap-2
-        w-full bg-gradient-to-br from-red-400 to-red-500
-        text-white rounded-3xl py-5 shadow-lg
-        active:scale-95 transition-all
-        disabled:opacity-60 disabled:cursor-not-allowed
-      "
+      className="flex items-center justify-center gap-2.5 w-full bg-white rounded-[14px] py-4 active:scale-[0.97] transition-all disabled:opacity-60"
+      style={{ border: "1.5px solid #ff6b47" }}
     >
-      <AlertCircle size={32} strokeWidth={2} />
-      <span className="font-bold text-lg">
+      <AlertTriangle size={20} strokeWidth={2} style={{ color: "#ff6b47" }} />
+      <span className="font-bold text-base" style={{ color: "#ff6b47" }}>
         {cooldown ? "נשלח ✓" : sending ? "שולח..." : "SOS – צריך חיזוק!"}
-      </span>
-      <span className="text-xs text-red-100">
-        יישלח התראה לכל חברי המבנה
       </span>
     </button>
   );

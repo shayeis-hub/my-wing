@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,10 +7,12 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { updateUserPhotoURL, signOut } from "@/lib/firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { updateUserStepsGoal } from "@/lib/firebase/firestore";
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib/utils/calculator";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Camera } from "lucide-react";
+import { Camera, Footprints, Users } from "lucide-react";
+import Link from "next/link";
 
 const activityLabels: Record<string, string> = {
   sedentary: "יושבני",
@@ -30,6 +32,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [stepsGoal, setStepsGoal] = useState<string>("");
+  const [savingSteps, setSavingSteps] = useState(false);
 
   async function compressImage(file: File): Promise<Blob> {
     return new Promise((resolve) => {
@@ -76,6 +80,27 @@ export default function ProfilePage() {
     router.replace("/login");
   }
 
+  // Init steps goal from profile when user loads
+  const profileStepsGoal = user?.profile?.stepsGoal;
+  if (stepsGoal === "" && profileStepsGoal) {
+    setStepsGoal(String(profileStepsGoal));
+  }
+
+  async function handleSaveStepsGoal() {
+    if (!firebaseUser) return;
+    const val = parseInt(stepsGoal);
+    if (isNaN(val) || val < 100) { toast.error("יעד צעדים לא תקין"); return; }
+    setSavingSteps(true);
+    try {
+      await updateUserStepsGoal(firebaseUser.uid, val);
+      toast.success("יעד הצעדים עודכן ✅");
+    } catch {
+      toast.error("שגיאה בשמירה");
+    } finally {
+      setSavingSteps(false);
+    }
+  }
+
   const profile = user?.profile;
   const bmi = profile?.heightCm && profile?.weightKg
     ? calculateBMI(profile.weightKg, profile.heightCm)
@@ -87,7 +112,7 @@ export default function ProfilePage() {
   return (
     <div className="p-4 space-y-4">
       <div className="pt-4">
-        <h1 className="text-xl font-bold text-slate-800">הפרופיל שלי</h1>
+        <h1 className="text-xl font-bold text-wing-ink">הפרופיל שלי</h1>
       </div>
 
       {/* Avatar */}
@@ -107,7 +132,7 @@ export default function ProfilePage() {
             <Camera size={14} />
           </button>
         </div>
-        <p className="text-lg font-bold text-slate-800">{user?.displayName}</p>
+        <p className="text-lg font-bold text-wing-ink">{user?.displayName}</p>
         <input
           ref={fileRef}
           type="file"
@@ -115,8 +140,15 @@ export default function ProfilePage() {
           className="hidden"
           onChange={handlePhotoChange}
         />
-        {uploading && <p className="text-sm text-slate-400 animate-pulse">מעלה תמונה...</p>}
+        {uploading && <p className="text-sm text-wing-muted animate-pulse">מעלה תמונה...</p>}
       </div>
+
+      {/* Wing */}
+      <Link href="/wing">
+        <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
+          <Users size={16} /> מבנה הכנף
+        </Button>
+      </Link>
 
       {/* Stats */}
       {profile && (
@@ -132,8 +164,8 @@ export default function ProfilePage() {
               { label: "רמת פעילות", value: activityLabels[profile.activityLevel] ?? "—" },
             ].map(({ label, value }) => (
               <div key={label} className="bg-slate-50 rounded-2xl px-3 py-2.5">
-                <p className="text-xs text-slate-400">{label}</p>
-                <p className="font-semibold text-slate-700 text-sm mt-0.5">{value}</p>
+                <p className="text-sm text-slate-400">{label}</p>
+                <p className="font-semibold text-slate-700 text-base mt-0.5">{value}</p>
               </div>
             ))}
           </div>
@@ -146,23 +178,45 @@ export default function ProfilePage() {
           <h3 className="font-semibold text-slate-800 mb-3">ערכים מחושבים</h3>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-slate-50 rounded-2xl px-3 py-2.5 text-center">
-              <p className="text-xs text-slate-400">BMI</p>
+              <p className="text-sm text-slate-400">BMI</p>
               <p className="font-bold text-slate-700">{bmi.toFixed(1)}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">{bmiCategory?.label}</p>
+              <p className="text-sm text-slate-400 mt-0.5">{bmiCategory?.label}</p>
             </div>
             <div className="bg-slate-50 rounded-2xl px-3 py-2.5 text-center">
-              <p className="text-xs text-slate-400">BMR</p>
+              <p className="text-sm text-slate-400">BMR</p>
               <p className="font-bold text-slate-700">{bmr}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">קק״ל בסיס</p>
+              <p className="text-sm text-slate-400 mt-0.5">קק״ל בסיס</p>
             </div>
             <div className="bg-slate-50 rounded-2xl px-3 py-2.5 text-center">
-              <p className="text-xs text-slate-400">TDEE</p>
+              <p className="text-sm text-slate-400">TDEE</p>
               <p className="font-bold text-slate-700">{tdee}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">קק״ל/יום</p>
+              <p className="text-sm text-slate-400 mt-0.5">קק״ל/יום</p>
             </div>
           </div>
         </Card>
       )}
+
+      {/* Steps goal */}
+      <Card>
+        <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-1.5">
+          <Footprints size={16} className="text-wing-muted" /> יעד צעדים יומי
+        </h3>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            value={stepsGoal}
+            onChange={(e) => setStepsGoal(e.target.value)}
+            placeholder="10000"
+            inputMode="numeric"
+            className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-wing-primary"
+            dir="ltr"
+          />
+          <span className="text-sm text-slate-400 shrink-0">צעד/יום</span>
+        </div>
+        <Button onClick={handleSaveStepsGoal} loading={savingSteps} className="w-full mt-3">
+          שמור יעד
+        </Button>
+      </Card>
 
       {/* Logout */}
       <Button variant="secondary" onClick={handleSignOut} className="w-full">

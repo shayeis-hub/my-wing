@@ -12,14 +12,9 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
-  const { title, body } = payload.notification ?? {};
-  self.registration.showNotification(title ?? "MY WING", {
-    body: body ?? "",
-    icon: "/icons/icon-192.png",
-    badge: "/icons/icon-192.png",
-    dir: "rtl",
-    lang: "he",
-    vibrate: [200, 100, 200],
-  });
+// FCM auto-displays notifications for messages with a `notification` field.
+// onBackgroundMessage is kept for data-only messages but must NOT call
+// showNotification again — doing so causes duplicate pushes.
+messaging.onBackgroundMessage((_payload) => {
+  // intentionally empty — FCM handles display via webpush.notification in the API
 });

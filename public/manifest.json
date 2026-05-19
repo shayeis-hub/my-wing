@@ -4,8 +4,8 @@
   "description": "אפליקציית תמיכה חברתית לירידה במשקל",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#f8fbff",
-  "theme_color": "#0ea5e9",
+  "background_color": "#fbf4e6",
+  "theme_color": "#fbf4e6",
   "orientation": "portrait",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },

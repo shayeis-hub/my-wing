@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,8 +45,8 @@ function InfoModal({ topic, onClose }: { topic: string; onClose: () => void }) {
         className="bg-white rounded-3xl p-6 w-full max-w-sm space-y-3"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="font-bold text-slate-800 text-lg">{info.title}</h3>
-        <p className="text-sm text-slate-600 leading-relaxed">{info.body}</p>
+        <h3 className="font-bold text-wing-ink text-lg">{info.title}</h3>
+        <p className="text-sm text-wing-muted leading-relaxed">{info.body}</p>
         <button
           onClick={onClose}
           className="w-full py-2.5 bg-wing-primary text-white rounded-2xl font-medium text-sm"
@@ -135,8 +135,8 @@ export default function CalculatorPage() {
       )}
 
       <div className="pt-4">
-        <h1 className="text-xl font-bold text-slate-800">מחשבון אישי</h1>
-        <p className="text-sm text-slate-500">חישוב BMI, BMR ו-TDEE</p>
+        <h1 className="text-xl font-bold text-wing-ink">מחשבון אישי</h1>
+        <p className="text-sm text-wing-muted">חישוב BMI, BMR ו-TDEE</p>
       </div>
 
       <Card className="space-y-4">
@@ -148,7 +148,7 @@ export default function CalculatorPage() {
               className={`flex-1 py-2.5 rounded-2xl text-sm font-medium transition-all ${
                 gender === g
                   ? "bg-wing-primary text-white"
-                  : "bg-slate-100 text-slate-600"
+                  : "bg-wing-elevated text-wing-muted"
               }`}
             >
               {g === "male" ? "זכר" : "נקבה"}
@@ -164,7 +164,7 @@ export default function CalculatorPage() {
         </div>
 
         <div>
-          <p className="text-sm font-medium text-slate-700 mb-2">רמת פעילות</p>
+          <p className="text-sm font-medium text-wing-ink mb-2">רמת פעילות</p>
           <div className="space-y-2">
             {activityOptions.map((o) => (
               <button
@@ -172,12 +172,12 @@ export default function CalculatorPage() {
                 onClick={() => setActivity(o.value)}
                 className={`w-full text-right px-4 py-2.5 rounded-2xl border transition-all text-sm ${
                   activity === o.value
-                    ? "border-wing-primary bg-wing-soft text-wing-primary"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    ? "border-wing-primary bg-wing-elevated text-wing-heat"
+                    : "border-wing-border bg-white text-wing-ink hover:bg-wing-elevated"
                 }`}
               >
                 <span className="font-medium">{o.label}</span>
-                <span className="text-slate-400 text-xs mr-2">{o.desc}</span>
+                <span className="text-wing-subtle text-xs mr-2">{o.desc}</span>
               </button>
             ))}
           </div>
@@ -190,37 +190,37 @@ export default function CalculatorPage() {
 
       {result && (
         <Card className="space-y-4">
-          <h3 className="font-bold text-slate-800">התוצאות שלך</h3>
-          <p className="text-xs text-slate-400">לחץ על כל נתון לקבלת הסבר</p>
+          <h3 className="font-bold text-wing-ink">התוצאות שלך</h3>
+          <p className="text-xs text-wing-subtle">לחץ על כל נתון לקבלת הסבר</p>
           <div className="grid grid-cols-2 gap-3 text-center">
             <button
               onClick={() => setActiveInfo("BMI")}
-              className="bg-slate-50 rounded-2xl p-3 text-center active:scale-95 transition-transform"
+              className="bg-wing-elevated rounded-2xl p-3 text-center active:scale-95 transition-transform"
             >
               <p className={`text-2xl font-bold ${result.bmiCategory.color}`}>{result.bmi}</p>
-              <p className="text-xs text-slate-400 mt-1">BMI ⓘ</p>
+              <p className="text-xs text-wing-subtle mt-1">BMI ⓘ</p>
               <p className={`text-xs font-medium mt-0.5 ${result.bmiCategory.color}`}>{result.bmiCategory.label}</p>
             </button>
-            <div className="bg-slate-50 rounded-2xl p-3 text-center">
-              <p className="text-2xl font-bold text-slate-700">{result.bmr}</p>
-              <p className="text-xs text-slate-400 mt-1">BMR</p>
-              <p className="text-xs text-slate-500 mt-0.5">חילוף חומרים בסיסי</p>
+            <div className="bg-wing-elevated rounded-2xl p-3 text-center">
+              <p className="text-2xl font-bold text-wing-ink">{result.bmr}</p>
+              <p className="text-xs text-wing-subtle mt-1">BMR</p>
+              <p className="text-xs text-wing-muted mt-0.5">חילוף חומרים בסיסי</p>
             </div>
             <button
               onClick={() => setActiveInfo("TDEE")}
-              className="bg-slate-50 rounded-2xl p-3 text-center active:scale-95 transition-transform"
+              className="bg-wing-elevated rounded-2xl p-3 text-center active:scale-95 transition-transform"
             >
-              <p className="text-2xl font-bold text-slate-700">{result.tdee}</p>
-              <p className="text-xs text-slate-400 mt-1">TDEE ⓘ</p>
-              <p className="text-xs text-slate-500 mt-0.5">כולל פעילות</p>
+              <p className="text-2xl font-bold text-wing-ink">{result.tdee}</p>
+              <p className="text-xs text-wing-subtle mt-1">TDEE ⓘ</p>
+              <p className="text-xs text-wing-muted mt-0.5">כולל פעילות</p>
             </button>
             <button
               onClick={() => setActiveInfo("יעד יומי")}
-              className="bg-wing-soft rounded-2xl p-3 text-center active:scale-95 transition-transform"
+              className="bg-wing-elevated rounded-2xl p-3 text-center active:scale-95 transition-transform"
             >
-              <p className="text-2xl font-bold text-wing-primary">{result.dailyTarget}</p>
-              <p className="text-xs text-slate-400 mt-1">יעד יומי ⓘ</p>
-              <p className="text-xs text-wing-primary mt-0.5">לירידה במשקל</p>
+              <p className="text-2xl font-bold text-wing-heat">{result.dailyTarget}</p>
+              <p className="text-xs text-wing-subtle mt-1">יעד יומי ⓘ</p>
+              <p className="text-xs text-wing-heat mt-0.5">לירידה במשקל</p>
             </button>
           </div>
 

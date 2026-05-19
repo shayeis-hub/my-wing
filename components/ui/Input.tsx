@@ -11,13 +11,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1">
         {label && (
-          <label className="text-sm font-medium text-slate-700">{label}</label>
+          <label className="text-sm font-medium text-wing-ink">{label}</label>
         )}
         <input
           ref={ref}
           className={cn(
-            "w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400",
-            "focus:outline-none focus:ring-2 focus:ring-wing-primary focus:border-transparent",
+            "w-full px-4 py-3 rounded-2xl border border-wing-border bg-wing-bg text-wing-ink placeholder:text-wing-subtle",
+            "focus:outline-none focus:ring-2 focus:ring-wing-ink focus:border-transparent",
             "transition-all",
             error && "border-red-400 focus:ring-red-400",
             className

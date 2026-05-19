@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { MealCard } from "@/components/meals/MealCard";
 import { getTodayCheckin, addEncouragement } from "@/lib/firebase/firestore";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { DailyCheckin, Encouragement, Meal } from "@/types";
+import { Droplets, Leaf, Footprints, Dumbbell, Scale, Smile } from "lucide-react";
 
 const moods = [
   { value: 1, emoji: "😞" },
   { value: 2, emoji: "😕" },
   { value: 3, emoji: "😐" },
-  { value: 4, emoji: "🙂" },
-  { value: 5, emoji: "😄" },
+  { value: 4, emoji: "😊" },
+  { value: 5, emoji: "🤩" },
 ];
 
 interface MemberDashboardProps {
@@ -52,16 +52,9 @@ export function MemberDashboard({
     setSending(true);
     try {
       if (checkin) {
-        const enc: Encouragement = {
-          authorId: currentUserId,
-          authorName: currentUserName,
-          text,
-          createdAt: Date.now(),
-        };
+        const enc: Encouragement = { authorId: currentUserId, authorName: currentUserName, text, createdAt: Date.now() };
         await addEncouragement(wingId, checkin.id, enc);
-        setCheckin((prev) =>
-          prev ? { ...prev, encouragements: [...(prev.encouragements ?? []), enc] } : prev
-        );
+        setCheckin((prev) => prev ? { ...prev, encouragements: [...(prev.encouragements ?? []), enc] } : prev);
         await fetch("/api/notifications/encouragement", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -81,65 +74,89 @@ export function MemberDashboard({
 
   return (
     <div className="space-y-4">
-      {/* Check-in summary */}
+      {/* Checkin card */}
       {checkin === undefined ? (
-        <div className="h-28 bg-slate-100 rounded-3xl animate-pulse" />
+        <div className="h-36 bg-wing-elevated border border-wing-border rounded-[20px] animate-pulse" />
       ) : checkin === null ? (
-        <Card>
-          <p className="text-center text-slate-400 py-4 text-sm">
-            {memberName} עדיין לא ביצע/ה צ&apos;ק-אין היום
-          </p>
-        </Card>
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-6 text-center">
+          <p className="text-wing-muted text-sm">{memberName.split(" ")[0]} עדיין לא עשה/תה צ׳ק-אין היום</p>
+        </div>
       ) : (
-        <Card>
-          <h3 className="font-semibold text-slate-800 mb-3">הצ&apos;ק-אין של היום</h3>
-          <div className="flex flex-wrap gap-2 mb-3">
-            <span className="bg-blue-50 text-blue-600 text-xs px-3 py-1.5 rounded-xl font-medium">
-              💧 {checkin.waterGlasses.toFixed(1)}L מים
-            </span>
-            <span className="bg-green-50 text-green-600 text-xs px-3 py-1.5 rounded-xl font-medium">
-              🥦 {checkin.vegetablesServings} ירקות
-            </span>
-            {checkin.steps ? (
-              <span className="bg-orange-50 text-orange-600 text-xs px-3 py-1.5 rounded-xl font-medium">
-                👟 {checkin.steps.toLocaleString()} צעדים
-              </span>
-            ) : null}
-            {checkin.workout?.done && (
-              <span className="bg-purple-50 text-purple-600 text-xs px-3 py-1.5 rounded-xl font-medium">
-                🏋️ אימון
-              </span>
-            )}
-            {checkin.weightKg ? (
-              <span className="bg-slate-100 text-slate-600 text-xs px-3 py-1.5 rounded-xl font-medium">
-                ⚖️ {checkin.weightKg} ק&quot;ג
-              </span>
-            ) : null}
-            <span className="bg-wing-soft text-wing-primary text-xs px-3 py-1.5 rounded-xl font-medium">
-              {moods.find((m) => m.value === checkin.mood)?.emoji} מצב רוח
-            </span>
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 space-y-4">
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-4 gap-2">
+            <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
+              <Droplets size={15} className="mx-auto text-blue-400 mb-1" />
+              <p className="font-black text-wing-ink tabular text-base" style={{ letterSpacing: "-0.03em" }}>
+                {checkin.waterGlasses.toFixed(1)}
+              </p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">ליטר</p>
+            </div>
+            <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
+              <Leaf size={15} className="mx-auto text-green-500 mb-1" />
+              <p className="font-black text-wing-ink tabular text-base" style={{ letterSpacing: "-0.03em" }}>
+                {checkin.vegetablesServings}
+              </p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">ירקות</p>
+            </div>
+            <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
+              <Footprints size={15} className="mx-auto text-wing-muted mb-1" />
+              <p className="font-black text-wing-ink tabular text-base" style={{ letterSpacing: "-0.03em" }}>
+                {checkin.steps
+                  ? checkin.steps >= 1000 ? `${(checkin.steps / 1000).toFixed(1)}k` : checkin.steps
+                  : "—"}
+              </p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">צעדים</p>
+            </div>
+            <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
+              <Smile size={15} className="mx-auto text-[#c79a00] mb-1" />
+              <p className="text-lg leading-none mt-0.5">
+                {moods.find((m) => m.value === checkin.mood)?.emoji ?? "😐"}
+              </p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider mt-1">מצב</p>
+            </div>
           </div>
 
-          {checkin.workout?.done && checkin.workout.description && (
-            <p className="text-xs text-slate-600 bg-purple-50 rounded-xl px-3 py-2 mb-3">
-              🏋️ {checkin.workout.description}
-              {checkin.workout.caloriesBurned ? ` · ${checkin.workout.caloriesBurned} קק"ל` : ""}
-            </p>
+          {/* Weight */}
+          {checkin.weightKg && (
+            <div className="flex items-center gap-2 bg-wing-elevated border border-wing-border rounded-2xl px-4 py-2.5">
+              <Scale size={14} className="text-wing-muted" />
+              <span className="text-sm text-wing-muted">משקל:</span>
+              <span className="font-bold text-wing-ink">{checkin.weightKg} ק״ג</span>
+            </div>
           )}
 
+          {/* Workout */}
+          {checkin.workout?.done && (
+            <div className="bg-wing-elevated border border-wing-border rounded-2xl px-4 py-3 flex items-start gap-2">
+              <Dumbbell size={14} className="text-wing-muted mt-0.5 shrink-0" />
+              <div>
+                <span className="text-sm font-semibold text-wing-ink">אימון</span>
+                {checkin.workout.description && (
+                  <p className="text-xs text-wing-muted mt-0.5">
+                    {checkin.workout.description}
+                    {checkin.workout.caloriesBurned ? ` · ${checkin.workout.caloriesBurned} קק״ל` : ""}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
           {checkin.notes && (
-            <p className="text-xs text-slate-500 bg-slate-50 rounded-xl px-3 py-2 italic mb-3">
+            <p className="text-sm text-wing-muted bg-wing-elevated border border-wing-border rounded-2xl px-4 py-3 italic">
               &ldquo;{checkin.notes}&rdquo;
             </p>
           )}
 
           {/* Encouragements */}
           {(checkin.encouragements ?? []).length > 0 && (
-            <div className="space-y-2 mb-3">
+            <div className="space-y-2">
               {checkin.encouragements!.map((enc, i) => (
-                <div key={i} className="text-sm bg-wing-soft rounded-xl px-3 py-2">
-                  <span className="font-medium text-wing-primary">{enc.authorName}: </span>
-                  <span className="text-slate-600">{enc.text}</span>
+                <div key={i} className="text-sm bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2">
+                  <span className="font-bold text-wing-ink">{enc.authorName}: </span>
+                  <span className="text-wing-muted">{enc.text}</span>
                 </div>
               ))}
             </div>
@@ -151,36 +168,29 @@ export function MemberDashboard({
               type="text"
               value={encText}
               onChange={(e) => setEncText(e.target.value)}
-              placeholder={isOwn ? "הגב על הצ'ק-אין שלך..." : `עודד את ${memberName}...`}
-              className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wing-primary bg-slate-50"
+              placeholder={isOwn ? "הגב על הצ׳ק-אין שלך..." : `עודד את ${memberName.split(" ")[0]}...`}
+              className="flex-1 text-sm border border-wing-border rounded-2xl px-3 py-2.5 bg-wing-elevated focus:outline-none focus:ring-2 focus:ring-wing-ink text-wing-ink placeholder:text-wing-subtle"
               onKeyDown={(e) => { if (e.key === "Enter") handleSendEncouragement(); }}
             />
             <Button size="sm" onClick={handleSendEncouragement} loading={sending} disabled={!encText.trim()}>
               שלח
             </Button>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Today's meals */}
       {memberMeals.length > 0 ? (
         <div className="space-y-3">
-          <h3 className="font-semibold text-slate-700">ארוחות היום</h3>
+          <h3 className="font-bold text-wing-ink">ארוחות היום</h3>
           {memberMeals.map((meal) => (
-            <MealCard
-              key={meal.id}
-              meal={meal}
-              currentUserId={currentUserId}
-              currentUserName={currentUserName}
-            />
+            <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
           ))}
         </div>
       ) : (
-        <Card>
-          <p className="text-center text-slate-400 py-4 text-sm">
-            אין ארוחות מתועדות היום
-          </p>
-        </Card>
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center">
+          <p className="text-wing-muted text-sm">אין ארוחות מתועדות היום</p>
+        </div>
       )}
     </div>
   );

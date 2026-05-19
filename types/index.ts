@@ -19,6 +19,7 @@ export interface UserProfile {
   gender: "male" | "female";
   activityLevel: "sedentary" | "light" | "moderate" | "active" | "very_active";
   dailyCalorieTarget: number;
+  stepsGoal?: number;
 }
 
 export interface Wing {
@@ -102,6 +103,7 @@ export interface DailyCheckin {
   weightKg?: number;
   encouragements?: Encouragement[];
   daySummary?: { summary: string; insights: string[]; tip: string };
+  eatingWindow?: { open: string; close: string; durationHours: number };
   createdAt: Timestamp;
 }
 
