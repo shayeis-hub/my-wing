@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +15,7 @@ import {
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
+import { useSearchParams } from "next/navigation";
 import type { DailyCheckin, Encouragement } from "@/types";
 
 const moods = [
@@ -60,8 +61,10 @@ async function sendEncouragementPush(targetUserId: string, authorName: string, t
   });
 }
 
-export default function CheckinPage() {
+function CheckinPageInner() {
   const { user, firebaseUser } = useAuth();
+  const searchParams = useSearchParams();
+  const paramDate = searchParams.get("date");
   const [myCheckin, setMyCheckin] = useState<DailyCheckin | null>(null);
   const [groupCheckins, setGroupCheckins] = useState<DailyCheckin[]>([]);
   const [water, setWater] = useState(0);
@@ -80,14 +83,16 @@ export default function CheckinPage() {
   const [closingDay, setClosingDay] = useState(false);
   const [daySummary, setDaySummary] = useState<{ summary: string; insights: string[]; tip: string } | null>(null);
   const today = format(new Date(), "yyyy-MM-dd");
+  const selectedDate = paramDate ?? today;
+  const isRetro = selectedDate !== today;
 
   useEffect(() => {
     if (!user?.wingId || !firebaseUser) return;
     const uid = firebaseUser.uid;
     Promise.all([
-      getTodayCheckin(user.wingId, uid, today),
-      getWingSteps(user.wingId, today),
-      getWingCheckins(user.wingId, today),
+      getTodayCheckin(user.wingId, uid, selectedDate),
+      getWingSteps(user.wingId, selectedDate),
+      getWingCheckins(user.wingId, selectedDate),
     ]).then(([c, stepsEntries, checkins]) => {
       const stepsFromLeaderboard = stepsEntries.find((e) => e.userId === uid)?.steps;
       if (c) {
@@ -129,7 +134,7 @@ export default function CheckinPage() {
         wingId: user.wingId,
         userId: firebaseUser.uid,
         userName: user.displayName,
-        date: today,
+        date: selectedDate,
         waterGlasses: water,
         vegetablesServings: vegetables,
         mood,
@@ -150,7 +155,7 @@ export default function CheckinPage() {
           await saveWeightLog(user.wingId, {
             userId: firebaseUser.uid,
             userName: user.displayName,
-            date: today,
+            date: selectedDate,
             weightKg: weightNum,
           });
         } catch {
@@ -241,8 +246,13 @@ export default function CheckinPage() {
       <div className="pt-4">
         <h1 className="text-xl font-bold text-slate-800">צ&apos;ק-אין יומי</h1>
         <p className="text-sm text-slate-500">
-          {format(new Date(), "EEEE, d MMMM", { locale: he })}
+          {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: he })}
         </p>
+        {isRetro && (
+          <p className="text-xs text-wing-primary bg-wing-soft px-3 py-1.5 rounded-xl mt-2 inline-block">
+            ✏️ מילוי רטרואקטיבי
+          </p>
+        )}
       </div>
 
       {/* Water slider */}
@@ -520,5 +530,13 @@ export default function CheckinPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+export default function CheckinPage() {
+  return (
+    <Suspense>
+      <CheckinPageInner />
+    </Suspense>
   );
 }
