@@ -1,10 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --font-geist-sans: 'Inter', system-ui, sans-serif;
-}
 
 * {
   box-sizing: border-box;
@@ -15,9 +13,9 @@ html {
 }
 
 body {
-  background-color: #f8fbff;
-  color: #1e293b;
-  font-family: var(--font-geist-sans);
+  background-color: #fbf4e6;
+  color: #1a1814;
+  font-family: 'Heebo', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -32,11 +30,29 @@ body {
   width: 4px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #bae6fd;
+  background: #ede5d0;
   border-radius: 99px;
 }
 
 /* Safe area padding for mobile */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Gradient utilities */
+.bg-sunrise {
+  background: linear-gradient(135deg, #f5dd4b 0%, #ff6b47 100%);
+}
+
+.text-sunrise {
+  background: linear-gradient(90deg, #c79a00, #d4541a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Tabular nums for data displays */
+.tabular {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
 }

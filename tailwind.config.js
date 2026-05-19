@@ -9,27 +9,48 @@ module.exports = {
     extend: {
       colors: {
         wing: {
-          bg: "#f8fbff",
-          card: "#ffffff",
-          accent: "#7dd3fc",
-          primary: "#0ea5e9",
-          soft: "#e0f2fe",
-          muted: "#94a3b8",
-          danger: "#f87171",
-          success: "#34d399",
+          // רקעים
+          bg:       "#fbf4e6",
+          surface:  "#ffffff",
+          elevated: "#fef9ea",
+
+          // טקסט
+          ink:      "#1a1814",
+          muted:    "#8a7e68",
+          subtle:   "#c9bc9c",
+
+          // גבולות
+          border:   "#ede5d0",
+          divider:  "#f3ecd9",
+
+          // מותג
+          sunrise:  "#f5dd4b",
+          coral:    "#ff6b47",
+          heat:     "#d4541a",
+          honey:    "#c79a00",
+
+          // תפקוד
+          success:  "#2f8d5f",
+          warning:  "#d4541a",
+
+          // legacycompat — בשימוש בקוד הקיים
+          primary:  "#d4541a",
+          soft:     "#fef9ea",
+          accent:   "#f5dd4b",
+          card:     "#ffffff",
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["Heebo", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       borderRadius: {
-        xl: "1rem",
+        xl:   "1rem",
         "2xl": "1.25rem",
         "3xl": "1.5rem",
       },
       boxShadow: {
-        card: "0 2px 16px 0 rgba(14,165,233,0.08)",
-        "card-hover": "0 4px 24px 0 rgba(14,165,233,0.14)",
+        card: "none",
       },
     },
   },

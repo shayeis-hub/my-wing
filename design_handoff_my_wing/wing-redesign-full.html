@@ -1,0 +1,2026 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>מבנה כנף · אופק · עיצוב מלא</title>
+<meta name="viewport" content="width=1920, initial-scale=1">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="full-styles.css">
+
+<script type="application/json" id="speaker-notes">
+["","","","","","","","","","","",""]
+</script>
+
+</head>
+<body>
+
+<deck-stage>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 01 — COVER
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="01 שער" class="dirCL-bg">
+  <div style="position:absolute; inset:0; background-image: radial-gradient(circle at 80% 20%, rgba(245,221,75,0.18) 0%, transparent 45%), radial-gradient(circle at 20% 80%, rgba(255,107,71,0.12) 0%, transparent 45%); pointer-events:none;"></div>
+
+  <div style="position:relative; height:100%; padding:96px 120px; display:flex; flex-direction:column; justify-content:space-between;">
+    <div>
+      <div style="font-family:'JetBrains Mono'; font-size:14px; letter-spacing:0.24em; color:#8a7e68; text-transform:uppercase;">
+        מערכת עיצוב חדשה · מאי 2026
+      </div>
+      <h1 style="margin:32px 0 0; font-family:'Heebo'; font-size:200px; font-weight:900; line-height:0.88; letter-spacing:-0.05em; color:#1a1814;">
+        מבנה <span style="background:linear-gradient(90deg, #c79a00 0%, #d4541a 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">כנף.</span>
+      </h1>
+      <p style="font-size:28px; line-height:1.4; color:#3a3329; max-width:980px; margin-top:36px;">
+        מערכת עיצוב מלאה ב"אופק · גרסת יום" — חלה על כל מסכי האפליקציה, כל הרכיבים, וכל החוויה. מהאונבורדינג ועד הצ'ק־אין הלילי.
+      </p>
+    </div>
+
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:64px;">
+      <div style="display:flex; gap:64px;">
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">היקף</div>
+          <div style="font-size:18px; font-weight:600; color:#1a1814; margin-top:6px;">10 מסכים · ספריית רכיבים · roadmap</div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">פלטה</div>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <div style="width:28px; height:28px; border-radius:6px; background:#fbf4e6; border:1px solid #ede5d0;"></div>
+            <div style="width:28px; height:28px; border-radius:6px; background:#1a1814;"></div>
+            <div style="width:28px; height:28px; border-radius:6px; background:linear-gradient(135deg, #f5dd4b, #ff6b47);"></div>
+            <div style="width:28px; height:28px; border-radius:6px; background:#2f8d5f;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">טיפוגרפיה</div>
+          <div style="font-size:18px; font-weight:600; color:#1a1814; margin-top:6px;">Heebo · JetBrains Mono</div>
+        </div>
+      </div>
+
+      <!-- The wing mark, full -->
+      <svg width="240" height="120" viewBox="0 0 240 120" fill="none">
+        <defs>
+          <linearGradient id="sun" x1="0" y1="0" x2="240" y2="0">
+            <stop offset="0" stop-color="#f5dd4b"/>
+            <stop offset="1" stop-color="#ff6b47"/>
+          </linearGradient>
+        </defs>
+        <path d="M16 100 L120 24 L224 100" stroke="url(#sun)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M50 84 L120 38 L190 84" stroke="#1a1814" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
+        <circle cx="120" cy="24" r="5" fill="#d4541a"/>
+        <circle cx="84" cy="56" r="3.5" fill="#1a1814"/>
+        <circle cx="156" cy="56" r="3.5" fill="#1a1814"/>
+        <circle cx="56" cy="88" r="3" fill="#1a1814"/>
+        <circle cx="184" cy="88" r="3" fill="#1a1814"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="slide-number" style="color:#8a7e68;">01 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 02 — THE VISION
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="02 חזון" class="dirCL-bg">
+  <div class="cl-pad" style="display:grid; grid-template-columns: 520px 1fr; gap:96px; align-items:start;">
+    <div>
+      <div class="kicker">חזון</div>
+      <h2 class="section-title">
+        טסים<br><span class="gradient-text">לקראת הזריחה</span>
+      </h2>
+      <p class="section-lede">
+        אפליקציה לירידה במשקל הופכת בקלות לפנקס משימות מאשים. אופק־יום בנויה להפך:
+        ההישגים מואצלים בגרדיאנט החם, המבנה (הקבוצה) נמצא תמיד על המסך,
+        והנתונים — גדולים, ברורים, גאים. בלי בושה, בלי סנקציות.
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <!-- Principle 01 -->
+      <div style="background:#fff; border:1px solid #ede5d0; border-radius:20px; padding:32px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg, #f5dd4b, #ff6b47); display:flex; align-items:center; justify-content:center; color:#1a1814; font-family:'JetBrains Mono'; font-weight:800; font-size:14px;">01</div>
+            <h3 style="margin:0; font-size:22px; font-weight:800; letter-spacing:-0.025em;">המספרים גאים</h3>
+          </div>
+          <p style="font-size:15px; line-height:1.55; color:#3a3329; margin:0;">
+            Heebo Black, tabular nums, גדלים של תצוגה. כל מספר ראוי לטיפול ראשי — לא מסתתר בתוך card קטן.
+          </p>
+        </div>
+        <div style="font-family:'Heebo'; font-size:48px; font-weight:900; line-height:1; color:#1a1814; letter-spacing:-0.04em;">
+          1,420
+        </div>
+      </div>
+
+      <!-- Principle 02 -->
+      <div style="background:#fff; border:1px solid #ede5d0; border-radius:20px; padding:32px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg, #f5dd4b, #ff6b47); display:flex; align-items:center; justify-content:center; color:#1a1814; font-family:'JetBrains Mono'; font-weight:800; font-size:14px;">02</div>
+            <h3 style="margin:0; font-size:22px; font-weight:800; letter-spacing:-0.025em;">הגרדיאנט = ההישג</h3>
+          </div>
+          <p style="font-size:15px; line-height:1.55; color:#3a3329; margin:0;">
+            צהוב לקורל. נשמר רק לרגעי שיא: כרטיס הקלוריות, ה־CTA, ה־badge של "אני". כל שאר ה־UI שקט.
+          </p>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <div style="flex:1; height:32px; border-radius:8px; background:linear-gradient(90deg, #f5dd4b, #ff6b47);"></div>
+        </div>
+      </div>
+
+      <!-- Principle 03 -->
+      <div style="background:#fff; border:1px solid #ede5d0; border-radius:20px; padding:32px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:#1a1814; display:flex; align-items:center; justify-content:center; color:#fbf4e6; font-family:'JetBrains Mono'; font-weight:800; font-size:14px;">03</div>
+            <h3 style="margin:0; font-size:22px; font-weight:800; letter-spacing:-0.025em;">המבנה תמיד נוכח</h3>
+          </div>
+          <p style="font-size:15px; line-height:1.55; color:#3a3329; margin:0;">
+            כל מסך מציג את המבנה במצבו הנוכחי: מי פעיל, מי איחר, מי מחכה לעידוד. הקבוצה היא הסיפור.
+          </p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <div style="width:36px; height:36px; border-radius:999px; background:#2f8d5f; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">נ</div>
+          <div style="width:36px; height:36px; border-radius:999px; background:linear-gradient(135deg, #f5dd4b, #ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">ש</div>
+          <div style="width:36px; height:36px; border-radius:999px; background:#1a1814; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">ד</div>
+          <div style="width:36px; height:36px; border-radius:999px; border:1.5px dashed #c9bc9c; color:#8a7e68; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">ת</div>
+        </div>
+      </div>
+
+      <!-- Principle 04 -->
+      <div style="background:#1a1814; color:#fbf4e6; border-radius:20px; padding:32px; min-height:280px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:#fbf4e6; display:flex; align-items:center; justify-content:center; color:#1a1814; font-family:'JetBrains Mono'; font-weight:800; font-size:14px;">04</div>
+            <h3 style="margin:0; font-size:22px; font-weight:800; letter-spacing:-0.025em; color:#fbf4e6;">בלי אמוג'י דקורטיביים</h3>
+          </div>
+          <p style="font-size:15px; line-height:1.55; color:#c5bfb0; margin:0;">
+            אמוג'י נשארים רק בתגובות של המבנה — תקשורת בין אנשים. ה־UI עצמו משתמש באייקונים עקביים מ־Lucide.
+          </p>
+        </div>
+        <div style="display:flex; gap:14px; align-items:center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbf4e6" stroke-width="1.6"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbf4e6" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12l2 2 4-4"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbf4e6" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbf4e6" stroke-width="1.6"><path d="M2 18 L12 8 L22 18"/><circle cx="12" cy="8" r="1.6" fill="#fbf4e6"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbf4e6" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">02 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 03 — DESIGN SYSTEM (Palette + Type + Components)
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="03 מערכת עיצוב" class="dirCL-bg">
+  <div class="cl-pad">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px;">
+      <div>
+        <div class="kicker">פרק 02 · מערכת עיצוב</div>
+        <h2 class="section-title">השפה</h2>
+      </div>
+      <p style="max-width:560px; color:#3a3329; font-size:16px; line-height:1.5; margin:0;">
+        4 צבעי בסיס, 1 גרדיאנט חתימה, 3 משקלי טיפוגרפיה, וסט אחד של רכיבים שעובד על הכל. מינימום החלקים — מקסימום הגמישות.
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:48px;">
+
+      <!-- LEFT: Palette + Typography -->
+      <div>
+        <div class="kicker" style="margin-bottom:18px;">פלטה</div>
+        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:12px;">
+          <div>
+            <div style="width:100%; height:90px; border-radius:12px; background:#fbf4e6; border:1px solid #ede5d0;"></div>
+            <div style="font-weight:600; font-size:13px; margin-top:8px;">חול</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.06em;">#FBF4E6</div>
+          </div>
+          <div>
+            <div style="width:100%; height:90px; border-radius:12px; background:#fff; border:1px solid #ede5d0;"></div>
+            <div style="font-weight:600; font-size:13px; margin-top:8px;">לבן</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.06em;">#FFFFFF</div>
+          </div>
+          <div>
+            <div style="width:100%; height:90px; border-radius:12px; background:#1a1814;"></div>
+            <div style="font-weight:600; font-size:13px; margin-top:8px;">דיו</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.06em;">#1A1814</div>
+          </div>
+          <div>
+            <div style="width:100%; height:90px; border-radius:12px; background:#8a7e68;"></div>
+            <div style="font-weight:600; font-size:13px; margin-top:8px;">חימר</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.06em;">#8A7E68</div>
+          </div>
+          <div>
+            <div style="width:100%; height:90px; border-radius:12px; background:linear-gradient(135deg, #f5dd4b, #ff6b47);"></div>
+            <div style="font-weight:600; font-size:13px; margin-top:8px;">זריחה</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.06em;">F5DD4B→FF6B47</div>
+          </div>
+        </div>
+
+        <div class="kicker" style="margin:36px 0 18px;">צבעי תמיכה</div>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px;">
+          <div>
+            <div style="width:100%; height:64px; border-radius:10px; background:#2f8d5f;"></div>
+            <div style="font-weight:600; font-size:12px; margin-top:6px;">הצלחה</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">#2F8D5F</div>
+          </div>
+          <div>
+            <div style="width:100%; height:64px; border-radius:10px; background:#d4541a;"></div>
+            <div style="font-weight:600; font-size:12px; margin-top:6px;">חימום</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">#D4541A</div>
+          </div>
+          <div>
+            <div style="width:100%; height:64px; border-radius:10px; background:#c79a00;"></div>
+            <div style="font-weight:600; font-size:12px; margin-top:6px;">דבש</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">#C79A00</div>
+          </div>
+          <div>
+            <div style="width:100%; height:64px; border-radius:10px; background:#ede5d0;"></div>
+            <div style="font-weight:600; font-size:12px; margin-top:6px;">גבול</div>
+            <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">#EDE5D0</div>
+          </div>
+        </div>
+
+        <div class="kicker" style="margin:36px 0 18px;">טיפוגרפיה · Heebo</div>
+        <div style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:24px;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; padding-bottom:14px; border-bottom:1px solid #f3ecd9;">
+            <div style="font-family:'Heebo'; font-size:64px; font-weight:900; line-height:1; letter-spacing:-0.045em;">1,420</div>
+            <div style="text-align:left;">
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">Display · Heebo 900</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">64px · -4.5% LS</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; padding:14px 0; border-bottom:1px solid #f3ecd9;">
+            <div style="font-size:24px; font-weight:800; letter-spacing:-0.025em;">בוקר טוב, שי</div>
+            <div style="text-align:left;">
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">Title · Heebo 800</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">24px</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; padding:14px 0; border-bottom:1px solid #f3ecd9;">
+            <div style="font-size:16px; font-weight:500;">סלט קינואה עם אבוקדו וטונה</div>
+            <div style="text-align:left;">
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">Body · Heebo 500</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">16px</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; padding-top:14px;">
+            <div style="font-family:'JetBrains Mono'; font-size:12px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">קלוריות · 78%</div>
+            <div style="text-align:left;">
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">Label · Mono 500</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">12px · +22% LS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Components -->
+      <div>
+        <div class="kicker" style="margin-bottom:18px;">רכיבים מרכזיים</div>
+
+        <!-- Buttons -->
+        <div class="comp">
+          <div class="comp-label">כפתורים</div>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button class="CL-btn-primary" style="padding:11px 18px;">צלם ארוחה</button>
+            <button class="CL-btn-secondary" style="padding:11px 18px;">צ'ק־אין</button>
+            <button style="background:#1a1814; color:#fbf4e6; padding:11px 18px; border-radius:14px; font-size:13px; font-weight:600; border:none;">דיו / ראשי</button>
+            <button style="background:transparent; color:#1a1814; padding:10px 18px; border-radius:14px; font-size:13px; font-weight:500; border:none; text-decoration:underline; text-underline-offset:3px;">קישור</button>
+          </div>
+        </div>
+
+        <!-- Pills/Tags -->
+        <div class="comp" style="margin-top:14px;">
+          <div class="comp-label">תגיות</div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <span class="CL-pill">פעיל</span>
+            <span class="CL-pill active">נבחר</span>
+            <span class="CL-pill glow">3 פעילים</span>
+            <span style="background:#2f8d5f; color:white; font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px;">12 ימי סטריק</span>
+            <span style="background:#fef0e0; color:#d4541a; font-size:11px; font-weight:600; padding:4px 11px; border-radius:999px;">+540 קק"ל</span>
+          </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="comp" style="margin-top:14px;">
+          <div class="comp-label">כרטיסים</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div style="background:linear-gradient(135deg, #fff3b8, #ffc89a); border-radius:14px; padding:14px;">
+              <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#5a4220; text-transform:uppercase; font-weight:600;">קלוריות</div>
+              <div style="font-weight:900; font-size:32px; line-height:1; letter-spacing:-0.04em; margin-top:4px;">1,420</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; color:#5a4220; margin-top:2px;">/ 1,820 קק"ל</div>
+            </div>
+            <div style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+              <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#8a7e68; text-transform:uppercase;">צעדים</div>
+              <div style="font-weight:900; font-size:32px; line-height:1; letter-spacing:-0.04em; margin-top:4px;">8,420</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; margin-top:2px;">+235 קק"ל</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs -->
+        <div class="comp" style="margin-top:14px;">
+          <div class="comp-label">קלט · בקרה</div>
+          <div style="display:flex; gap:10px; flex-direction:column;">
+            <input value="שי כהן" style="background:#fbf4e6; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; font-size:14px; font-family:'Heebo'; outline:none; color:#1a1814;">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <div style="flex:1; height:6px; background:#ede5d0; border-radius:999px; overflow:hidden;"><div style="width:60%; height:100%; background:linear-gradient(90deg, #f5dd4b, #ff6b47);"></div></div>
+              <span style="font-family:'JetBrains Mono'; font-size:12px; font-weight:600; color:#1a1814;">1.8L</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:13px;">סנכרון אוטומטי</span>
+              <span class="switch on"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Member avatars -->
+        <div class="comp" style="margin-top:14px;">
+          <div class="comp-label">אווטרים · מבנה</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div style="width:40px; height:40px; border-radius:999px; background:#2f8d5f; color:white; display:flex; align-items:center; justify-content:center; font-weight:800;">נ</div>
+            <div style="width:40px; height:40px; border-radius:999px; background:linear-gradient(135deg, #f5dd4b, #ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:800; position:relative;">
+              ש
+              <span style="position:absolute; bottom:-3px; right:-3px; background:#1a1814; color:#fbf4e6; font-size:8px; padding:1px 4px; border-radius:999px; font-weight:700;">12d</span>
+            </div>
+            <div style="width:40px; height:40px; border-radius:999px; background:#1a1814; color:#fbf4e6; display:flex; align-items:center; justify-content:center; font-weight:800;">ד</div>
+            <div style="width:40px; height:40px; border-radius:999px; border:1.5px dashed #c9bc9c; color:#8a7e68; display:flex; align-items:center; justify-content:center; font-weight:700;">ת</div>
+            <span style="margin-right:8px; font-family:'JetBrains Mono'; font-size:11px; color:#8a7e68;">+ 0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">03 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 04 — DASHBOARD (hero, annotated)
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="04 לוח בקרה" class="dirCL-bg">
+  <div class="cl-pad" style="display:grid; grid-template-columns: 1fr 460px 380px; gap:64px; align-items:start;">
+
+    <!-- Left: notes / explanation -->
+    <div>
+      <div class="kicker">פרק 03 · מסך הבית</div>
+      <h2 class="section-title">לוח<br>הבקרה</h2>
+      <p class="section-lede">
+        המסך הראשי הוא הסיפור של היום: כמה אכלת, מה המבנה עושה, ומה השלב הבא.
+        הכרטיס הראשי מסכם את הכל בגרדיאנט אחד; שאר ה־UI שקט ומכבד את ההתקדמות.
+      </p>
+
+      <div style="margin-top:48px; display:flex; flex-direction:column; gap:18px;">
+        <div class="annot">
+          <div class="marker gradient">01</div>
+          <div><b>כרטיס קלוריות בגרדיאנט</b>אלמנט הגיבור של המסך — תופס ~30% מהגובה, גרדיאנט מלא, מספר בדיספליי 44.</div>
+        </div>
+        <div class="annot">
+          <div class="marker">02</div>
+          <div><b>שורה אופקית של מדדים</b>צעדים, מים, סטריק — לא כרטיסים נפרדים. סורקים את כולם בבת אחת.</div>
+        </div>
+        <div class="annot">
+          <div class="marker">03</div>
+          <div><b>הלהקה החיה</b>אווטרים עם מצב היום של כל אחד. הוייצב עם <code style="font-family:'JetBrains Mono'; font-size:12px; background:#fff; padding:1px 5px; border-radius:4px;">YOU</code> ברור.</div>
+        </div>
+        <div class="annot">
+          <div class="marker gradient">04</div>
+          <div><b>CTA יחיד וחזק</b>"צלם ארוחה" הוא הפעולה הראשית. כל השאר משני, ב־white card.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone -->
+    <div style="display:flex; justify-content:center;">
+      <div class="phone" style="transform:scale(1.05); transform-origin:top center;">
+        <div class="phone-notch"></div>
+        <div class="phone-screen CL-screen">
+          <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+          <div class="body">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <div class="label">יום שני · 19 במאי · יום 12</div>
+                <h1 style="margin-top:6px;">בוקר טוב, שי</h1>
+              </div>
+              <div style="width:36px; height:36px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;">ש</div>
+            </div>
+
+            <!-- Hero card -->
+            <div class="CL-card hero" style="padding:18px; text-align:right;">
+              <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#5a4220; text-transform:uppercase; font-weight:600;">קלוריות היום</div>
+              <div style="display:flex; align-items:baseline; gap:6px; margin-top:6px;">
+                <span class="display" style="font-size:48px; line-height:1; color:#1a1814;">1,420</span>
+                <span style="font-size:12px; color:#5a4220;">/ 1,820</span>
+              </div>
+              <div style="height:5px; background:rgba(26,24,20,0.18); border-radius:999px; overflow:hidden; margin-top:14px;">
+                <div style="width:78%; height:100%; background:#1a1814; border-radius:999px;"></div>
+              </div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; color:#5a4220; margin-top:6px; letter-spacing:0.08em;">
+                78% · 400 קק"ל לסיום היעד
+              </div>
+            </div>
+
+            <!-- Stats row -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
+              <div style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:12px;">
+                <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">צעדים</div>
+                <div style="font-weight:900; font-size:20px; letter-spacing:-0.04em; margin-top:4px;">8,420</div>
+              </div>
+              <div style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:12px;">
+                <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">מים</div>
+                <div style="font-weight:900; font-size:20px; letter-spacing:-0.04em; margin-top:4px;">1.8<span style="font-size:13px;">L</span></div>
+              </div>
+              <div style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:12px;">
+                <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.18em; color:#8a7e68; text-transform:uppercase;">סטריק</div>
+                <div style="font-weight:900; font-size:20px; letter-spacing:-0.04em; margin-top:4px; color:#d4541a;">12<span style="font-size:13px;">d</span></div>
+              </div>
+            </div>
+
+            <!-- Wing -->
+            <div class="CL-card elevated">
+              <div class="flex justify-between items-center mb-2">
+                <h2 style="font-size:11px;">הלהקה היום</h2>
+                <span style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.18em; text-transform:uppercase;">3 / 4 פעילים</span>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <div style="text-align:center; flex:1;">
+                  <div style="width:36px; height:36px; border-radius:999px; background:#2f8d5f; color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; margin:0 auto;">נ</div>
+                  <div style="font-size:9px; color:#8a7e68; margin-top:4px;">נועה</div>
+                  <div style="font-weight:700; font-size:11px;">12.4k</div>
+                </div>
+                <div style="text-align:center; flex:1; position:relative;">
+                  <div style="position:absolute; top:-4px; left:50%; transform:translateX(-50%); background:#1a1814; color:#fbf4e6; font-size:8px; font-weight:800; padding:1px 4px; border-radius:4px; letter-spacing:0.06em;">YOU</div>
+                  <div style="width:36px; height:36px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; margin:0 auto;">ש</div>
+                  <div style="font-size:9px; color:#8a7e68; margin-top:4px;">אני</div>
+                  <div style="font-weight:700; font-size:11px; color:#d4541a;">8.4k</div>
+                </div>
+                <div style="text-align:center; flex:1;">
+                  <div style="width:36px; height:36px; border-radius:999px; background:#1a1814; color:#fbf4e6; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; margin:0 auto;">ד</div>
+                  <div style="font-size:9px; color:#8a7e68; margin-top:4px;">דניאל</div>
+                  <div style="font-weight:700; font-size:11px;">6.1k</div>
+                </div>
+                <div style="text-align:center; flex:1;">
+                  <div style="width:36px; height:36px; border-radius:999px; border:1.5px dashed #c9bc9c; color:#8a7e68; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; margin:0 auto;">ת</div>
+                  <div style="font-size:9px; color:#8a7e68; margin-top:4px;">תמר</div>
+                  <div style="font-weight:700; font-size:11px; color:#8a7e68;">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Primary CTA -->
+            <button class="CL-btn-primary" style="width:100%; padding:14px; font-size:15px; display:flex; align-items:center; justify-content:center; gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.4"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+              צלם ארוחה
+            </button>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px;">
+              <button class="CL-btn-secondary" style="padding:11px; font-size:12px;">צ'ק־אין יומי</button>
+              <button class="CL-btn-secondary" style="padding:11px; font-size:12px; color:#d4541a;">🆘 SOS</button>
+            </div>
+          </div>
+          <div class="CL-nav">
+            <div class="CL-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span>בית</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg><span>ארוחות</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg><span>יומן</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>צ'ק</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 18 L12 8 L22 18"/></svg><span>להקה</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: meta info / quick stats sidebar -->
+    <div style="padding-top:36px;">
+      <div class="kicker" style="margin-bottom:14px;">מצב כללי</div>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="background:#fff; border:1px solid #ede5d0; border-radius:16px; padding:18px;">
+          <div class="kicker" style="font-size:10px;">משקל · 30 ימים</div>
+          <div style="font-weight:900; font-size:42px; letter-spacing:-0.04em; margin-top:4px; display:flex; align-items:baseline; gap:6px;">
+            74.2<span style="font-size:14px; color:#8a7e68;">ק"ג</span>
+            <span style="margin-right:auto; font-size:14px; color:#2f8d5f; font-weight:700;">↓ -2.3</span>
+          </div>
+          <div class="sparkline" style="margin-top:10px;">
+            <div style="height:60%;"></div><div style="height:75%;"></div><div style="height:65%;"></div>
+            <div style="height:80%;"></div><div style="height:70%;"></div><div style="height:55%;"></div>
+            <div style="height:60%;"></div><div style="height:48%;"></div><div style="height:40%;"></div>
+            <div style="height:50%;"></div><div style="height:35%;"></div><div style="height:30%;"></div>
+          </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #ede5d0; border-radius:16px; padding:18px;">
+          <div class="kicker" style="font-size:10px;">השבוע</div>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:10px;">
+            <span class="cal-dot done"></span>
+            <span class="cal-dot done"></span>
+            <span class="cal-dot partial"></span>
+            <span class="cal-dot done"></span>
+            <span class="cal-dot done"></span>
+            <span class="cal-dot partial"></span>
+            <span class="cal-dot" style="background:#1a1814;"></span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:6px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.12em; color:#8a7e68;">
+            <span>א</span><span>ב</span><span>ג</span><span>ד</span><span>ה</span><span>ו</span><span>ש</span>
+          </div>
+          <div style="margin-top:10px; font-size:13px; color:#3a3329;">5 ימי צ'ק־אין השבוע</div>
+        </div>
+
+        <div style="background:linear-gradient(135deg, #fff3b8, #ffc89a); border-radius:16px; padding:18px;">
+          <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#5a4220; text-transform:uppercase; font-weight:600;">סיכום AI · אתמול</div>
+          <p style="font-size:13px; line-height:1.5; color:#1a1814; margin:8px 0 0;">
+            יום מאוזן. החלבון אמנם נמוך, אבל המאמץ הקרדיו פיצה. מחר נסה להוסיף ביצה בבוקר.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">04 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 05 — MEALS (list + detail)
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="05 ארוחות" class="dirCL-bg">
+  <div class="cl-pad">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px;">
+      <div>
+        <div class="kicker">פרק 04 · ארוחות</div>
+        <h2 class="section-title">השולחן<br><span class="gradient-text">המשותף</span></h2>
+      </div>
+      <p style="max-width:520px; color:#3a3329; font-size:16px; line-height:1.55; margin:0;">
+        כל ארוחה של כל חבר במבנה היא רגע שראוי לציון. הארוחה האחרונה תופסת את הבמה עם תמונה מלאה; הקודמות שורות שקטות. תגובות החברים מתחת לכל ארוחה — לא נחבאות.
+      </p>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:80px; align-items:flex-start;">
+
+      <!-- LIST view -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">תצוגת רשימה</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <div class="label">היום · 3 ארוחות · 1,040 קק"ל</div>
+                  <h1 style="margin-top:6px;">ארוחות</h1>
+                </div>
+                <button class="CL-btn-primary" style="padding:8px 14px; font-size:11px; display:flex; align-items:center; gap:5px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.4"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+                  צלם
+                </button>
+              </div>
+              <div style="display:flex; gap:5px; margin-bottom:14px;">
+                <span class="CL-pill active" style="font-size:10px;">הכל</span>
+                <span class="CL-pill" style="font-size:10px;">שלי</span>
+                <span class="CL-pill" style="font-size:10px;">נועה</span>
+                <span class="CL-pill" style="font-size:10px;">דניאל</span>
+              </div>
+
+              <!-- Hero meal -->
+              <div class="CL-card" style="padding:0; overflow:hidden;">
+                <div style="height:130px; background:linear-gradient(135deg, #b5c8a0, #889e75); position:relative;">
+                  <div style="position:absolute; top:10px; right:12px;">
+                    <span style="background:#fff; color:#1a1814; font-size:9px; font-weight:700; padding:3px 8px; border-radius:999px;">צהריים · 13:20</span>
+                  </div>
+                  <div style="position:absolute; bottom:0; left:0; right:0; padding:12px 14px; background:linear-gradient(transparent, rgba(255,255,255,0.95));">
+                    <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+                      <div>
+                        <div style="font-size:11px; color:#5a4f3f;">נועה · לפני שעה</div>
+                        <div style="font-weight:700; font-size:14px; color:#1a1814; margin-top:2px;">סלט קינואה ואבוקדו</div>
+                      </div>
+                      <div style="text-align:left;">
+                        <div class="display" style="font-size:26px; line-height:1; color:#1a1814;">540</div>
+                        <div style="font-family:'JetBrains Mono'; font-size:8px; letter-spacing:0.22em; color:#5a4f3f; text-transform:uppercase;">קק"ל</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+                  <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.06em;">
+                    <span style="color:#d4541a;">P 32</span> · <span style="color:#c79a00;">C 48</span> · <span style="color:#2f8d5f;">F 22</span>
+                  </div>
+                  <div style="display:flex; gap:8px; align-items:center;">
+                    <span style="font-size:11px; color:#5a4f3f;">🔥 2</span>
+                    <span style="font-size:11px; color:#5a4f3f;">💬 1</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Meal row -->
+              <div class="CL-card" style="padding:11px;">
+                <div style="display:flex; gap:10px;">
+                  <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg, #f0c896, #d8a070);"></div>
+                  <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between;">
+                      <div>
+                        <div style="font-size:11px; color:#5a4f3f;">שי · בוקר · 8:15</div>
+                        <div style="font-weight:600; font-size:13px; margin-top:1px;">חביתה עם ירקות</div>
+                      </div>
+                      <div style="text-align:left;">
+                        <div class="display" style="font-size:18px; line-height:1;">320</div>
+                      </div>
+                    </div>
+                    <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.04em; margin-top:6px;">
+                      P 22 · C 18 · F 16 · 🔥 דניאל, נועה
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Meal row -->
+              <div class="CL-card" style="padding:11px;">
+                <div style="display:flex; gap:10px;">
+                  <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg, #c8d8b8, #a0c098);"></div>
+                  <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between;">
+                      <div>
+                        <div style="font-size:11px; color:#5a4f3f;">דניאל · חטיף · 11:00</div>
+                        <div style="font-weight:600; font-size:13px; margin-top:1px;">תפוח + שקדים</div>
+                      </div>
+                      <div style="text-align:left;">
+                        <div class="display" style="font-size:18px; line-height:1;">180</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:12px; padding-top:12px; border-top:1px solid #ede5d0; display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#8a7e68;">
+                <span>אתמול · 4 ארוחות · 1,580 קק"ל</span>
+                <span style="font-family:'JetBrains Mono'; color:#1a1814;">→</span>
+              </div>
+            </div>
+            <div class="CL-nav">
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span>בית</span></div>
+              <div class="CL-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg><span>ארוחות</span></div>
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg><span>יומן</span></div>
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>צ'ק</span></div>
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 18 L12 8 L22 18"/></svg><span>להקה</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DETAIL view -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">תצוגת פרטים</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body" style="padding:46px 0 80px;">
+              <!-- Big hero image -->
+              <div style="height:280px; background:linear-gradient(135deg, #b5c8a0, #889e75); position:relative;">
+                <div style="position:absolute; top:14px; right:14px; display:flex; gap:6px;">
+                  <button style="width:30px; height:30px; background:rgba(255,255,255,0.92); border-radius:999px; border:none; display:flex; align-items:center; justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                  </button>
+                  <button style="width:30px; height:30px; background:rgba(255,255,255,0.92); border-radius:999px; border:none; display:flex; align-items:center; justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                  </button>
+                </div>
+                <div style="position:absolute; top:14px; left:14px;">
+                  <span style="background:rgba(26,24,20,0.85); color:#fbf4e6; font-size:10px; font-weight:700; padding:5px 10px; border-radius:999px; letter-spacing:0.06em;">צהריים · 13:20</span>
+                </div>
+              </div>
+
+              <div style="padding:16px;">
+                <!-- Calories block -->
+                <div style="display:flex; align-items:baseline; justify-content:space-between;">
+                  <div>
+                    <div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.22em; color:#8a7e68; text-transform:uppercase;">נועה · לפני שעה</div>
+                    <div style="font-weight:700; font-size:17px; margin-top:2px;">סלט קינואה עם אבוקדו וטונה</div>
+                  </div>
+                </div>
+
+                <div style="margin-top:14px; background:linear-gradient(135deg, #fff3b8, #ffc89a); border-radius:14px; padding:12px; display:flex; align-items:baseline; justify-content:space-between;">
+                  <span class="display" style="font-size:36px; line-height:1;">540</span>
+                  <span style="font-family:'JetBrains Mono'; font-size:11px; color:#5a4220; letter-spacing:0.18em; text-transform:uppercase; font-weight:600;">קק"ל</span>
+                </div>
+
+                <!-- Macros -->
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px;">
+                  <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-weight:900; font-size:18px; color:#d4541a; letter-spacing:-0.03em;">32<span style="font-size:11px;">g</span></div>
+                    <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.14em; color:#8a7e68; text-transform:uppercase;">חלבון</div>
+                  </div>
+                  <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-weight:900; font-size:18px; color:#c79a00; letter-spacing:-0.03em;">48<span style="font-size:11px;">g</span></div>
+                    <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.14em; color:#8a7e68; text-transform:uppercase;">פחמ׳</div>
+                  </div>
+                  <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+                    <div style="font-weight:900; font-size:18px; color:#2f8d5f; letter-spacing:-0.03em;">22<span style="font-size:11px;">g</span></div>
+                    <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.14em; color:#8a7e68; text-transform:uppercase;">שומן</div>
+                  </div>
+                </div>
+
+                <!-- Items -->
+                <div class="label" style="margin-top:14px; margin-bottom:6px;">פירוט מנות</div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; overflow:hidden;">
+                  <div style="display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px solid #f3ecd9; font-size:11px;">
+                    <span>קינואה</span><span style="font-family:'JetBrains Mono'; color:#8a7e68;">120g · 180קק"ל</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px solid #f3ecd9; font-size:11px;">
+                    <span>אבוקדו</span><span style="font-family:'JetBrains Mono'; color:#8a7e68;">80g · 130קק"ל</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:8px 12px; font-size:11px;">
+                    <span>טונה</span><span style="font-family:'JetBrains Mono'; color:#8a7e68;">90g · 145קק"ל</span>
+                  </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="label" style="margin-top:14px; margin-bottom:6px;">תגובות הלהקה · 1</div>
+                <div style="background:linear-gradient(135deg, #fff3b8 0%, #ffe0c8 100%); border-radius:12px; padding:10px 12px;">
+                  <div style="display:flex; align-items:flex-start; gap:8px;">
+                    <div style="width:24px; height:24px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; flex-shrink:0;">ש</div>
+                    <div>
+                      <div style="font-size:11px; font-weight:600; color:#1a1814;">שי · 13:45</div>
+                      <div style="font-size:12px; color:#3a3329; margin-top:1px;">נראה מעולה. צריך להעתיק את המתכון 🔥</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="CL-nav">
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span>בית</span></div>
+              <div class="CL-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg><span>ארוחות</span></div>
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg><span>יומן</span></div>
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>צ'ק</span></div>
+              <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 18 L12 8 L22 18"/></svg><span>להקה</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div style="width:300px; padding-top:60px;">
+        <div class="kicker" style="margin-bottom:18px;">דגשים</div>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="annot">
+            <div class="marker gradient">A</div>
+            <div><b>הארוחה האחרונה גיבורה</b>תמונה מלאה, מספר גדול, ארוחות קודמות הופכות לשורות שקטות.</div>
+          </div>
+          <div class="annot">
+            <div class="marker">B</div>
+            <div><b>מקרו־נוטריאנטים בצבע</b>חלבון = קורל, פחמימות = דבש, שומן = ירוק. אותם צבעים בכל המסכים.</div>
+          </div>
+          <div class="annot">
+            <div class="marker">C</div>
+            <div><b>תגובות במקום בולט</b>לא נחבאות מתחת לכפתור. הן <em>סיבת השיתוף</em>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">05 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 06 — CAMERA + AI FLOW
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="06 צילום AI" class="dirCL-bg">
+  <div class="cl-pad">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px;">
+      <div>
+        <div class="kicker">פרק 05 · צילום AI</div>
+        <h2 class="section-title">לצלם.<br>לקבל. <span class="gradient-text">לאכול.</span></h2>
+      </div>
+      <p style="max-width:580px; color:#3a3329; font-size:16px; line-height:1.55; margin:0;">
+        השלב הקריטי ביותר באפליקציה — מה־"click" עד ל־insight. שלוש שניות, שלושה מסכים. ובסוף: הצלחת על המסך, עם הניתוח, ועם אפשרות לתקן.
+      </p>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:64px; align-items:flex-start;">
+
+      <!-- Step 1: Camera -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">01 · לצלם</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen" style="background:#1a1814; height:100%; position:relative;">
+            <div class="phone-status" style="color:#fbf4e6;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <!-- Camera frame -->
+            <div style="position:absolute; inset:46px 0 100px; background: radial-gradient(ellipse at center, #3a4434, #1a1814); display:flex; align-items:center; justify-content:center;">
+              <!-- Plate silhouette -->
+              <div style="width:200px; height:200px; border-radius:999px; background:radial-gradient(circle, #5a6644, #3a4434); position:relative;">
+                <div style="position:absolute; top:20px; left:30%; width:60px; height:60px; border-radius:50%; background:#889e75;"></div>
+                <div style="position:absolute; bottom:30px; right:20%; width:50px; height:40px; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; background:#a8b88c;"></div>
+              </div>
+              <!-- Focus rectangle -->
+              <div style="position:absolute; inset:60px 30px; border:2px solid rgba(245,221,75,0.7); border-radius:18px; pointer-events:none;">
+                <span style="position:absolute; top:-3px; right:-3px; width:18px; height:18px; border-top:3px solid #f5dd4b; border-right:3px solid #f5dd4b; border-radius:4px 0 0 0;"></span>
+                <span style="position:absolute; top:-3px; left:-3px; width:18px; height:18px; border-top:3px solid #f5dd4b; border-left:3px solid #f5dd4b; border-radius:0 4px 0 0;"></span>
+                <span style="position:absolute; bottom:-3px; right:-3px; width:18px; height:18px; border-bottom:3px solid #f5dd4b; border-right:3px solid #f5dd4b; border-radius:0 0 0 4px;"></span>
+                <span style="position:absolute; bottom:-3px; left:-3px; width:18px; height:18px; border-bottom:3px solid #f5dd4b; border-left:3px solid #f5dd4b; border-radius:0 0 4px 0;"></span>
+              </div>
+            </div>
+            <!-- Top hint -->
+            <div style="position:absolute; top:60px; left:0; right:0; text-align:center; color:#fbf4e6; font-size:13px; font-weight:600;">
+              מסגרת את הצלחת
+            </div>
+            <!-- Bottom controls -->
+            <div style="position:absolute; bottom:30px; left:0; right:0; display:flex; align-items:center; justify-content:center; gap:32px;">
+              <button style="width:44px; height:44px; background:rgba(255,255,255,0.15); border:none; border-radius:999px; color:#fbf4e6; display:flex; align-items:center; justify-content:center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button style="width:72px; height:72px; background:linear-gradient(135deg, #f5dd4b, #ff6b47); border-radius:999px; border:4px solid rgba(255,255,255,0.3);"></button>
+              <button style="width:44px; height:44px; background:rgba(255,255,255,0.15); border:none; border-radius:999px; color:#fbf4e6; display:flex; align-items:center; justify-content:center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h6v6M20 20h-6v-6M20 4l-7 7M4 20l7-7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Analyzing -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">02 · מנתח</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body">
+              <div class="flex justify-between items-start mb-3">
+                <h1>מנתח...</h1>
+                <button style="background:transparent; border:none; color:#8a7e68;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+
+              <!-- Image -->
+              <div style="height:200px; border-radius:18px; background:linear-gradient(135deg, #b5c8a0, #889e75); position:relative; overflow:hidden; margin-bottom:16px;">
+                <!-- Scanning line animation -->
+                <div style="position:absolute; left:0; right:0; height:3px; background:linear-gradient(90deg, transparent, #f5dd4b, transparent); top:50%; box-shadow: 0 0 24px #f5dd4b;"></div>
+                <div style="position:absolute; bottom:10px; left:10px; right:10px; background:rgba(26,24,20,0.7); color:#fbf4e6; font-size:11px; padding:6px 10px; border-radius:8px; backdrop-filter:blur(4px);">
+                  Claude מזהה את הצלחת...
+                </div>
+              </div>
+
+              <!-- Progressive reveal items -->
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; display:flex; align-items:center; gap:10px;">
+                  <div style="width:8px; height:8px; border-radius:999px; background:#2f8d5f;"></div>
+                  <span style="font-size:13px; font-weight:500;">קינואה זוהתה</span>
+                  <span style="margin-right:auto; font-family:'JetBrains Mono'; font-size:11px; color:#8a7e68;">~120g</span>
+                </div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; display:flex; align-items:center; gap:10px;">
+                  <div style="width:8px; height:8px; border-radius:999px; background:#2f8d5f;"></div>
+                  <span style="font-size:13px; font-weight:500;">אבוקדו זוהה</span>
+                  <span style="margin-right:auto; font-family:'JetBrains Mono'; font-size:11px; color:#8a7e68;">~80g</span>
+                </div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; display:flex; align-items:center; gap:10px;">
+                  <div style="width:8px; height:8px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); animation:pulse 1s infinite;"></div>
+                  <span style="font-size:13px; font-weight:500; color:#8a7e68;">מזהה חלבון...</span>
+                </div>
+                <div style="background:#fafaf3; border:1px dashed #ede5d0; border-radius:12px; padding:11px 14px; display:flex; align-items:center; gap:10px; opacity:0.5;">
+                  <div style="width:8px; height:8px; border-radius:999px; background:#ede5d0;"></div>
+                  <span style="font-size:13px; color:#8a7e68;">מחשב מקרו...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Review & Edit -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">03 · לאשר ולשמור</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <div class="label">נראה לי טעים</div>
+                  <h1 style="margin-top:6px;">540 קק"ל</h1>
+                </div>
+                <button style="background:#fff; border:1px solid #ede5d0; color:#1a1814; padding:6px 10px; border-radius:10px; font-size:11px; font-weight:500;">תקן</button>
+              </div>
+
+              <!-- Image -->
+              <div style="height:130px; border-radius:14px; background:linear-gradient(135deg, #b5c8a0, #889e75); margin-bottom:12px;"></div>
+
+              <!-- Description -->
+              <input value="סלט קינואה עם אבוקדו וטונה" style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; font-size:13px; font-family:'Heebo'; outline:none; color:#1a1814; width:100%; font-weight:500; box-sizing:border-box;">
+
+              <!-- Macros -->
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-top:10px;">
+                <div style="background:linear-gradient(135deg, #fff3b8, #ffc89a); border-radius:10px; padding:10px 6px; text-align:center;">
+                  <div style="font-weight:900; font-size:20px; letter-spacing:-0.03em;">540</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#5a4220; letter-spacing:0.1em;">קק"ל</div>
+                </div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:10px; padding:10px 6px; text-align:center;">
+                  <div style="font-weight:900; font-size:18px; color:#d4541a;">32<span style="font-size:11px;">g</span></div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.06em;">חלבון</div>
+                </div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:10px; padding:10px 6px; text-align:center;">
+                  <div style="font-weight:900; font-size:18px; color:#c79a00;">48<span style="font-size:11px;">g</span></div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.06em;">פחמ׳</div>
+                </div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:10px; padding:10px 6px; text-align:center;">
+                  <div style="font-weight:900; font-size:18px; color:#2f8d5f;">22<span style="font-size:11px;">g</span></div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.06em;">שומן</div>
+                </div>
+              </div>
+
+              <!-- Meal type + time -->
+              <div style="display:flex; gap:8px; margin-top:10px;">
+                <select style="flex:1; background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; font-size:13px; font-family:'Heebo'; outline:none; color:#1a1814; appearance:none;">
+                  <option>צהריים</option>
+                </select>
+                <input value="13:20" type="time" style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; font-size:13px; font-family:'Heebo'; outline:none; color:#1a1814; width:90px;">
+              </div>
+
+              <!-- Hint -->
+              <div style="background:linear-gradient(135deg, #fff3b8, #ffe0c8); border-radius:12px; padding:10px 12px; margin-top:10px; font-size:12px; color:#3a3329; line-height:1.4;">
+                <b style="color:#d4541a;">לא מדויק?</b> תכתוב מה בצלחת ונחשב מחדש.
+              </div>
+
+              <!-- Save buttons -->
+              <div style="display:grid; grid-template-columns:1fr 2fr; gap:8px; margin-top:14px;">
+                <button class="CL-btn-secondary" style="padding:12px;">בטל</button>
+                <button class="CL-btn-primary" style="padding:12px;">שמור במבנה</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }</style>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">06 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 07 — CHECK-IN
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="07 צ'ק-אין" class="dirCL-bg">
+  <div class="cl-pad" style="display:grid; grid-template-columns: 1fr 460px 380px; gap:64px; align-items:start;">
+
+    <div>
+      <div class="kicker">פרק 06 · צ'ק־אין יומי</div>
+      <h2 class="section-title">הטקס<br>של<br>הסיום</h2>
+      <p class="section-lede">
+        בסוף היום, חמש שאלות, שתי דקות. מים, ירקות, אימון, רגש, משקל. כל תשובה היא טקס קטן — לא טופס. ובסוף, סיכום AI חם של היום.
+      </p>
+
+      <div style="margin-top:40px; display:flex; flex-direction:column; gap:18px;">
+        <div class="annot">
+          <div class="marker gradient">01</div>
+          <div><b>סליידר גרדיאנט למים</b>תזוזה אופקית, הצבע מתעצם ככל שמתקדמים. ויזואלי, לא מספרי.</div>
+        </div>
+        <div class="annot">
+          <div class="marker">02</div>
+          <div><b>אימון = שאלה מורכבת מובנית</b>סוג, עצימות, משך — נפתח רק כשמסמנים שהתאמנתי. בלי מטה־פטר.</div>
+        </div>
+        <div class="annot">
+          <div class="marker">03</div>
+          <div><b>סיכום AI בסיום</b>סקירה אישית של היום, 3 התובנות, וטיפ למחר. נשמר בכרטיס "אתמול" של הבית.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:center;">
+      <div class="phone" style="transform:scale(1.05); transform-origin:top center;">
+        <div class="phone-notch"></div>
+        <div class="phone-screen CL-screen">
+          <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+          <div class="body">
+            <div class="mb-3">
+              <div class="label">יום שני · 19 במאי · 19:42</div>
+              <h1 style="margin-top:6px;">סיום היום</h1>
+            </div>
+
+            <!-- Water slider -->
+            <div class="CL-card">
+              <div class="flex justify-between items-center mb-2">
+                <h2 style="font-size:11px;">מים</h2>
+                <span style="font-weight:800; color:#d4541a; font-size:20px; letter-spacing:-0.03em;">1.8<span style="font-size:13px;">L</span></span>
+              </div>
+              <div style="height:8px; background:#ede5d0; border-radius:999px; overflow:hidden; position:relative;">
+                <div style="width:60%; height:100%; background:linear-gradient(90deg, #f5dd4b, #ff6b47); border-radius:999px;"></div>
+                <div style="position:absolute; right:60%; top:-4px; width:16px; height:16px; border-radius:999px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.2); border:2px solid #ff6b47;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:6px; font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68;">
+                <span>0</span><span>1L</span><span>2L</span><span>3L</span><span>4L</span>
+              </div>
+            </div>
+
+            <!-- Vegetables -->
+            <div class="CL-card">
+              <div class="flex justify-between items-center mb-2">
+                <h2 style="font-size:11px;">ירקות בארוחות</h2>
+                <span style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.18em; text-transform:uppercase;">3 / 6</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-top:6px;">
+                <button style="width:36px; height:36px; border-radius:999px; background:#fafaf3; border:1px solid #ede5d0; font-size:20px; color:#1a1814;">−</button>
+                <span style="font-weight:900; font-size:32px; letter-spacing:-0.04em; width:48px; text-align:center;">3</span>
+                <button style="width:36px; height:36px; border-radius:999px; background:linear-gradient(135deg, #f5dd4b, #ff6b47); border:none; font-size:20px; color:#1a1814; font-weight:700;">+</button>
+              </div>
+            </div>
+
+            <!-- Workout toggle -->
+            <div class="CL-card">
+              <div class="flex justify-between items-center">
+                <h2 style="font-size:11px;">התאמנתי היום</h2>
+                <span class="switch on"></span>
+              </div>
+              <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                  <span class="CL-pill active" style="font-size:11px; padding:5px 12px;">🏃 ריצה</span>
+                  <span class="CL-pill" style="font-size:11px; padding:5px 12px;">🏋️ כושר</span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+                  <span class="CL-pill" style="font-size:11px; padding:5px 12px;">קל</span>
+                  <span class="CL-pill active" style="font-size:11px; padding:5px 12px;">בינוני</span>
+                  <span class="CL-pill" style="font-size:11px; padding:5px 12px;">אינטנסיבי</span>
+                </div>
+                <div style="background:#fafaf3; border:1px solid #ede5d0; border-radius:12px; padding:9px 14px; display:flex; align-items:center; justify-content:space-between;">
+                  <span style="font-size:12px;">35 דקות</span>
+                  <span style="font-family:'JetBrains Mono'; font-size:11px; color:#2f8d5f; font-weight:700;">~340 קק"ל</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mood -->
+            <div class="CL-card">
+              <h2 class="mb-2" style="font-size:11px;">מצב רוח</h2>
+              <div style="display:flex; gap:6px;">
+                <button class="mood-chip">😞</button>
+                <button class="mood-chip">😕</button>
+                <button class="mood-chip selected">😐</button>
+                <button class="mood-chip">😊</button>
+                <button class="mood-chip">🤩</button>
+              </div>
+            </div>
+
+            <button class="CL-btn-primary" style="width:100%; padding:14px; font-size:15px;">שמור · ייצר סיכום AI</button>
+          </div>
+          <div class="CL-nav">
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span>בית</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg><span>ארוחות</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg><span>יומן</span></div>
+            <div class="CL-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>צ'ק</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 18 L12 8 L22 18"/></svg><span>להקה</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: AI summary preview -->
+    <div style="padding-top:36px;">
+      <div class="kicker" style="margin-bottom:14px;">סיכום AI · אחרי השמירה</div>
+      <div style="background:linear-gradient(135deg, #fff3b8 0%, #ffe0c8 100%); border-radius:20px; padding:24px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div style="width:32px; height:32px; border-radius:10px; background:#1a1814; color:#fbf4e6; display:flex; align-items:center; justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <h3 style="margin:0; font-size:16px; font-weight:800;">סיכום היום שלך</h3>
+        </div>
+        <p style="font-size:14px; line-height:1.55; color:#1a1814; margin:0;">
+          יום מצוין, שי. עמדת ב־78% מיעד הקלוריות והוספת ריצה של 35 דקות.
+          שתיית המים עדיין נמוכה — שווה לכוון ל־2.5L מחר.
+        </p>
+
+        <div style="margin-top:18px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; align-items:flex-start; gap:8px;">
+            <div style="width:6px; height:6px; border-radius:999px; background:#d4541a; margin-top:7px; flex-shrink:0;"></div>
+            <span style="font-size:13px; color:#3a3329; line-height:1.45;">צריכת חלבון נמוכה (62g, יעד 90g). הוסיפ ביצה לבוקר.</span>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:8px;">
+            <div style="width:6px; height:6px; border-radius:999px; background:#2f8d5f; margin-top:7px; flex-shrink:0;"></div>
+            <span style="font-size:13px; color:#3a3329; line-height:1.45;">12 ימים רצופים של צ'ק־אין. מצוין.</span>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:8px;">
+            <div style="width:6px; height:6px; border-radius:999px; background:#c79a00; margin-top:7px; flex-shrink:0;"></div>
+            <span style="font-size:13px; color:#3a3329; line-height:1.45;">חברי המבנה (נועה, דניאל) הגיבו ל־3 ארוחות שלך היום.</span>
+          </div>
+        </div>
+
+        <div style="margin-top:18px; padding-top:14px; border-top:1px solid rgba(26,24,20,0.15);">
+          <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#5a4220; text-transform:uppercase; font-weight:600;">טיפ למחר</div>
+          <p style="font-size:13px; line-height:1.5; color:#1a1814; margin:6px 0 0;">
+            אכלת ירקות ב־3 ארוחות. מטרה: 4. נסה להוסיף סלט קטן ליד החטיף.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">07 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 08 — STEPS + LEADERBOARD
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="08 צעדים ולוח תוצאות" class="dirCL-bg">
+  <div class="cl-pad" style="display:grid; grid-template-columns: 1fr 460px 380px; gap:64px; align-items:start;">
+
+    <div>
+      <div class="kicker">פרק 07 · צעדים</div>
+      <h2 class="section-title"><span class="gradient-text">8,420</span><br>צעדים</h2>
+      <p class="section-lede">
+        טבעת התקדמות חזקה מסביב לטבעת ראשית — לא דיאגרמה. לוח התוצאות מתחתיה תופס מקום שווה: לא היררכיה תחרותית, אלא תזכורת שכולנו ביחד.
+      </p>
+
+      <div style="margin-top:40px; display:flex; flex-direction:column; gap:18px;">
+        <div class="annot">
+          <div class="marker gradient">01</div>
+          <div><b>טבעת מילוי גדולה</b>SVG ring עם גרדיאנט. מסביב — המספר במרכז, רחב ובוטה.</div>
+        </div>
+        <div class="annot">
+          <div class="marker">02</div>
+          <div><b>לוח תוצאות = כבוד, לא תחרות</b>אין בולטות אדומה למקום אחרון. המקום מוצג, אבל המהות היא ההשתתפות.</div>
+        </div>
+        <div class="annot">
+          <div class="marker">03</div>
+          <div><b>Google Fit מסונכרן ברקע</b>בלי כפתורי רענון מציקים. סטטוס שקט, ועדכון אוטומטי.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:center;">
+      <div class="phone" style="transform:scale(1.05); transform-origin:top center;">
+        <div class="phone-notch"></div>
+        <div class="phone-screen CL-screen">
+          <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+          <div class="body">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <div class="label">19 במאי · מסונכרן עכשיו</div>
+                <h1 style="margin-top:6px;">צעדים</h1>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono'; font-size:10px; color:#2f8d5f;">
+                <div style="width:6px; height:6px; border-radius:999px; background:#2f8d5f;"></div>
+                Google Fit
+              </div>
+            </div>
+
+            <!-- Ring -->
+            <div class="ring-wrap" style="display:block; margin:18px auto 14px; text-align:center;">
+              <svg width="220" height="220" viewBox="0 0 220 220">
+                <defs>
+                  <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f5dd4b"/>
+                    <stop offset="100%" stop-color="#ff6b47"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="110" cy="110" r="92" stroke="#ede5d0" stroke-width="16" fill="none"/>
+                <circle cx="110" cy="110" r="92" stroke="url(#ring-grad)" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="578 578" stroke-dashoffset="170" transform="rotate(-90 110 110)"/>
+              </svg>
+              <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div class="label">היום · 70%</div>
+                <div class="display" style="font-size:48px; line-height:1; color:#1a1814; margin-top:4px;">8,420</div>
+                <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.18em; text-transform:uppercase; margin-top:4px;">צעדים</div>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:14px;">
+              <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+                <div class="label" style="font-size:9px;">יעד</div>
+                <div style="font-weight:800; font-size:14px; margin-top:2px;">12,000</div>
+              </div>
+              <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+                <div class="label" style="font-size:9px;">קק"ל</div>
+                <div style="font-weight:800; font-size:14px; margin-top:2px; color:#2f8d5f;">+235</div>
+              </div>
+              <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+                <div class="label" style="font-size:9px;">ק"מ</div>
+                <div style="font-weight:800; font-size:14px; margin-top:2px;">6.2</div>
+              </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="CL-card" style="padding:14px;">
+              <div class="flex justify-between items-center mb-2">
+                <h2 style="font-size:11px;">לוח הלהקה</h2>
+                <span class="label" style="font-size:9px;">היום</span>
+              </div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f3ecd9;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:800; color:#c79a00; width:18px;">1</span>
+                  <div style="width:28px; height:28px; border-radius:999px; background:#2f8d5f; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">נ</div>
+                  <span style="font-weight:500; font-size:13px;">נועה</span>
+                  <span style="margin-right:auto; font-family:'JetBrains Mono'; font-weight:700; font-size:13px;">12,420</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f3ecd9; background:linear-gradient(90deg, transparent, rgba(245,221,75,0.12), transparent); margin:0 -14px; padding-right:14px; padding-left:14px; border-radius:8px;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:800; color:#8a7e68; width:18px;">2</span>
+                  <div style="width:28px; height:28px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">ש</div>
+                  <span style="font-weight:600; font-size:13px;">אני</span>
+                  <span style="margin-right:auto; font-family:'JetBrains Mono'; font-weight:700; font-size:13px;">8,420</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f3ecd9;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:800; color:#8a7e68; width:18px;">3</span>
+                  <div style="width:28px; height:28px; border-radius:999px; background:#1a1814; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">ד</div>
+                  <span style="font-weight:500; font-size:13px;">דניאל</span>
+                  <span style="margin-right:auto; font-family:'JetBrains Mono'; font-weight:700; font-size:13px;">6,120</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; padding:9px 0;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:500; color:#c9bc9c; width:18px;">—</span>
+                  <div style="width:28px; height:28px; border-radius:999px; border:1.5px dashed #c9bc9c; color:#8a7e68; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">ת</div>
+                  <span style="font-size:13px; color:#8a7e68;">תמר · לא חיברה</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="CL-nav">
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span>בית</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg><span>ארוחות</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg><span>יומן</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>צ'ק</span></div>
+            <div class="CL-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 18 L12 8 L22 18"/></svg><span>להקה</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly history -->
+    <div style="padding-top:36px;">
+      <div class="kicker" style="margin-bottom:14px;">7 ימים אחרונים</div>
+      <div style="background:#fff; border:1px solid #ede5d0; border-radius:20px; padding:22px;">
+        <div style="display:flex; align-items:flex-end; gap:8px; height:160px;">
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <div style="width:100%; height:88%; background:linear-gradient(180deg, #f5dd4b, #ff6b47); border-radius:6px 6px 2px 2px;"></div>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">א</span>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <div style="width:100%; height:65%; background:linear-gradient(180deg, #f5dd4b, #ff6b47); border-radius:6px 6px 2px 2px; opacity:0.85;"></div>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">ב</span>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <div style="width:100%; height:75%; background:linear-gradient(180deg, #f5dd4b, #ff6b47); border-radius:6px 6px 2px 2px; opacity:0.85;"></div>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">ג</span>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <div style="width:100%; height:55%; background:linear-gradient(180deg, #f5dd4b, #ff6b47); border-radius:6px 6px 2px 2px; opacity:0.85;"></div>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">ד</span>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <div style="width:100%; height:92%; background:linear-gradient(180deg, #f5dd4b, #ff6b47); border-radius:6px 6px 2px 2px;"></div>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">ה</span>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <div style="width:100%; height:80%; background:linear-gradient(180deg, #f5dd4b, #ff6b47); border-radius:6px 6px 2px 2px; opacity:0.85;"></div>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">ו</span>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <div style="width:100%; height:70%; background:linear-gradient(180deg, #f5dd4b, #ff6b47); border-radius:6px 6px 2px 2px; position:relative;">
+              <span style="position:absolute; top:-22px; left:50%; transform:translateX(-50%); font-family:'JetBrains Mono'; font-size:11px; font-weight:700; color:#1a1814;">8.4k</span>
+            </div>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#d4541a; font-weight:700;">היום</span>
+          </div>
+        </div>
+        <hr style="border:none; border-top:1px solid #ede5d0; margin:18px 0 14px;">
+        <div style="display:flex; justify-content:space-between;">
+          <div>
+            <div class="label" style="font-size:9px;">ממוצע יומי</div>
+            <div style="font-weight:900; font-size:28px; letter-spacing:-0.04em; margin-top:2px;">9,142</div>
+          </div>
+          <div style="text-align:left;">
+            <div class="label" style="font-size:9px;">סה"כ השבוע</div>
+            <div style="font-weight:900; font-size:28px; letter-spacing:-0.04em; margin-top:2px; color:#d4541a;">64k</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">08 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 09 — WING / MEMBERS
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="09 המבנה" class="dirCL-bg">
+  <div class="cl-pad" style="display:grid; grid-template-columns: 1fr 460px 380px; gap:64px; align-items:start;">
+
+    <div>
+      <div class="kicker">פרק 08 · המבנה</div>
+      <h2 class="section-title">להקה<br><span class="gradient-text">קטנה</span></h2>
+      <p class="section-lede">
+        עד ארבעה חברים. לא צופים, חברים. המסך של המבנה הוא ה"בית" של הקבוצה — היכן שכל אחד נמצא היום, מי הזמין למבנה, ומה האתגר השבועי.
+      </p>
+
+      <div style="margin-top:40px; display:flex; flex-direction:column; gap:18px;">
+        <div class="annot">
+          <div class="marker gradient">01</div>
+          <div><b>שורת חברים בקפסולה</b>כל חבר עם מצב היום שלו: צעדים, ארוחות, מצב רוח, סטריק.</div>
+        </div>
+        <div class="annot">
+          <div class="marker">02</div>
+          <div><b>אתגר שבועי</b>שיתופי, חשוף בראש המסך. ברוח של "אנחנו ביחד" לא "אתה בודד".</div>
+        </div>
+        <div class="annot">
+          <div class="marker">03</div>
+          <div><b>SOS = חוזק שקט</b>כפתור קיים, נגיש, אבל לא צועק. ויזואלית כמו "הזעקה צריך אותך — כאן אנחנו".</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:center;">
+      <div class="phone" style="transform:scale(1.05); transform-origin:top center;">
+        <div class="phone-notch"></div>
+        <div class="phone-screen CL-screen">
+          <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+          <div class="body">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <div class="label">מבנה · יום 12</div>
+                <h1 style="margin-top:6px;">חברי הספורטאק</h1>
+              </div>
+              <button style="background:transparent; border:none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H2a2 2 0 110-4h.09A1.65 1.65 0 004.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V2a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H22a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              </button>
+            </div>
+
+            <!-- Weekly challenge -->
+            <div class="CL-card hero" style="padding:14px;">
+              <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#5a4220; text-transform:uppercase; font-weight:700;">אתגר שבועי</div>
+              <div style="font-weight:800; font-size:18px; color:#1a1814; margin-top:4px;">50 ק"מ ביחד</div>
+              <div style="font-size:11px; color:#5a4220; margin-top:2px;">3 ימים נותרו · 32 / 50 ק"מ</div>
+              <div style="height:5px; background:rgba(26,24,20,0.18); border-radius:999px; overflow:hidden; margin-top:10px;">
+                <div style="width:64%; height:100%; background:#1a1814; border-radius:999px;"></div>
+              </div>
+            </div>
+
+            <!-- Members -->
+            <div class="CL-card" style="padding:0;">
+              <!-- Member 1 -->
+              <div style="padding:12px 14px; border-bottom:1px solid #f3ecd9; display:flex; align-items:center; gap:10px;">
+                <div style="width:38px; height:38px; border-radius:999px; background:#2f8d5f; color:white; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;">נ</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-weight:600; font-size:13px;">נועה</span>
+                    <span style="background:#ede5d0; color:#5a4f3f; font-size:9px; font-weight:600; padding:1px 6px; border-radius:4px;">מנהלת</span>
+                  </div>
+                  <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.04em; margin-top:2px;">
+                    12.4k · 4 ארוחות · 🤩
+                  </div>
+                </div>
+                <div style="text-align:left;">
+                  <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:11px; color:#d4541a;">15 ימים</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68;">סטריק</div>
+                </div>
+              </div>
+              <!-- Member 2 (me) -->
+              <div style="padding:12px 14px; border-bottom:1px solid #f3ecd9; display:flex; align-items:center; gap:10px; background:linear-gradient(90deg, transparent, rgba(245,221,75,0.08), transparent);">
+                <div style="width:38px; height:38px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;">ש</div>
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-weight:600; font-size:13px;">שי כהן</span>
+                    <span style="background:#1a1814; color:#fbf4e6; font-size:9px; font-weight:700; padding:1px 6px; border-radius:4px;">אני</span>
+                  </div>
+                  <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.04em; margin-top:2px;">
+                    8.4k · 3 ארוחות · 😐
+                  </div>
+                </div>
+                <div style="text-align:left;">
+                  <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:11px; color:#d4541a;">12 ימים</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68;">סטריק</div>
+                </div>
+              </div>
+              <!-- Member 3 -->
+              <div style="padding:12px 14px; border-bottom:1px solid #f3ecd9; display:flex; align-items:center; gap:10px;">
+                <div style="width:38px; height:38px; border-radius:999px; background:#1a1814; color:#fbf4e6; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;">ד</div>
+                <div style="flex:1;">
+                  <div style="font-weight:600; font-size:13px;">דניאל לוי</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.04em; margin-top:2px;">
+                    6.1k · 2 ארוחות · 😊
+                  </div>
+                </div>
+                <div style="text-align:left;">
+                  <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:11px; color:#8a7e68;">8 ימים</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68;">סטריק</div>
+                </div>
+              </div>
+              <!-- Member 4 (inactive) -->
+              <div style="padding:12px 14px; display:flex; align-items:center; gap:10px;">
+                <div style="width:38px; height:38px; border-radius:999px; border:1.5px dashed #c9bc9c; color:#8a7e68; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;">ת</div>
+                <div style="flex:1;">
+                  <div style="font-weight:600; font-size:13px; color:#8a7e68;">תמר אבני</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; letter-spacing:0.04em; margin-top:2px;">
+                    לא ביצעה צ'ק־אין · 3 ימים
+                  </div>
+                </div>
+                <button style="background:transparent; border:1px solid #d4541a; color:#d4541a; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:600;">עודד</button>
+              </div>
+            </div>
+
+            <!-- Invite -->
+            <div style="background:#fff; border:1px dashed #c9bc9c; border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a7e68" stroke-width="1.6"><circle cx="9" cy="9" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2M16 6h6M19 3v6"/></svg>
+              <div style="flex:1;">
+                <div style="font-size:12px; font-weight:600;">הזמן חבר חדש</div>
+                <div style="font-size:10px; color:#8a7e68;">קישור או QR</div>
+              </div>
+              <span style="font-family:'JetBrains Mono'; color:#1a1814; font-size:11px;">→</span>
+            </div>
+
+            <!-- SOS -->
+            <button style="width:100%; padding:13px; background:#fff; border:1.5px solid #d4541a; border-radius:14px; font-size:13px; font-weight:700; color:#d4541a; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+              צריך עידוד עכשיו (SOS)
+            </button>
+          </div>
+          <div class="CL-nav">
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span>בית</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg><span>ארוחות</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg><span>יומן</span></div>
+            <div class="CL-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>צ'ק</span></div>
+            <div class="CL-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 18 L12 8 L22 18"/><circle cx="12" cy="8" r="1.6" fill="currentColor"/></svg><span>להקה</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live activity feed -->
+    <div style="padding-top:36px;">
+      <div class="kicker" style="margin-bottom:14px;">פעילות חיה במבנה</div>
+      <div style="background:#fff; border:1px solid #ede5d0; border-radius:20px; padding:20px;">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <!-- Activity 1 -->
+          <div style="display:flex; gap:10px;">
+            <div style="width:32px; height:32px; border-radius:999px; background:#2f8d5f; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">נ</div>
+            <div style="flex:1;">
+              <div style="font-size:13px; color:#1a1814;"><b>נועה</b> סיכמה יום מצוין</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; margin-top:2px;">לפני 12 דקות</div>
+              <div style="background:linear-gradient(135deg, #fff3b8, #ffe0c8); border-radius:10px; padding:8px 10px; margin-top:6px; font-size:12px; color:#3a3329;">
+                "נעלה את הקטגוריה של החלבון מחר. מי איתי?"
+              </div>
+            </div>
+          </div>
+          <!-- Activity 2 -->
+          <div style="display:flex; gap:10px;">
+            <div style="width:32px; height:32px; border-radius:999px; background:#1a1814; color:#fbf4e6; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">ד</div>
+            <div style="flex:1;">
+              <div style="font-size:13px; color:#1a1814;"><b>דניאל</b> סימן 🔥 על "חביתה עם ירקות" שלך</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; margin-top:2px;">לפני 45 דקות</div>
+            </div>
+          </div>
+          <!-- Activity 3 -->
+          <div style="display:flex; gap:10px;">
+            <div style="width:32px; height:32px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0;">ש</div>
+            <div style="flex:1;">
+              <div style="font-size:13px; color:#1a1814;"><b>אתה</b> הגעת ליעד הצעדים. נועה ניהלה 1.5x יותר.</div>
+              <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; margin-top:2px;">לפני שעה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">09 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 10 — ONBOARDING + LOGIN
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="10 אונבורדינג" class="dirCL-bg">
+  <div class="cl-pad">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px;">
+      <div>
+        <div class="kicker">פרק 09 · אונבורדינג</div>
+        <h2 class="section-title">שלוש דקות.<br><span class="gradient-text">ובדרך.</span></h2>
+      </div>
+      <p style="max-width:520px; color:#3a3329; font-size:16px; line-height:1.55; margin:0;">
+        ארבעה מסכים: התחברות, הצטרפות־למבנה, פרופיל אישי, יעדים. בלי שאלות מיותרות — רק מה שצריך כדי להתחיל את היום הראשון.
+      </p>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:48px; align-items:flex-start; transform:scale(0.92); transform-origin:center top;">
+
+      <!-- 01: Login -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">01 · התחברות</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body" style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:46px 24px 80px;">
+              <!-- Wing mark -->
+              <svg width="60" height="36" viewBox="0 0 60 36" fill="none">
+                <defs>
+                  <linearGradient id="sun-mini" x1="0" y1="0" x2="60" y2="0">
+                    <stop offset="0" stop-color="#f5dd4b"/>
+                    <stop offset="1" stop-color="#ff6b47"/>
+                  </linearGradient>
+                </defs>
+                <path d="M4 30 L30 8 L56 30" stroke="url(#sun-mini)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="30" cy="8" r="3" fill="#d4541a"/>
+                <circle cx="17" cy="19" r="1.8" fill="#1a1814"/>
+                <circle cx="43" cy="19" r="1.8" fill="#1a1814"/>
+              </svg>
+              <h1 style="text-align:center; font-size:32px; margin-top:18px;">מבנה כנף</h1>
+              <p style="text-align:center; color:#8a7e68; font-size:13px; margin-top:6px;">יורדים במשקל ביחד</p>
+
+              <div style="width:100%; margin-top:36px; display:flex; flex-direction:column; gap:10px;">
+                <input placeholder="אימייל" style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:13px 16px; font-size:14px; font-family:'Heebo'; outline:none; box-sizing:border-box;">
+                <input type="password" placeholder="סיסמה" value="••••••••" style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:13px 16px; font-size:14px; font-family:'Heebo'; outline:none; box-sizing:border-box;">
+                <button class="CL-btn-primary" style="padding:14px; font-size:14px; margin-top:6px;">התחבר</button>
+
+                <div style="display:flex; align-items:center; gap:8px; margin:14px 0; font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.2em; color:#8a7e68; text-transform:uppercase;">
+                  <div style="flex:1; height:1px; background:#ede5d0;"></div>
+                  או
+                  <div style="flex:1; height:1px; background:#ede5d0;"></div>
+                </div>
+
+                <button class="CL-btn-secondary" style="padding:13px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                  המשך עם Google
+                </button>
+              </div>
+
+              <p style="text-align:center; font-size:12px; color:#8a7e68; margin-top:24px;">אין לך חשבון? <span style="color:#d4541a; font-weight:600;">הירשם</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02: Welcome / Join wing -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">02 · להצטרף למבנה</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body" style="display:flex; flex-direction:column; padding:46px 18px 80px;">
+              <div class="steps" style="margin-bottom:18px;">
+                <div></div>
+                <div class="active"></div>
+                <div></div>
+                <div></div>
+              </div>
+
+              <h1>היי שי!<br>בוא נמצא את המבנה שלך.</h1>
+              <p style="font-size:14px; color:#8a7e68; line-height:1.5; margin-top:10px;">המבנה הוא קבוצה של עד 4 חברים. תומכים זה בזה, חולקים ארוחות, ועוברים את הדרך ביחד.</p>
+
+              <div style="display:flex; flex-direction:column; gap:10px; margin-top:24px;">
+                <div style="background:#fff; border:2px solid #1a1814; border-radius:16px; padding:18px; cursor:pointer;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2"><circle cx="9" cy="9" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2M16 6h6M19 3v6"/></svg>
+                    <div style="flex:1;">
+                      <div style="font-weight:700; font-size:15px;">יש לי קוד הזמנה</div>
+                      <div style="font-size:11px; color:#8a7e68; margin-top:1px;">חבר/ה כבר שלח/ה לי</div>
+                    </div>
+                  </div>
+                  <input placeholder="הדבק קוד הזמנה" style="width:100%; margin-top:12px; background:#fbf4e6; border:1px solid #ede5d0; border-radius:10px; padding:10px 14px; font-size:13px; font-family:'JetBrains Mono'; letter-spacing:0.08em; outline:none; box-sizing:border-box;">
+                </div>
+
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:16px; padding:18px; cursor:pointer;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg, #f5dd4b, #ff6b47); display:flex; align-items:center; justify-content:center;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+                    </div>
+                    <div style="flex:1;">
+                      <div style="font-weight:700; font-size:15px;">יצירת מבנה חדש</div>
+                      <div style="font-size:11px; color:#8a7e68; margin-top:1px;">אזמין חברים בעצמי</div>
+                    </div>
+                    <span style="font-family:'JetBrains Mono'; color:#1a1814;">→</span>
+                  </div>
+                </div>
+              </div>
+
+              <button class="CL-btn-primary" style="width:100%; padding:14px; font-size:14px; margin-top:auto;">המשך</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03: Profile -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">03 · פרופיל</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body" style="display:flex; flex-direction:column; padding:46px 18px 80px;">
+              <div class="steps" style="margin-bottom:18px;">
+                <div></div>
+                <div></div>
+                <div class="active"></div>
+                <div></div>
+              </div>
+
+              <h1>קצת עליך</h1>
+              <p style="font-size:14px; color:#8a7e68; line-height:1.5; margin-top:8px;">נשתמש בזה לחשב BMR, יעדי קלוריות, ולתת המלצות מותאמות.</p>
+
+              <div style="display:flex; flex-direction:column; gap:14px; margin-top:24px;">
+                <div>
+                  <div class="label" style="margin-bottom:6px;">משקל כעת</div>
+                  <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span style="font-weight:900; font-size:48px; letter-spacing:-0.04em;">76<span style="font-size:18px; color:#8a7e68;">.5</span></span>
+                    <span style="font-family:'JetBrains Mono'; color:#8a7e68; font-size:12px;">ק"ג</span>
+                  </div>
+                  <div style="display:flex; gap:4px; margin-top:8px; align-items:center;">
+                    <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">60</span>
+                    <div style="flex:1; height:4px; background:#ede5d0; border-radius:999px; position:relative;">
+                      <div style="position:absolute; right:42%; top:-5px; width:14px; height:14px; border-radius:999px; background:linear-gradient(135deg, #f5dd4b, #ff6b47);"></div>
+                    </div>
+                    <span style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68;">120</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="label" style="margin-bottom:6px;">משקל יעד</div>
+                  <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span style="font-weight:900; font-size:32px; letter-spacing:-0.04em; color:#d4541a;">70</span>
+                    <span style="font-family:'JetBrains Mono'; color:#8a7e68; font-size:12px;">ק"ג</span>
+                    <span style="margin-right:auto; font-family:'JetBrains Mono'; font-size:11px; color:#2f8d5f; font-weight:700;">−6.5 ק"ג</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="label" style="margin-bottom:6px;">גובה</div>
+                  <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span style="font-weight:900; font-size:32px; letter-spacing:-0.04em;">178</span>
+                    <span style="font-family:'JetBrains Mono'; color:#8a7e68; font-size:12px;">ס"מ</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="label" style="margin-bottom:6px;">רמת פעילות</div>
+                  <div style="display:flex; gap:6px;">
+                    <span class="CL-pill" style="font-size:11px;">יושבני</span>
+                    <span class="CL-pill active" style="font-size:11px;">בינוני</span>
+                    <span class="CL-pill" style="font-size:11px;">פעיל</span>
+                  </div>
+                </div>
+              </div>
+
+              <button class="CL-btn-primary" style="width:100%; padding:14px; font-size:14px; margin-top:auto;">המשך</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04: Ready -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="compare-label" style="color:#d4541a;">04 · יעדים מחושבים</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen CL-screen">
+            <div class="phone-status" style="color:#1a1814;"><span>9:41</span><span class="right-side">●●●  📶  🔋</span></div>
+            <div class="body" style="display:flex; flex-direction:column; padding:46px 18px 80px;">
+              <div class="steps" style="margin-bottom:18px;">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div class="active"></div>
+              </div>
+
+              <h1>היעדים שלך</h1>
+              <p style="font-size:14px; color:#8a7e68; line-height:1.5; margin-top:8px;">חישבנו לך הכל, אבל תמיד אפשר להתאים.</p>
+
+              <!-- BMR hero -->
+              <div class="CL-card hero" style="margin-top:24px; padding:18px; text-align:right;">
+                <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#5a4220; text-transform:uppercase; font-weight:700;">יעד קלוריות יומי</div>
+                <div style="display:flex; align-items:baseline; gap:6px; margin-top:6px;">
+                  <span class="display" style="font-size:52px; line-height:1; color:#1a1814;">1,820</span>
+                  <span style="font-size:12px; color:#5a4220;">קק"ל</span>
+                </div>
+                <div style="font-family:'JetBrains Mono'; font-size:10px; color:#5a4220; margin-top:6px;">BMR · 1,620 + פעילות 200</div>
+              </div>
+
+              <!-- Macros -->
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px;">
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:12px 8px; text-align:center;">
+                  <div style="font-weight:900; font-size:18px; color:#d4541a;">90<span style="font-size:11px;">g</span></div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.1em;">חלבון</div>
+                </div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:12px 8px; text-align:center;">
+                  <div style="font-weight:900; font-size:18px; color:#c79a00;">200<span style="font-size:11px;">g</span></div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.1em;">פחמ׳</div>
+                </div>
+                <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:12px 8px; text-align:center;">
+                  <div style="font-weight:900; font-size:18px; color:#2f8d5f;">60<span style="font-size:11px;">g</span></div>
+                  <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.1em;">שומן</div>
+                </div>
+              </div>
+
+              <!-- Estimate -->
+              <div style="background:#fff; border:1px solid #ede5d0; border-radius:12px; padding:14px; margin-top:14px;">
+                <div class="label" style="font-size:9px; margin-bottom:6px;">צפי הגעה ליעד</div>
+                <div style="display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-weight:900; font-size:22px; letter-spacing:-0.03em;">11 שבועות</span>
+                  <span style="font-family:'JetBrains Mono'; font-size:11px; color:#2f8d5f; font-weight:700;">~0.6 ק"ג / שבוע</span>
+                </div>
+              </div>
+
+              <button class="CL-btn-primary" style="width:100%; padding:14px; font-size:14px; margin-top:auto;">בוא נתחיל</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">10 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 11 — COMPONENT LIBRARY
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="11 ספריית רכיבים" class="dirCL-bg">
+  <div class="cl-pad">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px;">
+      <div>
+        <div class="kicker">פרק 10 · ספריית רכיבים</div>
+        <h2 class="section-title">הקיט.</h2>
+      </div>
+      <p style="max-width:560px; color:#3a3329; font-size:16px; line-height:1.55; margin:0;">
+        16 רכיבים מכסים 95% מהמסכים. כל אחד תורגם מהקוד הקיים — Button, Card, Input, MealCard, ProgressBar, BottomNav וכו'.
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:18px;">
+
+      <!-- Buttons -->
+      <div class="comp">
+        <div class="comp-label">Button · Primary</div>
+        <button class="CL-btn-primary" style="width:100%; padding:12px;">צלם ארוחה</button>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <button class="CL-btn-primary" style="padding:7px 14px; font-size:11px;">SM</button>
+          <button class="CL-btn-primary" style="padding:10px 14px;">MD</button>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Button · Secondary</div>
+        <button class="CL-btn-secondary" style="width:100%; padding:12px;">צ'ק־אין</button>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <button class="CL-btn-secondary" style="padding:7px 14px; font-size:11px;">SM</button>
+          <button class="CL-btn-secondary" style="padding:10px 14px;">MD</button>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Button · Ink</div>
+        <button style="width:100%; background:#1a1814; color:#fbf4e6; padding:12px; border-radius:14px; border:none; font-weight:600; font-family:'Heebo'; font-size:13px;">המשך</button>
+        <button style="width:100%; background:transparent; color:#1a1814; padding:10px; border:none; font-weight:500; font-family:'Heebo'; font-size:13px; margin-top:8px; text-decoration:underline;">קישור</button>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Pills · Tags</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <span class="CL-pill">פעיל</span>
+          <span class="CL-pill active">נבחר</span>
+          <span class="CL-pill glow">3 פעילים</span>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <div class="comp" style="grid-column: span 2;">
+        <div class="comp-label">Card · Hero (gradient)</div>
+        <div style="background:linear-gradient(135deg, #fff3b8, #ffc89a); border-radius:14px; padding:16px;">
+          <div style="font-family:'JetBrains Mono'; font-size:9px; letter-spacing:0.22em; color:#5a4220; text-transform:uppercase; font-weight:600;">קלוריות היום</div>
+          <div style="font-weight:900; font-size:36px; line-height:1; letter-spacing:-0.04em; margin-top:4px;">1,420 <span style="font-size:13px; color:#5a4220;">/ 1,820</span></div>
+          <div style="height:5px; background:rgba(26,24,20,0.18); border-radius:999px; overflow:hidden; margin-top:10px;">
+            <div style="width:78%; height:100%; background:#1a1814;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp" style="grid-column: span 2;">
+        <div class="comp-label">Card · Standard + Stats grid</div>
+        <div style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div class="kicker" style="font-size:10px;">השבוע · ממוצע יומי</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-top:8px;">
+            <div class="stat-big"><span class="num">9,142</span><span class="lbl">צעדים</span></div>
+            <div class="stat-big"><span class="num" style="color:#d4541a;">12<span style="font-size:14px;">d</span></span><span class="lbl">סטריק</span></div>
+            <div class="stat-big"><span class="num" style="color:#2f8d5f;">−2.3</span><span class="lbl">ק"ג / חודש</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inputs -->
+      <div class="comp">
+        <div class="comp-label">Input · Text</div>
+        <input placeholder="טקסט" style="width:100%; background:#fbf4e6; border:1px solid #ede5d0; border-radius:12px; padding:11px 14px; font-size:13px; font-family:'Heebo'; outline:none; box-sizing:border-box;">
+        <input placeholder="פוקוס" style="width:100%; background:#fff; border:2px solid #1a1814; border-radius:12px; padding:10px 13px; font-size:13px; font-family:'Heebo'; outline:none; box-sizing:border-box; margin-top:8px;">
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Slider</div>
+        <div style="height:8px; background:#ede5d0; border-radius:999px; overflow:hidden; position:relative; margin-top:14px;">
+          <div style="width:60%; height:100%; background:linear-gradient(90deg, #f5dd4b, #ff6b47); border-radius:999px;"></div>
+          <div style="position:absolute; right:60%; top:-4px; width:16px; height:16px; border-radius:999px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.2); border:2px solid #ff6b47;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:6px; font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68;">
+          <span>0</span><span>4L</span>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Switch</div>
+        <div style="display:flex; gap:16px; align-items:center; padding-top:6px;">
+          <span class="switch on"></span>
+          <span class="switch"></span>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Avatar · Status</div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <div style="width:36px; height:36px; border-radius:999px; background:#2f8d5f; color:white; display:flex; align-items:center; justify-content:center; font-weight:800;">נ</div>
+          <div style="width:36px; height:36px; border-radius:999px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; display:flex; align-items:center; justify-content:center; font-weight:800;">ש</div>
+          <div style="width:36px; height:36px; border-radius:999px; background:#1a1814; color:#fbf4e6; display:flex; align-items:center; justify-content:center; font-weight:800;">ד</div>
+          <div style="width:36px; height:36px; border-radius:999px; border:1.5px dashed #c9bc9c; color:#8a7e68; display:flex; align-items:center; justify-content:center; font-weight:700;">ת</div>
+        </div>
+      </div>
+
+      <!-- Meal card -->
+      <div class="comp" style="grid-column: span 2;">
+        <div class="comp-label">MealCard · Compact</div>
+        <div style="background:#fff; border:1px solid #ede5d0; border-radius:14px; padding:11px;">
+          <div style="display:flex; gap:10px;">
+            <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg, #f0c896, #d8a070);"></div>
+            <div style="flex:1;">
+              <div style="display:flex; justify-content:space-between;">
+                <div>
+                  <div style="font-size:11px; color:#5a4f3f;">שי · בוקר · 8:15</div>
+                  <div style="font-weight:600; font-size:13px; margin-top:1px;">חביתה עם ירקות</div>
+                </div>
+                <div class="display" style="font-size:18px; line-height:1;">320</div>
+              </div>
+              <div style="font-family:'JetBrains Mono'; font-size:9px; color:#8a7e68; letter-spacing:0.04em; margin-top:5px;">
+                P 22 · C 18 · F 16
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Progress · Linear</div>
+        <div style="height:8px; background:#ede5d0; border-radius:999px; overflow:hidden; margin-top:10px;">
+          <div style="width:78%; height:100%; background:linear-gradient(90deg, #f5dd4b, #ff6b47);"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono'; font-size:10px; color:#8a7e68; margin-top:6px; letter-spacing:0.06em;">78% · 1,420 / 1,820</div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Progress · Ring</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <svg width="50" height="50" viewBox="0 0 50 50">
+            <circle cx="25" cy="25" r="20" stroke="#ede5d0" stroke-width="5" fill="none"/>
+            <circle cx="25" cy="25" r="20" stroke="url(#ring-grad-small)" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="125 125" stroke-dashoffset="35" transform="rotate(-90 25 25)"/>
+            <defs><linearGradient id="ring-grad-small"><stop offset="0" stop-color="#f5dd4b"/><stop offset="1" stop-color="#ff6b47"/></linearGradient></defs>
+          </svg>
+          <div>
+            <div style="font-weight:900; font-size:18px;">72%</div>
+            <div class="label" style="font-size:9px;">יעד יומי</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom nav -->
+      <div class="comp" style="grid-column: span 2;">
+        <div class="comp-label">Bottom Navigation</div>
+        <div style="background:#fff; border:1px solid #ede5d0; border-radius:18px; padding:8px; display:flex; justify-content:space-around;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:2px; color:#d4541a;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span style="font-size:9px; font-weight:600;">בית</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:2px; color:#8a7e68;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg><span style="font-size:9px;">ארוחות</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:2px; color:#8a7e68;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg><span style="font-size:9px;">יומן</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:2px; color:#8a7e68;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span style="font-size:9px;">צ'ק</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:2px; color:#8a7e68;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M2 18 L12 8 L22 18"/></svg><span style="font-size:9px;">להקה</span></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Mood selector</div>
+        <div style="display:flex; gap:4px; margin-top:6px;">
+          <button class="mood-chip" style="padding:6px 4px; font-size:16px;">😞</button>
+          <button class="mood-chip selected" style="padding:6px 4px; font-size:16px;">😐</button>
+          <button class="mood-chip" style="padding:6px 4px; font-size:16px;">🤩</button>
+        </div>
+      </div>
+
+      <div class="comp">
+        <div class="comp-label">Stat badges</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+          <span style="background:#2f8d5f; color:white; font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px;">12 ימי סטריק</span>
+          <span style="background:#fef0e0; color:#d4541a; font-size:11px; font-weight:600; padding:4px 11px; border-radius:999px;">+540 קק"ל</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="slide-number" style="color:#8a7e68;">11 / 12</div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     SLIDE 12 — ROADMAP / NEXT STEPS
+     ════════════════════════════════════════════════════════════════ -->
+<section data-screen-label="12 roadmap" class="dirCL-bg">
+  <div style="position:absolute; inset:0; background-image: radial-gradient(circle at 20% 100%, rgba(245,221,75,0.15) 0%, transparent 50%); pointer-events:none;"></div>
+
+  <div class="cl-pad" style="display:grid; grid-template-columns: 540px 1fr; gap:80px; align-items:start; position:relative;">
+    <div>
+      <div class="kicker">פרק 11 · המעבר</div>
+      <h2 class="section-title">צעדים<br><span class="gradient-text">לאוויר.</span></h2>
+      <p class="section-lede">
+        Roadmap בשלושה שלבים — מהפינה המהירה (tokens) ועד הגרסה המלאה. הכל בקוד הקיים, בלי שכתוב.
+      </p>
+
+      <div style="margin-top:48px; padding:24px; background:#fff; border:1px solid #ede5d0; border-radius:18px;">
+        <div class="kicker" style="font-size:10px; margin-bottom:12px;">סיכום</div>
+        <p style="font-size:14px; line-height:1.55; color:#3a3329; margin:0;">
+          <b style="color:#1a1814;">3 ימי עבודה</b> להגיע ל־MVP חזותי שמכסה Dashboard + Meals + Check-in.
+          <b style="color:#1a1814;">~10 ימי עבודה</b> לכיסוי מלא + Onboarding חדש.
+        </p>
+      </div>
+    </div>
+
+    <!-- Phases -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+
+      <!-- Phase 1 -->
+      <div style="background:#fff; border:1px solid #ede5d0; border-radius:24px; padding:32px; display:grid; grid-template-columns:80px 1fr; gap:24px; align-items:start;">
+        <div style="background:linear-gradient(135deg, #f5dd4b, #ff6b47); border-radius:16px; padding:20px 0; text-align:center;">
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:0.2em; color:#5a4220; text-transform:uppercase; font-weight:700;">שלב</div>
+          <div style="font-weight:900; font-size:32px; letter-spacing:-0.04em; line-height:1; color:#1a1814; margin-top:4px;">01</div>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.025em;">Design Tokens</h3>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; color:#8a7e68; letter-spacing:0.12em; text-transform:uppercase; margin-top:2px;">~1 יום · מהיר מאוד</div>
+          <p style="font-size:14px; line-height:1.55; color:#3a3329; margin:10px 0 0;">
+            לעדכן את <code style="font-family:'JetBrains Mono'; font-size:12px; background:#fbf4e6; padding:2px 6px; border-radius:4px; border:1px solid #ede5d0;">tailwind.config.js</code>: צבעי <code style="font-family:'JetBrains Mono'; font-size:12px; background:#fbf4e6; padding:2px 6px; border-radius:4px; border:1px solid #ede5d0;">wing</code>, רדיוסים, צללים, פונטים. אחרי השינוי — כל המסכים הקיימים מקבלים את הפלטה החדשה אוטומטית.
+          </p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+            <span style="background:#fbf4e6; border:1px solid #ede5d0; color:#3a3329; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">tailwind.config.js</span>
+            <span style="background:#fbf4e6; border:1px solid #ede5d0; color:#3a3329; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">globals.css</span>
+            <span style="background:#fbf4e6; border:1px solid #ede5d0; color:#3a3329; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">app/layout.tsx</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div style="background:#fff; border:1px solid #ede5d0; border-radius:24px; padding:32px; display:grid; grid-template-columns:80px 1fr; gap:24px; align-items:start;">
+        <div style="background:#1a1814; border-radius:16px; padding:20px 0; text-align:center;">
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:0.2em; color:#a8a090; text-transform:uppercase; font-weight:700;">שלב</div>
+          <div style="font-weight:900; font-size:32px; letter-spacing:-0.04em; line-height:1; color:#fbf4e6; margin-top:4px;">02</div>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.025em;">רכיבים מרכזיים</h3>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; color:#8a7e68; letter-spacing:0.12em; text-transform:uppercase; margin-top:2px;">~3 ימים · עיקר ה־UI</div>
+          <p style="font-size:14px; line-height:1.55; color:#3a3329; margin:10px 0 0;">
+            לעדכן את הרכיבים ב־<code style="font-family:'JetBrains Mono'; font-size:12px; background:#fbf4e6; padding:2px 6px; border-radius:4px; border:1px solid #ede5d0;">components/ui/</code>: Button, Card, Input, ProgressBar, BottomNav. אחר כך מסך־מסך — Dashboard, Meals, Check-in. אמוג'י → אייקונים מ־Lucide.
+          </p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+            <span style="background:#fbf4e6; border:1px solid #ede5d0; color:#3a3329; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">components/ui/*</span>
+            <span style="background:#fbf4e6; border:1px solid #ede5d0; color:#3a3329; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">MealCard.tsx</span>
+            <span style="background:#fbf4e6; border:1px solid #ede5d0; color:#3a3329; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">BottomNav.tsx</span>
+            <span style="background:#fbf4e6; border:1px solid #ede5d0; color:#3a3329; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">dashboard/page.tsx</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div style="background:#1a1814; color:#fbf4e6; border:1px solid #1a1814; border-radius:24px; padding:32px; display:grid; grid-template-columns:80px 1fr; gap:24px; align-items:start;">
+        <div style="background:#fbf4e6; border-radius:16px; padding:20px 0; text-align:center;">
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:0.2em; color:#8a7e68; text-transform:uppercase; font-weight:700;">שלב</div>
+          <div style="font-weight:900; font-size:32px; letter-spacing:-0.04em; line-height:1; color:#1a1814; margin-top:4px;">03</div>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.025em; color:#fbf4e6;">חוויה מלאה</h3>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; color:#a8a090; letter-spacing:0.12em; text-transform:uppercase; margin-top:2px;">~6 ימים · אונבורדינג, פרטים, אנימציות</div>
+          <p style="font-size:14px; line-height:1.55; color:#d8d2c0; margin:10px 0 0;">
+            Onboarding חדש (4 מסכים), אנימציית הצילום, סיכומי AI ב־UI חדש, אינטראקציות מיקרו (sliders, switches, transitions). הרגעים ש"מרגישים מוצר", לא תכונה.
+          </p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+            <span style="background:#2a2620; color:#d8d2c0; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">onboarding/*</span>
+            <span style="background:#2a2620; color:#d8d2c0; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">MealCamera.tsx</span>
+            <span style="background:#2a2620; color:#d8d2c0; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">framer-motion</span>
+            <span style="background:#2a2620; color:#d8d2c0; font-size:11px; font-weight:500; padding:5px 11px; border-radius:6px; font-family:'JetBrains Mono';">DaySummary.tsx</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-number" style="color:#8a7e68;">12 / 12</div>
+</section>
+
+</deck-stage>
+
+<script src="deck-stage.js"></script>
+</body>
+</html>

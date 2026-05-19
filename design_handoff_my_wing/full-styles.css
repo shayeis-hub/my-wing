@@ -1,0 +1,230 @@
+/* ════════════════════════════════════════════════════════════════
+   FULL DECK — additional helpers for wing-redesign-full.html
+   ════════════════════════════════════════════════════════════════ */
+
+/* Section title pattern */
+.kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: #8a7e68;
+  text-transform: uppercase;
+}
+.section-title {
+  font-family: 'Heebo';
+  font-size: 88px;
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  color: #1a1814;
+  margin: 16px 0 0;
+}
+.section-lede {
+  font-size: 20px;
+  line-height: 1.55;
+  color: #3a3329;
+  max-width: 540px;
+  margin-top: 28px;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #c79a00, #d4541a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mini callout used to annotate phone screens */
+.annot {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #3a3329;
+  max-width: 280px;
+}
+.annot .marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #1a1814;
+  color: #fbf4e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono';
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.annot .marker.gradient {
+  background: linear-gradient(135deg, #f5dd4b, #ff6b47);
+  color: #1a1814;
+}
+.annot b { color: #1a1814; font-weight: 700; display: block; margin-bottom: 2px; font-size: 14px; }
+
+/* Component preview card (used in system slide) */
+.comp {
+  background: #fff;
+  border: 1px solid #ede5d0;
+  border-radius: 14px;
+  padding: 18px;
+}
+.comp-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: #8a7e68;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* Onboarding step indicator */
+.steps {
+  display: flex;
+  gap: 4px;
+}
+.steps > div {
+  height: 3px;
+  flex: 1;
+  background: #ede5d0;
+  border-radius: 999px;
+}
+.steps > div.active {
+  background: linear-gradient(90deg, #f5dd4b, #ff6b47);
+}
+
+/* Mini sparkline (for stats) */
+.sparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 32px;
+}
+.sparkline > div {
+  flex: 1;
+  background: linear-gradient(180deg, #f5dd4b, #ff6b47);
+  border-radius: 1px;
+  opacity: 0.9;
+}
+
+/* Calendar dot grid */
+.cal-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #ede5d0;
+  display: inline-block;
+}
+.cal-dot.done { background: #2f8d5f; }
+.cal-dot.partial { background: linear-gradient(90deg, #f5dd4b, #ff6b47); }
+.cal-dot.miss { background: #d4541a; opacity: 0.3; }
+
+/* Big-number stat block */
+.stat-big {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-big .num {
+  font-weight: 900;
+  font-size: 36px;
+  letter-spacing: -0.04em;
+  color: #1a1814;
+  line-height: 1;
+  font-feature-settings: "tnum";
+}
+.stat-big .lbl {
+  font-family: 'JetBrains Mono';
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8a7e68;
+}
+
+/* Slide pad for the full deck */
+.cl-pad {
+  padding: 80px 96px;
+  height: 100%;
+  position: relative;
+}
+
+/* Headers for the right column phones (annotations next to screens) */
+.phone-with-notes {
+  display: grid;
+  grid-template-columns: 360px 320px;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+/* Inline keyboard for login */
+.kbd-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+.kbd-key {
+  background: #fff;
+  border: 1px solid #ede5d0;
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+}
+
+/* Toggle/switch */
+.switch {
+  width: 36px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ede5d0;
+  position: relative;
+  display: inline-block;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.switch.on { background: linear-gradient(135deg, #f5dd4b, #ff6b47); }
+.switch.on::after { right: auto; left: 2px; }
+
+/* Mood selector chips */
+.mood-chip {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px;
+  border-radius: 14px;
+  border: 1px solid #ede5d0;
+  background: #fff;
+  font-size: 22px;
+}
+.mood-chip.selected {
+  background: linear-gradient(135deg, #fff3b8, #ffc89a);
+  border-color: transparent;
+}
+
+/* Progress ring (SVG-rendered inline) */
+.ring-wrap {
+  position: relative;
+  display: inline-block;
+}
+.ring-wrap .center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
