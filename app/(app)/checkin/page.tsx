@@ -133,12 +133,10 @@ function CheckinPageInner() {
       }
       setGroupCheckins(checkins);
 
-      // Load meals separately — failure here must not block checkin display
-      if (!c?.eatingWindow) {
-        getUserTodayMeals(user.wingId!, uid, selectedDate)
-          .then(applyMealTimes)
-          .catch(() => {/* non-critical */});
-      }
+      // Load meals separately — always recalculate auto eating window from meals
+      getUserTodayMeals(user.wingId!, uid, selectedDate)
+        .then(applyMealTimes)
+        .catch(() => {/* non-critical */});
     });
   }, [user?.wingId, firebaseUser, today]);
 
