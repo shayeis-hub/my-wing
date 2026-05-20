@@ -151,7 +151,7 @@ function CheckinPageInner() {
     if (!times.length) return;
     const toHHMM = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     setEwOpen(toHHMM(times[0]));
-    setEwClose(toHHMM(times[times.length - 1]));
+    if (times.length > 1) setEwClose(toHHMM(times[times.length - 1]));
   }
 
   function calcEwDuration(open: string, close: string): number {
@@ -373,6 +373,15 @@ function CheckinPageInner() {
               <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">משך</p>
               <p className="font-black tabular" style={{ fontSize: 22, letterSpacing: "-0.04em", color: "#d4541a" }}>{calcEwDuration(ewOpen, ewClose)}h</p>
             </div>
+          </div>
+        ) : ewOpen && !ewClose && !ewManual ? (
+          <div className="flex items-center gap-3 bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3">
+            <div className="text-center">
+              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">פתיחה</p>
+              <p className="font-black text-wing-ink tabular" style={{ fontSize: 22, letterSpacing: "-0.04em" }}>{ewOpen}</p>
+            </div>
+            <div className="text-wing-muted text-lg">→</div>
+            <p className="text-sm text-wing-subtle">ממתין לארוחה הבאה...</p>
           </div>
         ) : ewManual ? (
           <div className="space-y-3">
