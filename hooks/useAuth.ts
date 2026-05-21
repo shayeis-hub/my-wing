@@ -55,6 +55,16 @@ export function useAuth(): AuthState {
             .then(({ requestNotificationPermission }) => requestNotificationPermission(firebaseUser.uid))
             .catch(() => {});
         }
+
+        // Save timezone for daily nudge cron
+        if (typeof window !== "undefined") {
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (tz) {
+            import("@/lib/firebase/firestore")
+              .then(({ saveUserTimezone }) => saveUserTimezone(firebaseUser.uid, tz))
+              .catch(() => {});
+          }
+        }
       });
     })();
 

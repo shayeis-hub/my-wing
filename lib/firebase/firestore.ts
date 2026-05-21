@@ -91,6 +91,10 @@ export async function updateUserStepsGoal(uid: string, stepsGoal: number): Promi
   await updateDoc(doc(db, "users", uid), { "profile.stepsGoal": stepsGoal });
 }
 
+export async function saveUserTimezone(uid: string, timezone: string): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { timezone });
+}
+
 export async function renameWing(wingId: string, name: string): Promise<void> {
   await updateDoc(doc(db, "wings", wingId), { name });
 }

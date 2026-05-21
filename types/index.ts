@@ -8,6 +8,7 @@ export interface User {
   wingId?: string;
   profile: UserProfile;
   fcmToken?: string;
+  timezone?: string;
   createdAt: Timestamp;
 }
 
