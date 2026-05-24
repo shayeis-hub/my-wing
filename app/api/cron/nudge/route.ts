@@ -47,31 +47,9 @@ const MESSAGES = [
   },
 ];
 
-function getLocalHour(timezone: string): number {
-  try {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: timezone,
-      hour: "numeric",
-      hour12: false,
-    }).formatToParts(new Date());
-    const h = parseInt(parts.find((p) => p.type === "hour")?.value ?? "-1", 10);
-    return h === 24 ? 0 : h;
-  } catch {
-    return -1;
-  }
-}
-
-function getLocalDate(timezone: string): string {
-  try {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
-  } catch {
-    return new Date().toISOString().slice(0, 10);
-  }
+// Today's date in Israel timezone (Asia/Jerusalem handles DST automatically)
+function todayIsrael(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jerusalem" }).format(new Date());
 }
 
 export async function GET(req: Request) {
@@ -83,6 +61,7 @@ export async function GET(req: Request) {
   getAdminApp();
   const db = admin.firestore();
 
+  const today = todayIsrael();
   const usersSnap = await db.collection("users").get();
 
   let sent = 0;
@@ -92,18 +71,14 @@ export async function GET(req: Request) {
     usersSnap.docs.map(async (userDoc) => {
       const data = userDoc.data();
       const fcmToken: string | undefined = data.fcmToken;
-      const timezone: string | undefined = data.timezone;
       const wingId: string | undefined = data.wingId;
       const gender: "male" | "female" = data.profile?.gender === "female" ? "female" : "male";
 
-      if (!fcmToken || !timezone || !wingId) { skipped++; return; }
+      if (!fcmToken || !wingId) { skipped++; return; }
 
-      const localHour = getLocalHour(timezone);
-      if (localHour !== 17) { skipped++; return; }
-
-      const localDate = getLocalDate(timezone);
+      // Check if user already checked in today
       const checkinSnap = await db
-        .doc(`wings/${wingId}/checkins/${userDoc.id}_${localDate}`)
+        .doc(`wings/${wingId}/checkins/${userDoc.id}_${today}`)
         .get();
       if (checkinSnap.exists) { skipped++; return; }
 
