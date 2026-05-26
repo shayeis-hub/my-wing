@@ -7,7 +7,7 @@ const FREE_FEATURES = [
   "Daily check-ins (water, vegetables, steps, mood, weight)",
   "Manual meal logging with calorie calculation",
   "Up to 3 AI meal photo analyses per day",
-  "Wing (support group) of up to 5 members",
+  "Wing (support group) of up to 3 members",
   "Daily & weekly progress calendar",
   "Step leaderboard within your Wing",
 ];

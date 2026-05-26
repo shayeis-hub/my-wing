@@ -7,7 +7,7 @@ export const GRANDFATHERED_EMAILS = [
 // ── Free-plan limits ──────────────────────────────────────────────────────────
 export const FREE_LIMITS = {
   mealPhotosPerDay: 3,
-  wingMembers: 5,
+  wingMembers: 3,
 } as const;
 
 // ── Paddle price IDs (set in Vercel env vars) ─────────────────────────────────

@@ -56,7 +56,7 @@ export default function TermsEnPage() {
             <h2 className="font-bold text-slate-800 text-base">7. Free Plan Limitations</h2>
             <ul className="list-disc list-inside space-y-1 text-slate-600">
               <li>Up to 3 AI meal photo analyses per day</li>
-              <li>Wing (group) size limited to 5 members</li>
+              <li>Wing (group) size limited to 3 members</li>
             </ul>
             <p className="mt-1">Premium subscribers enjoy unlimited meal analysis and groups of up to 20 members.</p>
           </section>
