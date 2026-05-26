@@ -2,7 +2,7 @@ export type Plan = "free" | "premium" | "grandfathered";
 export type PriceType = "monthly" | "yearly";
 
 // ── Trial ─────────────────────────────────────────────────────────────────────
-export const TRIAL_DAYS = 7;
+export const TRIAL_DAYS = 14;
 
 /** Returns days remaining in trial (0 = expired). Pass createdAt as ms since epoch. */
 export function getTrialDaysLeft(createdAtMs: number | null | undefined): number {
