@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 
-export const metadata = { title: "Pricing – My Wing" };
+export const metadata = { title: "Pricing – Wingpact" };
 
 const FREE_FEATURES = [
   "Daily check-ins (water, vegetables, steps, mood, weight)",

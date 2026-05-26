@@ -163,7 +163,7 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           <div className="h-px bg-wing-border mx-2 my-1" />
 
           {/* Contact */}
-          <a href="mailto:support@my-wing.app" onClick={onClose}>
+          <a href="mailto:support@wingpact.app" onClick={onClose}>
             <MenuItem icon={<Mail size={20} />} label={t("menu_contact")} />
           </a>
 

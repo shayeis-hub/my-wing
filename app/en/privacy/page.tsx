@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Privacy Policy – My Wing" };
+export const metadata = { title: "Privacy Policy – Wingpact" };
 
 export default function PrivacyEnPage() {
   return (
@@ -18,7 +18,7 @@ export default function PrivacyEnPage() {
         <div className="bg-white rounded-3xl shadow-sm p-6 space-y-5 text-sm text-slate-700 leading-relaxed">
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">1. Introduction</h2>
-            <p>My Wing ("the App", "we", "us") is a social weight-loss support application operated by Shay Eisen, Israel. We are committed to protecting your personal data. This policy explains what data we collect, how we use it, and your rights regarding it.</p>
+            <p>Wingpact ("the App", "we", "us") is a social weight-loss support application operated by Shay Eisen, Israel. We are committed to protecting your personal data. This policy explains what data we collect, how we use it, and your rights regarding it.</p>
           </section>
 
           <section className="space-y-2">

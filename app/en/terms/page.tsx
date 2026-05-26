@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Terms of Service – My Wing" };
+export const metadata = { title: "Terms of Service – Wingpact" };
 
 export default function TermsEnPage() {
   return (
@@ -18,17 +18,17 @@ export default function TermsEnPage() {
         <div className="bg-white rounded-3xl shadow-sm p-6 space-y-5 text-sm text-slate-700 leading-relaxed">
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">1. Acceptance of Terms</h2>
-            <p>By accessing or using My Wing ("the App"), you agree to be bound by these Terms of Service. If you do not agree, please discontinue use immediately.</p>
+            <p>By accessing or using Wingpact ("the App"), you agree to be bound by these Terms of Service. If you do not agree, please discontinue use immediately.</p>
           </section>
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">2. Description of Service</h2>
-            <p>My Wing is a web-based social weight-loss support application that allows users to track meals, log daily health data, receive AI-powered nutritional analysis, and share progress with a chosen support group ("Wing").</p>
+            <p>Wingpact is a web-based social weight-loss support application that allows users to track meals, log daily health data, receive AI-powered nutritional analysis, and share progress with a chosen support group ("Wing").</p>
           </section>
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">3. Medical Disclaimer</h2>
-            <p className="font-medium text-amber-700 bg-amber-50 rounded-2xl p-3">My Wing is not a medical device and does not provide medical, nutritional, or dietetic advice. All information displayed is for personal tracking purposes only. Always consult a qualified physician or registered dietitian before making significant changes to your diet or exercise routine.</p>
+            <p className="font-medium text-amber-700 bg-amber-50 rounded-2xl p-3">Wingpact is not a medical device and does not provide medical, nutritional, or dietetic advice. All information displayed is for personal tracking purposes only. Always consult a qualified physician or registered dietitian before making significant changes to your diet or exercise routine.</p>
           </section>
 
           <section className="space-y-2">
@@ -49,7 +49,7 @@ export default function TermsEnPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">6. Subscriptions & Billing</h2>
-            <p>My Wing offers a free tier and a paid Premium subscription. Subscriptions are billed on a monthly or annual basis through <strong>Paddle</strong>, who acts as Merchant of Record. By subscribing you also agree to <a href="https://www.paddle.com/legal/terms" className="text-wing-primary underline" target="_blank" rel="noopener noreferrer">Paddle's Terms of Service</a>. Billing, taxes, and refunds are governed by our <Link href="/en/refund" className="text-wing-primary underline">Refund Policy</Link>.</p>
+            <p>Wingpact offers a free tier and a paid Premium subscription. Subscriptions are billed on a monthly or annual basis through <strong>Paddle</strong>, who acts as Merchant of Record. By subscribing you also agree to <a href="https://www.paddle.com/legal/terms" className="text-wing-primary underline" target="_blank" rel="noopener noreferrer">Paddle's Terms of Service</a>. Billing, taxes, and refunds are governed by our <Link href="/en/refund" className="text-wing-primary underline">Refund Policy</Link>.</p>
           </section>
 
           <section className="space-y-2">
@@ -68,7 +68,7 @@ export default function TermsEnPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">9. Limitation of Liability</h2>
-            <p>To the maximum extent permitted by law, My Wing and its operators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the App. The App is provided "as is" without warranties of any kind.</p>
+            <p>To the maximum extent permitted by law, Wingpact and its operators shall not be liable for any indirect, incidental, or consequential damages arising from your use of the App. The App is provided "as is" without warranties of any kind.</p>
           </section>
 
           <section className="space-y-2">

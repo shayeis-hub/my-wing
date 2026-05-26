@@ -14,6 +14,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
 import { getTodayCheckin, getWeightHistory } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
@@ -26,7 +27,7 @@ import type { StepsEntry } from "@/types";
 
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
@@ -58,7 +59,7 @@ export default function DashboardPage() {
   const { wing } = useWing(user?.wingId);
   const { meals } = useMeals(user?.wingId);
 
-  const today = format(new Date(), "EEEE, d MMMM", { locale: he });
+  const today = format(new Date(), "EEEE, d MMMM", { locale: lang === "he" ? he : enUS });
   const todayDateStr = format(new Date(), "yyyy-MM-dd");
 
   const todayMeals = meals.filter((m) => {

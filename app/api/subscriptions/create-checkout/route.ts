@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const displayName: string = userData.displayName ?? "";
 
     const paddle = getPaddle();
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://my-wing.vercel.app";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://wingpact.app";
 
     // Reuse existing Paddle customer or create one
     let paddleCustomerId: string | undefined = userData?.subscription?.paddleCustomerId;

@@ -1,6 +1,6 @@
 {
-  "name": "מבנה כנף | MY WING",
-  "short_name": "My Wing",
+  "name": "Wingpact | מבנה כנף",
+  "short_name": "Wingpact",
   "description": "אפליקציית תמיכה חברתית לירידה במשקל",
   "start_url": "/dashboard",
   "display": "standalone",

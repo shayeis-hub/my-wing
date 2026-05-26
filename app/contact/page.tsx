@@ -18,7 +18,7 @@ export default function ContactPage() {
           <div className="text-center space-y-3">
             <p className="text-sm text-slate-600">שלח לנו מייל ישירות:</p>
             <a
-              href="mailto:shayeis@gmail.com?subject=MY WING - פנייה"
+              href="mailto:shayeis@gmail.com?subject=Wingpact - פנייה"
               className="block w-full py-3 bg-wing-primary text-white rounded-2xl font-medium text-center hover:bg-sky-600 transition-colors"
             >
               shayeis@gmail.com

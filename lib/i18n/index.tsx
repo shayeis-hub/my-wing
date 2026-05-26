@@ -454,7 +454,7 @@ export const T = {
     // Hamburger menu
     menu_title: "Menu",
     menu_profile: "My Profile",
-    menu_wing: "My Wing",
+    menu_wing: "Wingpact",
     menu_language: "Language",
     menu_contact: "Contact Us",
     menu_privacy: "Privacy Policy",
@@ -464,7 +464,7 @@ export const T = {
     lang_en: "English",
 
     // Auth
-    app_name: "MY WING",
+    app_name: "Wingpact",
     app_tagline: "Lose weight together",
     login_email: "Email",
     login_password: "Password",
@@ -586,7 +586,7 @@ export const T = {
 
     // Profile
     profile_title: "My Profile",
-    profile_wing_btn: "My Wing",
+    profile_wing_btn: "Wingpact",
     profile_my_data: "My Data",
     profile_age: "Age",
     profile_height: "Height",
@@ -642,7 +642,7 @@ export const T = {
     // Steps / Calendar / Wing
     steps_title: "Leaderboard",
     calendar_title: "Calendar",
-    wing_title: "My Wing",
+    wing_title: "Wingpact",
 
     // Onboarding
     ob_step0_title: (name: string) => `Hey ${name}!\nLet's find your Wing.`,

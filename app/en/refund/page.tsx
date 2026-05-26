@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Refund Policy – My Wing" };
+export const metadata = { title: "Refund Policy – Wingpact" };
 
 export default function RefundEnPage() {
   return (
@@ -18,12 +18,12 @@ export default function RefundEnPage() {
         <div className="bg-white rounded-3xl shadow-sm p-6 space-y-5 text-sm text-slate-700 leading-relaxed">
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">1. Merchant of Record</h2>
-            <p>All payments for My Wing Premium subscriptions are processed by <strong>Paddle</strong> (paddle.com), who acts as the Merchant of Record. Paddle is responsible for billing, invoicing, tax collection, and handling payment disputes on our behalf.</p>
+            <p>All payments for Wingpact Premium subscriptions are processed by <strong>Paddle</strong> (paddle.com), who acts as the Merchant of Record. Paddle is responsible for billing, invoicing, tax collection, and handling payment disputes on our behalf.</p>
           </section>
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">2. 14-Day Money-Back Guarantee</h2>
-            <p>If you are not satisfied with your My Wing Premium subscription, you may request a full refund within <strong>14 days</strong> of your initial purchase. To request a refund within this period, contact us at <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a> with the subject line "Refund Request" and your registered email address.</p>
+            <p>If you are not satisfied with your Wingpact Premium subscription, you may request a full refund within <strong>14 days</strong> of your initial purchase. To request a refund within this period, contact us at <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a> with the subject line "Refund Request" and your registered email address.</p>
           </section>
 
           <section className="space-y-2">

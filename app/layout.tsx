@@ -3,7 +3,7 @@ import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "מבנה כנף | MY WING",
+  title: "Wingpact | מבנה כנף",
   description: "אפליקציית תמיכה חברתית לירידה במשקל",
   manifest: "/manifest.json",
   icons: {

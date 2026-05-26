@@ -12,6 +12,7 @@ import {
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
 import type { DailyCheckin, Encouragement } from "@/types";
 import { Droplets, Leaf, Footprints, Dumbbell, Smile, Scale, Pencil, Moon, Lightbulb, Timer } from "lucide-react";
@@ -60,7 +61,7 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 
 function CheckinPageInner() {
   const { user, firebaseUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const moods = [
     { value: 1, emoji: MOOD_EMOJIS[0], label: t("mood_1") },
@@ -262,7 +263,7 @@ function CheckinPageInner() {
       <div className="pt-4">
         <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("checkin_title")}</h1>
         <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
-          {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: he })}
+          {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: lang === "he" ? he : enUS })}
         </p>
         {isRetro && (
           <span className="inline-block text-xs text-wing-heat font-medium bg-wing-elevated border border-wing-border px-3 py-1 rounded-full mt-2">
