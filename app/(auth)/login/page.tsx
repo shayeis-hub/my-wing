@@ -168,6 +168,7 @@ function LoginForm() {
         {[
           { href: "/privacy", key: "link_privacy" as const },
           { href: "/terms", key: "link_terms" as const },
+          { href: lang === "en" ? "/en/refund" : "/refund", key: "link_refund" as const },
           { href: "/contact", key: "link_contact" as const },
           { href: "/delete-account", key: "link_delete" as const },
         ].map(({ href, key }) => (

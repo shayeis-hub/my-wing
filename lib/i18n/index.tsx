@@ -66,6 +66,7 @@ export const T = {
     register_google_error: "ההתחברות עם Google נכשלה",
     link_privacy: "פרטיות",
     link_terms: "תנאי שימוש",
+    link_refund: "מדיניות החזרות",
     link_contact: "צור קשר",
     link_delete: "מחיקת חשבון",
 
@@ -561,6 +562,7 @@ export const T = {
     register_google_error: "Google sign-in failed",
     link_privacy: "Privacy",
     link_terms: "Terms",
+    link_refund: "Refund Policy",
     link_contact: "Contact",
     link_delete: "Delete Account",
 
