@@ -19,7 +19,7 @@ import { requestNotificationPermission } from "@/lib/firebase/messaging";
 import { getTodayCheckin, getWeightHistory } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
-import { Bell, Footprints, Scale, CheckSquare, ChevronLeft, Droplets, Flame } from "lucide-react";
+import { Bell, Footprints, Scale, CheckSquare, ChevronLeft, Droplets, Flame, BookOpen } from "lucide-react";
 import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
 import { calcStreak } from "@/lib/utils/streak";
 import type { StepsEntry } from "@/types";
@@ -237,6 +237,23 @@ export default function DashboardPage() {
               </div>
             </Link>
           </div>
+
+          {/* User Guide banner */}
+          <a
+            href={`/guides/${lang}.html`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-wing-surface border border-wing-border rounded-[20px] px-4 py-3.5 hover:border-wing-ink transition-colors"
+          >
+            <div className="w-9 h-9 rounded-2xl bg-wing-elevated flex items-center justify-center shrink-0">
+              <BookOpen size={18} className="text-wing-heat" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-wing-ink">{t("dashboard_guide_title")}</p>
+              <p className="text-xs text-wing-muted mt-0.5">{t("dashboard_guide_sub")}</p>
+            </div>
+            <ChevronLeft size={16} className="text-wing-muted shrink-0" />
+          </a>
 
           {/* SOS */}
           {user && firebaseUser && (

@@ -19,6 +19,7 @@ import {
   LogOut,
   Zap,
   Crown,
+  BookOpen,
 } from "lucide-react";
 
 interface HamburgerMenuProps {
@@ -158,6 +159,11 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
               </button>
             </div>
           </div>
+
+          {/* User Guide */}
+          <a href={`/guides/${lang}.html`} target="_blank" rel="noopener noreferrer" onClick={onClose}>
+            <MenuItem icon={<BookOpen size={20} />} label={t("menu_guide")} />
+          </a>
 
           {/* Divider */}
           <div className="h-px bg-wing-border mx-2 my-1" />

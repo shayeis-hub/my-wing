@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>Wingpact · User Guide</title>
+<meta name="viewport" content="width=794, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ─────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { direction: ltr; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #ede5d0;
+  color: #1a1814;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page shell ─────────────────────────────────── */
+.page {
+  width: 794px;
+  min-height: 1123px;
+  background: #fbf4e6;
+  margin: 32px auto;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+}
+
+/* ── Tokens ─────────────────────────────────────── */
+:root {
+  --ink:     #1a1814;
+  --muted:   #8a7e68;
+  --subtle:  #c9bc9c;
+  --border:  #ede5d0;
+  --surface: #ffffff;
+  --sand:    #fbf4e6;
+  --sun1:    #f5dd4b;
+  --sun2:    #ff6b47;
+  --coral:   #d4541a;
+  --honey:   #c79a00;
+  --green:   #2f8d5f;
+}
+
+.gradient-fill { background: linear-gradient(135deg, var(--sun1), var(--sun2)); }
+.gradient-text {
+  background: linear-gradient(90deg, var(--honey), var(--coral));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Cover ──────────────────────────────────────── */
+.cover-page {
+  background: var(--sand);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 80px 72px;
+}
+.cover-radial {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 15%, rgba(245,221,75,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 85%, rgba(255,107,71,.14) 0%, transparent 55%);
+}
+
+/* ── Typography ─────────────────────────────────── */
+.kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--muted);
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Layout helpers ─────────────────────────────── */
+.pad { padding: 64px 72px; }
+.two-col { display: grid; grid-template-columns: 1fr 260px; gap: 48px; align-items: start; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+
+/* ── Step numbers ───────────────────────────────── */
+.step {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px;
+}
+.step .num {
+  width: 28px; height: 28px; border-radius: 999px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sun1), var(--sun2));
+  color: var(--ink); font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.step .body b { display: block; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.step .body p { font-size: 13px; line-height: 1.5; color: #3a3329; }
+
+/* ── Tip box ────────────────────────────────────── */
+.tip {
+  background: linear-gradient(135deg, rgba(245,221,75,.18), rgba(255,107,71,.12));
+  border: 1px solid rgba(212,84,26,.2);
+  border-radius: 14px; padding: 14px 16px; margin-top: 22px;
+}
+.tip .tip-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--coral); font-weight: 700; margin-bottom: 4px;
+}
+.tip p { font-size: 12px; line-height: 1.5; color: #3a3329; }
+
+/* ── Phone shell ────────────────────────────────── */
+.phone {
+  width: 232px; height: 472px;
+  background: var(--surface);
+  border-radius: 36px;
+  border: 7px solid #1a1814;
+  position: relative; overflow: hidden;
+  box-shadow: 0 20px 56px rgba(26,24,20,.16), 0 4px 12px rgba(26,24,20,.08);
+  flex-shrink: 0;
+}
+.phone::before {
+  content: ''; position: absolute; top: 7px; left: 50%;
+  transform: translateX(-50%); width: 80px; height: 18px;
+  background: #1a1814; border-radius: 0 0 12px 12px; z-index: 10;
+}
+.phone-screen { height: 100%; overflow: hidden; background: #fbf4e6; }
+.phone-status {
+  padding: 28px 18px 4px; font-size: 10px; font-weight: 600;
+  display: flex; justify-content: space-between; color: var(--ink);
+}
+
+/* ── Phone UI elements ───────────────────────────── */
+.ph-hero {
+  margin: 6px 12px 8px;
+  background: linear-gradient(135deg, #fff3b8, #ffc89a);
+  border-radius: 14px; padding: 14px;
+}
+.ph-hero .ph-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: #5a4220; font-weight: 700; }
+.ph-hero .ph-num { font-weight: 900; font-size: 38px; letter-spacing: -.04em; line-height: 1; color: #1a1814; margin-top: 2px; }
+.ph-hero .ph-sub { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #5a4220; margin-top: 3px; }
+.ph-bar { height: 4px; background: rgba(26,24,20,.18); border-radius: 999px; margin-top: 8px; overflow: hidden; }
+.ph-bar > div { height: 100%; background: #1a1814; border-radius: 999px; }
+
+.ph-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin: 0 12px 8px; }
+.ph-stat { background: white; border: 1px solid #ede5d0; border-radius: 10px; padding: 7px 6px; }
+.ph-stat .l { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .14em; text-transform: uppercase; color: #8a7e68; }
+.ph-stat .v { font-weight: 900; font-size: 13px; letter-spacing: -.03em; margin-top: 1px; }
+
+.ph-card { background: white; border: 1px solid #ede5d0; border-radius: 12px; padding: 9px 11px; margin: 0 12px 8px; }
+.ph-card .ph-card-title { font-size: 9px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: #8a7e68; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+
+.ph-avatars { display: flex; gap: 5px; align-items: center; }
+.ph-av { width: 28px; height: 28px; border-radius: 999px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; position: relative; flex-shrink: 0; }
+.ph-av .you { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); background: #1a1814; color: #fbf4e6; font-size: 6px; font-weight: 800; padding: 0 3px; border-radius: 3px; letter-spacing: .06em; white-space: nowrap; }
+.ph-av.dashed { background: transparent; border: 1.5px dashed #c9bc9c; color: #8a7e68; }
+
+.ph-cta {
+  background: linear-gradient(135deg, #f5dd4b, #ff6b47);
+  border-radius: 12px; padding: 10px; margin: 0 12px 6px;
+  font-weight: 800; font-size: 12px; text-align: center; color: #1a1814;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+
+.ph-nav {
+  position: absolute; bottom: 10px; left: 10px; right: 10px; height: 44px;
+  background: white; border: 1px solid #ede5d0; border-radius: 16px;
+  display: flex; justify-content: space-around; align-items: center;
+}
+.ph-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 7px; color: #8a7e68; }
+.ph-nav-item.active { color: #d4541a; }
+.ph-nav-item svg { width: 16px; height: 16px; }
+
+.ph-pill-row { display: flex; gap: 4px; margin: 0 12px 8px; overflow: hidden; }
+.ph-pill { font-size: 9px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: white; border: 1px solid #ede5d0; color: #5a4f3f; white-space: nowrap; }
+.ph-pill.active { background: #1a1814; color: #fbf4e6; border-color: #1a1814; }
+
+/* ── Meal card ───────────────────────────────────── */
+.ph-meal-hero { margin: 0 12px 6px; border-radius: 12px; overflow: hidden; }
+.ph-meal-hero .img { height: 90px; position: relative; }
+.ph-meal-hero .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 7px 10px; background: linear-gradient(transparent, rgba(255,255,255,.96)); }
+.ph-meal-compact { display: flex; gap: 8px; margin: 0 12px 5px; background: white; border: 1px solid #ede5d0; border-radius: 10px; padding: 7px 8px; }
+.ph-meal-compact .thumb { width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0; }
+.ph-meal-compact .info { flex: 1; }
+.ph-meal-compact .info .name { font-size: 10px; font-weight: 600; }
+.ph-meal-compact .info .meta { font-size: 8px; color: #8a7e68; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.ph-meal-compact .cal { font-weight: 900; font-size: 16px; letter-spacing: -.03em; }
+
+/* ── Check-in elements ─────────────────────────── */
+.ph-slider-row { display: flex; align-items: center; gap: 8px; margin: 6px 0 2px; }
+.ph-slider { flex: 1; height: 6px; background: #ede5d0; border-radius: 999px; overflow: hidden; }
+.ph-slider .fill { height: 100%; background: linear-gradient(90deg, #f5dd4b, #ff6b47); border-radius: 999px; }
+.ph-counter { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 4px 0; }
+.ph-minus, .ph-plus { width: 28px; height: 28px; border-radius: 999px; border: 1px solid #ede5d0; background: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.ph-plus { background: linear-gradient(135deg, #f5dd4b, #ff6b47); border: none; color: #1a1814; }
+.ph-mood-row { display: flex; gap: 4px; justify-content: space-around; margin-top: 4px; }
+.ph-mood { font-size: 18px; padding: 4px; border-radius: 10px; }
+.ph-mood.sel { background: linear-gradient(135deg, rgba(245,221,75,.3), rgba(255,107,71,.2)); }
+
+/* ── Leaderboard ─────────────────────────────────── */
+.ph-lb-row { display: flex; align-items: center; gap: 6px; padding: 5px 10px; }
+.ph-lb-row.me { background: linear-gradient(90deg, transparent, rgba(245,221,75,.1), transparent); }
+.ph-lb-rank { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; color: #c79a00; width: 14px; }
+.ph-lb-name { font-size: 10px; font-weight: 500; flex: 1; }
+.ph-lb-val { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; }
+
+/* ── Wing card ──────────────────────────────────── */
+.ph-challenge { margin: 6px 12px 8px; background: linear-gradient(135deg, #fff3b8, #ffc89a); border-radius: 12px; padding: 10px 12px; }
+.ph-member-row { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-bottom: 1px solid #f3ecd9; }
+.ph-member-row:last-child { border-bottom: none; }
+
+/* ── Section header ─────────────────────────────── */
+.feature-header {
+  border-bottom: 1px solid var(--border);
+  padding: 48px 72px 28px; margin-bottom: 0;
+  display: flex; align-items: flex-end; justify-content: space-between;
+}
+.feature-header h2 { font-size: 52px; font-weight: 900; letter-spacing: -.035em; line-height: .95; }
+.feature-header .badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 999px;
+  background: linear-gradient(135deg, #f5dd4b, #ff6b47); color: #1a1814; font-weight: 700;
+}
+
+/* ── TOC ─────────────────────────────────────────── */
+.toc-item {
+  display: flex; align-items: center; padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.toc-item .toc-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); min-width: 36px; font-size: 14px; }
+.toc-item .toc-title { font-weight: 600; font-size: 15px; flex: 1; }
+.toc-item .toc-desc { font-size: 13px; color: var(--muted); }
+
+/* ── Page number ─────────────────────────────────── */
+.page-num {
+  position: absolute; bottom: 28px; right: 72px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .18em; color: var(--subtle); text-transform: uppercase;
+}
+
+/* ── FAQ ─────────────────────────────────────────── */
+.faq-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.faq-item .q { font-weight: 700; font-size: 14px; margin-bottom: 5px; display: flex; align-items: flex-start; gap: 8px; }
+.faq-item .q::before { content: 'Q'; font-family: 'JetBrains Mono', monospace; font-size: 10px; background: linear-gradient(135deg, #f5dd4b, #ff6b47); color: #1a1814; width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.faq-item .a { font-size: 13px; line-height: 1.6; color: #3a3329; padding-left: 28px; }
+
+/* ── Print ───────────────────────────────────────── */
+@media print {
+  body { background: white; }
+  .page { margin: 0; box-shadow: none; page-break-after: always; }
+  @page { size: A4 portrait; margin: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 1 — COVER
+═══════════════════════════════════════════ -->
+<section class="page cover-page">
+  <div class="cover-radial"></div>
+
+  <!-- Top: logo + eyebrow -->
+  <div style="position:relative;">
+    <svg width="72" height="44" viewBox="0 0 72 44" fill="none">
+      <defs>
+        <linearGradient id="cg" x1="0" y1="0" x2="72" y2="44">
+          <stop offset="0" stop-color="#f5dd4b"/>
+          <stop offset="1" stop-color="#ff6b47"/>
+        </linearGradient>
+      </defs>
+      <path d="M4 38 L36 8 L68 38" stroke="url(#cg)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="36" cy="8" r="5.5" fill="#d4541a"/>
+      <circle cx="20" cy="23" r="3.5" fill="#1a1814"/>
+      <circle cx="52" cy="23" r="3.5" fill="#1a1814"/>
+    </svg>
+    <div class="kicker" style="margin-top:14px;">Wingpact</div>
+  </div>
+
+  <!-- Middle: main title -->
+  <div style="position:relative;">
+    <div style="font-weight:900; font-size:108px; letter-spacing:-.05em; line-height:.88; color:#1a1814;">
+      User<br><span class="gradient-text">Guide</span>
+    </div>
+    <p style="font-size:22px; line-height:1.5; color:#3a3329; max-width:560px; margin-top:28px; font-weight:400;">
+      Everything you need to know to fly with your wing — from your first check-in to closing the day with AI.
+    </p>
+  </div>
+
+  <!-- Bottom: meta -->
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; position:relative;">
+    <div>
+      <div class="kicker">Version 1.0 · May 2026</div>
+      <div style="font-size:14px; color:var(--muted); margin-top:4px;">Web App · iOS · Android</div>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <div style="text-align:center;">
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">3</div>
+        <div class="kicker" style="font-size:9px;">members</div>
+      </div>
+      <div style="width:1px; height:36px; background:#ede5d0;"></div>
+      <div style="text-align:center;">
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">7</div>
+        <div class="kicker" style="font-size:9px;">screens</div>
+      </div>
+      <div style="width:1px; height:36px; background:#ede5d0;"></div>
+      <div style="text-align:center;">
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">AI</div>
+        <div class="kicker" style="font-size:9px;">meal analysis</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 2 — WELCOME + CONCEPT
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="pad">
+
+    <div class="kicker" style="margin-bottom:12px;">Welcome</div>
+    <h1 style="font-size:48px; font-weight:900; letter-spacing:-.04em; line-height:.95; margin-bottom:32px;">
+      How does<br><span class="gradient-text">Wingpact work?</span>
+    </h1>
+
+    <div class="two-col">
+      <!-- Left text -->
+      <div>
+        <p style="font-size:15px; line-height:1.65; color:#3a3329; margin-bottom:18px;">
+          Migratory birds fly in a V-formation for one simple reason: when the leading bird breaks the wind, every member of the flock expends less energy. When the leader tires, another bird takes their place. That's how they travel distances no single bird could manage alone.
+        </p>
+        <p style="font-size:15px; line-height:1.65; color:#3a3329; margin-bottom:28px;">
+          That's exactly the Wingpact model: a group of up to 3 people who share meals, do a daily check-in, and compete in friendly challenges together. Not competition — collaboration.
+        </p>
+
+        <!-- 3 concepts -->
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+            </div>
+            <div>
+              <b style="font-size:14px;">Snap & Eat</b>
+              <p style="font-size:13px; color:#3a3329; line-height:1.5; margin-top:2px;">Photograph your plate — Claude AI analyzes calories, protein, carbs and fat in seconds. Your wing sees what you ate.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <div style="width:36px; height:36px; border-radius:10px; background:#1a1814; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbf4e6" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div>
+              <b style="font-size:14px;">Daily Check-in</b>
+              <p style="font-size:13px; color:#3a3329; line-height:1.5; margin-top:2px;">2 minutes each evening: water, veggies, workout, eating window and mood. AI summarizes your day and adds a tip for tomorrow.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <div style="width:36px; height:36px; border-radius:10px; background:var(--green); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M8 21l4-8 4 8M4 9l8-6 8 6"/></svg>
+            </div>
+            <div>
+              <b style="font-size:14px;">Challenges & Trophies</b>
+              <p style="font-size:13px; color:#3a3329; line-height:1.5; margin-top:2px;">The wing leader launches weekly challenges — steps, water, veggies and more. Winners earn trophies displayed on their profile forever.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: V formation illustration -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="220" height="200" viewBox="0 0 220 200" fill="none">
+          <defs>
+            <linearGradient id="vg" x1="0" y1="0" x2="220" y2="200">
+              <stop offset="0" stop-color="#f5dd4b"/>
+              <stop offset="1" stop-color="#ff6b47"/>
+            </linearGradient>
+          </defs>
+          <path d="M18 170 L110 40 L202 170" stroke="url(#vg)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 4" opacity=".3"/>
+          <path d="M18 170 L110 40 L202 170" stroke="url(#vg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="110" cy="40" r="12" fill="#d4541a"/>
+          <text x="110" y="44" text-anchor="middle" font-family="Inter" font-weight="800" font-size="9" fill="white">leader</text>
+          <circle cx="64" cy="105" r="10" fill="#1a1814"/>
+          <text x="64" y="109" text-anchor="middle" font-family="Inter" font-weight="700" font-size="8" fill="white">member</text>
+          <circle cx="156" cy="105" r="10" fill="#1a1814"/>
+          <text x="156" y="109" text-anchor="middle" font-family="Inter" font-weight="700" font-size="8" fill="white">member</text>
+          <path d="M100 180 L80 190 L90 182" stroke="#ede5d0" stroke-width="1.5"/>
+          <text x="88" y="198" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#8a7e68">wind</text>
+        </svg>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px 16px; width:100%;">
+          <div class="kicker" style="font-size:9px; margin-bottom:8px;">your wing</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div class="ph-av" style="background:#d4541a;">S</div>
+            <div class="ph-av" style="background:#1a1814;">N</div>
+            <div class="ph-av dashed" style="font-size:16px; color:#c9bc9c;">+</div>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin-top:8px; line-height:1.4;">Up to 3 members. Join via invitation link.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOC preview -->
+    <div style="margin-top:36px; padding-top:28px; border-top:1px solid #ede5d0;">
+      <div class="kicker" style="margin-bottom:14px;">In this guide</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 32px;">
+        <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">Dashboard</span><span class="toc-desc">p. 3</span></div>
+        <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">Meal Photo + AI</span><span class="toc-desc">p. 4</span></div>
+        <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">Daily Check-in</span><span class="toc-desc">p. 5</span></div>
+        <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">Steps &amp; Leaderboard</span><span class="toc-desc">p. 6</span></div>
+        <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">Challenges &amp; Trophies</span><span class="toc-desc">p. 7</span></div>
+        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">06</span><span class="toc-title">Tips &amp; FAQ</span><span class="toc-desc">p. 8</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 2</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 3 — DASHBOARD
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">01 · dashboard</div>
+      <h2>Your home<br><span class="gradient-text">every morning</span></h2>
+    </div>
+    <span class="badge">Dashboard</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        The dashboard is the main screen you see every time you open the app. It summarizes what you've eaten, what your wing is doing, and what your next action should be.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>Calorie Card</b>
+          <p>The yellow-coral card at the top shows how many calories you've eaten against your BMR target. The dark bar shows your progress.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>Three Key Stats</b>
+          <p>Below the card — steps, water, and streak (number of consecutive days you've checked in). Your streak is shown in coral.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>Wing Today</b>
+          <p>Avatars show who's been active today. Tap a member's avatar to view their dashboard — meals, steps and check-in.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>"Snap Meal" Button</b>
+          <p>The large yellow button is your main action. Tap it before every meal. Daily check-in is also accessible from the bottom nav.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">Tip · Quick Nav</div>
+        <p>Tap any member's avatar to jump to their dashboard and see their meals, steps, and last check-in.</p>
+      </div>
+
+      <div style="margin-top:20px; background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px 16px;">
+        <div class="kicker" style="font-size:9px; margin-bottom:8px;">Bottom navigation icons</div>
+        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px; text-align:center;">
+          <div><div style="font-size:10px; font-weight:700;">Home</div><div style="font-size:10px; color:var(--muted); margin-top:2px;">Main feed</div></div>
+          <div><div style="font-size:10px; font-weight:700;">Meals</div><div style="font-size:10px; color:var(--muted); margin-top:2px;">Group feed</div></div>
+          <div><div style="font-size:10px; font-weight:700;">Log</div><div style="font-size:10px; color:var(--muted); margin-top:2px;">History</div></div>
+          <div><div style="font-size:10px; font-weight:700;">Check-in</div><div style="font-size:10px; color:var(--muted); margin-top:2px;">Daily</div></div>
+          <div><div style="font-size:10px; font-weight:700;">Challenges</div><div style="font-size:10px; color:var(--muted); margin-top:2px;">Compete</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+
+        <div style="padding:2px 12px 6px; display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.18em; text-transform:uppercase;">Mon · May 19</div>
+            <div style="font-weight:800; font-size:18px; letter-spacing:-.025em; margin-top:2px;">Good morning, Shai</div>
+          </div>
+          <div class="ph-av" style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; margin-top:4px; width:32px; height:32px; font-size:12px;">S</div>
+        </div>
+
+        <div class="ph-hero" style="margin:4px 12px 6px;">
+          <div class="ph-label">Calories Today</div>
+          <div class="ph-num" style="font-size:34px;">1,420</div>
+          <div class="ph-sub">/ 1,820 kcal · 78%</div>
+          <div class="ph-bar"><div style="width:78%;"></div></div>
+        </div>
+
+        <div class="ph-stats">
+          <div class="ph-stat"><div class="l">steps</div><div class="v" style="font-size:11px;">8,420</div></div>
+          <div class="ph-stat"><div class="l">water</div><div class="v" style="font-size:11px;">1.8L</div></div>
+          <div class="ph-stat"><div class="l">streak</div><div class="v" style="font-size:11px; color:#d4541a;">12d</div></div>
+        </div>
+
+        <div class="ph-card">
+          <div class="ph-card-title">Wing Today</div>
+          <div class="ph-avatars">
+            <div class="ph-av" style="background:var(--green);">N</div>
+            <div class="ph-av" style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; position:relative;">
+              S<div class="you">YOU</div>
+            </div>
+            <div class="ph-av dashed">+</div>
+          </div>
+        </div>
+
+        <div class="ph-cta">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+          Snap Meal
+        </div>
+        <div style="margin:0 12px;">
+          <div style="background:white; border:1px solid #ede5d0; border-radius:10px; padding:7px; font-size:10px; text-align:center; color:#1a1814; font-weight:500;">Daily Check-in</div>
+        </div>
+
+        <div class="ph-nav">
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Home</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>Meals</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>Log</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Check</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 21l4-8 4 8M4 9l8-6 8 6"/></svg>Challenges</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 3</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 4 — MEALS + AI CAMERA
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">02 · meals + AI</div>
+      <h2>Snap.<br><span class="gradient-text">Analyze. Eat.</span></h2>
+    </div>
+    <span class="badge">Meals · AI Camera</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        Photograph every meal — Claude AI analyzes calories, protein, carbs and fat in seconds. Not accurate? Add a text hint and get a fresh analysis.
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+        <div>
+          <div class="kicker" style="font-size:9px; margin-bottom:12px;">Step 1 · Snap</div>
+          <div class="step">
+            <div class="num">1</div>
+            <div class="body"><b>Tap "Snap Meal"</b><p>From the dashboard or tap Meals in the bottom nav, then the snap button.</p></div>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <div class="body"><b>Frame your plate</b><p>The yellow frame guides you. Wait until the plate is in focus, then tap the shutter.</p></div>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <div class="body"><b>AI analyzes</b><p>The yellow scan line moves across the image — food items are identified one by one.</p></div>
+          </div>
+        </div>
+        <div>
+          <div class="kicker" style="font-size:9px; margin-bottom:12px;">Step 2 · Review &amp; Save</div>
+          <div class="step">
+            <div class="num">4</div>
+            <div class="body"><b>Check the analysis</b><p>See calories, protein, carbs and fat. Not right? Tap "Correct".</p></div>
+          </div>
+          <div class="step">
+            <div class="num">5</div>
+            <div class="body"><b>Add a hint (optional)</b><p>"No tahini" / "That was whole-grain bread" — AI re-analyzes with your correction.</p></div>
+          </div>
+          <div class="step">
+            <div class="num">6</div>
+            <div class="body"><b>Save to Wing</b><p>Tap "Save" — the meal appears in every wing member's feed instantly.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip" style="margin-top:18px;">
+        <div class="tip-label">Tip · Manual &amp; Retroactive Logging</div>
+        <p>No camera available? Tap "Manual" to add a meal with a text description. Forgot to log yesterday? You can add a meal for a past date — tap the date icon in the form and pick any day.</p>
+      </div>
+
+      <div style="margin-top:18px; padding:16px; background:white; border:1px solid #ede5d0; border-radius:14px;">
+        <div class="kicker" style="font-size:9px; margin-bottom:10px;">Macronutrient colors</div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <div style="display:flex; align-items:center; gap:5px;">
+            <div style="width:10px; height:10px; border-radius:3px; background:#d4541a;"></div>
+            <span style="font-size:12px; font-weight:600;">Protein</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:5px;">
+            <div style="width:10px; height:10px; border-radius:3px; background:#c79a00;"></div>
+            <span style="font-size:12px; font-weight:600;">Carbs</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:5px;">
+            <div style="width:10px; height:10px; border-radius:3px; background:#2f8d5f;"></div>
+            <span style="font-size:12px; font-weight:600;">Fat</span>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--muted); margin-top:6px;">Consistent across all screens in the app.</p>
+      </div>
+    </div>
+
+    <!-- Phone: meals feed -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 6px; display:flex; justify-content:space-between; align-items:flex-end;">
+          <div>
+            <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.14em; text-transform:uppercase;">Today · 3 meals</div>
+            <div style="font-weight:800; font-size:17px; letter-spacing:-.025em; margin-top:2px;">Meals</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:10px; padding:5px 10px; font-size:10px; font-weight:800; color:#1a1814; display:flex; align-items:center; gap:4px;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+            Snap
+          </div>
+        </div>
+
+        <div class="ph-pill-row">
+          <span class="ph-pill active">All</span>
+          <span class="ph-pill">Mine</span>
+          <span class="ph-pill">Noa</span>
+        </div>
+
+        <div class="ph-meal-hero">
+          <div class="img" style="background:linear-gradient(135deg,#b5c8a0,#7a9470);">
+            <div style="position:absolute; top:6px; left:8px;">
+              <span style="background:white; color:#1a1814; font-size:7.5px; font-weight:700; padding:2px 7px; border-radius:999px;">Lunch · 1:20 PM</span>
+            </div>
+            <div class="overlay">
+              <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <div>
+                  <div style="font-size:9px; color:#5a4f3f;">Noa</div>
+                  <div style="font-weight:700; font-size:11px; color:#1a1814;">Quinoa &amp; Avocado Salad</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-weight:900; font-size:18px; letter-spacing:-.03em; color:#1a1814; line-height:1;">540</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:7px; color:#5a4f3f; text-transform:uppercase; letter-spacing:.1em;">kcal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="background:white; padding:6px 10px; display:flex; justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#d4541a;">P 32</span>
+            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#c79a00;">C 48</span>
+            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#2f8d5f;">F 22</span>
+          </div>
+        </div>
+
+        <div class="ph-meal-compact">
+          <div class="thumb" style="background:linear-gradient(135deg,#f0c896,#d8a070);"></div>
+          <div class="info"><div class="name">Shai · Veggie Omelette</div><div class="meta">Breakfast · 8:15 · P22 C18 F16</div></div>
+          <div class="cal">320</div>
+        </div>
+
+        <div class="ph-nav">
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Home</div>
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>Meals</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>Log</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Check</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 21l4-8 4 8M4 9l8-6 8 6"/></svg>Challenges</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 4</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 5 — CHECK-IN
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">03 · daily check-in</div>
+      <h2>Your evening<br><span class="gradient-text">ritual</span></h2>
+    </div>
+    <span class="badge">Daily Check-in</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        The check-in is 2 minutes that wrap up your day. After saving, AI generates a personal summary with insights and a tip for tomorrow. Your wing can cheer you on your check-in.
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:22px;">
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><path d="M12 2C8 2 4 6 4 10c0 5.5 8 14 8 14s8-8.5 8-14c0-4-4-8-8-8z"/></svg>
+            </div>
+            <b style="font-size:13px;">Water</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">Drag the slider to the amount of water you drank. Goal: 2–2.5 liters.</p>
+        </div>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:#1a1814; display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <b style="font-size:13px;">Veggies</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">How many meals included vegetables? Tap +/− to count.</p>
+        </div>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:var(--green); display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4 4-4"/></svg>
+            </div>
+            <b style="font-size:13px;">Workout</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">Toggle on, choose type + intensity + duration. AI calculates calories burned.</p>
+        </div>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,rgba(245,221,75,.3),rgba(255,107,71,.2)); display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d4541a" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <b style="font-size:13px;">Mood</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">Choose from 5 emoji. Mood is saved in history and visible to wing members.</p>
+        </div>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px; grid-column:1/-1;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            <div>
+              <b style="font-size:13px;">Eating Window</b>
+              <span style="font-size:10px; color:var(--muted); margin-left:6px;">Recommended 8–10 hrs</span>
+            </div>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">Set the time of your first and last meal. A narrower eating window supports better sleep quality and steady energy throughout the day.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">AI Daily Summary</div>
+        <p>After tapping "Save" — tap "Close Day" to receive a personal AI summary: analysis of what you did well, 2–3 insights, and a specific tip for tomorrow. The summary is saved in the calendar.</p>
+      </div>
+    </div>
+
+    <!-- Phone -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px;">
+          <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.14em; text-transform:uppercase;">Monday · 7:42 PM</div>
+          <div style="font-weight:800; font-size:17px; letter-spacing:-.025em; margin-top:2px;">End of Day</div>
+        </div>
+
+        <div class="ph-card">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between;"><span>Water</span><span style="color:#d4541a; font-weight:900; font-family:'JetBrains Mono';">1.8L</span></div>
+          <div class="ph-slider-row">
+            <div class="ph-slider"><div class="fill" style="width:60%;"></div></div>
+          </div>
+        </div>
+
+        <div class="ph-card">
+          <div class="ph-card-title">Veggies</div>
+          <div class="ph-counter">
+            <div class="ph-minus">−</div>
+            <div style="font-weight:900; font-size:24px; letter-spacing:-.04em;">3</div>
+            <div class="ph-plus">+</div>
+          </div>
+        </div>
+
+        <div class="ph-card">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Eating Window</span>
+            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#d4541a; font-weight:700;">9 hrs</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:4px;">
+            <div style="background:#fbf4e6; border:1px solid #ede5d0; border-radius:8px; padding:4px 6px; text-align:center;">
+              <div style="font-size:7px; color:#8a7e68;">First meal</div>
+              <div style="font-family:'JetBrains Mono'; font-size:11px; font-weight:700;">8:00 AM</div>
+            </div>
+            <div style="background:#fbf4e6; border:1px solid #ede5d0; border-radius:8px; padding:4px 6px; text-align:center;">
+              <div style="font-size:7px; color:#8a7e68;">Last meal</div>
+              <div style="font-family:'JetBrains Mono'; font-size:11px; font-weight:700;">5:00 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ph-card">
+          <div class="ph-card-title">Mood</div>
+          <div class="ph-mood-row">
+            <div class="ph-mood">😞</div>
+            <div class="ph-mood">😕</div>
+            <div class="ph-mood sel">😊</div>
+            <div class="ph-mood">🤩</div>
+          </div>
+        </div>
+
+        <div class="ph-cta" style="font-size:11px;">Save · Generate AI Summary</div>
+
+        <div class="ph-nav">
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Home</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>Meals</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>Log</div>
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Check</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 21l4-8 4 8M4 9l8-6 8 6"/></svg>Challenges</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 5</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 6 — STEPS + WING
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div style="display:grid; grid-template-columns:1fr 1fr; min-height:1023px;">
+
+    <!-- LEFT: Steps -->
+    <div style="border-right:1px solid #ede5d0; padding:48px 40px 48px 56px;">
+      <div class="kicker" style="margin-bottom:8px;">04 · steps</div>
+      <h2 style="font-size:38px; font-weight:900; letter-spacing:-.035em; line-height:.95; margin-bottom:20px;">
+        <span class="gradient-text">8,420</span><br>steps
+      </h2>
+
+      <div style="display:flex; justify-content:center; margin-bottom:20px;">
+        <div class="phone" style="height:360px; width:196px;">
+          <div class="phone-screen" style="background:#fbf4e6; height:100%;">
+            <div class="phone-status" style="font-size:9px;"><span>9:41</span><span>●●●</span></div>
+            <div style="padding:2px 10px 6px;">
+              <div style="font-weight:800; font-size:15px; letter-spacing:-.025em;">Steps</div>
+            </div>
+            <div style="display:flex; justify-content:center; margin-bottom:8px;">
+              <div style="position:relative; width:120px; height:120px;">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="48" stroke="#ede5d0" stroke-width="10" fill="none"/>
+                  <circle cx="60" cy="60" r="48" stroke="url(#rg2)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="215 302" transform="rotate(-90 60 60)"/>
+                  <defs><linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0" stop-color="#f5dd4b"/><stop offset="1" stop-color="#ff6b47"/></linearGradient></defs>
+                </svg>
+                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <div style="font-family:'JetBrains Mono'; font-size:7px; letter-spacing:.14em; color:#8a7e68; text-transform:uppercase;">Today · 70%</div>
+                  <div style="font-weight:900; font-size:22px; letter-spacing:-.04em; line-height:1; margin-top:2px;">8,420</div>
+                </div>
+              </div>
+            </div>
+            <div style="margin:0 8px; background:white; border:1px solid #ede5d0; border-radius:12px; overflow:hidden;">
+              <div style="padding:6px 10px; border-bottom:1px solid #f3ecd9;"><span style="font-family:'JetBrains Mono'; font-size:8px; letter-spacing:.16em; color:#8a7e68; text-transform:uppercase;">Wing Board</span></div>
+              <div class="ph-lb-row"><span class="ph-lb-rank">1</span><div class="ph-av" style="background:var(--green); width:20px; height:20px; font-size:9px;">N</div><span class="ph-lb-name">Noa</span><span class="ph-lb-val">12.4k</span></div>
+              <div class="ph-lb-row me"><span class="ph-lb-rank" style="color:#8a7e68;">2</span><div class="ph-av" style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; width:20px; height:20px; font-size:9px;">S</div><span class="ph-lb-name" style="font-weight:700;">Me</span><span class="ph-lb-val" style="color:#d4541a;">8.4k</span></div>
+              <div class="ph-lb-row"><span class="ph-lb-rank" style="color:#c9bc9c;">—</span><div class="ph-av dashed" style="width:20px; height:20px; font-size:9px;">+</div><span class="ph-lb-name" style="color:#8a7e68;">3rd member</span><span class="ph-lb-val" style="color:#8a7e68;">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step"><div class="num">1</div><div class="body"><b>Google Fit Sync</b><p>The app syncs steps automatically. First time — tap "Connect Google Fit".</p></div></div>
+      <div class="step"><div class="num">2</div><div class="body"><b>Manual Entry</b><p>No Google Fit? Enter manually. Tap the number to update.</p></div></div>
+      <div class="step"><div class="num">3</div><div class="body"><b>Wing Leaderboard</b><p>Shows all wing members ranked by steps. Your badge is always highlighted with the gradient.</p></div></div>
+    </div>
+
+    <!-- RIGHT: Wing activity -->
+    <div style="padding:48px 56px 48px 40px;">
+      <div class="kicker" style="margin-bottom:8px;">05 · my wing</div>
+      <h2 style="font-size:38px; font-weight:900; letter-spacing:-.035em; line-height:.95; margin-bottom:20px;">
+        Your<br><span class="gradient-text">wing</span>
+      </h2>
+
+      <div style="background:white; border:1px solid #ede5d0; border-radius:16px; overflow:hidden; margin-bottom:20px;">
+        <div class="ph-challenge">
+          <div style="font-family:'JetBrains Mono'; font-size:8px; letter-spacing:.2em; color:#5a4220; text-transform:uppercase; font-weight:700;">Active Challenge</div>
+          <div style="font-weight:800; font-size:15px; color:#1a1814; margin-top:3px;">50km Together</div>
+          <div style="font-size:10px; color:#5a4220; margin-top:2px;">3 days left · 32 / 50</div>
+          <div class="ph-bar" style="margin-top:8px;"><div style="width:64%;"></div></div>
+        </div>
+        <div>
+          <div class="ph-member-row">
+            <div class="ph-av" style="background:var(--green); width:26px; height:26px; font-size:10px;">N</div>
+            <div style="flex:1; margin-left:6px;"><div style="font-size:10px; font-weight:600;">Noa</div><div style="font-family:'JetBrains Mono'; font-size:8px; color:#8a7e68;">12.4k · 4 meals</div></div>
+            <div style="font-family:'JetBrains Mono'; font-size:8px; color:#d4541a; font-weight:700;">15d</div>
+          </div>
+          <div class="ph-member-row" style="background:rgba(245,221,75,.08);">
+            <div class="ph-av" style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; width:26px; height:26px; font-size:10px;">S</div>
+            <div style="flex:1; margin-left:6px;"><div style="font-size:10px; font-weight:700;">Me</div><div style="font-family:'JetBrains Mono'; font-size:8px; color:#8a7e68;">8.4k · 3 meals</div></div>
+            <div style="font-family:'JetBrains Mono'; font-size:8px; color:#d4541a; font-weight:700;">12d</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step"><div class="num">1</div><div class="body"><b>Manage Your Wing</b><p>The settings button lets you rename the wing and send an invitation link to new members.</p></div></div>
+      <div class="step"><div class="num">2</div><div class="body"><b>Member Activity</b><p>See each member's steps, meal count, streak, and last mood. Tap a member to view all their meals.</p></div></div>
+      <div class="step"><div class="num">3</div><div class="body"><b>React &amp; Encourage</b><p>Tap any meal or check-in and send a quick reaction. Real-time encouragement keeps everyone motivated.</p></div></div>
+
+      <div class="tip" style="margin-top:14px;">
+        <div class="tip-label">Inviting Members</div>
+        <p>Tap "Challenges" in the nav → Settings → "Copy Invite Link". Send to a friend — tapping the link joins them to your wing automatically (up to 3 members).</p>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 6</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 7 — CHALLENGES & TROPHIES
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">05 · challenges &amp; trophies</div>
+      <h2>Compete.<br><span class="gradient-text">Win. Repeat.</span></h2>
+    </div>
+    <span class="badge">Challenges · Trophies</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        The wing leader can launch time-limited challenges — friendly competitions that sustain motivation. Winners earn trophies displayed on their profile permanently.
+      </p>
+
+      <div style="margin-bottom:22px;">
+        <div class="kicker" style="font-size:9px; margin-bottom:12px;">Challenge types</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:12px;">
+            <div style="width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            <b style="font-size:13px;">Steps</b>
+            <p style="font-size:11px; color:#3a3329; line-height:1.4; margin-top:3px;">Who gets the most steps this week? Synced automatically.</p>
+          </div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:12px;">
+            <div style="width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,#a8d5e2,#5ba3c9); display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2C8 2 4 6 4 10c0 5.5 8 14 8 14s8-8.5 8-14c0-4-4-8-8-8z"/></svg>
+            </div>
+            <b style="font-size:13px;">Water</b>
+            <p style="font-size:11px; color:#3a3329; line-height:1.4; margin-top:3px;">Total liters from check-ins. Accumulated automatically.</p>
+          </div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:12px;">
+            <div style="width:28px; height:28px; border-radius:8px; background:var(--green); display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2a7 7 0 00-7 7c0 4 3 8 7 13 4-5 7-9 7-13a7 7 0 00-7-7z"/></svg>
+            </div>
+            <b style="font-size:13px;">Veggies</b>
+            <p style="font-size:11px; color:#3a3329; line-height:1.4; margin-top:3px;">Count of meals with vegetables from check-ins.</p>
+          </div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:12px;">
+            <div style="width:28px; height:28px; border-radius:8px; background:#8a7e68; display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            </div>
+            <b style="font-size:13px;">Manual</b>
+            <p style="font-size:11px; color:#3a3329; line-height:1.4; margin-top:3px;">No-sugar / calorie goal — each person self-reports progress.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:16px;">
+        <div class="kicker" style="font-size:9px; margin-bottom:12px;">Trophy Cabinet</div>
+        <p style="font-size:13px; line-height:1.5; color:#3a3329; margin-bottom:12px;">When a challenge ends, the leader taps "Finish Challenge" — the top three finishers receive a trophy: gold, silver, bronze. Trophies appear on the profile permanently.</p>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1; text-align:center; padding:10px; background:linear-gradient(135deg, rgba(245,221,75,.2), rgba(245,181,0,.15)); border:1px solid rgba(199,154,0,.3); border-radius:10px;">
+            <div style="width:24px; height:24px; border-radius:999px; background:#c79a00; color:white; font-family:'JetBrains Mono'; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 4px;">1</div>
+            <div style="font-size:11px; font-weight:700; color:#8a6200;">Gold</div>
+          </div>
+          <div style="flex:1; text-align:center; padding:10px; background:linear-gradient(135deg, rgba(200,200,210,.2), rgba(160,160,170,.15)); border:1px solid rgba(130,130,140,.3); border-radius:10px;">
+            <div style="width:24px; height:24px; border-radius:999px; background:#6b7280; color:white; font-family:'JetBrains Mono'; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 4px;">2</div>
+            <div style="font-size:11px; font-weight:700; color:#4b5563;">Silver</div>
+          </div>
+          <div style="flex:1; text-align:center; padding:10px; background:linear-gradient(135deg, rgba(255,180,100,.2), rgba(210,120,50,.15)); border:1px solid rgba(180,90,30,.3); border-radius:10px;">
+            <div style="width:24px; height:24px; border-radius:999px; background:#c2692a; color:white; font-family:'JetBrains Mono'; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 4px;">3</div>
+            <div style="font-size:11px; font-weight:700; color:#923d10;">Bronze</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip" style="margin-top:18px;">
+        <div class="tip-label">Tip · Live Leaderboard</div>
+        <p>Tap any active challenge card to see a real-time leaderboard — each member's progress, days remaining, and a manual update button for no-sugar and calorie challenges.</p>
+      </div>
+    </div>
+
+    <!-- Phone: challenges screen -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px;">
+          <div style="font-weight:800; font-size:17px; letter-spacing:-.025em; margin-top:2px;">Challenges</div>
+        </div>
+
+        <div style="margin:0 12px 8px; background:linear-gradient(135deg,#fff3b8,#ffc89a); border-radius:14px; padding:12px;">
+          <div style="font-family:'JetBrains Mono'; font-size:7px; letter-spacing:.2em; color:#5a4220; text-transform:uppercase; font-weight:700; margin-bottom:3px;">Active · 3 days left</div>
+          <div style="font-weight:800; font-size:14px; color:#1a1814; margin-bottom:2px;">Weekly Water Marathon</div>
+          <div style="font-size:10px; color:#5a4220; margin-bottom:6px;">Goal: 14 liters per person</div>
+          <div class="ph-bar"><div style="width:58%;"></div></div>
+        </div>
+
+        <div style="margin:0 12px 8px; background:white; border:1px solid #ede5d0; border-radius:12px; overflow:hidden;">
+          <div style="padding:6px 10px; border-bottom:1px solid #f3ecd9;"><span style="font-family:'JetBrains Mono'; font-size:8px; letter-spacing:.16em; color:#8a7e68; text-transform:uppercase;">Leaderboard</span></div>
+
+          <div class="ph-lb-row">
+            <div style="width:18px; height:18px; border-radius:999px; background:#c79a00; color:white; font-size:8px; font-weight:800; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono';">1</div>
+            <div class="ph-av" style="background:var(--green); width:20px; height:20px; font-size:9px;">N</div>
+            <span class="ph-lb-name">Noa</span>
+            <span class="ph-lb-val">8.2L</span>
+          </div>
+          <div class="ph-lb-row me">
+            <div style="width:18px; height:18px; border-radius:999px; background:#6b7280; color:white; font-size:8px; font-weight:800; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono';">2</div>
+            <div class="ph-av" style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); color:#1a1814; width:20px; height:20px; font-size:9px;">S</div>
+            <span class="ph-lb-name" style="font-weight:700;">Me</span>
+            <span class="ph-lb-val" style="color:#d4541a;">7.1L</span>
+          </div>
+        </div>
+
+        <div style="padding:4px 12px 4px;">
+          <div style="font-family:'JetBrains Mono'; font-size:8px; letter-spacing:.16em; color:#8a7e68; text-transform:uppercase; margin-bottom:6px;">Past challenges</div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:10px; padding:8px 10px; margin-bottom:5px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:9px; font-weight:700;">Steps Week</div>
+              <div style="font-size:8px; color:#8a7e68; font-family:'JetBrains Mono';">Finished</div>
+            </div>
+            <div style="width:18px; height:18px; border-radius:999px; background:#c79a00; color:white; font-size:8px; font-weight:800; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono';">1</div>
+          </div>
+        </div>
+
+        <div class="ph-nav">
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Home</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>Meals</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/></svg>Log</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Check</div>
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 21l4-8 4 8M4 9l8-6 8 6"/></svg>Challenges</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 7</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 8 — TIPS + FAQ
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">06 · tips &amp; questions</div>
+      <h2>Frequently<br><span class="gradient-text">Asked</span></h2>
+    </div>
+    <span class="badge">FAQ + Tips</span>
+  </div>
+
+  <div style="padding:32px 72px 64px; display:grid; grid-template-columns:1fr 1fr; gap:48px;">
+
+    <!-- Left: FAQ -->
+    <div>
+      <div class="kicker" style="margin-bottom:14px;">Frequently Asked Questions</div>
+
+      <div class="faq-item">
+        <div class="q">What is BMR and why is it my calorie target?</div>
+        <div class="a">BMR (Basal Metabolic Rate) is the number of calories your body burns at rest. The TDEE/BMR calculator in the menu computes it from your age, height, weight, and activity level. That becomes your daily calorie goal.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">Can my wing members see everything I do?</div>
+        <div class="a">Yes — every meal photo, daily check-in, and step count. That's intentional! Part of the power is shared accountability. If you don't photograph a meal, your wing won't see it.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">What happens when my streak breaks?</div>
+        <div class="a">If you miss a day without checking in, your streak resets. You can do a retroactive check-in (for yesterday) via the calendar → select day → Edit.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">How many people can be in a wing?</div>
+        <div class="a">Up to 3 members. The small size is intentional — a small group creates real accountability. In a group of 20 it's easy to disappear.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">What's the difference between the trial and Premium?</div>
+        <div class="a">The first 7 days are a free trial with full access to everything. After that, a Premium subscription unlocks unlimited meal analysis, challenges, AI summaries and more. You can continue in view-only mode without a subscription.</div>
+      </div>
+
+      <div class="faq-item" style="border-bottom:none;">
+        <div class="q">How do I add a new member to my wing?</div>
+        <div class="a">Tap "Challenges" in the nav → Settings → "Copy Invite Link" → send the link to your friend. Tapping the link joins them automatically.</div>
+      </div>
+    </div>
+
+    <!-- Right: Pro tips -->
+    <div>
+      <div class="kicker" style="margin-bottom:14px;">7 Tips for Your First Week</div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">01</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>Snap everything — even coffee.</b> Snacks, caloric drinks, sweets. A 3-second AI analysis is worth far more than "I'll log it later."</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">02</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>Check-in = routine.</b> Pick a fixed time — 9 PM for example. The notification will remind you.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">03</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>React to your wing.</b> 3 seconds of encouragement after a healthy meal = motivates everyone. The meal feed is a social feed.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">04</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>Read the AI summary.</b> Not to feel bad, but to learn. The "tomorrow tip" is the most useful part.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">05</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>Don't wait for the "perfect" day.</b> A 2,400-calorie day that's logged beats a "clean" day that isn't tracked at all.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">06</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>Launch a weekly challenge.</b> An active challenge is a motivation engine for the whole group. Even "7,000 steps a day" keeps everyone moving.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:linear-gradient(135deg,rgba(245,221,75,.15),rgba(255,107,71,.1)); border:1px solid rgba(212,84,26,.2); border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">07</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>Steps = everything.</b> Google Fit syncs automatically. 10,000 steps a day = ~350 extra calories burned — no special workout required.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 8</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 9 — BACK COVER
+═══════════════════════════════════════════ -->
+<section class="page" style="background:#1a1814; color:#fbf4e6;">
+  <div style="position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 20% 20%, rgba(245,221,75,.12) 0%, transparent 55%), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(255,107,71,.1) 0%, transparent 50%); pointer-events:none;"></div>
+
+  <div style="position:relative; height:100%; padding:80px 72px; display:flex; flex-direction:column; justify-content:space-between;">
+
+    <div>
+      <svg width="56" height="34" viewBox="0 0 72 44" fill="none">
+        <defs>
+          <linearGradient id="cg2" x1="0" y1="0" x2="72" y2="44">
+            <stop offset="0" stop-color="#f5dd4b"/>
+            <stop offset="1" stop-color="#ff6b47"/>
+          </linearGradient>
+        </defs>
+        <path d="M4 38 L36 8 L68 38" stroke="url(#cg2)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="36" cy="8" r="5.5" fill="#d4541a"/>
+        <circle cx="20" cy="23" r="3.5" fill="#fbf4e6"/>
+        <circle cx="52" cy="23" r="3.5" fill="#fbf4e6"/>
+      </svg>
+    </div>
+
+    <div>
+      <div style="font-weight:900; font-size:96px; letter-spacing:-.05em; line-height:.88; color:#fbf4e6;">
+        Flying<br><span style="background:linear-gradient(90deg,#f5dd4b,#ff6b47); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">together</span>
+      </div>
+      <p style="font-size:22px; line-height:1.5; color:#a8a090; max-width:560px; margin-top:28px; font-weight:400;">
+        The strongest wing isn't the one where everyone is perfect — it's the one where everyone keeps flying even on the hardest day.
+      </p>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.22em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">Wingpact</div>
+        <div style="font-size:13px; color:#7a8492;">Version 1.0 · May 2026</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.18em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">Support</div>
+        <div style="font-size:13px; color:#a8a090;">Settings → Contact</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
