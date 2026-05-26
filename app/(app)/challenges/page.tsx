@@ -1,37 +1,53 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { useLanguage } from "@/lib/i18n";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { saveChallenge } from "@/lib/firebase/firestore";
+import { saveChallenge, getWingChallenges } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format, addDays } from "date-fns";
+import { useRouter } from "next/navigation";
+import { Trophy, ChevronRight, ChevronLeft } from "lucide-react";
 import type { Challenge } from "@/types";
 
 export default function ChallengesPage() {
   const { user } = useAuth();
   const { wing } = useWing(user?.wingId);
-  const { t } = useLanguage();
+  const { t, lang, dir } = useLanguage();
+  const router = useRouter();
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<Challenge["type"]>("steps");
   const [targetValue, setTargetValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [pastChallenges, setPastChallenges] = useState<Challenge[]>([]);
+  const [loadingPast, setLoadingPast] = useState(false);
 
   const isMember = !!user?.wingId;
 
   const challengeTypes: { value: Challenge["type"]; label: string; emoji: string }[] = [
-    { value: "steps", label: t("ct_steps"), emoji: "👟" },
-    { value: "water", label: t("ct_water"), emoji: "💧" },
-    { value: "vegetables", label: t("ct_veg"), emoji: "🥦" },
-    { value: "no_sugar", label: t("ct_sugar"), emoji: "🚫🍬" },
-    { value: "calories", label: t("ct_cal"), emoji: "🔥" },
+    { value: "steps", label: t("ct_steps") as string, emoji: "👟" },
+    { value: "water", label: t("ct_water") as string, emoji: "💧" },
+    { value: "vegetables", label: t("ct_veg") as string, emoji: "🥦" },
+    { value: "no_sugar", label: t("ct_sugar") as string, emoji: "🚫🍬" },
+    { value: "calories", label: t("ct_cal") as string, emoji: "🔥" },
   ];
+
+  useEffect(() => {
+    if (!user?.wingId) return;
+    setLoadingPast(true);
+    getWingChallenges(user.wingId)
+      .then((all) => {
+        const past = all.filter((c) => c.status === "finished" || c.endDate < format(new Date(), "yyyy-MM-dd"));
+        setPastChallenges(past);
+      })
+      .finally(() => setLoadingPast(false));
+  }, [user?.wingId]);
 
   async function handleCreate() {
     if (!user?.wingId || !title || !targetValue) return;
@@ -47,60 +63,81 @@ export default function ChallengesPage() {
         startDate: today,
         endDate: format(addDays(new Date(), 7), "yyyy-MM-dd"),
         progress: {},
+        status: "active",
       });
-      toast.success(t("challenge_created"));
+      toast.success(t("challenge_created") as string);
       setShowCreate(false);
       setTitle(""); setDescription(""); setTargetValue("");
     } catch {
-      toast.error(t("challenge_error"));
+      toast.error(t("challenge_error") as string);
     } finally {
       setSaving(false);
     }
   }
 
+  const activeEmoji = challengeTypes.find((ct) => ct.value === wing?.activeChallenge?.type)?.emoji;
+  const ChevronIcon = lang === "he" ? ChevronLeft : ChevronRight;
+
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-4" dir={dir}>
       <div className="pt-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-wing-ink">{t("challenges_title")}</h1>
+        <h1 className="text-xl font-bold text-wing-ink">{t("challenges_title") as string}</h1>
         {isMember && (
           <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
-            {t("challenge_add")}
+            {t("challenge_add") as string}
           </Button>
         )}
       </div>
 
+      {/* Active challenge */}
       {wing?.activeChallenge ? (
-        <Card>
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl">
-              {challengeTypes.find((ct) => ct.value === wing.activeChallenge?.type)?.emoji}
-            </span>
-            <div>
-              <h2 className="font-bold text-wing-ink">{wing.activeChallenge.title}</h2>
-              <p className="text-xs text-wing-subtle">
-                {wing.activeChallenge.startDate} – {wing.activeChallenge.endDate}
-              </p>
+        <button
+          className="w-full text-start"
+          onClick={() => router.push(`/challenges/${wing.activeChallenge!.id}`)}
+        >
+          <div className="bg-gradient-to-br from-wing-heat/10 to-yellow-50 border-2 border-wing-heat/20 rounded-[20px] p-5 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{activeEmoji}</span>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-bold text-wing-ink">{wing.activeChallenge.title}</h2>
+                  <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    {t("challenge_active_badge") as string}
+                  </span>
+                </div>
+                <p className="text-xs text-wing-subtle mt-0.5">
+                  {wing.activeChallenge.startDate} – {wing.activeChallenge.endDate}
+                </p>
+              </div>
+              <ChevronIcon size={20} className="text-wing-muted flex-shrink-0" />
             </div>
+            {wing.activeChallenge.description ? (
+              <p className="text-sm text-wing-muted">{wing.activeChallenge.description}</p>
+            ) : null}
+            <div className="bg-white/70 rounded-2xl px-4 py-2 text-sm text-wing-heat font-medium inline-flex gap-2">
+              <Trophy size={14} className="mt-0.5" />
+              {t("challenge_goal") as string}: {wing.activeChallenge.targetValue.toLocaleString()}{" "}
+              {wing.activeChallenge.type === "steps" ? t("challenge_steps_unit") as string : ""}
+            </div>
+            <p className="text-xs text-wing-heat font-medium">
+              {lang === "he" ? "לחץ לצפייה בלוח התוצאות ←" : "Tap to view leaderboard →"}
+            </p>
           </div>
-          <p className="text-sm text-wing-muted">{wing.activeChallenge.description}</p>
-          <div className="mt-3 bg-wing-elevated rounded-2xl px-4 py-2 text-sm text-wing-heat font-medium">
-            {t("challenge_goal")}: {wing.activeChallenge.targetValue.toLocaleString()}{" "}
-            {wing.activeChallenge.type === "steps" ? t("challenge_steps_unit") : ""}
-          </div>
-        </Card>
+        </button>
       ) : (
         <Card className="text-center py-8">
           <div className="text-4xl mb-3">🏆</div>
-          <p className="font-semibold text-wing-ink">{t("challenge_no_active")}</p>
+          <p className="font-semibold text-wing-ink">{t("challenge_no_active") as string}</p>
           <p className="text-sm text-wing-subtle mt-1">
-            {isMember ? t("challenge_no_active_member") : t("challenge_no_active_guest")}
+            {isMember ? t("challenge_no_active_member") as string : t("challenge_no_active_guest") as string}
           </p>
         </Card>
       )}
 
+      {/* Create form */}
       {showCreate && isMember && (
         <Card className="space-y-4 border-2 border-wing-border">
-          <h3 className="font-bold text-wing-ink">{t("challenge_new")}</h3>
+          <h3 className="font-bold text-wing-ink">{t("challenge_new") as string}</h3>
           <div className="grid grid-cols-2 gap-2">
             {challengeTypes.map((ct) => (
               <button
@@ -117,18 +154,47 @@ export default function ChallengesPage() {
               </button>
             ))}
           </div>
-          <Input label={t("challenge_name_label")} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("challenge_name_ph")} />
-          <Input label={t("challenge_desc_label")} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("challenge_desc_ph")} />
-          <Input label={t("challenge_target_label")} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder="10000" dir="ltr" />
+          <Input label={t("challenge_name_label") as string} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("challenge_name_ph") as string} />
+          <Input label={t("challenge_desc_label") as string} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("challenge_desc_ph") as string} />
+          <Input label={t("challenge_target_label") as string} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder="10000" dir="ltr" />
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setShowCreate(false)} className="flex-1">
-              {t("cancel")}
+              {t("cancel") as string}
             </Button>
             <Button onClick={handleCreate} loading={saving} className="flex-1">
-              {t("challenge_create_btn")}
+              {t("challenge_create_btn") as string}
             </Button>
           </div>
         </Card>
+      )}
+
+      {/* Past challenges */}
+      {!loadingPast && pastChallenges.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="font-bold text-wing-ink text-sm px-1">{t("challenge_past_title") as string}</h2>
+          {pastChallenges.map((c) => {
+            const emoji = challengeTypes.find((ct) => ct.value === c.type)?.emoji ?? "🏆";
+            return (
+              <button
+                key={c.id}
+                className="w-full text-start"
+                onClick={() => router.push(`/challenges/${c.id}`)}
+              >
+                <div className="bg-wing-surface border border-wing-border rounded-[16px] px-4 py-3 flex items-center gap-3">
+                  <span className="text-2xl">{emoji}</span>
+                  <div className="flex-1">
+                    <p className="font-semibold text-wing-ink text-sm">{c.title}</p>
+                    <p className="text-xs text-wing-muted">{c.startDate} – {c.endDate}</p>
+                  </div>
+                  {c.winners && c.winners.length > 0 && (
+                    <span className="text-lg">🥇</span>
+                  )}
+                  <ChevronIcon size={16} className="text-wing-muted" />
+                </div>
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );

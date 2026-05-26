@@ -24,6 +24,7 @@ import type {
   Encouragement,
   StepsEntry,
   Challenge,
+  Trophy,
   WingMember,
   WeightLog,
   Subscription,
@@ -393,6 +394,101 @@ export async function saveChallenge(
   const ref = doc(collection(db, "wings", wingId, "challenges"));
   await setDoc(ref, { ...challenge, createdAt: serverTimestamp() });
   await updateDoc(doc(db, "wings", wingId), { activeChallenge: { ...challenge, id: ref.id } });
+}
+
+export async function getWingChallenges(wingId: string): Promise<Challenge[]> {
+  const snap = await getDocs(collection(db, "wings", wingId, "challenges"));
+  const challenges = snap.docs.map((d) => ({ ...(d.data() as Omit<Challenge, "id">), id: d.id }));
+  // Sort newest first in JS (avoids composite index requirement)
+  return challenges.sort((a, b) => {
+    const aTime = a.createdAt?.seconds ?? 0;
+    const bTime = b.createdAt?.seconds ?? 0;
+    return bTime - aTime;
+  });
+}
+
+export async function getChallenge(wingId: string, challengeId: string): Promise<Challenge | null> {
+  const snap = await getDoc(doc(db, "wings", wingId, "challenges", challengeId));
+  if (!snap.exists()) return null;
+  return { ...(snap.data() as Omit<Challenge, "id">), id: snap.id };
+}
+
+export async function getWingCheckinsRange(
+  wingId: string,
+  startDate: string,
+  endDate: string
+): Promise<DailyCheckin[]> {
+  const q = query(
+    collection(db, "wings", wingId, "checkins"),
+    where("date", ">=", startDate),
+    where("date", "<=", endDate)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ ...(d.data() as Omit<DailyCheckin, "id">), id: d.id }));
+}
+
+export async function getWingStepsRange(
+  wingId: string,
+  startDate: string,
+  endDate: string
+): Promise<StepsEntry[]> {
+  const q = query(
+    collection(db, "wings", wingId, "steps"),
+    where("date", ">=", startDate),
+    where("date", "<=", endDate)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ ...(d.data() as Omit<StepsEntry, "id">), id: d.id }));
+}
+
+export async function updateChallengeProgress(
+  wingId: string,
+  challengeId: string,
+  userId: string,
+  value: number
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "challenges", challengeId), {
+    [`progress.${userId}`]: value,
+  });
+}
+
+export async function finishChallenge(
+  wingId: string,
+  challenge: Challenge,
+  members: WingMember[]
+): Promise<void> {
+  // Sort members by progress descending
+  const sorted = [...members].sort(
+    (a, b) => (challenge.progress[b.uid] ?? 0) - (challenge.progress[a.uid] ?? 0)
+  );
+  const medals: Array<"gold" | "silver" | "bronze"> = ["gold", "silver", "bronze"];
+  const winners = sorted.slice(0, 3).map((m) => m.uid);
+
+  // Mark challenge as finished
+  await updateDoc(doc(db, "wings", wingId, "challenges", challenge.id), {
+    status: "finished",
+    winners,
+  });
+
+  // Clear active challenge on wing
+  await updateDoc(doc(db, "wings", wingId), { activeChallenge: null });
+
+  // Award trophies to top 3
+  for (let i = 0; i < Math.min(3, sorted.length); i++) {
+    const member = sorted[i];
+    if (!challenge.progress[member.uid]) continue; // skip if no progress at all
+    const trophy: Trophy = {
+      challengeId: challenge.id,
+      challengeTitle: challenge.title,
+      challengeType: challenge.type,
+      medal: medals[i],
+      endDate: challenge.endDate,
+      wingId,
+    };
+    await updateDoc(doc(db, "users", member.uid), {
+      trophies: arrayUnion(trophy),
+    });
+  }
 }
 
 // ── Subscription & daily usage ────────────────────────────────────────────────

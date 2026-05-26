@@ -219,6 +219,32 @@ export default function ProfilePage() {
         </Button>
       </Card>
 
+      {/* Trophy Cabinet */}
+      <Card>
+        <h2 className="font-bold text-wing-ink mb-3 flex items-center gap-2">
+          🏆 {t("trophy_title")}
+        </h2>
+        {!user?.trophies || user.trophies.length === 0 ? (
+          <p className="text-sm text-wing-muted text-center py-3">{t("trophy_empty")}</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {user.trophies.map((trophy, idx) => {
+              const medalEmoji = trophy.medal === "gold" ? "🥇" : trophy.medal === "silver" ? "🥈" : "🥉";
+              const medalLabel = trophy.medal === "gold" ? t("trophy_gold") : trophy.medal === "silver" ? t("trophy_silver") : t("trophy_bronze");
+              const bg = trophy.medal === "gold" ? "bg-yellow-50 border-yellow-200" : trophy.medal === "silver" ? "bg-slate-50 border-slate-200" : "bg-orange-50 border-orange-200";
+              return (
+                <div key={idx} className={`rounded-2xl border p-3 text-center ${bg}`}>
+                  <p className="text-3xl mb-1">{medalEmoji}</p>
+                  <p className="text-[10px] font-bold text-wing-muted uppercase tracking-wide">{medalLabel as string}</p>
+                  <p className="text-xs font-semibold text-wing-ink mt-1 leading-tight">{trophy.challengeTitle}</p>
+                  <p className="text-[10px] text-wing-muted mt-0.5">{trophy.endDate}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
       {/* Logout */}
       <Button variant="secondary" onClick={handleSignOut} className="w-full">
         {t("profile_signout")}

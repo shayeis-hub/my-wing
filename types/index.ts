@@ -10,6 +10,7 @@ export interface User {
   fcmToken?: string;
   timezone?: string;
   subscription?: Subscription;
+  trophies?: Trophy[];
   createdAt: Timestamp;
 }
 
@@ -138,8 +139,19 @@ export interface Challenge {
   targetValue: number;
   startDate: string;
   endDate: string;
-  progress: Record<string, number>;
+  progress: Record<string, number>; // userId → cumulative value (manual for no_sugar/calories)
+  status?: "active" | "finished";
+  winners?: string[]; // [gold_uid, silver_uid, bronze_uid]
   createdAt: Timestamp;
+}
+
+export interface Trophy {
+  challengeId: string;
+  challengeTitle: string;
+  challengeType: Challenge["type"];
+  medal: "gold" | "silver" | "bronze";
+  endDate: string;
+  wingId: string;
 }
 
 export interface AISummary {

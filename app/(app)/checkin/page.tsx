@@ -356,7 +356,12 @@ function CheckinPageInner() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Timer size={16} className="text-wing-muted" />
-            <span className="font-semibold text-wing-ink">{t("checkin_ew")}</span>
+            <div>
+              <span className="font-semibold text-wing-ink">{t("checkin_ew")}</span>
+              <p className="text-[10px] text-wing-muted leading-tight">
+                {lang === "he" ? "מומלץ 8–10 שעות" : "Recommended 8–10 hrs"}
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setEwManual((v) => !v)}

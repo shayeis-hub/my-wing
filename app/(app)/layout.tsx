@@ -5,7 +5,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <div className="min-h-screen bg-wing-bg">
-        <main className="pb-20 max-w-lg mx-auto">{children}</main>
+        <main className="pb-28 max-w-lg mx-auto">{children}</main>
         <BottomNav />
       </div>
     </AuthGuard>
