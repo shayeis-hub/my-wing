@@ -164,6 +164,15 @@ export const T = {
 
     // Challenge detail
     challenge_leaderboard: "לוח תוצאות",
+    challenge_back: "חזרה לאתגרים",
+    challenge_goal_label: "יעד",
+    challenge_time_label: "זמן",
+    challenge_me: "אני",
+    challenge_of_goal: "מהיעד",
+    challenge_loading: "טוען...",
+    challenge_finished_toast: "האתגר הסתיים!",
+    challenge_error_finish: "שגיאה בסיום האתגר",
+    challenge_error_generic: "שגיאה",
     challenge_progress_label: "התקדמות",
     challenge_days_left: (n: number) => n === 1 ? "יום אחד נשאר" : `${n} ימים נשארו`,
     challenge_ended: "האתגר הסתיים",
@@ -695,6 +704,15 @@ export const T = {
 
     // Challenge detail
     challenge_leaderboard: "Leaderboard",
+    challenge_back: "Back to challenges",
+    challenge_goal_label: "Goal",
+    challenge_time_label: "Time",
+    challenge_me: "Me",
+    challenge_of_goal: "of goal",
+    challenge_loading: "Loading...",
+    challenge_finished_toast: "Challenge finished!",
+    challenge_error_finish: "Error finishing challenge",
+    challenge_error_generic: "Error",
     challenge_progress_label: "Progress",
     challenge_days_left: (n: number) => n === 1 ? "1 day left" : `${n} days left`,
     challenge_ended: "Challenge ended",

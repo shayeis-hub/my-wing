@@ -12,7 +12,7 @@ import { updateUserStepsGoal } from "@/lib/firebase/firestore";
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib/utils/calculator";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Camera, Footprints, Users } from "lucide-react";
+import { Camera, Footprints, Users, Trophy } from "lucide-react";
 import Link from "next/link";
 
 
@@ -222,20 +222,25 @@ export default function ProfilePage() {
       {/* Trophy Cabinet */}
       <Card>
         <h2 className="font-bold text-wing-ink mb-3 flex items-center gap-2">
-          🏆 {t("trophy_title")}
+          <Trophy size={16} className="text-wing-heat" />
+          {t("trophy_title")}
         </h2>
         {!user?.trophies || user.trophies.length === 0 ? (
           <p className="text-sm text-wing-muted text-center py-3">{t("trophy_empty")}</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             {user.trophies.map((trophy, idx) => {
-              const medalEmoji = trophy.medal === "gold" ? "🥇" : trophy.medal === "silver" ? "🥈" : "🥉";
               const medalLabel = trophy.medal === "gold" ? t("trophy_gold") : trophy.medal === "silver" ? t("trophy_silver") : t("trophy_bronze");
-              const bg = trophy.medal === "gold" ? "bg-yellow-50 border-yellow-200" : trophy.medal === "silver" ? "bg-slate-50 border-slate-200" : "bg-orange-50 border-orange-200";
+              const styles =
+                trophy.medal === "gold"   ? { bg: "bg-yellow-50 border-yellow-200", text: "text-yellow-700", rank: "1" } :
+                trophy.medal === "silver" ? { bg: "bg-slate-50 border-slate-200",   text: "text-slate-500",  rank: "2" } :
+                                            { bg: "bg-orange-50 border-orange-200", text: "text-orange-600", rank: "3" };
               return (
-                <div key={idx} className={`rounded-2xl border p-3 text-center ${bg}`}>
-                  <p className="text-3xl mb-1">{medalEmoji}</p>
-                  <p className="text-[10px] font-bold text-wing-muted uppercase tracking-wide">{medalLabel as string}</p>
+                <div key={idx} className={`rounded-2xl border p-3 text-center ${styles.bg}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-base mx-auto mb-1 border ${styles.bg} ${styles.text}`}>
+                    {styles.rank}
+                  </div>
+                  <p className={`text-[10px] font-bold uppercase tracking-wide ${styles.text}`}>{medalLabel as string}</p>
                   <p className="text-xs font-semibold text-wing-ink mt-1 leading-tight">{trophy.challengeTitle}</p>
                   <p className="text-[10px] text-wing-muted mt-0.5">{trophy.endDate}</p>
                 </div>
