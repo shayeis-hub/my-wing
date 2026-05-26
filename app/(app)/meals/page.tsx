@@ -298,13 +298,16 @@ export default function MealsPage() {
               />
             </div>
           </div>
-          <input
-            type="date"
-            value={manualDate}
-            max={format(new Date(), "yyyy-MM-dd")}
-            onChange={(e) => setManualDate(e.target.value)}
-            className="w-full bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
-          />
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-wing-subtle">{lang === "he" ? "תאריך הארוחה" : "Meal date"}</span>
+            <input
+              type="date"
+              value={manualDate}
+              max={format(new Date(), "yyyy-MM-dd")}
+              onChange={(e) => setManualDate(e.target.value)}
+              className="w-full bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+            />
+          </label>
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setShowManualForm(false)} className="flex-1">{t("cancel")}</Button>
             <Button onClick={saveManualMeal} loading={savingManual} disabled={!manualDescription.trim()} className="flex-1">{t("save")}</Button>
@@ -410,13 +413,16 @@ export default function MealsPage() {
               />
             </div>
           </div>
-          <input
-            type="date"
-            value={mealDate}
-            max={format(new Date(), "yyyy-MM-dd")}
-            onChange={(e) => setMealDate(e.target.value)}
-            className="w-full bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
-          />
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-wing-subtle">{lang === "he" ? "תאריך הארוחה" : "Meal date"}</span>
+            <input
+              type="date"
+              value={mealDate}
+              max={format(new Date(), "yyyy-MM-dd")}
+              onChange={(e) => setMealDate(e.target.value)}
+              className="w-full bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+            />
+          </label>
 
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setPendingAnalysis(null)} className="flex-1">
