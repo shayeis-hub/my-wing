@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,15 +20,15 @@ export default function ProfilePage() {
   const { user, firebaseUser } = useAuth();
   const { t } = useLanguage();
   const activityLabels: Record<string, string> = {
-    sedentary: t("activity_sedentary"),
-    light: t("activity_light"),
-    moderate: t("activity_moderate"),
-    active: t("activity_active"),
-    very_active: t("activity_very_active"),
+    sedentary: t("activity_sedentary") as string,
+    light: t("activity_light") as string,
+    moderate: t("activity_moderate") as string,
+    active: t("activity_active") as string,
+    very_active: t("activity_very_active") as string,
   };
   const genderLabels: Record<string, string> = {
-    male: t("gender_male"),
-    female: t("gender_female"),
+    male: t("gender_male") as string,
+    female: t("gender_female") as string,
   };
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -68,9 +68,9 @@ export default function ProfilePage() {
       await uploadBytes(storageRef, compressed, { contentType: "image/jpeg" });
       const url = await getDownloadURL(storageRef);
       await updateUserPhotoURL(firebaseUser.uid, user.wingId, url);
-      toast.success(t("profile_photo_saved"));
+      toast.success(t("profile_photo_saved") as string);
     } catch {
-      toast.error(t("profile_photo_error"));
+      toast.error(t("profile_photo_error") as string);
     } finally {
       setUploading(false);
     }
@@ -90,13 +90,13 @@ export default function ProfilePage() {
   async function handleSaveStepsGoal() {
     if (!firebaseUser) return;
     const val = parseInt(stepsGoal);
-    if (isNaN(val) || val < 100) { toast.error(t("profile_steps_invalid")); return; }
+    if (isNaN(val) || val < 100) { toast.error(t("profile_steps_invalid") as string); return; }
     setSavingSteps(true);
     try {
       await updateUserStepsGoal(firebaseUser.uid, val);
-      toast.success(t("profile_steps_saved"));
+      toast.success(t("profile_steps_saved") as string);
     } catch {
-      toast.error(t("profile_save_error"));
+      toast.error(t("profile_save_error") as string);
     } finally {
       setSavingSteps(false);
     }
@@ -113,7 +113,7 @@ export default function ProfilePage() {
   return (
     <div className="p-4 space-y-4">
       <div className="pt-4">
-        <h1 className="text-xl font-bold text-wing-ink">הפרופיל שלי</h1>
+        <h1 className="text-xl font-bold text-wing-ink">{t("profile_title")}</h1>
       </div>
 
       {/* Avatar */}
@@ -141,28 +141,28 @@ export default function ProfilePage() {
           className="hidden"
           onChange={handlePhotoChange}
         />
-        {uploading && <p className="text-sm text-wing-muted animate-pulse">מעלה תמונה...</p>}
+        {uploading && <p className="text-sm text-wing-muted animate-pulse">{t("profile_uploading")}</p>}
       </div>
 
       {/* Wing */}
       <Link href="/wing">
         <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
-          <Users size={16} /> מבנה הכנף
+          <Users size={16} /> {t("profile_wing_btn")}
         </Button>
       </Link>
 
       {/* Stats */}
       {profile && (
         <Card>
-          <h3 className="font-semibold text-slate-800 mb-3">הנתונים שלי</h3>
+          <h3 className="font-semibold text-slate-800 mb-3">{t("profile_my_data")}</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "גיל", value: profile.age ? `${profile.age}` : "—" },
-              { label: "גובה", value: profile.heightCm ? `${profile.heightCm} ס״מ` : "—" },
-              { label: "משקל נוכחי", value: profile.weightKg ? `${profile.weightKg} ק״ג` : "—" },
-              { label: "משקל יעד", value: profile.targetWeightKg ? `${profile.targetWeightKg} ק״ג` : "—" },
-              { label: "מגדר", value: genderLabels[profile.gender] ?? "—" },
-              { label: "רמת פעילות", value: activityLabels[profile.activityLevel] ?? "—" },
+              { label: t("profile_age") as string, value: profile.age ? `${profile.age}` : "—" },
+              { label: t("profile_height") as string, value: profile.heightCm ? `${profile.heightCm} cm` : "—" },
+              { label: t("profile_weight") as string, value: profile.weightKg ? `${profile.weightKg} ${t("kg_label")}` : "—" },
+              { label: t("profile_target_weight") as string, value: profile.targetWeightKg ? `${profile.targetWeightKg} ${t("kg_label")}` : "—" },
+              { label: t("profile_gender") as string, value: genderLabels[profile.gender] ?? "—" },
+              { label: t("profile_activity") as string, value: activityLabels[profile.activityLevel] ?? "—" },
             ].map(({ label, value }) => (
               <div key={label} className="bg-slate-50 rounded-2xl px-3 py-2.5">
                 <p className="text-sm text-slate-400">{label}</p>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
       {/* Calculated values */}
       {bmi && tdee && (
         <Card>
-          <h3 className="font-semibold text-slate-800 mb-3">ערכים מחושבים</h3>
+          <h3 className="font-semibold text-slate-800 mb-3">{t("profile_calculated")}</h3>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-slate-50 rounded-2xl px-3 py-2.5 text-center">
               <p className="text-sm text-slate-400">BMI</p>
@@ -186,12 +186,12 @@ export default function ProfilePage() {
             <div className="bg-slate-50 rounded-2xl px-3 py-2.5 text-center">
               <p className="text-sm text-slate-400">BMR</p>
               <p className="font-bold text-slate-700">{bmr}</p>
-              <p className="text-sm text-slate-400 mt-0.5">קק״ל בסיס</p>
+              <p className="text-sm text-slate-400 mt-0.5">{t("profile_bmi_base")}</p>
             </div>
             <div className="bg-slate-50 rounded-2xl px-3 py-2.5 text-center">
               <p className="text-sm text-slate-400">TDEE</p>
               <p className="font-bold text-slate-700">{tdee}</p>
-              <p className="text-sm text-slate-400 mt-0.5">קק״ל/יום</p>
+              <p className="text-sm text-slate-400 mt-0.5">{t("profile_tdee_day")}</p>
             </div>
           </div>
         </Card>
@@ -200,7 +200,7 @@ export default function ProfilePage() {
       {/* Steps goal */}
       <Card>
         <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-1.5">
-          <Footprints size={16} className="text-wing-muted" /> יעד צעדים יומי
+          <Footprints size={16} className="text-wing-muted" /> {t("profile_steps_goal")}
         </h3>
         <div className="flex items-center gap-3">
           <input
@@ -212,18 +212,17 @@ export default function ProfilePage() {
             className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-wing-primary"
             dir="ltr"
           />
-          <span className="text-sm text-slate-400 shrink-0">צעד/יום</span>
+          <span className="text-sm text-slate-400 shrink-0">{t("profile_steps_unit")}</span>
         </div>
         <Button onClick={handleSaveStepsGoal} loading={savingSteps} className="w-full mt-3">
-          שמור יעד
+          {t("profile_save_goal")}
         </Button>
       </Card>
 
       {/* Logout */}
       <Button variant="secondary" onClick={handleSignOut} className="w-full">
-        התנתק
+        {t("profile_signout")}
       </Button>
     </div>
   );
 }
-

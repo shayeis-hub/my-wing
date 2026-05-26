@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/i18n";
 
 interface SOSButtonProps {
   wingId: string;
@@ -13,6 +14,7 @@ interface SOSButtonProps {
 export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
   const [sending, setSending] = useState(false);
   const [cooldown, setCooldown] = useState(false);
+  const { t } = useLanguage();
 
   async function handleSOS() {
     if (sending || cooldown) return;
@@ -25,19 +27,25 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        toast.error(`שגיאה: ${data.error ?? res.status}`);
+        toast.error(`Error: ${data.error ?? res.status}`);
         return;
       }
       const notified: number = data.notified ?? 0;
-      toast.success(notified > 0 ? `שלחנו סימן ל-${notified} חברים 💪` : "שלחנו סימן!");
+      toast.success((t("sos_success") as (n: number) => string)(notified));
       setCooldown(true);
       setTimeout(() => setCooldown(false), 10 * 60 * 1000);
     } catch {
-      toast.error("לא הצלחנו לשלוח. נסה שוב.");
+      toast.error(t("sos_error") as string);
     } finally {
       setSending(false);
     }
   }
+
+  const label = cooldown
+    ? t("sos_sent") as string
+    : sending
+    ? t("sos_sending") as string
+    : t("sos_btn") as string;
 
   return (
     <button
@@ -48,7 +56,7 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
     >
       <AlertTriangle size={20} strokeWidth={2} style={{ color: "#ff6b47" }} />
       <span className="font-bold text-base" style={{ color: "#ff6b47" }}>
-        {cooldown ? "נשלח ✓" : sending ? "שולח..." : "SOS – צריך חיזוק!"}
+        {label}
       </span>
     </button>
   );

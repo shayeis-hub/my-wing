@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
+import { useLanguage } from "@/lib/i18n";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Avatar } from "@/components/ui/Avatar";
@@ -17,6 +18,7 @@ import { format, subDays } from "date-fns";
 export default function WingPage() {
   const { user, firebaseUser } = useAuth();
   const { wing, loading } = useWing(user?.wingId);
+  const { t } = useLanguage();
 
   const [wingName, setWingName] = useState("");
   const [joinToken, setJoinToken] = useState("");
@@ -36,14 +38,12 @@ export default function WingPage() {
   useEffect(() => {
     if (!user?.wingId) return;
     const today = format(new Date(), "yyyy-MM-dd");
-    // Fetch recent 3 days of checkins for activity feed + streak calc
     Promise.all([
       getWingCheckins(user.wingId, today),
       getWingCheckins(user.wingId, format(subDays(new Date(), 1), "yyyy-MM-dd")),
       getWingCheckins(user.wingId, format(subDays(new Date(), 2), "yyyy-MM-dd")),
     ]).then(([d0, d1, d2]) => {
       setRecentCheckins([...d0, ...d1, ...d2]);
-      // Compute streak per user (consecutive days with checkins)
       const streaks: Record<string, number> = {};
       const byUser = new Map<string, Set<string>>();
       for (const c of [...d0, ...d1, ...d2]) {
@@ -77,10 +77,10 @@ export default function WingPage() {
         body: JSON.stringify({ ownerId: firebaseUser.uid, ownerName: user.displayName, name: wingName.trim() }),
       });
       if (!res.ok) throw new Error();
-      toast.success(`המבנה "${wingName}" נוצר! 🪽`);
+      toast.success((t("wing_created") as (name: string) => string)(wingName));
       window.location.reload();
     } catch {
-      toast.error("שגיאה ביצירת המבנה");
+      toast.error(t("wing_create_error") as string);
     } finally {
       setCreating(false);
     }
@@ -96,10 +96,10 @@ export default function WingPage() {
         body: JSON.stringify({ token: joinToken.trim(), userId: firebaseUser.uid, displayName: user.displayName, photoURL: user.photoURL }),
       });
       if (!res.ok) throw new Error("token-invalid");
-      toast.success("הצטרפת למבנה! 🎉");
+      toast.success(t("wing_joined") as string);
       window.location.reload();
     } catch {
-      toast.error("קישור לא תקין. בדוק ונסה שוב.");
+      toast.error(t("wing_join_error") as string);
     } finally {
       setJoining(false);
     }
@@ -115,19 +115,28 @@ export default function WingPage() {
         body: JSON.stringify({ wingId: wing.id, name: newName.trim() }),
       });
       if (!res.ok) throw new Error();
-      toast.success("שם המבנה עודכן!");
+      toast.success(t("wing_rename_saved") as string);
       setEditingName(false);
     } catch {
-      toast.error("שגיאה בעדכון השם");
+      toast.error(t("wing_rename_error") as string);
     } finally {
       setRenamingWing(false);
     }
   }
 
   async function copyInvite() {
-    if (!inviteLink) { toast.error("הקישור עדיין נוצר, נסה שוב"); return; }
+    if (!inviteLink) { toast.error(t("wing_invite_error") as string); return; }
     await navigator.clipboard.writeText(inviteLink);
-    toast.success("הקישור הועתק! שלח לחברים 📤");
+    toast.success(t("wing_invite_copied") as string);
+  }
+
+  const today = format(new Date(), "yyyy-MM-dd");
+  const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
+
+  function whenLabel(date: string) {
+    if (date === today) return t("wing_today") as string;
+    if (date === yesterday) return t("wing_yesterday") as string;
+    return t("wing_two_days_ago") as string;
   }
 
   if (loading) {
@@ -141,7 +150,7 @@ export default function WingPage() {
   return (
     <div className="p-4 space-y-4">
       <div className="pt-4">
-        <h1 className="text-2xl font-black text-wing-ink tracking-tight">המבנה שלי</h1>
+        <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("wing_title")}</h1>
       </div>
 
       {wing ? (
@@ -165,24 +174,28 @@ export default function WingPage() {
                     <div className="flex gap-2">
                       <button onClick={handleRename} disabled={renamingWing}
                         className="text-xs bg-wing-ink text-wing-elevated px-3 py-1 rounded-full font-bold">
-                        {renamingWing ? "שומר..." : "שמור"}
+                        {renamingWing ? t("wing_rename_saving") : t("save")}
                       </button>
                       <button onClick={() => setEditingName(false)}
                         className="text-xs text-wing-muted px-3 py-1 rounded-full bg-wing-elevated border border-wing-border">
-                        ביטול
+                        {t("cancel")}
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-black text-wing-ink">{wing.name || <span className="text-wing-muted italic">ללא שם</span>}</h2>
+                    <h2 className="text-xl font-black text-wing-ink">
+                      {wing.name || <span className="text-wing-muted italic">{t("wing_no_name")}</span>}
+                    </h2>
                     <button onClick={() => { setNewName(wing.name); setEditingName(true); }}
                       className="p-1.5 hover:bg-wing-elevated rounded-lg transition-colors">
                       <Pencil size={14} className="text-wing-muted" />
                     </button>
                   </div>
                 )}
-                <p className="text-sm text-wing-muted mt-0.5">{memberCount} חברים</p>
+                <p className="text-sm text-wing-muted mt-0.5">
+                  {(t("wing_members_count") as (n: number) => string)(memberCount)}
+                </p>
               </div>
               <div className="text-3xl">🪽</div>
             </div>
@@ -208,16 +221,15 @@ export default function WingPage() {
                     </div>
                     {isOwner && (
                       <span className="font-mono text-[11px] tracking-[0.14em] uppercase text-wing-muted bg-wing-elevated border border-wing-border px-2 py-0.5 rounded-full">
-                        מנהל
+                        {t("wing_admin")}
                       </span>
                     )}
-                    {/* Streak */}
                     {(memberStreaks[m.uid] ?? 0) > 0 && (
                       <div className="mr-auto flex flex-col items-center">
                         <span className="font-mono font-bold text-[11px]" style={{ color: "#d4541a" }}>
                           {memberStreaks[m.uid]}
                         </span>
-                        <span className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">ימים</span>
+                        <span className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">{t("wing_days_streak")}</span>
                       </div>
                     )}
                   </div>
@@ -231,12 +243,12 @@ export default function WingPage() {
               className="w-full flex items-center justify-center gap-2 py-3 rounded-[14px] border-2 border-dashed border-wing-border text-sm font-semibold text-wing-muted hover:border-wing-ink hover:text-wing-ink transition-colors"
             >
               <UserPlus size={16} />
-              הזמן חבר / העתק קישור
+              {t("wing_invite_btn")}
               <Copy size={14} className="opacity-60" />
             </button>
           </div>
 
-          {/* Active challenge hero card */}
+          {/* Active challenge */}
           {wing.activeChallenge && (
             <div
               className="rounded-[20px] p-5 space-y-3"
@@ -244,7 +256,9 @@ export default function WingPage() {
             >
               <div className="flex items-center gap-2">
                 <Trophy size={18} className="text-[#c79a00]" />
-                <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#c79a00]">אתגר שבועי</span>
+                <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#c79a00]">
+                  {t("wing_weekly_challenge")}
+                </span>
               </div>
               <p className="text-[18px] font-extrabold text-wing-ink leading-snug">{wing.activeChallenge.title}</p>
               {wing.activeChallenge.description && (
@@ -267,22 +281,19 @@ export default function WingPage() {
           )}
 
           {/* Activity Feed */}
-          {recentCheckins.length > 0 && (
+          {recentCheckins.filter((c) => c.daySummary || c.workout?.done).length > 0 && (
             <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-3">
-              <span className="font-bold text-sm text-wing-ink">פעילות אחרונה</span>
+              <span className="font-bold text-sm text-wing-ink">{t("wing_activity")}</span>
               <div className="space-y-3">
                 {recentCheckins
                   .filter((c) => c.daySummary || c.workout?.done)
                   .slice(0, 4)
                   .map((c, i) => {
-                    const today = format(new Date(), "yyyy-MM-dd");
-                    const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
-                    const when = c.date === today ? "היום" : c.date === yesterday ? "אתמול" : "לפני יומיים";
                     const action = c.daySummary
-                      ? "סגר/ה את היום"
+                      ? t("wing_closed_day") as string
                       : c.workout?.done
-                      ? `אימון · ${c.workout.type ?? ""}`
-                      : "עשה/תה צ׳ק-אין";
+                      ? (t("wing_workout_action") as (type: string) => string)(c.workout.type ?? "")
+                      : t("wing_checkin_action") as string;
                     return (
                       <div key={`${c.id}-${i}`} className="flex items-start gap-3">
                         <Avatar name={c.userName} size={32} />
@@ -291,7 +302,9 @@ export default function WingPage() {
                             <span className="font-semibold">{c.userName.split(" ")[0]}</span>
                             {" "}{action}
                           </p>
-                          <p className="font-mono text-[11px] text-wing-muted tracking-wider mt-0.5">{when}</p>
+                          <p className="font-mono text-[11px] text-wing-muted tracking-wider mt-0.5">
+                            {whenLabel(c.date)}
+                          </p>
                           {c.daySummary?.tip && (
                             <div
                               className="mt-1.5 px-3 py-2 rounded-[10px] text-xs text-wing-ink/80"
@@ -317,26 +330,41 @@ export default function WingPage() {
         <div className="space-y-4">
           <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-4">
             <div>
-              <h2 className="font-bold text-wing-ink">צור מבנה חדש</h2>
-              <p className="text-sm text-wing-muted mt-1">אתה תהיה המנהל ותשלח קישור לחברים</p>
+              <h2 className="font-bold text-wing-ink">{t("wing_create_title")}</h2>
+              <p className="text-sm text-wing-muted mt-1">{t("wing_create_sub")}</p>
             </div>
-            <Input label="שם המבנה" value={wingName} onChange={(e) => setWingName(e.target.value)} placeholder="חברי הספורטאק..." />
-            <Button onClick={handleCreate} loading={creating} className="w-full">צור מבנה 🪽</Button>
+            <Input
+              label={t("wing_name_label") as string}
+              value={wingName}
+              onChange={(e) => setWingName(e.target.value)}
+              placeholder={t("wing_name_ph") as string}
+            />
+            <Button onClick={handleCreate} loading={creating} className="w-full">
+              {t("wing_create_btn")}
+            </Button>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-wing-border" />
-            <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-wing-muted">או</span>
+            <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-wing-muted">{t("wing_or")}</span>
             <div className="flex-1 h-px bg-wing-border" />
           </div>
 
           <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-4">
             <div>
-              <h2 className="font-bold text-wing-ink">הצטרף למבנה קיים</h2>
-              <p className="text-sm text-wing-muted mt-1">הכנס את קוד ההזמנה שקיבלת</p>
+              <h2 className="font-bold text-wing-ink">{t("wing_join_title")}</h2>
+              <p className="text-sm text-wing-muted mt-1">{t("wing_join_sub")}</p>
             </div>
-            <Input label="קוד הזמנה" value={joinToken} onChange={(e) => setJoinToken(e.target.value)} placeholder="XXXXXXXXXX" dir="ltr" />
-            <Button variant="secondary" onClick={handleJoin} loading={joining} className="w-full">הצטרף</Button>
+            <Input
+              label={t("wing_token_label") as string}
+              value={joinToken}
+              onChange={(e) => setJoinToken(e.target.value)}
+              placeholder="XXXXXXXXXX"
+              dir="ltr"
+            />
+            <Button variant="secondary" onClick={handleJoin} loading={joining} className="w-full">
+              {t("wing_join_btn")}
+            </Button>
           </div>
         </div>
       )}
