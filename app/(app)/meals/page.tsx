@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
+import { AdBanner } from "@/components/ads/AdBanner";
 
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
 
@@ -406,6 +407,9 @@ export default function MealsPage() {
           </div>
         </div>
       )}
+
+      {/* Ad Banner */}
+      <AdBanner className="rounded-2xl" />
 
       {/* Meals feed */}
       {loading ? (

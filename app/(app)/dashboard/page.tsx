@@ -23,6 +23,7 @@ import { Bell, Footprints, Scale, CheckSquare, ChevronLeft, Droplets, Flame } fr
 import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
 import { calcStreak } from "@/lib/utils/streak";
 import type { StepsEntry } from "@/types";
+import { AdBanner } from "@/components/ads/AdBanner";
 
 
 export default function DashboardPage() {
@@ -238,6 +239,9 @@ export default function DashboardPage() {
           {user && firebaseUser && (
             <SOSButton wingId={user.wingId ?? ""} userId={firebaseUser.uid} userName={user.displayName} />
           )}
+
+          {/* Ad Banner */}
+          <AdBanner className="rounded-2xl" />
 
           {/* Recent meals */}
           {myTodayMeals.length > 0 && (
