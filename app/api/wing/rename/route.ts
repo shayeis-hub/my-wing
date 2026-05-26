@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { admin, getAdminApp } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
-import { renameWing } from "@/lib/firebase/firestore";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +9,10 @@ export async function POST(req: NextRequest) {
     if (!wingId || !name) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
-    await renameWing(wingId, name);
+
+    getAdminApp();
+    await admin.firestore().collection("wings").doc(wingId).update({ name });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Rename wing error:", err);
