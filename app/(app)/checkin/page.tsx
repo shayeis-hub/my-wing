@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
+import { useTrialLock } from "@/hooks/useTrialLock";
 import { g } from "@/lib/utils/gender";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
@@ -62,6 +63,7 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 function CheckinPageInner() {
   const { user, firebaseUser } = useAuth();
   const { t, lang } = useLanguage();
+  const trialLocked = useTrialLock();
 
   const moods = [
     { value: 1, emoji: MOOD_EMOJIS[0], label: t("mood_1") },
@@ -573,12 +575,18 @@ function CheckinPageInner() {
 
       {/* CTA */}
       <button
-        onClick={handleSave}
+        onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : handleSave()}
         disabled={saving}
         className="w-full py-4 rounded-[14px] font-extrabold text-wing-ink text-base transition-all active:scale-[0.97] disabled:opacity-60"
         style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
       >
-        {saving ? g(user?.profile?.gender, t("checkin_saving_m"), t("checkin_saving_f")) : myCheckin ? g(user?.profile?.gender, t("checkin_update_m"), t("checkin_update_f")) : g(user?.profile?.gender, t("checkin_save_m"), t("checkin_save_f"))}
+        {trialLocked
+          ? t("trial_upgrade_btn")
+          : saving
+          ? g(user?.profile?.gender, t("checkin_saving_m"), t("checkin_saving_f"))
+          : myCheckin
+          ? g(user?.profile?.gender, t("checkin_update_m"), t("checkin_update_f"))
+          : g(user?.profile?.gender, t("checkin_save_m"), t("checkin_save_f"))}
       </button>
 
       {/* Close day button */}

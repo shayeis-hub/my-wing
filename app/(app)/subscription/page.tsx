@@ -2,18 +2,27 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Zap, Check, Crown, ArrowLeft } from "lucide-react";
+import { Zap, Check, Crown, ArrowLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
-import { isGrandfathered, isPremium, FREE_LIMITS } from "@/lib/subscription";
+import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { Subscription } from "@/types";
+import type { Timestamp } from "firebase/firestore";
+import { Suspense } from "react";
 
-export default function SubscriptionPage() {
+function toMs(ts: Timestamp | null | undefined): number | null {
+  if (!ts) return null;
+  if (typeof ts.toDate === "function") return ts.toDate().getTime();
+  const s = (ts as unknown as { _seconds?: number })._seconds;
+  return s ? s * 1000 : null;
+}
+
+function SubscriptionPageInner() {
   const { user, firebaseUser } = useAuth();
-  const { t, lang } = useLanguage();
+  const { t, lang, dir } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loadingCheckout, setLoadingCheckout] = useState<"monthly" | "yearly" | null>(null);
@@ -23,10 +32,15 @@ export default function SubscriptionPage() {
   const sub: Subscription | undefined = user?.subscription;
   const grandfathered = isGrandfathered(email);
   const premium = isPremium(email, sub?.plan);
+  const isExpiredPaywall = searchParams.get("expired") === "1";
+
+  const createdAtMs = toMs(user?.createdAt ?? null);
+  const daysLeft = getTrialDaysLeft(createdAtMs);
+  const inTrial = !premium && !grandfathered && daysLeft > 0;
 
   useEffect(() => {
     if (searchParams.get("success") === "1") {
-      toast.success(lang === "he" ? "ברוך הבא ל-Premium! 🎉" : "Welcome to Premium! 🎉");
+      toast.success(lang === "he" ? "ברוך הבא ל-Premium!" : "Welcome to Premium!");
     }
     if (searchParams.get("canceled") === "1") {
       toast(lang === "he" ? "ביטלת את תהליך ההרשמה" : "Checkout canceled");
@@ -88,21 +102,55 @@ export default function SubscriptionPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-wing-bg" dir={lang === "he" ? "rtl" : "ltr"}>
-      {/* Header */}
+    <div className="min-h-screen bg-wing-bg" dir={dir}>
+      {/* Header — hide back button when in paywall mode */}
       <div className="sticky top-0 bg-wing-bg/80 backdrop-blur-md border-b border-wing-border z-10">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
-          <button onClick={() => router.back()} className="p-2 hover:bg-wing-elevated rounded-xl">
-            <ArrowLeft size={20} className="text-wing-muted" />
-          </button>
+          {!isExpiredPaywall && (
+            <button onClick={() => router.back()} className="p-2 hover:bg-wing-elevated rounded-xl">
+              <ArrowLeft size={20} className="text-wing-muted" />
+            </button>
+          )}
           <h1 className="font-black text-wing-ink text-lg">{t("upgrade_manage")}</h1>
         </div>
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
 
+        {/* Paywall banner — trial expired */}
+        {isExpiredPaywall && !premium && !grandfathered && (
+          <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-wing-elevated flex items-center justify-center shrink-0">
+                <Lock size={18} className="text-wing-muted" />
+              </div>
+              <div>
+                <p className="font-black text-wing-ink">{t("trial_expired_title")}</p>
+                <p className="text-sm text-wing-muted mt-0.5">{t("trial_expired_body")}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Trial countdown banner */}
+        {inTrial && !isExpiredPaywall && (
+          <div className="bg-wing-elevated border border-wing-border rounded-[20px] px-4 py-3 flex items-center justify-between">
+            <p className="text-sm font-medium text-wing-ink">
+              {(t("trial_days_left") as (n: number) => string)(daysLeft)}
+            </p>
+            <div className="flex gap-0.5">
+              {Array.from({ length: TRIAL_DAYS }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1.5 w-4 rounded-full ${i < (TRIAL_DAYS - daysLeft) ? "bg-wing-border" : "bg-wing-heat"}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Current status card */}
-        <div className={`rounded-3xl p-5 ${premium ? "bg-gradient-to-br from-wing-primary to-wing-heat" : "bg-wing-surface border border-wing-border"}`}>
+        <div className={`rounded-[20px] p-5 ${premium ? "bg-gradient-to-br from-wing-primary to-wing-heat" : "bg-wing-surface border border-wing-border"}`}>
           <div className="flex items-center gap-3">
             {premium ? (
               <Crown size={28} className="text-yellow-300 fill-yellow-300" />
@@ -112,21 +160,21 @@ export default function SubscriptionPage() {
             <div>
               <p className={`font-black text-lg ${premium ? "text-white" : "text-wing-ink"}`}>
                 {grandfathered
-                  ? "Wing VIP 👑"
+                  ? "Wingpact Founders"
                   : premium
                   ? t("upgrade_active")
-                  : t("upgrade_free")}
+                  : inTrial
+                  ? t("trial_active_sub")
+                  : t("trial_expired_title")}
               </p>
               {premium && !grandfathered && expiresAt && (
                 <p className="text-xs text-white/80">
                   {(t("upgrade_renews") as (d: string) => string)(expiresAt)}
                 </p>
               )}
-              {!premium && (
+              {inTrial && (
                 <p className="text-xs text-wing-muted">
-                  {lang === "he"
-                    ? `${FREE_LIMITS.mealPhotosPerDay} תמונות ארוחה ביום · עד ${FREE_LIMITS.wingMembers} חברים`
-                    : `${FREE_LIMITS.mealPhotosPerDay} meal photos/day · up to ${FREE_LIMITS.wingMembers} members`}
+                  {(t("trial_days_left") as (n: number) => string)(daysLeft)}
                 </p>
               )}
             </div>
@@ -134,7 +182,7 @@ export default function SubscriptionPage() {
         </div>
 
         {/* Features list */}
-        <div className="bg-wing-surface border border-wing-border rounded-3xl p-5 space-y-3">
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-3">
           <p className="font-bold text-wing-ink text-sm">
             {lang === "he" ? "מה כלול ב-Premium:" : "What's included in Premium:"}
           </p>
@@ -148,14 +196,10 @@ export default function SubscriptionPage() {
           ))}
         </div>
 
-        {/* Upgrade / manage buttons */}
+        {/* Founders */}
         {grandfathered ? (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 text-center">
-            <p className="text-sm font-semibold text-yellow-800">
-              {lang === "he"
-                ? "אתה/את חלק מקבוצת המייסדים של Wing — גישה מלאה לעולם ועד 💛"
-                : "You're a Wing founder — full access forever 💛"}
-            </p>
+          <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center">
+            <p className="text-sm font-semibold text-wing-ink">{t("founders_message")}</p>
           </div>
         ) : premium ? (
           <div className="space-y-3">
@@ -168,7 +212,7 @@ export default function SubscriptionPage() {
               {t("upgrade_cancel")}
             </Button>
             {sub?.cancelPending && (
-              <p className="text-center text-sm text-orange-600 bg-orange-50 rounded-2xl px-4 py-2.5">
+              <p className="text-center text-sm text-wing-muted bg-wing-elevated rounded-2xl px-4 py-2.5">
                 {lang === "he"
                   ? "המנוי יסתיים בתום תקופת החיוב הנוכחית"
                   : "Your subscription will end at the current billing period"}
@@ -205,9 +249,30 @@ export default function SubscriptionPage() {
             </button>
 
             <p className="text-center text-xs text-wing-subtle">{t("upgrade_cancel_anytime")}</p>
+
+            {/* View only (only when paywall / trial expired) */}
+            {isExpiredPaywall && (
+              <div className="pt-2 border-t border-wing-border space-y-1.5">
+                <button
+                  onClick={() => router.replace("/dashboard")}
+                  className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
+                >
+                  {t("trial_view_only")}
+                </button>
+                <p className="text-center text-xs text-wing-subtle">{t("trial_view_only_note")}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function SubscriptionPage() {
+  return (
+    <Suspense>
+      <SubscriptionPageInner />
+    </Suspense>
   );
 }

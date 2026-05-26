@@ -473,6 +473,15 @@ export const T = {
     upgrade_cancel: "בטל מנוי",
     upgrade_renews: (date: string) => `מתחדש ב-${date}`,
     upgrade_expires: (date: string) => `פג תוקף ב-${date}`,
+    trial_days_left: (n: number) => n === 1 ? "נשאר יום אחד בניסיון" : `נשארו ${n} ימים בניסיון`,
+    trial_active_sub: "7 ימי ניסיון ללא תשלום",
+    trial_expired_title: "תקופת הניסיון הסתיימה",
+    trial_expired_body: "כדי להמשיך להשתמש ב-Wingpact, בחר תכנית מנוי",
+    trial_view_only: "המשך בצפייה בלבד",
+    trial_view_only_note: "לא ניתן להזין ארוחות, צ׳ק-אין או לשלוח תגובות",
+    trial_locked_action: "שדרג לפרמיום כדי לבצע פעולה זו",
+    trial_upgrade_btn: "שדרג עכשיו",
+    founders_message: "שי וסיוון — צוות המייסדים של Wingpact. גישה מלאה לעולם ועד.",
 
     // Steps page
     steps_ring_label: "צעדים",
@@ -1013,6 +1022,15 @@ export const T = {
     upgrade_cancel: "Cancel Subscription",
     upgrade_renews: (date: string) => `Renews on ${date}`,
     upgrade_expires: (date: string) => `Expires on ${date}`,
+    trial_days_left: (n: number) => n === 1 ? "1 day left in trial" : `${n} days left in trial`,
+    trial_active_sub: "7-day free trial",
+    trial_expired_title: "Your free trial has ended",
+    trial_expired_body: "To keep using Wingpact, choose a subscription plan",
+    trial_view_only: "Continue in view-only mode",
+    trial_view_only_note: "You won't be able to add meals, check in, or send reactions",
+    trial_locked_action: "Upgrade to Premium to use this feature",
+    trial_upgrade_btn: "Upgrade now",
+    founders_message: "Shay & Sivan — Wingpact founding team. Full access forever.",
 
     // Steps page
     steps_ring_label: "Steps",

@@ -20,6 +20,7 @@ import { he } from "date-fns/locale";
 import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 import { AdBanner } from "@/components/ads/AdBanner";
+import { useTrialLock } from "@/hooks/useTrialLock";
 
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
 
@@ -28,6 +29,7 @@ export default function MealsPage() {
   const { meals, loading } = useMeals(user?.wingId);
   const { wing } = useWing(user?.wingId);
   const { t, lang } = useLanguage();
+  const trialLocked = useTrialLock();
   const mealTypeLabels = {
     breakfast: t("meals_type_breakfast"),
     lunch: t("meals_type_lunch"),
@@ -179,7 +181,7 @@ export default function MealsPage() {
           <Button
             size="sm"
             variant="secondary"
-            onClick={() => { setShowManualForm(true); setPendingAnalysis(null); }}
+            onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : (setShowManualForm(true), setPendingAnalysis(null))}
             className="flex items-center gap-1.5"
           >
             <PenLine size={16} />
@@ -187,7 +189,7 @@ export default function MealsPage() {
           </Button>
           <Button
             size="sm"
-            onClick={() => setShowCamera(true)}
+            onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : setShowCamera(true)}
             className="flex items-center gap-1.5"
           >
             <Camera size={16} />

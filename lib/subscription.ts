@@ -1,3 +1,26 @@
+export type Plan = "free" | "premium" | "grandfathered";
+export type PriceType = "monthly" | "yearly";
+
+// ── Trial ─────────────────────────────────────────────────────────────────────
+export const TRIAL_DAYS = 7;
+
+/** Returns days remaining in trial (0 = expired). Pass createdAt as ms since epoch. */
+export function getTrialDaysLeft(createdAtMs: number | null | undefined): number {
+  if (createdAtMs == null) return TRIAL_DAYS;
+  const elapsed = (Date.now() - createdAtMs) / (1000 * 60 * 60 * 24);
+  return Math.max(0, Math.ceil(TRIAL_DAYS - elapsed));
+}
+
+export function isTrialExpired(
+  email:        string | null | undefined,
+  plan:         Plan   | undefined,
+  createdAtMs:  number | null | undefined
+): boolean {
+  if (isGrandfathered(email)) return false;
+  if (isPremium(email, plan)) return false;
+  return getTrialDaysLeft(createdAtMs) === 0;
+}
+
 // ── Grandfathered users — always premium, never see ads ──────────────────────
 export const GRANDFATHERED_EMAILS = [
   "sivan.ati@gmail.com",
@@ -15,9 +38,6 @@ export const PADDLE_PRICES = {
   monthly: process.env.PADDLE_PRICE_MONTHLY ?? "",
   yearly:  process.env.PADDLE_PRICE_YEARLY  ?? "",
 } as const;
-
-export type Plan = "free" | "premium" | "grandfathered";
-export type PriceType = "monthly" | "yearly";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 export function isGrandfathered(email?: string | null): boolean {
