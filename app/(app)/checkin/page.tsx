@@ -147,16 +147,19 @@ function CheckinPageInner() {
 
   function applyMealTimes(meals: import("@/types").Meal[], savedOpen?: string) {
     if (!meals.length) return;
-    const times = meals.map((m) => {
-      const ts = m.createdAt as unknown as { toDate?: () => Date; _seconds?: number };
-      return ts?.toDate ? ts.toDate() : new Date((ts?._seconds ?? 0) * 1000);
-    }).filter(Boolean);
-    if (!times.length) return;
+    // Prefer user-specified mealTime ("HH:mm") over Firestore createdAt timestamp
     const toHHMM = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    const times = meals.map((m) => {
+      if (m.mealTime) return m.mealTime; // "HH:mm" string — use as-is
+      const ts = m.createdAt as unknown as { toDate?: () => Date; _seconds?: number };
+      const d = ts?.toDate ? ts.toDate() : new Date((ts?._seconds ?? 0) * 1000);
+      return toHHMM(d);
+    }).filter(Boolean).sort();
+    if (!times.length) return;
     // Preserve manually saved open time; only auto-set if not yet saved
-    if (!savedOpen) setEwOpen(toHHMM(times[0]));
+    if (!savedOpen) setEwOpen(times[0]);
     // Always update close to latest meal time
-    setEwClose(toHHMM(times[times.length - 1]));
+    setEwClose(times[times.length - 1]);
   }
 
   function calcEwDuration(open: string, close: string): number {
