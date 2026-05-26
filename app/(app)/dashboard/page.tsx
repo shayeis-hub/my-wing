@@ -244,7 +244,7 @@ export default function DashboardPage() {
           )}
 
           {/* Ad Banner */}
-          <AdBanner className="rounded-2xl" />
+          <AdBanner slot="1364961245" layoutKey="-6t+ed+2i-1n-4w" format="fluid" className="rounded-2xl" />
 
           {/* Recent meals */}
           {myTodayMeals.length > 0 && (

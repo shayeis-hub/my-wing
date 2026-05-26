@@ -436,7 +436,7 @@ export default function MealsPage() {
       )}
 
       {/* Ad Banner */}
-      <AdBanner className="rounded-2xl" />
+      <AdBanner slot="6335732261" layoutKey="-6t+ed+2i-1n-4w" format="fluid" className="rounded-2xl" />
 
       {/* Meals feed */}
       {loading ? (

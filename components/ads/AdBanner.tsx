@@ -6,6 +6,8 @@ import { isGrandfathered, isPremium } from "@/lib/subscription";
 
 interface AdBannerProps {
   slot?: string;
+  layoutKey?: string;
+  format?: string;
   className?: string;
 }
 
@@ -20,7 +22,7 @@ declare global {
  * Set NEXT_PUBLIC_ADSENSE_CLIENT in Vercel env vars once your AdSense account is approved.
  * Until then the component renders nothing visible.
  */
-export function AdBanner({ slot, className = "" }: AdBannerProps) {
+export function AdBanner({ slot, layoutKey, format = "auto", className = "" }: AdBannerProps) {
   const { user, firebaseUser } = useAuth();
   const adRef = useRef<HTMLModElement>(null);
   const initialized = useRef(false);
@@ -52,8 +54,8 @@ export function AdBanner({ slot, className = "" }: AdBannerProps) {
         style={{ display: "block" }}
         data-ad-client={clientId}
         data-ad-slot={slot ?? ""}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
+        data-ad-format={format}
+        {...(layoutKey ? { "data-ad-layout-key": layoutKey } : { "data-full-width-responsive": "true" })}
       />
     </div>
   );
