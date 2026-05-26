@@ -16,12 +16,11 @@ import {
   parseISO,
   isFuture,
 } from "date-fns";
-import { he } from "date-fns/locale";
+import { he, enUS } from "date-fns/locale";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { DayPanel } from "@/components/calendar/DayPanel";
 import type { DailyCheckin, Encouragement } from "@/types";
-
-const DAY_LABELS = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
+import { useLanguage } from "@/lib/i18n";
 
 function todayStr() {
   return format(new Date(), "yyyy-MM-dd");
@@ -30,6 +29,12 @@ function todayStr() {
 export default function CalendarPage() {
   const { user, firebaseUser } = useAuth();
   const { wing } = useWing(user?.wingId);
+  const { t, lang } = useLanguage();
+  const dateLocale = lang === "he" ? he : enUS;
+  const DAY_LABELS = [
+    t("cal_day_0"), t("cal_day_1"), t("cal_day_2"), t("cal_day_3"),
+    t("cal_day_4"), t("cal_day_5"), t("cal_day_6"),
+  ];
   const [currentDate, setCurrentDate] = useState(new Date());
   const [checkins, setCheckins] = useState<DailyCheckin[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(todayStr());
@@ -118,7 +123,7 @@ export default function CalendarPage() {
           <ChevronRight size={20} className="text-wing-muted" />
         </button>
         <h1 className="text-xl font-bold text-wing-ink">
-          {format(currentDate, "MMMM yyyy", { locale: he })}
+          {format(currentDate, "MMMM yyyy", { locale: dateLocale })}
         </h1>
         <button
           onClick={() =>
@@ -197,7 +202,7 @@ export default function CalendarPage() {
       </div>
 
       {loading && (
-        <div className="text-center py-2 text-wing-subtle text-sm">טוען...</div>
+        <div className="text-center py-2 text-wing-subtle text-sm">{t("loading")}</div>
       )}
 
       {/* Day panel */}

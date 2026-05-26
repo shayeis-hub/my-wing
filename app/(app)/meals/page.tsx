@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
+import { enUS } from "date-fns/locale";
 import { useMeals } from "@/hooks/useMeals";
 import { useWing } from "@/hooks/useWing";
 import { MealCard } from "@/components/meals/MealCard";
@@ -19,12 +20,18 @@ import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
-const mealTypeLabels = { breakfast: "בוקר", lunch: "צהריים", dinner: "ערב", snack: "חטיף" };
 
 export default function MealsPage() {
   const { user, firebaseUser } = useAuth();
   const { meals, loading } = useMeals(user?.wingId);
   const { wing } = useWing(user?.wingId);
+  const { t, lang } = useLanguage();
+  const mealTypeLabels = {
+    breakfast: t("meals_type_breakfast"),
+    lunch: t("meals_type_lunch"),
+    dinner: t("meals_type_dinner"),
+    snack: t("meals_type_snack"),
+  };
   const [selectedUserId, setSelectedUserId] = useState<string | "all">("all");
   const [showCamera, setShowCamera] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
@@ -80,7 +87,7 @@ export default function MealsPage() {
         mealType: manualMealType,
         mealTime: manualTime,
       });
-      toast.success("הארוחה נשמרה! 🍽️");
+      toast.success(t("meals_saved"));
       setShowManualForm(false);
       setManualDescription("");
       setManualCalories("");
@@ -88,7 +95,7 @@ export default function MealsPage() {
       setManualCarbs("");
       setManualFat("");
     } catch {
-      toast.error("שגיאה בשמירת הארוחה");
+      toast.error(t("meals_save_error"));
     } finally {
       setSavingManual(false);
     }
@@ -109,9 +116,9 @@ export default function MealsPage() {
       const analysis: MealAnalysis = await res.json();
       setPendingAnalysis((prev) => prev ? { ...prev, analysis } : null);
       setHint("");
-      toast.success("הניתוח עודכן ✨");
+      toast.success(t("meals_reanalyzed"));
     } catch {
-      toast.error("שגיאה בניתוח מחדש");
+      toast.error(t("meals_reanalyze_error"));
     } finally {
       setReanalyzing(false);
     }
@@ -145,10 +152,10 @@ export default function MealsPage() {
         mealTime,
       });
 
-      toast.success("הארוחה נשמרה! 🍽️");
+      toast.success(t("meals_saved"));
       setPendingAnalysis(null);
     } catch {
-      toast.error("שגיאה בשמירת הארוחה");
+      toast.error(t("meals_save_error"));
     } finally {
       setSaving(false);
     }
@@ -157,7 +164,7 @@ export default function MealsPage() {
   return (
     <div className="p-4 space-y-4">
       <div className="pt-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-wing-ink">ארוחות המבנה</h1>
+        <h1 className="text-xl font-bold text-wing-ink">{t("meals_wing_title")}</h1>
         <div className="flex gap-2">
           <Button
             size="sm"
@@ -166,7 +173,7 @@ export default function MealsPage() {
             className="flex items-center gap-1.5"
           >
             <PenLine size={16} />
-            ידנית
+            {t("meals_manual_short")}
           </Button>
           <Button
             size="sm"
@@ -174,7 +181,7 @@ export default function MealsPage() {
             className="flex items-center gap-1.5"
           >
             <Camera size={16} />
-            צלם
+            {t("meals_photo_short")}
           </Button>
         </div>
       </div>
@@ -190,7 +197,7 @@ export default function MealsPage() {
                 : "bg-wing-elevated border border-wing-border text-wing-muted"
             }`}
           >
-            הכל
+            {t("all")}
           </button>
           {/* "שלי" always uses firebaseUser.uid directly */}
           {(() => {
@@ -203,8 +210,8 @@ export default function MealsPage() {
                   active ? "bg-wing-ink text-wing-elevated" : "bg-wing-elevated border border-wing-border text-wing-muted"
                 }`}
               >
-                <Avatar name={selfMember?.displayName ?? "שלי"} photoURL={selfMember?.photoURL} size={20} isCurrentUser />
-                שלי
+                <Avatar name={selfMember?.displayName ?? t("my")} photoURL={selfMember?.photoURL} size={20} isCurrentUser />
+                {t("my")}
               </button>
             );
           })()}
@@ -231,12 +238,12 @@ export default function MealsPage() {
       {/* Manual meal form */}
       {showManualForm && (
         <div className="bg-white rounded-3xl shadow-card p-4 space-y-3 border-2 border-wing-border">
-          <h2 className="font-bold text-wing-ink">הוספה ידנית 📝</h2>
+          <h2 className="font-bold text-wing-ink">{t("meals_manual_form_title")}</h2>
           <input
             type="text"
             value={manualDescription}
             onChange={(e) => setManualDescription(e.target.value)}
-            placeholder="שם / תיאור הארוחה"
+            placeholder={t("meals_desc_ph")}
             className="w-full border border-wing-border rounded-2xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink"
           />
           <div className="grid grid-cols-2 gap-2">
@@ -282,8 +289,8 @@ export default function MealsPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Button variant="secondary" onClick={() => setShowManualForm(false)} className="flex-1">בטל</Button>
-            <Button onClick={saveManualMeal} loading={savingManual} disabled={!manualDescription.trim()} className="flex-1">שמור</Button>
+            <Button variant="secondary" onClick={() => setShowManualForm(false)} className="flex-1">{t("cancel")}</Button>
+            <Button onClick={saveManualMeal} loading={savingManual} disabled={!manualDescription.trim()} className="flex-1">{t("save")}</Button>
           </div>
         </div>
       )}
@@ -291,7 +298,7 @@ export default function MealsPage() {
       {/* Pending analysis review */}
       {pendingAnalysis && (
         <div className="bg-white rounded-3xl shadow-card p-4 space-y-4 border-2 border-wing-border">
-          <h2 className="font-bold text-wing-ink">תוצאות הניתוח ✨</h2>
+          <h2 className="font-bold text-wing-ink">{t("meals_analysis_title")}</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={pendingAnalysis.imageDataUrl}
@@ -330,7 +337,7 @@ export default function MealsPage() {
               onClick={() => setEditingValues((v) => !v)}
               className="text-xs text-wing-subtle underline"
             >
-              {editingValues ? "סגור עריכה" : "ערוך ערכים ידנית"}
+              {editingValues ? t("meals_close_edit") : t("meals_edit_values")}
             </button>
 
             {pendingAnalysis.analysis.tips && (
@@ -347,7 +354,7 @@ export default function MealsPage() {
                 type="text"
                 value={hint}
                 onChange={(e) => setHint(e.target.value)}
-                placeholder="לא מדויק? כתוב מה יש בצלחת..."
+                placeholder={t("meals_hint_ph")}
                 className="flex-1 border border-wing-border rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink"
                 onKeyDown={(e) => { if (e.key === "Enter") handleReanalyze(); }}
               />
@@ -357,7 +364,7 @@ export default function MealsPage() {
                 loading={reanalyzing}
                 disabled={!hint.trim()}
               >
-                נתח מחדש
+                {t("meals_reanalyze")}
               </Button>
             </div>
           </div>
@@ -389,10 +396,10 @@ export default function MealsPage() {
 
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setPendingAnalysis(null)} className="flex-1">
-              בטל
+              {t("cancel")}
             </Button>
             <Button onClick={saveMeal} loading={saving} className="flex-1">
-              שמור במבנה
+              {t("meals_save_to_wing")}
             </Button>
           </div>
         </div>
@@ -408,7 +415,7 @@ export default function MealsPage() {
       ) : meals.length === 0 ? (
         <div className="text-center py-12 text-wing-subtle">
           <div className="text-4xl mb-3">🍽️</div>
-          <p>עדיין אין ארוחות. צלם את הארוחה הראשונה!</p>
+          <p>{t("meals_no_meals_feed")}</p>
         </div>
       ) : (
         <MealsByDate
@@ -432,10 +439,11 @@ export default function MealsPage() {
 
 import type { Meal } from "@/types";
 
-function dateLabel(dateStr: string): string {
+function dateLabel(dateStr: string, lang: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
-  const dayName = format(d, "EEEE", { locale: he });
+  const locale = lang === "he" ? he : enUS;
+  const dayName = format(d, "EEEE", { locale });
   const dateFormatted = format(d, "d/M/yy");
   return `${dayName} ${dateFormatted}`;
 }
@@ -449,6 +457,7 @@ function MealsByDate({
   currentUserId?: string;
   currentUserName?: string;
 }) {
+  const { t, lang } = useLanguage();
   // Group meals by date string yyyy-MM-dd
   const groups: { date: string; meals: Meal[] }[] = [];
   const seen = new Map<string, Meal[]>();
@@ -496,7 +505,7 @@ function MealsByDate({
             {isTodays ? (
               // Today: hero card first (most recent), then compact rows
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-wing-muted px-1">היום</p>
+                <p className="text-sm font-semibold text-wing-muted px-1">{t("meals_today")}</p>
                 {/* Most recent meal = hero at top */}
                 <MealCard
                   key={dayMeals[dayMeals.length - 1].id}
@@ -518,7 +527,7 @@ function MealsByDate({
                   className="w-full flex items-center justify-between px-4 py-3 hover:bg-wing-elevated transition-colors"
                 >
                   <div className="text-right">
-                    <p className="font-semibold text-wing-ink text-base">{dateLabel(date)}</p>
+                    <p className="font-semibold text-wing-ink text-base">{dateLabel(date, lang)}</p>
                   </div>
                   <ChevronDown
                     size={20}

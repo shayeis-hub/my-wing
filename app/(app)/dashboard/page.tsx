@@ -78,11 +78,11 @@ export default function DashboardPage() {
       {showNotifBanner && (
         <div className="bg-wing-surface border border-wing-border rounded-2xl p-3 flex items-center justify-between gap-3">
           <p className="text-sm text-wing-heat font-medium flex items-center gap-1.5">
-            <Bell size={14} /> אפשר התראות לקבל SOS מהחברים
+            <Bell size={14} /> {t("dashboard_notif_text")}
           </p>
           <div className="flex gap-2 shrink-0">
-            <button onClick={() => setShowNotifBanner(false)} className="text-xs text-wing-muted px-2 py-1">לא עכשיו</button>
-            <button onClick={handleEnableNotifications} className="text-xs bg-wing-ink text-wing-elevated px-3 py-1 rounded-xl font-bold">אפשר</button>
+            <button onClick={() => setShowNotifBanner(false)} className="text-xs text-wing-muted px-2 py-1">{t("dashboard_notif_no")}</button>
+            <button onClick={handleEnableNotifications} className="text-xs bg-wing-ink text-wing-elevated px-3 py-1 rounded-xl font-bold">{t("dashboard_notif_yes")}</button>
           </div>
         </div>
       )}
@@ -96,7 +96,7 @@ export default function DashboardPage() {
           </h1>
           {wing && (
             <p className="text-sm text-wing-muted mt-0.5">
-              {wing.name} · {wing.memberIds.length} חברים ({wingSteps.length} פעילים היום)
+              {(t("dashboard_wing_name") as (name: string, total: number, active: number) => string)(wing.name, wing.memberIds.length, wingSteps.length)}
             </p>
           )}
         </div>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                 : "bg-wing-elevated border border-wing-border text-wing-muted"
             }`}
           >
-            שלי
+            {t("my")}
           </button>
           {otherMembers.map((m) => (
             <button
@@ -162,8 +162,8 @@ export default function DashboardPage() {
             style={{ background: "linear-gradient(135deg, #fff3b8, #ffc89a)" }}
           >
             <div className="flex items-start justify-between mb-1">
-              <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#c79a00]">קלוריות היום</span>
-              <span className="text-xs text-wing-ink/60">{myTodayMeals.length} ארוחות</span>
+              <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#c79a00]">{t("dashboard_calories_today")}</span>
+              <span className="text-xs text-wing-ink/60">{(t("dashboard_meals_count") as (n: number) => string)(myTodayMeals.length)}</span>
             </div>
             <div className="flex items-end gap-3 mb-3">
               <span
@@ -172,7 +172,7 @@ export default function DashboardPage() {
               >
                 {todayCalories}
               </span>
-              <span className="text-sm text-wing-ink/60 mb-2">/ {bmr} קק&quot;ל</span>
+              <span className="text-sm text-wing-ink/60 mb-2">/ {bmr} {t("kcal")}</span>
             </div>
             <ProgressBar
               value={todayCalories}
@@ -185,7 +185,7 @@ export default function DashboardPage() {
             <div className="mt-3 grid grid-cols-3 gap-2">
               <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
                 <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
-                  <Footprints size={9} /> צעדים
+                  <Footprints size={9} /> {t("steps_label")}
                 </p>
                 <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
                   {todayCheckin?.steps
@@ -197,7 +197,7 @@ export default function DashboardPage() {
               </div>
               <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
                 <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
-                  <Droplets size={9} /> מים
+                  <Droplets size={9} /> {t("water_label")}
                 </p>
                 <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
                   {todayCheckin?.waterGlasses ? `${todayCheckin.waterGlasses.toFixed(1)}L` : "—"}
@@ -205,7 +205,7 @@ export default function DashboardPage() {
               </div>
               <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
                 <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
-                  <Flame size={9} /> סטריק
+                  <Flame size={9} /> {t("dashboard_mini_streak")}
                 </p>
                 <p className="font-black text-base tabular" style={{ letterSpacing: "-0.03em", color: streak > 0 ? "#d4541a" : "#1a1814" }}>
                   {streak > 0 ? streak : "—"}
@@ -220,15 +220,15 @@ export default function DashboardPage() {
             <Link href="/checkin">
               <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center hover:border-wing-ink transition-colors">
                 <CheckSquare size={24} className="mx-auto mb-2 text-wing-heat" />
-                <p className="text-sm font-bold text-wing-ink">צ׳ק-אין</p>
-                <p className="text-xs text-wing-muted mt-0.5">מים, אימון, משקל</p>
+                <p className="text-sm font-bold text-wing-ink">{t("nav_checkin")}</p>
+                <p className="text-xs text-wing-muted mt-0.5">{t("dashboard_checkin_sub")}</p>
               </div>
             </Link>
             <Link href="/steps">
               <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center hover:border-wing-ink transition-colors">
                 <Footprints size={24} className="mx-auto mb-2 text-wing-heat" />
-                <p className="text-sm font-bold text-wing-ink">צעדים</p>
-                <p className="text-xs text-wing-muted mt-0.5">לוח תוצאות</p>
+                <p className="text-sm font-bold text-wing-ink">{t("steps_label")}</p>
+                <p className="text-xs text-wing-muted mt-0.5">{t("dashboard_steps_sub")}</p>
               </div>
             </Link>
           </div>
@@ -242,9 +242,9 @@ export default function DashboardPage() {
           {myTodayMeals.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="font-bold text-wing-ink">ארוחות היום</h2>
+                <h2 className="font-bold text-wing-ink">{t("dashboard_meals_today")}</h2>
                 <Link href="/meals" className="text-sm text-wing-heat font-medium flex items-center gap-0.5">
-                  הכל <ChevronLeft size={14} />
+                  {t("all")} <ChevronLeft size={14} />
                 </Link>
               </div>
               {myTodayMeals.slice(0, 3).map((meal) => (
@@ -258,7 +258,7 @@ export default function DashboardPage() {
             <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5">
               <div className="flex items-center gap-1.5 mb-3">
                 <Scale size={15} className="text-wing-muted" />
-                <span className="font-bold text-wing-ink text-sm">מגמת משקל</span>
+                <span className="font-bold text-wing-ink text-sm">{t("dashboard_weight_progress")}</span>
               </div>
               <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} />
             </div>
@@ -268,14 +268,14 @@ export default function DashboardPage() {
           {!user?.wingId && (
             <div className="bg-wing-surface border border-wing-border rounded-[20px] p-8 text-center space-y-3">
               <div className="text-4xl">🪽</div>
-              <p className="font-bold text-wing-ink">עדיין לא במבנה כנף</p>
-              <p className="text-sm text-wing-muted">צור מבנה חדש או הצטרף לאחד קיים</p>
+              <p className="font-bold text-wing-ink">{t("dashboard_no_wing")}</p>
+              <p className="text-sm text-wing-muted">{t("dashboard_no_wing_sub")}</p>
               <Link href="/wing">
                 <button
                   className="mt-2 px-6 py-2.5 rounded-[14px] font-bold text-sm text-wing-ink transition-all active:scale-[0.97]"
                   style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
                 >
-                  הצטרף / צור מבנה
+                  {t("dashboard_join_wing")}
                 </button>
               </Link>
             </div>

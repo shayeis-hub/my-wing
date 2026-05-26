@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import { he } from "date-fns/locale";
+import { he, enUS } from "date-fns/locale";
 import { ChevronRight, ChevronLeft, Droplets, Leaf, Footprints, Smile, Dumbbell, Flame } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { addEncouragement } from "@/lib/firebase/firestore";
 import Link from "next/link";
 import type { DailyCheckin, Encouragement, WingMember } from "@/types";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/i18n";
 
 const moods = [
   { value: 1, emoji: "😞" },
@@ -48,8 +49,9 @@ export function DayPanel({
   );
   const [texts, setTexts] = useState<Record<string, string>>({});
   const [sending, setSending] = useState<string | null>(null);
-
-  const dateFormatted = format(parseISO(date), "EEEE, d MMMM", { locale: he });
+  const { t, lang } = useLanguage();
+  const dateLocale = lang === "he" ? he : enUS;
+  const dateFormatted = format(parseISO(date), "EEEE, d MMMM", { locale: dateLocale });
 
   // Self member: match by UID first, fallback to display name (handles legacy UID mismatch)
   const selfMember =
@@ -78,9 +80,9 @@ export function DayPanel({
       await addEncouragement(wingId, checkin.id, enc);
       onEncouragementSent(checkin.id, enc);
       setTexts((prev) => ({ ...prev, [checkin.id]: "" }));
-      toast.success("העידוד נשלח! 💪");
+      toast.success(t("enc_sent"));
     } catch {
-      toast.error("שגיאה בשליחה");
+      toast.error(t("enc_error"));
     } finally {
       setSending(null);
     }
@@ -119,7 +121,7 @@ export function DayPanel({
                   : "bg-wing-elevated text-wing-muted hover:bg-wing-elevated"
               }`}
             >
-              {m.uid === selfUid ? "שלי" : m.displayName.split(" ")[0]}
+              {m.uid === selfUid ? t("my") : m.displayName.split(" ")[0]}
             </button>
           ))}
         </div>
@@ -131,7 +133,7 @@ export function DayPanel({
           <div className="text-center py-8 space-y-1">
             <p className="text-2xl">📋</p>
             <p className="text-wing-subtle text-sm">
-              {selectedMember?.displayName?.split(" ")[0] ?? "המשתמש"} לא עשה צ׳ק-אין ביום זה
+              {(t("daypanel_no_checkin") as (name: string) => string)(selectedMember?.displayName?.split(" ")[0] ?? "")}
             </p>
           </div>
         ) : (
@@ -141,24 +143,24 @@ export function DayPanel({
               <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
                 <Droplets size={16} className="mx-auto text-blue-400 mb-1" />
                 <p className="text-sm font-bold text-wing-ink">{checkin.waterGlasses.toFixed(1)}L</p>
-                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">מים</p>
+                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">{t("water_label")}</p>
               </div>
               <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
                 <Leaf size={16} className="mx-auto text-green-500 mb-1" />
                 <p className="text-sm font-bold text-wing-ink">{checkin.vegetablesServings}</p>
-                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">ירקות</p>
+                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">{t("veg_label")}</p>
               </div>
               <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
                 <Footprints size={16} className="mx-auto text-wing-muted mb-1" />
                 <p className="text-sm font-bold text-wing-ink">
                   {checkin.steps ? (checkin.steps >= 1000 ? `${(checkin.steps / 1000).toFixed(1)}k` : checkin.steps) : "—"}
                 </p>
-                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">צעדים</p>
+                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">{t("steps_label")}</p>
               </div>
               <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
                 <Smile size={16} className="mx-auto text-wing-honey mb-1" />
                 <p className="text-sm font-bold text-wing-ink">{moods.find((m) => m.value === checkin.mood)?.emoji ?? "😐"}</p>
-                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">מצב</p>
+                <p className="font-mono text-xs text-wing-muted uppercase tracking-wider mt-0.5">{t("mood_label")}</p>
               </div>
             </div>
 
@@ -166,8 +168,8 @@ export function DayPanel({
             {checkin.weightKg && (
               <div className="flex items-center gap-2 bg-wing-elevated rounded-2xl px-4 py-2.5">
                 <span className="text-lg">⚖️</span>
-                <span className="text-sm text-wing-muted">משקל:</span>
-                <span className="font-semibold text-wing-ink">{checkin.weightKg} ק״ג</span>
+                <span className="text-sm text-wing-muted">{t("weight_label")}:</span>
+                <span className="font-semibold text-wing-ink">{checkin.weightKg} {t("kg_label")}</span>
               </div>
             )}
 
@@ -176,10 +178,10 @@ export function DayPanel({
               <div className="bg-green-50 rounded-2xl px-4 py-3 space-y-1">
                 <div className="flex items-center gap-2">
                   <Dumbbell size={15} className="text-green-600" />
-                  <span className="text-sm font-semibold text-green-700">אימון</span>
+                  <span className="text-sm font-semibold text-green-700">{t("workout_label")}</span>
                   {checkin.workout.caloriesBurned && (
                     <span className="text-xs text-green-600 mr-auto flex items-center gap-0.5">
-                      <Flame size={11} /> {checkin.workout.caloriesBurned} קק״ל
+                      <Flame size={11} /> {checkin.workout.caloriesBurned} {t("kcal")}
                     </span>
                   )}
                 </div>
@@ -187,7 +189,7 @@ export function DayPanel({
                   <p className="text-xs text-green-600 mr-7">
                     {checkin.workout.type && <span className="capitalize">{checkin.workout.type}</span>}
                     {checkin.workout.intensity && <span> · {checkin.workout.intensity}</span>}
-                    {checkin.workout.durationMinutes && <span> · {checkin.workout.durationMinutes} דקות</span>}
+                    {checkin.workout.durationMinutes && <span> · {checkin.workout.durationMinutes} {t("minutes")}</span>}
                   </p>
                 )}
               </div>
@@ -203,7 +205,7 @@ export function DayPanel({
             {/* Day summary */}
             {checkin.daySummary && (
               <div className="bg-wing-elevated rounded-2xl p-4 space-y-2">
-                <p className="text-sm font-semibold text-wing-heat">🌙 סיכום יום</p>
+                <p className="text-sm font-semibold text-wing-heat">{t("daypanel_day_summary")}</p>
                 <p className="text-sm text-wing-ink">{checkin.daySummary.summary}</p>
                 {checkin.daySummary.insights.length > 0 && (
                   <ul className="space-y-1">
@@ -241,7 +243,7 @@ export function DayPanel({
                 href={`/checkin?date=${date}`}
                 className="flex items-center justify-center gap-2 w-full text-sm font-medium text-wing-heat bg-wing-elevated px-4 py-2.5 rounded-2xl hover:bg-wing-accent/20 transition-colors"
               >
-                🌙 סגירת יום
+                {t("daypanel_close_day")}
               </Link>
             )}
 
@@ -254,8 +256,8 @@ export function DayPanel({
                   onChange={(e) => setTexts((prev) => ({ ...prev, [checkin.id]: e.target.value }))}
                   placeholder={
                     checkin.userId === currentUserId
-                      ? "הגב / תודה על העידוד..."
-                      : `עודד את ${checkin.userName.split(" ")[0]}...`
+                      ? t("daypanel_reply_ph")
+                      : (t("checkin_encourage_ph") as (name: string) => string)(checkin.userName.split(" ")[0])
                   }
                   className="flex-1 text-sm border border-wing-border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wing-ink bg-white"
                   onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
@@ -266,7 +268,7 @@ export function DayPanel({
                   loading={sending === checkin.id}
                   disabled={!texts[checkin.id]?.trim()}
                 >
-                  שלח
+                  {t("send")}
                 </Button>
               </div>
             )}

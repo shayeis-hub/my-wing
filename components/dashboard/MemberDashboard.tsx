@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { DailyCheckin, Encouragement, Meal } from "@/types";
 import { Droplets, Leaf, Footprints, Dumbbell, Scale, Smile } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 const moods = [
   { value: 1, emoji: "😞" },
@@ -37,6 +38,7 @@ export function MemberDashboard({
   const [checkin, setCheckin] = useState<DailyCheckin | null | undefined>(undefined);
   const [encText, setEncText] = useState("");
   const [sending, setSending] = useState(false);
+  const { t } = useLanguage();
   const today = format(new Date(), "yyyy-MM-dd");
   const isOwn = memberId === currentUserId;
 
@@ -62,9 +64,9 @@ export function MemberDashboard({
         });
       }
       setEncText("");
-      toast.success(isOwn ? "תגובה נשלחה! 💬" : "העידוד נשלח! 💪");
+      toast.success(isOwn ? t("member_reply_sent") : t("enc_sent"));
     } catch {
-      toast.error("שגיאה בשליחה");
+      toast.error(t("enc_error"));
     } finally {
       setSending(false);
     }
@@ -79,7 +81,7 @@ export function MemberDashboard({
         <div className="h-36 bg-wing-elevated border border-wing-border rounded-[20px] animate-pulse" />
       ) : checkin === null ? (
         <div className="bg-wing-surface border border-wing-border rounded-[20px] p-6 text-center">
-          <p className="text-wing-muted text-sm">{memberName.split(" ")[0]} עדיין לא עשה/תה צ׳ק-אין היום</p>
+          <p className="text-wing-muted text-sm">{(t("member_no_checkin") as (name: string) => string)(memberName.split(" ")[0])}</p>
         </div>
       ) : (
         <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 space-y-4">
@@ -91,14 +93,14 @@ export function MemberDashboard({
               <p className="font-black text-wing-ink tabular text-base" style={{ letterSpacing: "-0.03em" }}>
                 {checkin.waterGlasses.toFixed(1)}
               </p>
-              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">ליטר</p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">{t("liters_label")}</p>
             </div>
             <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
               <Leaf size={15} className="mx-auto text-green-500 mb-1" />
               <p className="font-black text-wing-ink tabular text-base" style={{ letterSpacing: "-0.03em" }}>
                 {checkin.vegetablesServings}
               </p>
-              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">ירקות</p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">{t("veg_label")}</p>
             </div>
             <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
               <Footprints size={15} className="mx-auto text-wing-muted mb-1" />
@@ -107,14 +109,14 @@ export function MemberDashboard({
                   ? checkin.steps >= 1000 ? `${(checkin.steps / 1000).toFixed(1)}k` : checkin.steps
                   : "—"}
               </p>
-              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">צעדים</p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">{t("steps_label")}</p>
             </div>
             <div className="bg-wing-elevated border border-wing-border rounded-2xl p-3 text-center">
               <Smile size={15} className="mx-auto text-[#c79a00] mb-1" />
               <p className="text-lg leading-none mt-0.5">
                 {moods.find((m) => m.value === checkin.mood)?.emoji ?? "😐"}
               </p>
-              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider mt-1">מצב</p>
+              <p className="font-mono text-[11px] text-wing-muted uppercase tracking-wider mt-1">{t("mood_label")}</p>
             </div>
           </div>
 
@@ -122,8 +124,8 @@ export function MemberDashboard({
           {checkin.weightKg && (
             <div className="flex items-center gap-2 bg-wing-elevated border border-wing-border rounded-2xl px-4 py-2.5">
               <Scale size={14} className="text-wing-muted" />
-              <span className="text-sm text-wing-muted">משקל:</span>
-              <span className="font-bold text-wing-ink">{checkin.weightKg} ק״ג</span>
+              <span className="text-sm text-wing-muted">{t("weight_label")}:</span>
+              <span className="font-bold text-wing-ink">{checkin.weightKg} {t("kg_label")}</span>
             </div>
           )}
 
@@ -132,11 +134,11 @@ export function MemberDashboard({
             <div className="bg-wing-elevated border border-wing-border rounded-2xl px-4 py-3 flex items-start gap-2">
               <Dumbbell size={14} className="text-wing-muted mt-0.5 shrink-0" />
               <div>
-                <span className="text-sm font-semibold text-wing-ink">אימון</span>
+                <span className="text-sm font-semibold text-wing-ink">{t("workout_label")}</span>
                 {checkin.workout.description && (
                   <p className="text-xs text-wing-muted mt-0.5">
                     {checkin.workout.description}
-                    {checkin.workout.caloriesBurned ? ` · ${checkin.workout.caloriesBurned} קק״ל` : ""}
+                    {checkin.workout.caloriesBurned ? ` · ${checkin.workout.caloriesBurned} ${t("kcal")}` : ""}
                   </p>
                 )}
               </div>
@@ -168,12 +170,12 @@ export function MemberDashboard({
               type="text"
               value={encText}
               onChange={(e) => setEncText(e.target.value)}
-              placeholder={isOwn ? "הגב על הצ׳ק-אין שלך..." : `עודד את ${memberName.split(" ")[0]}...`}
+              placeholder={isOwn ? t("member_reply_ph") : (t("checkin_encourage_ph") as (name: string) => string)(memberName.split(" ")[0])}
               className="flex-1 text-sm border border-wing-border rounded-2xl px-3 py-2.5 bg-wing-elevated focus:outline-none focus:ring-2 focus:ring-wing-ink text-wing-ink placeholder:text-wing-subtle"
               onKeyDown={(e) => { if (e.key === "Enter") handleSendEncouragement(); }}
             />
             <Button size="sm" onClick={handleSendEncouragement} loading={sending} disabled={!encText.trim()}>
-              שלח
+              {t("send")}
             </Button>
           </div>
         </div>
@@ -182,14 +184,14 @@ export function MemberDashboard({
       {/* Today's meals */}
       {memberMeals.length > 0 ? (
         <div className="space-y-3">
-          <h3 className="font-bold text-wing-ink">ארוחות היום</h3>
+          <h3 className="font-bold text-wing-ink">{t("member_meals_today")}</h3>
           {memberMeals.map((meal) => (
             <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
           ))}
         </div>
       ) : (
         <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center">
-          <p className="text-wing-muted text-sm">אין ארוחות מתועדות היום</p>
+          <p className="text-wing-muted text-sm">{t("dashboard_no_meals")}</p>
         </div>
       )}
     </div>

@@ -16,24 +16,7 @@ import { useSearchParams } from "next/navigation";
 import type { DailyCheckin, Encouragement } from "@/types";
 import { Droplets, Leaf, Footprints, Dumbbell, Smile, Scale, Pencil, Moon, Lightbulb, Timer } from "lucide-react";
 
-const moods = [
-  { value: 1, emoji: "😞", label: "קשה" },
-  { value: 2, emoji: "😕", label: "לא טוב" },
-  { value: 3, emoji: "😐", label: "סביר" },
-  { value: 4, emoji: "😊", label: "טוב" },
-  { value: 5, emoji: "🤩", label: "מעולה" },
-];
-
-const WORKOUT_TYPES: { value: string; label: string }[] = [
-  { value: "running", label: "🏃 ריצה" },
-  { value: "walking", label: "🚶 הליכה" },
-  { value: "cycling", label: "🚴 אופניים" },
-  { value: "weights", label: "🏋️ משקולות" },
-  { value: "hiit", label: "⚡ HIIT" },
-  { value: "swimming", label: "🏊 שחייה" },
-  { value: "yoga", label: "🧘 יוגה" },
-  { value: "other", label: "🤸 אחר" },
-];
+const MOOD_EMOJIS = ["😞", "😕", "😐", "😊", "🤩"];
 
 const MET: Record<string, Record<"light" | "moderate" | "intense", number>> = {
   running:  { light: 8,   moderate: 11,  intense: 14  },
@@ -78,6 +61,25 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 function CheckinPageInner() {
   const { user, firebaseUser } = useAuth();
   const { t } = useLanguage();
+
+  const moods = [
+    { value: 1, emoji: MOOD_EMOJIS[0], label: t("mood_1") },
+    { value: 2, emoji: MOOD_EMOJIS[1], label: t("mood_2") },
+    { value: 3, emoji: MOOD_EMOJIS[2], label: t("mood_3") },
+    { value: 4, emoji: MOOD_EMOJIS[3], label: t("mood_4") },
+    { value: 5, emoji: MOOD_EMOJIS[4], label: t("mood_5") },
+  ];
+
+  const WORKOUT_TYPES: { value: string; label: string }[] = [
+    { value: "running", label: t("wt_running") },
+    { value: "walking", label: t("wt_walking") },
+    { value: "cycling", label: t("wt_cycling") },
+    { value: "weights", label: t("wt_weights") },
+    { value: "hiit", label: t("wt_hiit") },
+    { value: "swimming", label: t("wt_swimming") },
+    { value: "yoga", label: t("wt_yoga") },
+    { value: "other", label: t("wt_other") },
+  ];
   const searchParams = useSearchParams();
   const paramDate = searchParams.get("date");
   const [myCheckin, setMyCheckin] = useState<DailyCheckin | null>(null);
@@ -194,7 +196,7 @@ function CheckinPageInner() {
         workout: {
           done: workoutDone,
           ...(workoutDone ? { type: workoutType, intensity: workoutIntensity } : {}),
-          ...(workoutDone && durationMin ? { durationMinutes: durationMin, description: `${workoutTypeLabel} · ${intensityLabel} · ${durationMin} דק'` } : {}),
+          ...(workoutDone && durationMin ? { durationMinutes: durationMin, description: `${workoutTypeLabel} · ${intensityLabel} · ${durationMin} ${t("minutes_short")}` } : {}),
           ...(workoutCalNum ? { caloriesBurned: workoutCalNum } : {}),
         },
       });
@@ -209,7 +211,7 @@ function CheckinPageInner() {
       const refreshed = await getTodayCheckin(user.wingId, firebaseUser.uid, selectedDate);
       if (refreshed) setMyCheckin(refreshed);
     } catch {
-      toast.error("שגיאה בשמירה");
+      toast.error(t("checkin_save_error"));
     } finally {
       setSaving(false);
     }
@@ -225,9 +227,9 @@ function CheckinPageInner() {
       await sendEncouragementPush(checkin.userId, user.displayName, text);
       setGroupCheckins((prev) => prev.map((c) => c.id === checkin.id ? { ...c, encouragements: [...(c.encouragements ?? []), enc] } : c));
       setEncourageTexts((prev) => ({ ...prev, [checkin.id]: "" }));
-      toast.success("העידוד נשלח! 💪");
+      toast.success(t("checkin_enc_sent"));
     } catch {
-      toast.error("שגיאה בשליחה");
+      toast.error(t("checkin_enc_error"));
     } finally {
       setSendingEnc(null);
     }
@@ -245,9 +247,9 @@ function CheckinPageInner() {
       if (!res.ok) throw new Error();
       const summary = await res.json();
       setDaySummary(summary);
-      toast.success("סיכום היום נוצר! ✨");
+      toast.success(t("checkin_summary_created"));
     } catch {
-      toast.error("שגיאה ביצירת הסיכום");
+      toast.error(t("checkin_summary_error"));
     } finally {
       setClosingDay(false);
     }
@@ -258,7 +260,7 @@ function CheckinPageInner() {
   return (
     <div className="p-4 space-y-4">
       <div className="pt-4">
-        <h1 className="text-2xl font-black text-wing-ink tracking-tight">צ׳ק-אין יומי</h1>
+        <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("checkin_title")}</h1>
         <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
           {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: he })}
         </p>
@@ -274,7 +276,7 @@ function CheckinPageInner() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Droplets size={16} className="text-blue-400" />
-            <span className="font-semibold text-wing-ink">שתיית מים</span>
+            <span className="font-semibold text-wing-ink">{t("checkin_water")}</span>
           </div>
           <span
             className="font-black tabular text-wing-ink"
@@ -318,9 +320,9 @@ function CheckinPageInner() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Leaf size={16} className="text-green-500" />
-            <span className="font-semibold text-wing-ink">ירקות</span>
+            <span className="font-semibold text-wing-ink">{t("checkin_veg")}</span>
           </div>
-          <MonoLabel>בארוחות היום</MonoLabel>
+          <MonoLabel>{t("checkin_veg_sub")}</MonoLabel>
         </div>
         <div className="flex items-center justify-center gap-6">
           <button
@@ -350,7 +352,7 @@ function CheckinPageInner() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Timer size={16} className="text-wing-muted" />
-            <span className="font-semibold text-wing-ink">חלון אכילה</span>
+            <span className="font-semibold text-wing-ink">{t("checkin_ew")}</span>
           </div>
           <button
             onClick={() => setEwManual((v) => !v)}
@@ -363,33 +365,33 @@ function CheckinPageInner() {
         {ewOpen && ewClose && !ewManual ? (
           <div className="flex items-center justify-between bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3">
             <div className="text-center">
-              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">פתיחה</p>
+              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">{t("checkin_ew_open")}</p>
               <p className="font-black text-wing-ink tabular" style={{ fontSize: 22, letterSpacing: "-0.04em" }}>{ewOpen}</p>
             </div>
             <div className="text-wing-muted text-lg">→</div>
             <div className="text-center">
-              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">סגירה</p>
+              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">{t("checkin_ew_close")}</p>
               <p className="font-black text-wing-ink tabular" style={{ fontSize: 22, letterSpacing: "-0.04em" }}>{ewClose}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">משך</p>
+              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">{t("checkin_ew_duration")}</p>
               <p className="font-black tabular" style={{ fontSize: 22, letterSpacing: "-0.04em", color: "#d4541a" }}>{calcEwDuration(ewOpen, ewClose)}h</p>
             </div>
           </div>
         ) : ewOpen && !ewClose && !ewManual ? (
           <div className="flex items-center gap-3 bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3">
             <div className="text-center">
-              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">פתיחה</p>
+              <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">{t("checkin_ew_open")}</p>
               <p className="font-black text-wing-ink tabular" style={{ fontSize: 22, letterSpacing: "-0.04em" }}>{ewOpen}</p>
             </div>
             <div className="text-wing-muted text-lg">→</div>
-            <p className="text-sm text-wing-subtle">ממתין לארוחה הבאה...</p>
+            <p className="text-sm text-wing-subtle">{t("checkin_ew_waiting")}</p>
           </div>
         ) : ewManual ? (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-wing-muted mb-1.5">פתיחת חלון</p>
+                <p className="text-xs text-wing-muted mb-1.5">{t("checkin_ew_open_label")}</p>
                 <input
                   type="time"
                   value={ewOpen}
@@ -398,7 +400,7 @@ function CheckinPageInner() {
                 />
               </div>
               <div>
-                <p className="text-xs text-wing-muted mb-1.5">סגירת חלון</p>
+                <p className="text-xs text-wing-muted mb-1.5">{t("checkin_ew_close_label")}</p>
                 <input
                   type="time"
                   value={ewClose}
@@ -409,13 +411,13 @@ function CheckinPageInner() {
             </div>
             {ewOpen && ewClose && (
               <p className="text-sm text-center text-wing-muted">
-                משך: <span className="font-bold text-wing-ink">{calcEwDuration(ewOpen, ewClose)} שעות</span>
+                {(t("checkin_ew_dur_label") as (h: number) => string)(calcEwDuration(ewOpen, ewClose))}
               </p>
             )}
           </div>
         ) : (
           <p className="text-sm text-wing-subtle text-center py-2">
-            יחושב אוטומטית מהארוחות שנרשמו היום
+            {t("checkin_ew_hint")}
           </p>
         )}
       </SectionCard>
@@ -424,7 +426,7 @@ function CheckinPageInner() {
       <SectionCard>
         <div className="flex items-center gap-2 mb-3">
           <Footprints size={16} className="text-wing-muted" />
-          <span className="font-semibold text-wing-ink">צעדים</span>
+          <span className="font-semibold text-wing-ink">{t("checkin_steps")}</span>
         </div>
         <input
           type="number"
@@ -441,9 +443,9 @@ function CheckinPageInner() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Dumbbell size={16} className="text-wing-muted" />
-            <span className="font-semibold text-wing-ink">התאמנתי היום</span>
+            <span className="font-semibold text-wing-ink">{t("checkin_workout")}</span>
           </div>
-          <Switch checked={workoutDone} onChange={setWorkoutDone} label="אימון" />
+          <Switch checked={workoutDone} onChange={setWorkoutDone} label={t("workout_label")} />
         </div>
 
         {workoutDone && (
@@ -489,12 +491,12 @@ function CheckinPageInner() {
                 inputMode="numeric"
                 className="flex-1 px-4 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
               />
-              <span className="text-sm text-wing-muted shrink-0">דקות</span>
+              <span className="text-sm text-wing-muted shrink-0">{t("checkin_workout_min")}</span>
             </div>
 
             {workoutDuration && parseInt(workoutDuration) > 0 && (
               <p className="text-sm text-green-700 bg-green-50 rounded-[14px] px-4 py-2 text-center font-medium">
-                🔥 כ-{calcWorkoutCalories(workoutType, workoutIntensity, parseInt(workoutDuration), user?.profile?.weightKg ?? 70)} קק&quot;ל
+                🔥 {(t("checkin_calories_est") as (n: number) => string)(calcWorkoutCalories(workoutType, workoutIntensity, parseInt(workoutDuration), user?.profile?.weightKg ?? 70))}
               </p>
             )}
           </div>
@@ -505,7 +507,7 @@ function CheckinPageInner() {
       <SectionCard>
         <div className="flex items-center gap-2 mb-4">
           <Smile size={16} className="text-wing-honey" />
-          <span className="font-semibold text-wing-ink">מצב רוח</span>
+          <span className="font-semibold text-wing-ink">{t("checkin_mood")}</span>
         </div>
         <div className="flex justify-around">
           {moods.map((m) => (
@@ -528,20 +530,20 @@ function CheckinPageInner() {
       <SectionCard>
         <div className="flex items-center gap-2 mb-3">
           <Scale size={16} className="text-wing-muted" />
-          <span className="font-semibold text-wing-ink">עדכון משקל</span>
-          <span className="text-xs text-wing-subtle">(אופציונלי)</span>
+          <span className="font-semibold text-wing-ink">{t("checkin_weight")}</span>
+          <span className="text-xs text-wing-subtle">({t("optional")})</span>
         </div>
         <div className="flex items-center gap-3">
           <input
             type="number"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            placeholder={user?.profile?.weightKg ? `משקל רשום: ${user.profile.weightKg}` : "משקל היום..."}
+            placeholder={user?.profile?.weightKg ? (t("checkin_weight_ph") as (w: number) => string)(user.profile.weightKg) : t("checkin_weight")}
             inputMode="decimal"
             step="0.1"
             className="flex-1 px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
           />
-          <span className="text-sm text-wing-muted shrink-0">ק&quot;ג</span>
+          <span className="text-sm text-wing-muted shrink-0">{t("checkin_weight_unit")}</span>
         </div>
       </SectionCard>
 
@@ -549,7 +551,7 @@ function CheckinPageInner() {
       <SectionCard>
         <div className="flex items-center gap-2 mb-3">
           <Pencil size={16} className="text-wing-muted" />
-          <span className="font-semibold text-wing-ink">הערה חופשית</span>
+          <span className="font-semibold text-wing-ink">{t("checkin_notes")}</span>
         </div>
         <textarea
           value={notes}
@@ -577,7 +579,7 @@ function CheckinPageInner() {
           disabled={closingDay}
           className="w-full py-3.5 rounded-[14px] border-2 border-wing-ink font-bold text-wing-ink text-sm transition-all active:scale-[0.97] disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {closingDay ? g(user?.profile?.gender, t("checkin_closing_m"), t("checkin_closing_f")) : <><Moon size={16} /> סגירת יום</>}
+          {closingDay ? g(user?.profile?.gender, t("checkin_closing_m"), t("checkin_closing_f")) : <><Moon size={16} /> {t("checkin_close_day")}</>}
         </button>
       )}
 
@@ -586,7 +588,7 @@ function CheckinPageInner() {
         <div className="rounded-[20px] p-5 space-y-3" style={{ background: "linear-gradient(135deg, #fff3b8, #ffc89a)" }}>
           <div className="flex items-center gap-2">
             <Moon size={18} className="text-[#c79a00]" />
-            <span className="font-black text-wing-ink text-lg">סיכום היום שלך</span>
+            <span className="font-black text-wing-ink text-lg">{t("checkin_day_summary")}</span>
           </div>
           <p className="text-sm text-wing-ink/80 leading-relaxed">{daySummary.summary}</p>
           {daySummary.insights.length > 0 && (
@@ -606,7 +608,7 @@ function CheckinPageInner() {
             </div>
           )}
           <button onClick={() => setDaySummary(null)} className="text-xs text-wing-ink/50 underline w-full text-center mt-1">
-            הסתר סיכום
+            {t("checkin_hide_summary")}
           </button>
         </div>
       )}
@@ -614,7 +616,7 @@ function CheckinPageInner() {
       {/* Group summary */}
       {groupCheckins.length > 0 && (
         <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-4">
-          <h3 className="font-bold text-wing-ink">המבנה היום</h3>
+          <h3 className="font-bold text-wing-ink">{t("checkin_group")}</h3>
           <div className="space-y-4">
             {groupCheckins.map((c) => (
               <div key={c.id} className="space-y-2">
@@ -631,7 +633,7 @@ function CheckinPageInner() {
                 </div>
                 {c.workout?.done && c.workout.description && (
                   <p className="text-xs text-green-700 bg-green-50 rounded-xl px-3 py-1.5">
-                    🏋️ {c.workout.description}{c.workout.caloriesBurned ? ` · ${c.workout.caloriesBurned} קק"ל` : ""}
+                    🏋️ {c.workout.description}{c.workout.caloriesBurned ? ` · ${c.workout.caloriesBurned} ${t("kcal")}` : ""}
                   </p>
                 )}
                 {c.notes && (
@@ -651,12 +653,12 @@ function CheckinPageInner() {
                       type="text"
                       value={encourageTexts[c.id] ?? ""}
                       onChange={(e) => setEncourageTexts((prev) => ({ ...prev, [c.id]: e.target.value }))}
-                      placeholder={c.userId === firebaseUser?.uid ? "הגב / תודה..." : `עודד את ${c.userName.split(" ")[0]}...`}
+                      placeholder={c.userId === firebaseUser?.uid ? t("checkin_reply_ph") : (t("checkin_encourage_ph") as (name: string) => string)(c.userName.split(" ")[0])}
                       className="flex-1 text-sm border border-wing-border rounded-xl px-3 py-2 bg-wing-elevated focus:outline-none focus:ring-2 focus:ring-wing-ink text-wing-ink"
                       onKeyDown={(e) => { if (e.key === "Enter") handleSendEncouragement(c); }}
                     />
                     <Button size="sm" onClick={() => handleSendEncouragement(c)} loading={sendingEnc === c.id} disabled={!encourageTexts[c.id]?.trim()}>
-                      שלח
+                      {t("send")}
                     </Button>
                   </div>
                 )}

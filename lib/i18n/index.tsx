@@ -220,6 +220,94 @@ export const T = {
     steps_title: "לוח תוצאות",
     calendar_title: "לוח שנה",
     wing_title: "מבנה הכנף",
+
+    // Shared stat labels
+    water_label: "מים",
+    veg_label: "ירקות",
+    steps_label: "צעדים",
+    mood_label: "מצב",
+    workout_label: "אימון",
+    kg_label: 'ק"ג',
+    liters_label: "ליטר",
+    weight_label: "משקל",
+    kcal: 'קק"ל',
+    all: "הכל",
+    minutes: "דקות",
+    minutes_short: "דק׳",
+    enc_sent: "העידוד נשלח! 💪",
+    enc_error: "שגיאה בשליחה",
+    save_error: "שגיאה בשמירה",
+
+    // Mood labels
+    mood_1: "קשה",
+    mood_2: "לא טוב",
+    mood_3: "סביר",
+    mood_4: "טוב",
+    mood_5: "מעולה",
+
+    // Workout type labels
+    wt_running: "🏃 ריצה",
+    wt_walking: "🚶 הליכה",
+    wt_cycling: "🚴 אופניים",
+    wt_weights: "🏋️ משקולות",
+    wt_hiit: "⚡ HIIT",
+    wt_swimming: "🏊 שחייה",
+    wt_yoga: "🧘 יוגה",
+    wt_other: "🤸 אחר",
+
+    // Calendar day abbreviations (Sun=0 … Sat=6)
+    cal_day_0: "א׳",
+    cal_day_1: "ב׳",
+    cal_day_2: "ג׳",
+    cal_day_3: "ד׳",
+    cal_day_4: "ה׳",
+    cal_day_5: "ו׳",
+    cal_day_6: "ש׳",
+
+    // Dashboard extras
+    dashboard_mini_streak: "סטריק",
+    dashboard_checkin_sub: "מים, אימון, משקל",
+    dashboard_steps_sub: "לוח תוצאות",
+    dashboard_meals_today: "ארוחות היום",
+    dashboard_no_wing: "עדיין לא במבנה כנף",
+    dashboard_no_wing_sub: "צור מבנה חדש או הצטרף לאחד קיים",
+    dashboard_join_wing: "הצטרף / צור מבנה",
+
+    // Meals extras
+    meals_wing_title: "ארוחות המבנה",
+    meals_manual_short: "ידנית",
+    meals_photo_short: "צלם",
+    meals_manual_form_title: "הוספה ידנית 📝",
+    meals_desc_ph: "שם / תיאור הארוחה",
+    meals_analysis_title: "תוצאות הניתוח ✨",
+    meals_hint_ph: "לא מדויק? כתוב מה יש בצלחת...",
+    meals_reanalyze: "נתח מחדש",
+    meals_close_edit: "סגור עריכה",
+    meals_edit_values: "ערוך ערכים ידנית",
+    meals_save_to_wing: "שמור במבנה",
+    meals_no_meals_feed: "עדיין אין ארוחות. צלם את הארוחה הראשונה!",
+    meals_reanalyzed: "הניתוח עודכן ✨",
+    meals_reanalyze_error: "שגיאה בניתוח מחדש",
+
+    // Checkin extras
+    checkin_save_error: "שגיאה בשמירה",
+    checkin_summary_created: "סיכום היום נוצר! ✨",
+    checkin_summary_error: "שגיאה ביצירת הסיכום",
+    checkin_enc_sent: "העידוד נשלח! 💪",
+    checkin_enc_error: "שגיאה בשליחה",
+    checkin_calories_est: (n: number) => `כ-${n} קק"ל`,
+
+    // DayPanel
+    daypanel_no_checkin: (name: string) => `${name} לא עשה/תה צ'ק-אין ביום זה`,
+    daypanel_day_summary: "🌙 סיכום יום",
+    daypanel_close_day: "🌙 סגירת יום",
+    daypanel_reply_ph: "הגב / תודה על העידוד...",
+
+    // MemberDashboard
+    member_no_checkin: (name: string) => `${name} עדיין לא עשה/תה צ'ק-אין היום`,
+    member_meals_today: "ארוחות היום",
+    member_reply_ph: "הגב על הצ'ק-אין שלך...",
+    member_reply_sent: "תגובה נשלחה! 💬",
   },
 
   en: {
@@ -435,6 +523,94 @@ export const T = {
     steps_title: "Leaderboard",
     calendar_title: "Calendar",
     wing_title: "My Wing",
+
+    // Shared stat labels
+    water_label: "Water",
+    veg_label: "Veg",
+    steps_label: "Steps",
+    mood_label: "Mood",
+    workout_label: "Workout",
+    kg_label: "kg",
+    liters_label: "L",
+    weight_label: "Weight",
+    kcal: "kcal",
+    all: "All",
+    minutes: "min",
+    minutes_short: "min",
+    enc_sent: "Encouragement sent! 💪",
+    enc_error: "Failed to send",
+    save_error: "Save failed",
+
+    // Mood labels
+    mood_1: "Rough",
+    mood_2: "Not great",
+    mood_3: "OK",
+    mood_4: "Good",
+    mood_5: "Great",
+
+    // Workout type labels
+    wt_running: "🏃 Running",
+    wt_walking: "🚶 Walking",
+    wt_cycling: "🚴 Cycling",
+    wt_weights: "🏋️ Weights",
+    wt_hiit: "⚡ HIIT",
+    wt_swimming: "🏊 Swimming",
+    wt_yoga: "🧘 Yoga",
+    wt_other: "🤸 Other",
+
+    // Calendar day abbreviations (Sun=0 … Sat=6)
+    cal_day_0: "Su",
+    cal_day_1: "Mo",
+    cal_day_2: "Tu",
+    cal_day_3: "We",
+    cal_day_4: "Th",
+    cal_day_5: "Fr",
+    cal_day_6: "Sa",
+
+    // Dashboard extras
+    dashboard_mini_streak: "Streak",
+    dashboard_checkin_sub: "Water, workout, weight",
+    dashboard_steps_sub: "Leaderboard",
+    dashboard_meals_today: "Today's Meals",
+    dashboard_no_wing: "Not in a wing yet",
+    dashboard_no_wing_sub: "Create a new wing or join an existing one",
+    dashboard_join_wing: "Join / Create Wing",
+
+    // Meals extras
+    meals_wing_title: "Wing Meals",
+    meals_manual_short: "Manual",
+    meals_photo_short: "Photo",
+    meals_manual_form_title: "Add Manually 📝",
+    meals_desc_ph: "Meal name / description",
+    meals_analysis_title: "Analysis Results ✨",
+    meals_hint_ph: "Not accurate? Describe what's on the plate...",
+    meals_reanalyze: "Re-analyze",
+    meals_close_edit: "Close edit",
+    meals_edit_values: "Edit values manually",
+    meals_save_to_wing: "Save to Wing",
+    meals_no_meals_feed: "No meals yet. Take your first meal photo!",
+    meals_reanalyzed: "Analysis updated ✨",
+    meals_reanalyze_error: "Re-analysis failed",
+
+    // Checkin extras
+    checkin_save_error: "Save failed",
+    checkin_summary_created: "Day summary created! ✨",
+    checkin_summary_error: "Failed to create summary",
+    checkin_enc_sent: "Encouragement sent! 💪",
+    checkin_enc_error: "Failed to send",
+    checkin_calories_est: (n: number) => `~${n} kcal`,
+
+    // DayPanel
+    daypanel_no_checkin: (name: string) => `${name} hasn't checked in this day`,
+    daypanel_day_summary: "🌙 Day Summary",
+    daypanel_close_day: "🌙 Close Day",
+    daypanel_reply_ph: "Reply / thank you...",
+
+    // MemberDashboard
+    member_no_checkin: (name: string) => `${name} hasn't checked in today`,
+    member_meals_today: "Today's Meals",
+    member_reply_ph: "Reply to your check-in...",
+    member_reply_sent: "Reply sent! 💬",
   },
 } as const;
 
