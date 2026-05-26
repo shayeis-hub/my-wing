@@ -133,14 +133,14 @@ function CheckinPageInner() {
       }
       setGroupCheckins(checkins);
 
-      // Load meals separately — always recalculate auto eating window from meals
+      // Load meals separately — update ewClose from last meal; preserve saved ewOpen
       getUserTodayMeals(user.wingId!, uid, selectedDate)
-        .then(applyMealTimes)
+        .then((meals) => applyMealTimes(meals, c?.eatingWindow?.open))
         .catch(() => {/* non-critical */});
     });
   }, [user?.wingId, firebaseUser, today]);
 
-  function applyMealTimes(meals: import("@/types").Meal[]) {
+  function applyMealTimes(meals: import("@/types").Meal[], savedOpen?: string) {
     if (!meals.length) return;
     const times = meals.map((m) => {
       const ts = m.createdAt as unknown as { toDate?: () => Date; _seconds?: number };
@@ -148,8 +148,10 @@ function CheckinPageInner() {
     }).filter(Boolean);
     if (!times.length) return;
     const toHHMM = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-    setEwOpen(toHHMM(times[0]));
-    if (times.length > 1) setEwClose(toHHMM(times[times.length - 1]));
+    // Preserve manually saved open time; only auto-set if not yet saved
+    if (!savedOpen) setEwOpen(toHHMM(times[0]));
+    // Always update close to latest meal time
+    setEwClose(toHHMM(times[times.length - 1]));
   }
 
   function calcEwDuration(open: string, close: string): number {
