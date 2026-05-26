@@ -9,6 +9,7 @@ export interface User {
   profile: UserProfile;
   fcmToken?: string;
   timezone?: string;
+  subscription?: Subscription;
   createdAt: Timestamp;
 }
 
@@ -157,4 +158,18 @@ export interface NutritionTotals {
   carbs: number;
   fat: number;
   fiber: number;
+}
+
+export interface Subscription {
+  plan: "free" | "premium" | "grandfathered";
+  expiresAt?: Timestamp;
+  paddleCustomerId?: string;
+  paddleSubscriptionId?: string;
+  provider?: "paddle" | "grandfathered";
+  cancelPending?: boolean;
+}
+
+export interface DailyUsage {
+  mealPhotos: number;
+  date: string;
 }

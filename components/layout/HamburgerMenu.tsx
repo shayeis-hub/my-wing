@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { signOut } from "@/lib/firebase/auth";
 import { Avatar } from "@/components/ui/Avatar";
+import { isGrandfathered, isPremium } from "@/lib/subscription";
 import {
   X,
   UserCircle,
@@ -16,6 +17,8 @@ import {
   ShieldCheck,
   FileText,
   LogOut,
+  Zap,
+  Crown,
 } from "lucide-react";
 
 interface HamburgerMenuProps {
@@ -24,8 +27,11 @@ interface HamburgerMenuProps {
 }
 
 export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
-  const { user } = useAuth();
+  const { user, firebaseUser } = useAuth();
   const { t, lang, setLang, dir } = useLanguage();
+  const email = firebaseUser?.email ?? user?.email ?? "";
+  const grandfathered = isGrandfathered(email);
+  const premium = isPremium(email, user?.subscription?.plan);
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -104,6 +110,25 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           {/* Wing */}
           <Link href="/wing" onClick={onClose}>
             <MenuItem icon={<Users size={20} />} label={t("menu_wing")} />
+          </Link>
+
+          {/* Subscription */}
+          <Link href="/subscription" onClick={onClose}>
+            <div className="flex items-center gap-3 px-3 py-3 rounded-[14px] hover:bg-wing-elevated transition-colors">
+              <span className={grandfathered || premium ? "text-yellow-500" : "text-wing-muted"}>
+                {grandfathered || premium ? <Crown size={20} /> : <Zap size={20} />}
+              </span>
+              <span className="flex-1 text-sm font-medium text-wing-ink">{t("upgrade_manage")}</span>
+              {grandfathered ? (
+                <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">VIP</span>
+              ) : premium ? (
+                <span className="text-xs font-bold text-white bg-wing-primary px-2 py-0.5 rounded-full">Premium</span>
+              ) : (
+                <span className="text-xs font-bold text-wing-heat bg-wing-primary/10 px-2 py-0.5 rounded-full">
+                  {lang === "he" ? "שדרג" : "Upgrade"}
+                </span>
+              )}
+            </div>
           </Link>
 
           {/* Language */}

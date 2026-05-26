@@ -8,6 +8,7 @@ import { useMeals } from "@/hooks/useMeals";
 import { useWing } from "@/hooks/useWing";
 import { MealCard } from "@/components/meals/MealCard";
 import { MealCamera } from "@/components/meals/MealCamera";
+import { UpgradeModal } from "@/components/subscription/UpgradeModal";
 import { Button } from "@/components/ui/Button";
 import { addMeal } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
@@ -34,6 +35,7 @@ export default function MealsPage() {
   };
   const [selectedUserId, setSelectedUserId] = useState<string | "all">("all");
   const [showCamera, setShowCamera] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
   const [manualDescription, setManualDescription] = useState("");
   const [manualCalories, setManualCalories] = useState("");
@@ -429,6 +431,16 @@ export default function MealsPage() {
         <MealCamera
           onAnalysis={handleAnalysis}
           onCancel={() => setShowCamera(false)}
+          onLimitReached={() => { setShowCamera(false); setShowUpgrade(true); }}
+          userId={firebaseUser?.uid}
+          userEmail={firebaseUser?.email}
+        />
+      )}
+
+      {showUpgrade && (
+        <UpgradeModal
+          onClose={() => setShowUpgrade(false)}
+          limitReached
         />
       )}
     </div>

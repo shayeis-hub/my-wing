@@ -1,18 +1,22 @@
-﻿"use client";
+"use client";
 
 import { useRef, useState, useCallback } from "react";
 import { Camera, Upload, X, Loader2, PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { MealAnalysis } from "@/types";
+import { useLanguage } from "@/lib/i18n";
 
 interface MealCameraProps {
   onAnalysis: (analysis: MealAnalysis, imageDataUrl: string) => void;
   onCancel: () => void;
+  onLimitReached?: () => void;
+  userId?: string;
+  userEmail?: string | null;
 }
 
 type Mode = "choose" | "text";
 
-export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
+export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userEmail }: MealCameraProps) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -20,6 +24,7 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("choose");
   const [textInput, setTextInput] = useState("");
+  const { t } = useLanguage();
 
   const processImage = useCallback(async (dataUrl: string) => {
     setAnalyzing(true);
@@ -30,17 +35,26 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64Image: base64, mediaType }),
+        body: JSON.stringify({
+          base64Image: base64,
+          mediaType,
+          userId,
+          userEmail: userEmail ?? null,
+        }),
       });
-      if (!res.ok) throw new Error("שגיאה בניתוח");
+      if (res.status === 403) {
+        onLimitReached?.();
+        return;
+      }
+      if (!res.ok) throw new Error("analysis error");
       const analysis: MealAnalysis = await res.json();
       onAnalysis(analysis, dataUrl);
     } catch {
-      setError("לא הצלחנו לנתח את התמונה. נסה שוב.");
+      setError(t("meals_analysis_error") as string);
     } finally {
       setAnalyzing(false);
     }
-  }, [onAnalysis]);
+  }, [onAnalysis, onLimitReached, userId, userEmail, t]);
 
   async function processText() {
     const trimmed = textInput.trim();
@@ -53,11 +67,11 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ textDescription: trimmed }),
       });
-      if (!res.ok) throw new Error("שגיאה בניתוח");
+      if (!res.ok) throw new Error("analysis error");
       const analysis: MealAnalysis = await res.json();
       onAnalysis(analysis, "");
     } catch {
-      setError("לא הצלחנו לנתח. נסה שוב.");
+      setError(t("meals_analysis_error") as string);
     } finally {
       setAnalyzing(false);
     }
@@ -76,7 +90,7 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl w-full max-w-md p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-lg text-wing-ink">הוסף ארוחה</h2>
+          <h2 className="font-bold text-lg text-wing-ink">{t("meals_add_meal")}</h2>
           <button onClick={onCancel} className="p-2 hover:bg-wing-elevated rounded-full">
             <X size={20} className="text-wing-muted" />
           </button>
@@ -90,10 +104,10 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
             <div className="flex gap-3">
               <Button variant="secondary" onClick={() => setPreview(null)} className="flex-1">
-                צלם מחדש
+                {t("meals_retake")}
               </Button>
               <Button onClick={() => processImage(preview)} loading={analyzing} className="flex-1">
-                {analyzing ? "מנתח..." : "נתח ✨"}
+                {analyzing ? t("meals_analyzing") : t("meals_analyze_cta")}
               </Button>
             </div>
           </div>
@@ -103,17 +117,17 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
             <textarea
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder="תאר מה אכלת, לדוגמה: חזה עוף 150 גרם, אורז 100 גרם, סלט ירקות..."
+              placeholder={t("meals_hint_ph") as string}
               rows={4}
               className="w-full px-4 py-3 rounded-2xl border border-wing-border bg-wing-elevated text-wing-ink placeholder:text-wing-subtle text-sm resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink"
             />
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
             <div className="flex gap-3">
               <Button variant="secondary" onClick={() => setMode("choose")} className="flex-1">
-                חזור
+                {t("back")}
               </Button>
               <Button onClick={processText} loading={analyzing} disabled={!textInput.trim()} className="flex-1">
-                {analyzing ? "מחשב..." : "חשב קלוריות ✨"}
+                {analyzing ? t("meals_analyzing") : t("meals_calc_cta")}
               </Button>
             </div>
           </div>
@@ -125,21 +139,21 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
               className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-wing-elevated hover:bg-wing-elevated transition-colors"
             >
               <Camera size={22} className="text-wing-heat" />
-              <span className="text-sm font-medium text-wing-heat">צלם תמונה</span>
+              <span className="text-sm font-medium text-wing-heat">{t("meals_take_photo")}</span>
             </button>
             <button
               onClick={() => galleryRef.current?.click()}
               className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-white hover:bg-wing-elevated transition-colors"
             >
               <Upload size={22} className="text-wing-muted" />
-              <span className="text-sm font-medium text-wing-muted">בחר מהגלריה</span>
+              <span className="text-sm font-medium text-wing-muted">{t("meals_pick_gallery")}</span>
             </button>
             <button
               onClick={() => setMode("text")}
               className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-white hover:bg-wing-elevated transition-colors"
             >
               <PencilLine size={22} className="text-wing-muted" />
-              <span className="text-sm font-medium text-wing-muted">הקלד ידנית</span>
+              <span className="text-sm font-medium text-wing-muted">{t("meals_type_manual")}</span>
             </button>
             <input
               ref={cameraRef}
@@ -162,7 +176,7 @@ export function MealCamera({ onAnalysis, onCancel }: MealCameraProps) {
         {analyzing && (
           <div className="flex items-center justify-center gap-2 text-wing-heat py-2">
             <Loader2 size={18} className="animate-spin" />
-            <span className="text-sm">Claude AI מנתח את הארוחה...</span>
+            <span className="text-sm">{t("meals_analyzing_ai")}</span>
           </div>
         )}
       </div>

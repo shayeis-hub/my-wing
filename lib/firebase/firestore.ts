@@ -12,6 +12,7 @@ import {
   serverTimestamp,
   arrayUnion,
   updateDoc,
+  increment,
   onSnapshot,
   type Unsubscribe,
 } from "firebase/firestore";
@@ -25,6 +26,7 @@ import type {
   Challenge,
   WingMember,
   WeightLog,
+  Subscription,
 } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 
@@ -391,4 +393,32 @@ export async function saveChallenge(
   const ref = doc(collection(db, "wings", wingId, "challenges"));
   await setDoc(ref, { ...challenge, createdAt: serverTimestamp() });
   await updateDoc(doc(db, "wings", wingId), { activeChallenge: { ...challenge, id: ref.id } });
+}
+
+// ── Subscription & daily usage ────────────────────────────────────────────────
+
+export async function getUserPlan(uid: string): Promise<Subscription | null> {
+  const snap = await getDoc(doc(db, "users", uid));
+  if (!snap.exists()) return null;
+  const data = snap.data() as { subscription?: Subscription };
+  return data.subscription ?? null;
+}
+
+export async function saveUserSubscription(
+  uid: string,
+  subscription: Subscription
+): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { subscription });
+}
+
+export async function getDailyMealCount(uid: string, date: string): Promise<number> {
+  const snap = await getDoc(doc(db, "users", uid, "dailyUsage", date));
+  if (!snap.exists()) return 0;
+  const data = snap.data() as { mealPhotos?: number };
+  return data.mealPhotos ?? 0;
+}
+
+export async function incrementDailyMealCount(uid: string, date: string): Promise<void> {
+  const ref = doc(db, "users", uid, "dailyUsage", date);
+  await setDoc(ref, { mealPhotos: increment(1), date }, { merge: true });
 }
