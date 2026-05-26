@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { signUp, signInWithGoogle } from "@/lib/firebase/auth";
+import { useLanguage } from "@/lib/i18n";
 
 function WingLogo() {
   return (
@@ -38,6 +39,7 @@ function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/onboarding";
+  const { t, dir } = useLanguage();
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -47,16 +49,16 @@ function RegisterForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 6) { toast.error("הסיסמה חייבת להכיל לפחות 6 תווים"); return; }
+    if (password.length < 6) { toast.error(t("register_password_short")); return; }
     setLoading(true);
     try {
       await signUp(email, password, displayName);
       router.replace(redirectTo);
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes("email-already-in-use")) {
-        toast.error("אימייל זה כבר קיים במערכת");
+        toast.error(t("register_email_exists"));
       } else {
-        toast.error("ההרשמה נכשלה, נסה שוב");
+        toast.error(t("register_error"));
       }
     } finally {
       setLoading(false);
@@ -69,20 +71,20 @@ function RegisterForm() {
       await signInWithGoogle();
       router.replace(redirectTo);
     } catch {
-      toast.error("ההתחברות עם Google נכשלה");
+      toast.error(t("register_google_error"));
     } finally {
       setGoogleLoading(false);
     }
   }
 
   return (
-    <div className="w-full max-w-[340px] flex flex-col items-center">
+    <div className="w-full max-w-[340px] flex flex-col items-center" dir={dir}>
       {/* Logo */}
       <div className="flex flex-col items-center gap-3 mb-8">
         <WingLogo />
         <div className="text-center">
-          <h1 className="text-[30px] font-black text-wing-ink tracking-[-0.025em]">הצטרף למבנה</h1>
-          <p className="text-sm text-wing-muted mt-1">צור חשבון ותתחיל את המסע</p>
+          <h1 className="text-[30px] font-black text-wing-ink tracking-[-0.025em]">{t("app_name")}</h1>
+          <p className="text-sm text-wing-muted mt-1">{t("app_tagline")}</p>
         </div>
       </div>
 
@@ -93,13 +95,13 @@ function RegisterForm() {
         className="w-full bg-wing-surface border border-wing-border rounded-[14px] px-4 py-3.5 text-sm font-semibold text-wing-ink flex items-center justify-center gap-2 active:scale-[0.97] transition-transform disabled:opacity-60 mb-4"
       >
         <GoogleIcon />
-        {googleLoading ? "מתחבר..." : "הרשמה עם Google"}
+        {googleLoading ? t("loading") : t("register_google")}
       </button>
 
       {/* Divider */}
       <div className="flex items-center gap-2 w-full mb-4">
         <div className="flex-1 h-px bg-wing-border" />
-        <span className="font-mono text-xs tracking-[0.22em] uppercase text-wing-muted">או עם אימייל</span>
+        <span className="font-mono text-xs tracking-[0.22em] uppercase text-wing-muted">{t("or")}</span>
         <div className="flex-1 h-px bg-wing-border" />
       </div>
 
@@ -107,7 +109,7 @@ function RegisterForm() {
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2.5">
         <input
           type="text"
-          placeholder="שם מלא"
+          placeholder={t("register_name")}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           required
@@ -115,7 +117,7 @@ function RegisterForm() {
         />
         <input
           type="email"
-          placeholder="אימייל"
+          placeholder={t("register_email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -124,7 +126,7 @@ function RegisterForm() {
         />
         <input
           type="password"
-          placeholder="סיסמה (לפחות 6 תווים)"
+          placeholder={t("register_password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -136,14 +138,14 @@ function RegisterForm() {
           disabled={loading}
           className="w-full bg-sunrise text-wing-ink font-extrabold text-sm py-3.5 rounded-[14px] mt-1 active:scale-[0.97] transition-transform disabled:opacity-60"
         >
-          {loading ? "יוצר חשבון..." : "צור חשבון"}
+          {loading ? t("register_submitting") : t("register_submit")}
         </button>
       </form>
 
       <p className="text-center text-xs text-wing-muted mt-6">
-        כבר יש לך חשבון?{" "}
+        {t("register_have_account")}{" "}
         <Link href="/login" className="text-wing-heat font-bold">
-          התחבר
+          {t("register_login_link")}
         </Link>
       </p>
     </div>

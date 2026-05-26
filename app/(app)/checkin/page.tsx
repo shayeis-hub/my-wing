@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
 import { g } from "@/lib/utils/gender";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
@@ -76,6 +77,7 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 
 function CheckinPageInner() {
   const { user, firebaseUser } = useAuth();
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const paramDate = searchParams.get("date");
   const [myCheckin, setMyCheckin] = useState<DailyCheckin | null>(null);
@@ -175,7 +177,7 @@ function CheckinPageInner() {
         ? calcWorkoutCalories(workoutType, workoutIntensity, durationMin, weightForCalc)
         : undefined;
       const workoutTypeLabel = WORKOUT_TYPES.find(t => t.value === workoutType)?.label ?? workoutType;
-      const intensityLabel = workoutIntensity === "light" ? "קל" : workoutIntensity === "moderate" ? "בינוני" : "אינטנסיבי";
+      const intensityLabel = workoutIntensity === "light" ? t("checkin_workout_light") : workoutIntensity === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense");
 
       await saveCheckin(user.wingId, {
         wingId: user.wingId,
@@ -203,7 +205,7 @@ function CheckinPageInner() {
         } catch { /* non-critical */ }
       }
 
-      toast.success(g(user?.profile?.gender, "הצ'ק-אין נשמר! 💪", "הצ'ק-אין נשמרה! 💪"));
+      toast.success(g(user?.profile?.gender, t("checkin_saved_ok_m"), t("checkin_saved_ok_f")));
       const refreshed = await getTodayCheckin(user.wingId, firebaseUser.uid, selectedDate);
       if (refreshed) setMyCheckin(refreshed);
     } catch {
@@ -354,7 +356,7 @@ function CheckinPageInner() {
             onClick={() => setEwManual((v) => !v)}
             className="text-xs text-wing-muted underline"
           >
-            {ewManual ? "חזור לאוטומטי" : "ערוך ידנית"}
+            {ewManual ? t("checkin_ew_auto") : t("checkin_ew_manual")}
           </button>
         </div>
 
@@ -428,7 +430,7 @@ function CheckinPageInner() {
           type="number"
           value={steps}
           onChange={(e) => setSteps(e.target.value)}
-          placeholder="כמה צעדים עשית היום?"
+          placeholder={t("checkin_steps_ph")}
           inputMode="numeric"
           className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
         />
@@ -473,7 +475,7 @@ function CheckinPageInner() {
                       : "border-wing-border bg-wing-elevated text-wing-muted"
                   }`}
                 >
-                  {lvl === "light" ? "קל" : lvl === "moderate" ? "בינוני" : "אינטנסיבי"}
+                  {lvl === "light" ? t("checkin_workout_light") : lvl === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense")}
                 </button>
               ))}
             </div>
@@ -483,7 +485,7 @@ function CheckinPageInner() {
                 type="number"
                 value={workoutDuration}
                 onChange={(e) => setWorkoutDuration(e.target.value)}
-                placeholder="משך האימון"
+                placeholder={t("checkin_workout_dur")}
                 inputMode="numeric"
                 className="flex-1 px-4 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
               />
@@ -552,7 +554,7 @@ function CheckinPageInner() {
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="איך היה היום? משהו שרצית לציין..."
+          placeholder={t("checkin_notes_ph")}
           rows={3}
           className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
         />
@@ -565,7 +567,7 @@ function CheckinPageInner() {
         className="w-full py-4 rounded-[14px] font-extrabold text-wing-ink text-base transition-all active:scale-[0.97] disabled:opacity-60"
         style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
       >
-        {saving ? g(user?.profile?.gender, "שומר...", "שומרת...") : myCheckin ? g(user?.profile?.gender, "עדכן צ׳ק-אין", "עדכני צ׳ק-אין") : g(user?.profile?.gender, "שמור צ׳ק-אין", "שמרי צ׳ק-אין")}
+        {saving ? g(user?.profile?.gender, t("checkin_saving_m"), t("checkin_saving_f")) : myCheckin ? g(user?.profile?.gender, t("checkin_update_m"), t("checkin_update_f")) : g(user?.profile?.gender, t("checkin_save_m"), t("checkin_save_f"))}
       </button>
 
       {/* Close day button */}
@@ -575,7 +577,7 @@ function CheckinPageInner() {
           disabled={closingDay}
           className="w-full py-3.5 rounded-[14px] border-2 border-wing-ink font-bold text-wing-ink text-sm transition-all active:scale-[0.97] disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {closingDay ? g(user?.profile?.gender, "מייצר סיכום AI...", "מייצרת סיכום AI...") : <><Moon size={16} /> סגירת יום</>}
+          {closingDay ? g(user?.profile?.gender, t("checkin_closing_m"), t("checkin_closing_f")) : <><Moon size={16} /> סגירת יום</>}
         </button>
       )}
 
@@ -674,3 +676,4 @@ export default function CheckinPage() {
     </Suspense>
   );
 }
+

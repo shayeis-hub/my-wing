@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
 import { useWing } from "@/hooks/useWing";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SOSButton } from "@/components/wing/SOSButton";
@@ -25,6 +26,7 @@ import type { StepsEntry } from "@/types";
 
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
+  const { t } = useLanguage();
   const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
@@ -90,7 +92,7 @@ export default function DashboardPage() {
         <div>
           <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted">{today}</p>
           <h1 className="text-[28px] font-black text-wing-ink tracking-[-0.025em] mt-0.5">
-            שלום, {user?.displayName?.split(" ")[0] ?? "חבר"}
+            {t("dashboard_hello")}, {user?.displayName?.split(" ")[0] ?? t("dashboard_hello_default")}
           </h1>
           {wing && (
             <p className="text-sm text-wing-muted mt-0.5">
@@ -297,3 +299,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

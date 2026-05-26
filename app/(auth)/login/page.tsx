@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { signIn, signInWithGoogle } from "@/lib/firebase/auth";
+import { useLanguage } from "@/lib/i18n";
 
 function WingLogo() {
   return (
@@ -38,6 +39,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/dashboard";
+  const { t, lang, setLang, dir } = useLanguage();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +53,7 @@ function LoginForm() {
       await signIn(email, password);
       router.replace(redirectTo);
     } catch {
-      toast.error("אימייל או סיסמה שגויים");
+      toast.error(t("login_error"));
     } finally {
       setLoading(false);
     }
@@ -63,20 +65,44 @@ function LoginForm() {
       await signInWithGoogle();
       router.replace(redirectTo);
     } catch {
-      toast.error("ההתחברות עם Google נכשלה");
+      toast.error(t("login_google_error"));
     } finally {
       setGoogleLoading(false);
     }
   }
 
   return (
-    <div className="w-full max-w-[340px] flex flex-col items-center">
+    <div className="w-full max-w-[340px] flex flex-col items-center" dir={dir}>
+      {/* Language switcher */}
+      <div className="flex gap-1.5 self-end mb-6">
+        <button
+          onClick={() => setLang("he")}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            lang === "he"
+              ? "bg-wing-ink text-wing-elevated"
+              : "bg-wing-elevated border border-wing-border text-wing-muted"
+          }`}
+        >
+          עב
+        </button>
+        <button
+          onClick={() => setLang("en")}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            lang === "en"
+              ? "bg-wing-ink text-wing-elevated"
+              : "bg-wing-elevated border border-wing-border text-wing-muted"
+          }`}
+        >
+          EN
+        </button>
+      </div>
+
       {/* Logo */}
       <div className="flex flex-col items-center gap-3 mb-10">
         <WingLogo />
         <div className="text-center">
-          <h1 className="text-[30px] font-black text-wing-ink tracking-[-0.025em]">מבנה כנף</h1>
-          <p className="text-sm text-wing-muted mt-1">יורדים במשקל ביחד</p>
+          <h1 className="text-[30px] font-black text-wing-ink tracking-[-0.025em]">{t("app_name")}</h1>
+          <p className="text-sm text-wing-muted mt-1">{t("app_tagline")}</p>
         </div>
       </div>
 
@@ -84,7 +110,7 @@ function LoginForm() {
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2.5">
         <input
           type="email"
-          placeholder="אימייל"
+          placeholder={t("login_email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -93,7 +119,7 @@ function LoginForm() {
         />
         <input
           type="password"
-          placeholder="סיסמה"
+          placeholder={t("login_password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -105,14 +131,14 @@ function LoginForm() {
           disabled={loading}
           className="w-full bg-sunrise text-wing-ink font-extrabold text-sm py-3.5 rounded-[14px] mt-1 active:scale-[0.97] transition-transform disabled:opacity-60"
         >
-          {loading ? "מתחבר..." : "התחבר"}
+          {loading ? t("login_submitting") : t("login_submit")}
         </button>
       </form>
 
       {/* Divider */}
       <div className="flex items-center gap-2 w-full my-5">
         <div className="flex-1 h-px bg-wing-border" />
-        <span className="font-mono text-xs tracking-[0.22em] uppercase text-wing-muted">או</span>
+        <span className="font-mono text-xs tracking-[0.22em] uppercase text-wing-muted">{t("or")}</span>
         <div className="flex-1 h-px bg-wing-border" />
       </div>
 
@@ -123,30 +149,30 @@ function LoginForm() {
         className="w-full bg-wing-surface border border-wing-border rounded-[14px] px-4 py-3.5 text-sm font-semibold text-wing-ink flex items-center justify-center gap-2 active:scale-[0.97] transition-transform disabled:opacity-60"
       >
         <GoogleIcon />
-        המשך עם Google
+        {t("login_google")}
       </button>
 
       {/* Register link */}
       <p className="text-center text-xs text-wing-muted mt-7">
-        אין לך חשבון?{" "}
+        {t("login_no_account")}{" "}
         <Link
           href={redirectTo !== "/dashboard" ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}
           className="text-wing-heat font-bold"
         >
-          הירשם
+          {t("login_register_link")}
         </Link>
       </p>
 
       {/* Legal */}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-8">
         {[
-          { href: "/privacy", label: "פרטיות" },
-          { href: "/terms", label: "תנאי שימוש" },
-          { href: "/contact", label: "צור קשר" },
-          { href: "/delete-account", label: "מחיקת חשבון" },
-        ].map(({ href, label }) => (
+          { href: "/privacy", key: "link_privacy" as const },
+          { href: "/terms", key: "link_terms" as const },
+          { href: "/contact", key: "link_contact" as const },
+          { href: "/delete-account", key: "link_delete" as const },
+        ].map(({ href, key }) => (
           <Link key={href} href={href} className="font-mono text-[11px] tracking-[0.18em] uppercase text-wing-subtle hover:text-wing-muted transition-colors">
-            {label}
+            {t(key)}
           </Link>
         ))}
       </div>

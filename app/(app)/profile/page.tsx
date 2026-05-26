@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -14,21 +15,21 @@ import { useRouter } from "next/navigation";
 import { Camera, Footprints, Users } from "lucide-react";
 import Link from "next/link";
 
-const activityLabels: Record<string, string> = {
-  sedentary: "יושבני",
-  light: "קל",
-  moderate: "בינוני",
-  active: "פעיל",
-  very_active: "מאוד פעיל",
-};
-
-const genderLabels: Record<string, string> = {
-  male: "זכר",
-  female: "נקבה",
-};
 
 export default function ProfilePage() {
   const { user, firebaseUser } = useAuth();
+  const { t } = useLanguage();
+  const activityLabels: Record<string, string> = {
+    sedentary: t("activity_sedentary"),
+    light: t("activity_light"),
+    moderate: t("activity_moderate"),
+    active: t("activity_active"),
+    very_active: t("activity_very_active"),
+  };
+  const genderLabels: Record<string, string> = {
+    male: t("gender_male"),
+    female: t("gender_female"),
+  };
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -67,9 +68,9 @@ export default function ProfilePage() {
       await uploadBytes(storageRef, compressed, { contentType: "image/jpeg" });
       const url = await getDownloadURL(storageRef);
       await updateUserPhotoURL(firebaseUser.uid, user.wingId, url);
-      toast.success("תמונת הפרופיל עודכנה ✅");
+      toast.success(t("profile_photo_saved"));
     } catch {
-      toast.error("שגיאה בהעלאת התמונה");
+      toast.error(t("profile_photo_error"));
     } finally {
       setUploading(false);
     }
@@ -89,13 +90,13 @@ export default function ProfilePage() {
   async function handleSaveStepsGoal() {
     if (!firebaseUser) return;
     const val = parseInt(stepsGoal);
-    if (isNaN(val) || val < 100) { toast.error("יעד צעדים לא תקין"); return; }
+    if (isNaN(val) || val < 100) { toast.error(t("profile_steps_invalid")); return; }
     setSavingSteps(true);
     try {
       await updateUserStepsGoal(firebaseUser.uid, val);
-      toast.success("יעד הצעדים עודכן ✅");
+      toast.success(t("profile_steps_saved"));
     } catch {
-      toast.error("שגיאה בשמירה");
+      toast.error(t("profile_save_error"));
     } finally {
       setSavingSteps(false);
     }
@@ -225,3 +226,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

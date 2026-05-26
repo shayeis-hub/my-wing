@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
 import { useMeals } from "@/hooks/useMeals";
 import { useWing } from "@/hooks/useWing";
 import { MealCard } from "@/components/meals/MealCard";
@@ -539,3 +540,4 @@ function MealsByDate({
     </div>
   );
 }
+
