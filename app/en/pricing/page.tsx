@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Check } from "lucide-react";
 
 export const metadata = { title: "Pricing – Wingpact" };
@@ -113,7 +113,7 @@ export default function PricingEnPage() {
         </div>
 
         <p className="text-center text-xs text-slate-400 pb-4">
-          Questions? <a href="mailto:shayeis@gmail.com" className="underline">shayeis@gmail.com</a>
+          Questions? <a href="mailto:contact@wingpact.app" className="underline">contact@wingpact.app</a>
         </p>
       </div>
     </div>

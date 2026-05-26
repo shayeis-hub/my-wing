@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export const metadata = { title: "מדיניות החזרות – Wingpact" };
 
@@ -23,7 +23,7 @@ export default function RefundPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">2. אחריות להחזר כספי של 14 יום</h2>
-            <p>אם אינך מרוצה ממנוי Wingpact Premium שלך, תוכל לבקש החזר כספי מלא תוך <strong>14 יום</strong> מהרכישה הראשונית. לבקשת החזר בתקופה זו, צור קשר בכתובת <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a> עם הנושא "בקשת החזר" וכתובת הדוא"ל הרשומה שלך.</p>
+            <p>אם אינך מרוצה ממנוי Wingpact Premium שלך, תוכל לבקש החזר כספי מלא תוך <strong>14 יום</strong> מהרכישה הראשונית. לבקשת החזר בתקופה זו, צור קשר בכתובת <a href="mailto:contact@wingpact.app" className="text-wing-primary underline">contact@wingpact.app</a> עם הנושא "בקשת החזר" וכתובת הדוא"ל הרשומה שלך.</p>
           </section>
 
           <section className="space-y-2">
@@ -48,7 +48,7 @@ export default function RefundPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">7. יצירת קשר</h2>
-            <p>לבקשות החזר או שאלות חיוב, פנה ל: <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a></p>
+            <p>לבקשות החזר או שאלות חיוב, פנה ל: <a href="mailto:contact@wingpact.app" className="text-wing-primary underline">contact@wingpact.app</a></p>
           </section>
         </div>
       </div>

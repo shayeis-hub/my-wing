@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export const metadata = { title: "Refund Policy – Wingpact" };
 
@@ -23,7 +23,7 @@ export default function RefundEnPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">2. 14-Day Money-Back Guarantee</h2>
-            <p>If you are not satisfied with your Wingpact Premium subscription, you may request a full refund within <strong>14 days</strong> of your initial purchase. To request a refund within this period, contact us at <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a> with the subject line "Refund Request" and your registered email address.</p>
+            <p>If you are not satisfied with your Wingpact Premium subscription, you may request a full refund within <strong>14 days</strong> of your initial purchase. To request a refund within this period, contact us at <a href="mailto:contact@wingpact.app" className="text-wing-primary underline">contact@wingpact.app</a> with the subject line "Refund Request" and your registered email address.</p>
           </section>
 
           <section className="space-y-2">
@@ -48,7 +48,7 @@ export default function RefundEnPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">7. Contact</h2>
-            <p>For refund requests or billing questions, please contact: <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a></p>
+            <p>For refund requests or billing questions, please contact: <a href="mailto:contact@wingpact.app" className="text-wing-primary underline">contact@wingpact.app</a></p>
           </section>
         </div>
       </div>

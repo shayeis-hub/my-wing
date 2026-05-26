@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export const metadata = { title: "Terms of Service – Wingpact" };
 
@@ -83,7 +83,7 @@ export default function TermsEnPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">12. Contact</h2>
-            <p>Questions about these Terms? Contact us at: <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a></p>
+            <p>Questions about these Terms? Contact us at: <a href="mailto:contact@wingpact.app" className="text-wing-primary underline">contact@wingpact.app</a></p>
           </section>
         </div>
       </div>

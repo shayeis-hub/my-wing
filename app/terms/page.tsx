@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export default function TermsPage() {
   return (
@@ -51,7 +51,7 @@ export default function TermsPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">7. יצירת קשר</h2>
-            <p>לכל שאלה בנושא תנאי השימוש: <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a></p>
+            <p>לכל שאלה בנושא תנאי השימוש: <a href="mailto:contact@wingpact.app" className="text-wing-primary underline">contact@wingpact.app</a></p>
           </section>
         </div>
       </div>

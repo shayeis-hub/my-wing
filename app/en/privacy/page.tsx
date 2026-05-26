@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export const metadata = { title: "Privacy Policy – Wingpact" };
 
@@ -69,7 +69,7 @@ export default function PrivacyEnPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">8. Contact</h2>
-            <p>For any privacy-related questions or requests, please contact: <a href="mailto:shayeis@gmail.com" className="text-wing-primary underline">shayeis@gmail.com</a></p>
+            <p>For any privacy-related questions or requests, please contact: <a href="mailto:contact@wingpact.app" className="text-wing-primary underline">contact@wingpact.app</a></p>
           </section>
         </div>
       </div>
