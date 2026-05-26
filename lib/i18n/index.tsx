@@ -224,7 +224,7 @@ export const T = {
 
     // Onboarding
     ob_step0_title: (name: string) => `היי ${name}!\nבוא נמצא את המבנה שלך.`,
-    ob_step0_sub: "המבנה הוא קבוצה של עד 4 חברים. תומכים זה בזה, חולקים ארוחות, ועוברים את הדרך ביחד.",
+    ob_step0_sub: "המבנה הוא קבוצה קטנה וקרובה. תומכים זה בזה, חולקים ארוחות, ועוברים את הדרך ביחד.",
     ob_join_title: "יש לי קוד הזמנה",
     ob_join_sub: "חבר/ה כבר שלח/ה לי",
     ob_join_ph: "הדבק קוד הזמנה",
@@ -720,7 +720,7 @@ export const T = {
 
     // Onboarding
     ob_step0_title: (name: string) => `Hey ${name}!\nLet's find your Wing.`,
-    ob_step0_sub: "A wing is a group of up to 4 people. You support each other, share meals, and make the journey together.",
+    ob_step0_sub: "A wing is a small, close-knit group. You support each other, share meals, and make the journey together.",
     ob_join_title: "I have an invite code",
     ob_join_sub: "A friend already sent me one",
     ob_join_ph: "Paste invite code",
