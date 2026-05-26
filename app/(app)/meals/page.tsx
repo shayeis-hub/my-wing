@@ -51,15 +51,20 @@ export default function MealsPage() {
   } | null>(null);
   const [mealType, setMealType] = useState<typeof mealTypes[number]>("lunch");
   const [mealTime, setMealTime] = useState(() => format(new Date(), "HH:mm"));
+  const [mealDate, setMealDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [manualTime, setManualTime] = useState(() => format(new Date(), "HH:mm"));
+  const [manualDate, setManualDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [saving, setSaving] = useState(false);
   const [hint, setHint] = useState("");
   const [reanalyzing, setReanalyzing] = useState(false);
   const [editingValues, setEditingValues] = useState(false);
 
-  // Reset time to now when opening a new meal entry
+  // Reset time/date to now when opening a new meal entry
   useEffect(() => {
-    if (showCamera) setMealTime(format(new Date(), "HH:mm"));
+    if (showCamera) {
+      setMealTime(format(new Date(), "HH:mm"));
+      setMealDate(format(new Date(), "yyyy-MM-dd"));
+    }
   }, [showCamera]);
 
   async function handleAnalysis(analysis: MealAnalysis, imageDataUrl: string) {
@@ -89,6 +94,7 @@ export default function MealsPage() {
         },
         mealType: manualMealType,
         mealTime: manualTime,
+        mealDate: manualDate,
       });
       toast.success(t("meals_saved"));
       setShowManualForm(false);
@@ -153,6 +159,7 @@ export default function MealsPage() {
         analysis: pendingAnalysis.analysis,
         mealType,
         mealTime,
+        mealDate,
       });
 
       toast.success(t("meals_saved"));
@@ -291,6 +298,13 @@ export default function MealsPage() {
               />
             </div>
           </div>
+          <input
+            type="date"
+            value={manualDate}
+            max={format(new Date(), "yyyy-MM-dd")}
+            onChange={(e) => setManualDate(e.target.value)}
+            className="w-full bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+          />
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setShowManualForm(false)} className="flex-1">{t("cancel")}</Button>
             <Button onClick={saveManualMeal} loading={savingManual} disabled={!manualDescription.trim()} className="flex-1">{t("save")}</Button>
@@ -396,6 +410,13 @@ export default function MealsPage() {
               />
             </div>
           </div>
+          <input
+            type="date"
+            value={mealDate}
+            max={format(new Date(), "yyyy-MM-dd")}
+            onChange={(e) => setMealDate(e.target.value)}
+            className="w-full bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+          />
 
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setPendingAnalysis(null)} className="flex-1">
@@ -479,15 +500,21 @@ function MealsByDate({
   const seen = new Map<string, Meal[]>();
 
   for (const meal of meals) {
-    const d = meal.createdAt?.toDate?.();
-    if (!d) continue;
-    const key = format(d, "yyyy-MM-dd");
+    // Prefer explicit mealDate, fall back to createdAt date
+    let key = meal.mealDate;
+    if (!key) {
+      const d = meal.createdAt?.toDate?.();
+      if (!d) continue;
+      key = format(d, "yyyy-MM-dd");
+    }
     if (!seen.has(key)) {
       seen.set(key, []);
       groups.push({ date: key, meals: seen.get(key)! });
     }
     seen.get(key)!.push(meal);
   }
+  // Sort groups newest first
+  groups.sort((a, b) => b.date.localeCompare(a.date));
 
   for (const group of groups) {
     group.meals.sort((a, b) => {

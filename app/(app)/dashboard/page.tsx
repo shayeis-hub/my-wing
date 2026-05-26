@@ -64,8 +64,11 @@ export default function DashboardPage() {
   const todayDateStr = format(new Date(), "yyyy-MM-dd");
 
   const todayMeals = meals.filter((m) => {
-    const d = m.createdAt?.toDate?.();
-    return d && format(d, "yyyy-MM-dd") === todayDateStr;
+    const dateKey = m.mealDate ?? (() => {
+      const d = m.createdAt?.toDate?.();
+      return d ? format(d, "yyyy-MM-dd") : null;
+    })();
+    return dateKey === todayDateStr;
   });
   const myTodayMeals = todayMeals.filter((m) => m.userId === firebaseUser?.uid);
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);

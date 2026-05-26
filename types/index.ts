@@ -52,7 +52,8 @@ export interface Meal {
   notes?: string;
   comments?: Encouragement[];
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
-  mealTime?: string;
+  mealTime?: string;   // "HH:mm"
+  mealDate?: string;   // "yyyy-MM-dd" — explicit date, falls back to createdAt date
   createdAt: Timestamp;
 }
 
