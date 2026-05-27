@@ -8,7 +8,7 @@ import { g } from "@/lib/utils/gender";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
 import {
-  saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement, saveWeightLog, getUserTodayMeals, saveSteps,
+  saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement, saveWeightLog, getUserTodayMeals,
 } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
@@ -105,6 +105,7 @@ function CheckinPageInner() {
   const [ewOpen, setEwOpen] = useState("");
   const [ewClose, setEwClose] = useState("");
   const [ewManual, setEwManual] = useState(false);
+  const [stepsEditing, setStepsEditing] = useState(false);
   const today = format(new Date(), "yyyy-MM-dd");
   const selectedDate = paramDate ?? today;
   const isRetro = selectedDate !== today;
@@ -213,17 +214,6 @@ function CheckinPageInner() {
         } catch { /* non-critical */ }
       }
 
-      if (stepsNum && user.wingId) {
-        try {
-          await saveSteps(user.wingId, {
-            wingId: user.wingId,
-            userId: firebaseUser.uid,
-            userName: user.displayName,
-            date: selectedDate,
-            steps: stepsNum,
-          });
-        } catch { /* non-critical */ }
-      }
 
       toast.success(g(user?.profile?.gender, t("checkin_saved_ok_m"), t("checkin_saved_ok_f")));
       const refreshed = await getTodayCheckin(user.wingId, firebaseUser.uid, selectedDate);
@@ -447,18 +437,39 @@ function CheckinPageInner() {
 
       {/* Steps */}
       <SectionCard>
-        <div className="flex items-center gap-2 mb-3">
-          <Footprints size={16} className="text-wing-muted" />
-          <span className="font-semibold text-wing-ink">{t("checkin_steps")}</span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Footprints size={16} className="text-wing-muted" />
+            <span className="font-semibold text-wing-ink">{t("checkin_steps")}</span>
+          </div>
+          <button
+            onClick={() => setStepsEditing((v) => !v)}
+            className="text-xs text-wing-muted underline"
+          >
+            {stepsEditing ? t("cancel") : t("steps_update_manual")}
+          </button>
         </div>
-        <input
-          type="number"
-          value={steps}
-          onChange={(e) => setSteps(e.target.value)}
-          placeholder={t("checkin_steps_ph")}
-          inputMode="numeric"
-          className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
-        />
+
+        {stepsEditing ? (
+          <input
+            type="number"
+            value={steps}
+            onChange={(e) => setSteps(e.target.value)}
+            placeholder={t("checkin_steps_ph")}
+            inputMode="numeric"
+            autoFocus
+            className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
+          />
+        ) : steps ? (
+          <div className="bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3 text-center">
+            <span className="font-black text-wing-ink tabular" style={{ fontSize: 28, letterSpacing: "-0.04em" }}>
+              {parseInt(steps).toLocaleString()}
+            </span>
+            <span className="text-sm text-wing-muted mr-1"> {lang === "he" ? "צעדים" : "steps"}</span>
+          </div>
+        ) : (
+          <p className="text-sm text-wing-subtle text-center py-2">{t("checkin_steps_ph")}</p>
+        )}
       </SectionCard>
 
       {/* Workout */}
