@@ -260,10 +260,10 @@ export default function MealsPage() {
           />
           <div className="grid grid-cols-2 gap-2">
             {([
-              ["manualCalories", "🔥 קק\"ל", manualCalories, setManualCalories],
-              ["manualProtein", "🥩 חלבון g", manualProtein, setManualProtein],
-              ["manualCarbs", "🌾 פחמימות g", manualCarbs, setManualCarbs],
-              ["manualFat", "🧈 שומן g", manualFat, setManualFat],
+              ["manualCalories", `🔥 ${t("kcal")}`, manualCalories, setManualCalories],
+              ["manualProtein", `🥩 ${t("ob_protein")} g`, manualProtein, setManualProtein],
+              ["manualCarbs", `🌾 ${t("ob_carbs")} g`, manualCarbs, setManualCarbs],
+              ["manualFat", `🧈 ${t("ob_fat")} g`, manualFat, setManualFat],
             ] as [string, string, string, (v: string) => void][]).map(([key, label, val, setter]) => (
               <label key={key} className="flex flex-col gap-0.5">
                 <span className="text-xs text-wing-subtle">{label}</span>
@@ -335,7 +335,7 @@ export default function MealsPage() {
                 {(["calories", "protein", "carbs", "fat"] as const).map((field) => (
                   <label key={field} className="flex flex-col gap-0.5">
                     <span className="text-xs text-wing-subtle">
-                      {field === "calories" ? "🔥 קק\"ל" : field === "protein" ? "🥩 חלבון g" : field === "carbs" ? "🌾 פחמימות g" : "🧈 שומן g"}
+                      {field === "calories" ? `🔥 ${t("kcal")}` : field === "protein" ? `🥩 ${t("ob_protein")} g` : field === "carbs" ? `🌾 ${t("ob_carbs")} g` : `🧈 ${t("ob_fat")} g`}
                     </span>
                     <input
                       type="number"
@@ -348,10 +348,10 @@ export default function MealsPage() {
               </div>
             ) : (
               <div className="flex gap-4 text-xs text-wing-muted">
-                <span>🔥 {pendingAnalysis.analysis.calories} קק&quot;ל</span>
-                <span>🥩 {pendingAnalysis.analysis.protein}g חלבון</span>
-                <span>🌾 {pendingAnalysis.analysis.carbs}g פחמ&apos;</span>
-                <span>🧈 {pendingAnalysis.analysis.fat}g שומן</span>
+                <span>🔥 {pendingAnalysis.analysis.calories} {t("kcal")}</span>
+                <span>🥩 {pendingAnalysis.analysis.protein}g {t("ob_protein")}</span>
+                <span>🌾 {pendingAnalysis.analysis.carbs}g {t("ob_carbs")}</span>
+                <span>🧈 {pendingAnalysis.analysis.fat}g {t("ob_fat")}</span>
               </div>
             )}
 
