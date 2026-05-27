@@ -121,7 +121,7 @@ export default function MealsPage() {
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64Image: base64, mediaType, hint: hint.trim() }),
+        body: JSON.stringify({ base64Image: base64, mediaType, hint: hint.trim(), lang }),
       });
       if (!res.ok) throw new Error();
       const analysis: MealAnalysis = await res.json();

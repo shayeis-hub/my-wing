@@ -8,22 +8,12 @@ const client = new Anthropic({
 export async function analyzeMealImage(
   base64Image: string,
   mediaType: "image/jpeg" | "image/png" | "image/webp",
-  hint?: string
+  hint?: string,
+  lang: "he" | "en" = "he"
 ): Promise<MealAnalysis> {
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1024,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "image",
-            source: { type: "base64", media_type: mediaType, data: base64Image },
-          },
-          {
-            type: "text",
-            text: `${hint ? `המשתמש מציין שהארוחה היא: "${hint}". השתמש במידע זה לצד התמונה לניתוח מדויק יותר.\n\n` : ""}אנא נתח את הצלחת בתמונה הזו ותן לי:
+  const isHe = lang === "he";
+  const promptText = isHe
+    ? `${hint ? `המשתמש מציין שהארוחה היא: "${hint}". השתמש במידע זה לצד התמונה לניתוח מדויק יותר.\n\n` : ""}אנא נתח את הצלחת בתמונה הזו ותן לי:
 1. תיאור קצר של הארוחה בעברית
 2. רשימת רכיבים עם משקל משוער בגרמים לכל אחד
 3. ערכים תזונתיים: קלוריות, חלבון, פחמימות, שומן, סיבים
@@ -43,8 +33,41 @@ export async function analyzeMealImage(
   ],
   "healthScore": 7,
   "tips": "טיפ אופציונלי"
-}`,
+}`
+    : `${hint ? `The user notes that the meal is: "${hint}". Use this alongside the image for a more accurate analysis.\n\n` : ""}Please analyze the plate in this image and provide:
+1. A short description of the meal in English
+2. A list of ingredients with estimated weight in grams each
+3. Nutritional values: calories, protein, carbs, fat, fiber
+4. A health score from 1 to 10
+5. A short tip in English to improve the meal (optional)
+
+Reply ONLY with valid JSON in the following format, no extra text:
+{
+  "description": "meal description",
+  "calories": 0,
+  "protein": 0,
+  "carbs": 0,
+  "fat": 0,
+  "fiber": 0,
+  "items": [
+    { "name": "ingredient name", "estimatedGrams": 0, "calories": 0 }
+  ],
+  "healthScore": 7,
+  "tips": "optional tip"
+}`;
+
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 1024,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type: mediaType, data: base64Image },
           },
+          { type: "text", text: promptText },
         ],
       },
     ],
@@ -59,14 +82,10 @@ export async function analyzeMealImage(
   return JSON.parse(jsonMatch[0]) as MealAnalysis;
 }
 
-export async function analyzeMealText(description: string): Promise<MealAnalysis> {
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1024,
-    messages: [
-      {
-        role: "user",
-        content: `המשתמש תיאר את הארוחה שלו: "${description}"
+export async function analyzeMealText(description: string, lang: "he" | "en" = "he"): Promise<MealAnalysis> {
+  const isHe = lang === "he";
+  const promptContent = isHe
+    ? `המשתמש תיאר את הארוחה שלו: "${description}"
 
 אנא נתח את הארוחה ותן לי:
 1. תיאור קצר בעברית
@@ -87,7 +106,37 @@ export async function analyzeMealText(description: string): Promise<MealAnalysis
   ],
   "healthScore": 7,
   "tips": "טיפ אופציונלי"
-}`,
+}`
+    : `The user described their meal: "${description}"
+
+Please analyze the meal and provide:
+1. A short description in English
+2. Estimated nutritional values: calories, protein, carbs, fat, fiber
+3. A health score from 1 to 10
+4. A short tip in English to improve the meal (optional)
+
+Reply ONLY with valid JSON in the following format, no extra text:
+{
+  "description": "meal description",
+  "calories": 0,
+  "protein": 0,
+  "carbs": 0,
+  "fat": 0,
+  "fiber": 0,
+  "items": [
+    { "name": "ingredient name", "estimatedGrams": 0, "calories": 0 }
+  ],
+  "healthScore": 7,
+  "tips": "optional tip"
+}`;
+
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 1024,
+    messages: [
+      {
+        role: "user",
+        content: promptContent,
       },
     ],
   });
@@ -111,12 +160,15 @@ export async function generatePersonalDaySummary(data: {
   targetWeightKg?: number;
   mood: number;
   notes?: string;
+  lang?: "he" | "en";
 }): Promise<{ summary: string; insights: string[]; tip: string }> {
   const totalCalories = data.meals.reduce((s, m) => s + m.calories, 0);
   const totalBurned = (data.steps ? Math.round(data.steps * 0.0004 * (data.weightKg ?? 70)) : 0)
     + (data.workout?.caloriesBurned ?? 0);
+  const isHe = (data.lang ?? "he") === "he";
 
-  const prompt = `אתה מאמן תזונה וכושר אישי. סכם את היום של ${data.userName} בצורה חמה, אישית ומעודדת בעברית.
+  const prompt = isHe
+    ? `אתה מאמן תזונה וכושר אישי. סכם את היום של ${data.userName} בצורה חמה, אישית ומעודדת בעברית.
 
 נתוני היום:
 - ארוחות: ${data.meals.length === 0 ? "לא נרשמו ארוחות" : data.meals.map(m => `${m.description} (${m.calories} קק"ל)`).join(", ")}
@@ -135,6 +187,26 @@ ${data.notes ? `- הערה: "${data.notes}"` : ""}
   "summary": "פסקה אישית קצרה (2-3 משפטים) על היום — מה השיג, איך הוא הרגיש, מה בולט לטוב",
   "insights": ["תובנה קצרה 1", "תובנה קצרה 2", "תובנה קצרה 3"],
   "tip": "טיפ אחד ספציפי לשיפור מחר"
+}`
+    : `You are a personal nutrition and fitness coach. Summarize ${data.userName}'s day in a warm, personal and encouraging way in English.
+
+Day data:
+- Meals: ${data.meals.length === 0 ? "No meals logged" : data.meals.map(m => `${m.description} (${m.calories} kcal)`).join(", ")}
+- Total calories eaten: ${totalCalories} out of target ${data.dailyCalorieTarget} kcal
+- Calories burned: ${totalBurned} kcal
+- Water: ${data.waterGlasses} liters
+- Vegetables: ${data.vegetablesServings} servings
+- Steps: ${data.steps ?? "not reported"}
+- Workout: ${data.workout?.done ? `yes — ${data.workout.description ?? ""}${data.workout.caloriesBurned ? ` (${data.workout.caloriesBurned} kcal)` : ""}` : "no"}
+- Weight: ${data.weightKg ? `${data.weightKg} kg` : "not measured"}${data.targetWeightKg ? ` (target: ${data.targetWeightKg} kg)` : ""}
+- Mood: ${data.mood}/5
+${data.notes ? `- Note: "${data.notes}"` : ""}
+
+Reply ONLY with JSON:
+{
+  "summary": "Short personal paragraph (2-3 sentences) about the day — what was achieved, how they felt, what stood out positively",
+  "insights": ["short insight 1", "short insight 2", "short insight 3"],
+  "tip": "one specific tip to improve tomorrow"
 }`;
 
   const response = await client.messages.create({

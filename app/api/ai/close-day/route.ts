@@ -6,7 +6,7 @@ import { generatePersonalDaySummary } from "@/lib/ai/claude";
 
 export async function POST(req: NextRequest) {
   try {
-    const { wingId, userId, date, checkin, userProfile } = await req.json();
+    const { wingId, userId, date, checkin, userProfile, lang } = await req.json();
     if (!wingId || !userId || !date || !checkin) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       targetWeightKg: userProfile?.targetWeightKg,
       mood: checkin.mood ?? 3,
       notes: checkin.notes,
+      lang: lang ?? "he",
     });
 
     // Save summary back to the checkin document

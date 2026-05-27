@@ -248,7 +248,7 @@ function CheckinPageInner() {
       const res = await fetch("/api/ai/close-day", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wingId: user.wingId, userId: firebaseUser.uid, date: today, checkin: myCheckin, userProfile: user.profile }),
+        body: JSON.stringify({ wingId: user.wingId, userId: firebaseUser.uid, date: today, checkin: myCheckin, userProfile: user.profile, lang }),
       });
       if (!res.ok) throw new Error();
       const summary = await res.json();

@@ -24,7 +24,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("choose");
   const [textInput, setTextInput] = useState("");
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const processImage = useCallback(async (dataUrl: string) => {
     setAnalyzing(true);
@@ -40,6 +40,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
           mediaType,
           userId,
           userEmail: userEmail ?? null,
+          lang,
         }),
       });
       if (res.status === 403) {
@@ -54,7 +55,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     } finally {
       setAnalyzing(false);
     }
-  }, [onAnalysis, onLimitReached, userId, userEmail, t]);
+  }, [onAnalysis, onLimitReached, userId, userEmail, t, lang]);
 
   async function processText() {
     const trimmed = textInput.trim();
@@ -65,7 +66,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ textDescription: trimmed }),
+        body: JSON.stringify({ textDescription: trimmed, lang }),
       });
       if (!res.ok) throw new Error("analysis error");
       const analysis: MealAnalysis = await res.json();

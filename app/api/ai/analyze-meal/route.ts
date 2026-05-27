@@ -8,7 +8,7 @@ import { getDailyMealCount, incrementDailyMealCount, getUserPlan } from "@/lib/f
 
 export async function POST(req: NextRequest) {
   try {
-    const { base64Image, mediaType, hint, textDescription, userId, userEmail } = await req.json();
+    const { base64Image, mediaType, hint, textDescription, userId, userEmail, lang } = await req.json();
 
     // ── Enforce meal-photo limit (only for image analysis, not text) ──────────
     if (base64Image && userId && userEmail !== undefined) {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     // ── Text analysis (manual entry) — no limit ───────────────────────────────
     if (textDescription) {
-      const analysis = await analyzeMealText(textDescription);
+      const analysis = await analyzeMealText(textDescription, lang ?? "he");
       return NextResponse.json(analysis);
     }
 
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image data" }, { status: 400 });
     }
 
-    const analysis = await analyzeMealImage(base64Image, mediaType, hint);
+    const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he");
 
     // ── Increment daily count after successful analysis ────────────────────────
     if (userId && userEmail !== undefined && !isGrandfathered(userEmail)) {
