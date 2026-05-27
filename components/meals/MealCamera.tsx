@@ -43,10 +43,11 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (e: any) => {
       let final = "";
-      for (let i = 0; i < e.results.length; i++) {
+      // Only process results from resultIndex onward — avoids exponential duplication
+      for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
       }
-      if (final) setVoiceTranscript((prev) => (prev + " " + final).trim());
+      if (final) setVoiceTranscript((prev) => (prev ? prev + " " : "") + final.trim());
     };
     recognition.onend = () => setListening(false);
     recognitionRef.current = recognition;
