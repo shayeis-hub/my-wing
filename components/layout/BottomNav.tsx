@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   UtensilsCrossed,
-  CalendarDays,
+  Activity,
   CheckSquare,
   Trophy,
   Menu,
@@ -23,7 +23,7 @@ export function BottomNav() {
   const navItems = [
     { href: "/dashboard", icon: Home, label: t("nav_home") },
     { href: "/meals", icon: UtensilsCrossed, label: t("nav_meals") },
-    { href: "/calendar", icon: CalendarDays, label: t("nav_calendar") },
+    { href: "/feed", icon: Activity, label: t("nav_feed") },
     { href: "/checkin", icon: CheckSquare, label: t("nav_checkin") },
     { href: "/challenges", icon: Trophy, label: t("nav_challenges") },
   ];

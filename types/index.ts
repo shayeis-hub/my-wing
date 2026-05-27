@@ -93,6 +93,24 @@ export interface Reaction {
   createdAt: number;
 }
 
+export interface PromptResponse {
+  userId: string;
+  userName: string;
+  text: string;
+  createdAt: number;
+}
+
+export interface DailyPrompt {
+  id: string;
+  wingId: string;
+  date: string;            // "yyyy-MM-dd"
+  question: string;        // Localized question shown to wing
+  questionId: number;      // Index into the curated list, for reproducibility
+  responses?: PromptResponse[];
+  reactions?: Reaction[];
+  createdAt: Timestamp;
+}
+
 export interface Workout {
   done: boolean;
   type?: string;

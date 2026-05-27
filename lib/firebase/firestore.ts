@@ -25,6 +25,8 @@ import type {
   Encouragement,
   Reaction,
   ReactionType,
+  DailyPrompt,
+  PromptResponse,
   StepsEntry,
   Challenge,
   Trophy,
@@ -325,6 +327,60 @@ export async function toggleCheckinReaction(
   type: ReactionType,
 ): Promise<Reaction[]> {
   return toggleReactionGeneric(["wings", wingId, "checkins", checkinId], current, userId, userName, type);
+}
+
+export async function togglePromptReaction(
+  wingId: string,
+  promptId: string,
+  current: Reaction[] | undefined,
+  userId: string,
+  userName: string,
+  type: ReactionType,
+): Promise<Reaction[]> {
+  return toggleReactionGeneric(["wings", wingId, "prompts", promptId], current, userId, userName, type);
+}
+
+// ── Daily Prompts ─────────────────────────────────────────────────────────────
+export async function getTodayPrompt(wingId: string, date: string): Promise<DailyPrompt | null> {
+  const snap = await getDoc(doc(db, "wings", wingId, "prompts", date));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...(snap.data() as Omit<DailyPrompt, "id">) };
+}
+
+export async function createDailyPrompt(
+  wingId: string,
+  date: string,
+  question: string,
+  questionId: number,
+): Promise<DailyPrompt> {
+  const data = {
+    wingId,
+    date,
+    question,
+    questionId,
+    responses: [] as PromptResponse[],
+    reactions: [] as Reaction[],
+    createdAt: serverTimestamp(),
+  };
+  await setDoc(doc(db, "wings", wingId, "prompts", date), data, { merge: false });
+  return { id: date, ...data } as unknown as DailyPrompt;
+}
+
+export async function addPromptResponse(
+  wingId: string,
+  promptDate: string,
+  response: PromptResponse,
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "prompts", promptDate), {
+    responses: arrayUnion(response),
+  });
+}
+
+export async function getRecentPrompts(wingId: string, days: number = 14): Promise<DailyPrompt[]> {
+  const snap = await getDocs(
+    query(collection(db, "wings", wingId, "prompts"), orderBy("date", "desc"), limit(days)),
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<DailyPrompt, "id">) }));
 }
 
 // ── Steps ─────────────────────────────────────────────────────────────────────

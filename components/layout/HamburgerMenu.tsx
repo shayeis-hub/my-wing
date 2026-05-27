@@ -20,6 +20,7 @@ import {
   Zap,
   Crown,
   BookOpen,
+  CalendarDays,
 } from "lucide-react";
 
 interface HamburgerMenuProps {
@@ -111,6 +112,11 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           {/* Wing */}
           <Link href="/wing" onClick={onClose}>
             <MenuItem icon={<Users size={20} />} label={t("menu_wing")} />
+          </Link>
+
+          {/* Calendar */}
+          <Link href="/calendar" onClick={onClose}>
+            <MenuItem icon={<CalendarDays size={20} />} label={t("nav_calendar")} />
           </Link>
 
           {/* Subscription */}
