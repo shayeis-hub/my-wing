@@ -27,7 +27,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [listening, setListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<InstanceType<typeof globalThis.SpeechRecognition> | null>(null);
   const { t, lang } = useLanguage();
 
   useEffect(() => {
@@ -39,10 +39,11 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = lang === "he" ? "he-IL" : "en-US";
-    recognition.onresult = (e: SpeechRecognitionEvent) => {
+    recognition.onresult = (e: Event) => {
+      const se = e as unknown as { results: SpeechRecognitionResultList };
       let final = "";
-      for (let i = 0; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
+      for (let i = 0; i < se.results.length; i++) {
+        if (se.results[i].isFinal) final += se.results[i][0].transcript + " ";
       }
       if (final) setVoiceTranscript((prev) => (prev + " " + final).trim());
     };
