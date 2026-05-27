@@ -361,7 +361,7 @@ function CheckinPageInner() {
             <div>
               <span className="font-semibold text-wing-ink">{t("checkin_ew")}</span>
               <p className="text-[10px] text-wing-muted leading-tight">
-                {lang === "he" ? "מומלץ 8–10 שעות" : "Recommended 8–10 hrs"}
+                {lang === "he" ? "מומלץ 8–10 שעות ביום (8/16 או 10/14)" : "Recommended 8–10 hrs/day (8/16 or 10/14)"}
               </p>
             </div>
           </div>
