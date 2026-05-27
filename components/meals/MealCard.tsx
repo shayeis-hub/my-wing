@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/Button";
 import { addMealComment, updateMeal, deleteMeal } from "@/lib/firebase/firestore";
 import type { Meal, Encouragement } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { he } from "date-fns/locale";
+import { he, enUS } from "date-fns/locale";
 import toast from "react-hot-toast";
 import { X, Pencil, Trash2, MessageCircle } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 interface MealCardProps {
   meal: Meal;
@@ -18,14 +19,16 @@ interface MealCardProps {
   hero?: boolean;
 }
 
-const mealTypeLabels: Record<Meal["mealType"], string> = {
-  breakfast: "ארוחת בוקר",
-  lunch: "ארוחת צהריים",
-  dinner: "ארוחת ערב",
-  snack: "חטיף",
-};
-
 export function MealCard({ meal, currentUserId, currentUserName, hero = false }: MealCardProps) {
+  const { t, lang } = useLanguage();
+
+  const mealTypeLabels: Record<Meal["mealType"], string> = {
+    breakfast: t("meal_type_breakfast") as string,
+    lunch: t("meal_type_lunch") as string,
+    dinner: t("meal_type_dinner") as string,
+    snack: t("meal_type_snack") as string,
+  };
+
   const [comments, setComments] = useState<Encouragement[]>(meal.comments ?? []);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -46,7 +49,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
   const [deleting, setDeleting] = useState(false);
 
   const timeAgo = meal.createdAt?.toDate
-    ? formatDistanceToNow(meal.createdAt.toDate(), { addSuffix: true, locale: he })
+    ? formatDistanceToNow(meal.createdAt.toDate(), { addSuffix: true, locale: lang === "he" ? he : enUS })
     : "";
 
   const isOwn = currentUserId === meal.userId;
@@ -68,10 +71,10 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
     setDeleting(true);
     try {
       await deleteMeal(meal.wingId, meal.id);
-      toast.success("הארוחה נמחקה");
+      toast.success(t("meal_deleted") as string);
       setShowModal(false);
     } catch {
-      toast.error("שגיאה במחיקה");
+      toast.error(t("meal_delete_error") as string);
       setDeleting(false);
     }
   }
@@ -91,10 +94,10 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
         mealType: editForm.mealType,
         mealTime: editForm.mealTime || undefined,
       });
-      toast.success("הארוחה עודכנה ✅");
+      toast.success(t("meal_updated") as string);
       setEditing(false);
     } catch {
-      toast.error("שגיאה בעדכון");
+      toast.error(t("meal_update_error") as string);
     } finally {
       setSavingEdit(false);
     }
@@ -124,9 +127,9 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
       setComments((prev) => [...prev, comment]);
       setText("");
       setShowComments(true);
-      toast.success("התגובה נשלחה! 💬");
+      toast.success(t("comment_sent") as string);
     } catch {
-      toast.error("שגיאה בשליחה");
+      toast.error(t("comment_error") as string);
     } finally {
       setSending(false);
     }
@@ -170,7 +173,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                   >
                     {meal.analysis.calories}
                   </span>
-                  <span className="font-mono text-[11px] tracking-wider text-wing-muted block">קק&quot;ל</span>
+                  <span className="font-mono text-[11px] tracking-wider text-wing-muted block">{t("kcal") as string}</span>
                 </div>
               </div>
             </div>
@@ -208,11 +211,11 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
             <div className="flex gap-2 px-3 pb-3" onClick={(e) => e.stopPropagation()}>
               <input type="text" value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder={isOwn ? "הגב / תודה..." : `עודד את ${meal.userName}...`}
+                placeholder={isOwn ? t("meal_reply_ph") as string : (t("checkin_encourage_ph") as (name: string) => string)(meal.userName)}
                 className="flex-1 text-sm border border-wing-border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wing-ink bg-wing-bg"
                 onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
               />
-              <Button size="sm" onClick={handleSend} loading={sending} disabled={!text.trim()}>שלח</Button>
+              <Button size="sm" onClick={handleSend} loading={sending} disabled={!text.trim()}>{t("send_btn") as string}</Button>
             </div>
           )}
         </div>
@@ -237,7 +240,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
               <p className="text-xs text-wing-muted truncate">{meal.userName}</p>
               <p className="text-sm font-black tabular flex-shrink-0 text-wing-ink" style={{ letterSpacing: "-0.03em" }}>
                 {meal.analysis.calories}
-                <span className="text-[11px] font-normal text-wing-subtle mr-0.5">קק&quot;ל</span>
+                <span className="text-[11px] font-normal text-wing-subtle mr-0.5">{t("kcal") as string}</span>
               </p>
             </div>
             <p className="text-sm font-semibold text-wing-ink truncate leading-tight">{meal.analysis.description}</p>
@@ -288,16 +291,16 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                   type="text"
                   value={editForm.description}
                   onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="תיאור הארוחה"
+                  placeholder={t("meal_desc_ph") as string}
                   className="w-full border border-wing-border rounded-2xl px-3 py-2.5 text-sm bg-wing-bg focus:outline-none focus:ring-2 focus:ring-wing-ink"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   {([
-                    ["calories", "קק\"ל"],
-                    ["protein", "חלבון g"],
-                    ["carbs", "פחמימות g"],
-                    ["fat", "שומן g"],
-                  ] as [keyof typeof editForm, string][]).map(([field, label]) => (
+                    ["calories", t("kcal") as string],
+                    ["protein", t("meals_protein") as string],
+                    ["carbs", t("meals_carbs") as string],
+                    ["fat", t("meals_fat") as string],
+                  ] as [keyof typeof editForm, string][]).map(([field, label]: [keyof typeof editForm, string]) => (
                     <label key={field} className="flex flex-col gap-0.5">
                       <span className="text-xs text-wing-muted">{label}</span>
                       <input
@@ -328,8 +331,8 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                   />
                 </div>
                 <div className="flex gap-3 sticky bottom-0 bg-wing-surface pt-2 pb-1">
-                  <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">בטל</Button>
-                  <Button onClick={handleSaveEdit} loading={savingEdit} className="flex-1">שמור</Button>
+                  <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">{t("meal_cancel") as string}</Button>
+                  <Button onClick={handleSaveEdit} loading={savingEdit} className="flex-1">{t("meal_save") as string}</Button>
                 </div>
 
                 {/* Delete */}
@@ -340,24 +343,24 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm text-red-500 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 size={16} />
-                      מחק ארוחה
+                      {t("meal_delete_btn") as string}
                     </button>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-center text-sm text-wing-ink font-medium">למחוק את הארוחה לצמיתות?</p>
+                      <p className="text-center text-sm text-wing-ink font-medium">{t("meal_delete_confirm") as string}</p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setConfirmDelete(false)}
                           className="flex-1 py-2 rounded-2xl text-sm border border-wing-border text-wing-muted hover:bg-wing-elevated transition-colors"
                         >
-                          ביטול
+                          {t("meal_cancel") as string}
                         </button>
                         <button
                           onClick={handleDelete}
                           disabled={deleting}
                           className="flex-1 py-2 rounded-2xl text-sm bg-red-500 text-white font-bold hover:bg-red-600 disabled:opacity-60 transition-colors"
                         >
-                          {deleting ? "מוחק..." : "כן, מחק"}
+                          {deleting ? t("meal_deleting") as string : t("meal_delete_yes") as string}
                         </button>
                       </div>
                     </div>
@@ -377,7 +380,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                 <div>
                   <div className="flex items-baseline gap-2 mb-1">
                     <span className="text-3xl font-extrabold text-wing-heat">{meal.analysis.calories}</span>
-                    <span className="text-wing-muted">קק&quot;ל</span>
+                    <span className="text-wing-muted">{t("kcal") as string}</span>
                   </div>
                   <p className="text-base text-wing-ink leading-relaxed">{meal.analysis.description}</p>
                 </div>
@@ -385,9 +388,9 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                 {/* Macros */}
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: "חלבון", value: meal.analysis.protein, bg: "#fff0eb", color: "#d4541a" },
-                    { label: "פחמימות", value: meal.analysis.carbs, bg: "#fff8e0", color: "#c79a00" },
-                    { label: "שומן", value: meal.analysis.fat, bg: "#eaf5ef", color: "#2f8d5f" },
+                    { label: t("ob_protein") as string, value: meal.analysis.protein, bg: "#fff0eb", color: "#d4541a" },
+                    { label: t("ob_carbs") as string, value: meal.analysis.carbs, bg: "#fff8e0", color: "#c79a00" },
+                    { label: t("ob_fat") as string, value: meal.analysis.fat, bg: "#eaf5ef", color: "#2f8d5f" },
                   ].map(({ label, value, bg, color }) => (
                     <div key={label} className="rounded-2xl p-3 text-center" style={{ background: bg }}>
                       <p className="text-xl font-bold" style={{ color }}>{value}g</p>
@@ -400,18 +403,18 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                 <div className="flex gap-3 text-sm text-wing-muted">
                   {meal.analysis.fiber > 0 && (
                     <span className="bg-green-50 text-green-700 px-3 py-1.5 rounded-xl">
-                      סיבים: {meal.analysis.fiber}g
+                      {t("meal_fiber") as string}: {meal.analysis.fiber}g
                     </span>
                   )}
                   <span className="bg-wing-elevated text-wing-muted px-3 py-1.5 rounded-xl">
-                    ציון בריאות {meal.analysis.healthScore}/10
+                    {t("meal_health_score") as string} {meal.analysis.healthScore}/10
                   </span>
                 </div>
 
                 {/* Food items */}
                 {meal.analysis.items && meal.analysis.items.length > 0 && (
                   <div>
-                    <p className="font-semibold text-wing-ink mb-2">פירוט מנות</p>
+                    <p className="font-semibold text-wing-ink mb-2">{t("meal_items_title") as string}</p>
                     <div className="space-y-1.5">
                       {meal.analysis.items.map((item, i) => (
                         <div key={i} className="flex justify-between text-sm text-wing-muted bg-wing-elevated px-3 py-2 rounded-xl">
@@ -433,7 +436,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                 {/* Comments */}
                 {comments.length > 0 && (
                   <div>
-                    <p className="font-semibold text-wing-ink mb-2">תגובות</p>
+                    <p className="font-semibold text-wing-ink mb-2">{t("meal_comments_title") as string}</p>
                     <div className="space-y-2">
                       {comments.map((c, i) => (
                         <div key={i} className="text-sm bg-wing-elevated rounded-xl px-3 py-2">
@@ -450,12 +453,12 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                   <div className="flex gap-2">
                     <input type="text" value={text}
                       onChange={(e) => setText(e.target.value)}
-                      placeholder={isOwn ? "הגב / תודה על העידוד..." : `עודד את ${meal.userName}...`}
+                      placeholder={isOwn ? t("meal_reply_ph") as string : (t("checkin_encourage_ph") as (name: string) => string)(meal.userName)}
                       className="flex-1 text-sm border border-wing-border rounded-xl px-3 py-2.5 bg-wing-bg focus:outline-none focus:ring-2 focus:ring-wing-ink"
                       onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
                     />
                     <Button size="sm" onClick={handleSend} loading={sending} disabled={!text.trim()}>
-                      שלח
+                      {t("send_btn") as string}
                     </Button>
                   </div>
                 )}
