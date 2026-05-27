@@ -38,16 +38,17 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognition = new SR() as any;
     recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.interimResults = false; // Only final results — avoids partial duplicates
     recognition.lang = lang === "he" ? "he-IL" : "en-US";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (e: any) => {
-      let final = "";
-      // Only process results from resultIndex onward — avoids exponential duplication
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
+      // Build full transcript from all final results in the event buffer.
+      // Replace (not append) — the event buffer is the source of truth.
+      const parts: string[] = [];
+      for (let i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) parts.push(e.results[i][0].transcript.trim());
       }
-      if (final) setVoiceTranscript((prev) => (prev ? prev + " " : "") + final.trim());
+      setVoiceTranscript(parts.join(" ").trim());
     };
     recognition.onend = () => setListening(false);
     recognitionRef.current = recognition;
