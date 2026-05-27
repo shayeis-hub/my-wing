@@ -8,7 +8,7 @@ import { g } from "@/lib/utils/gender";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
 import {
-  saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement, saveWeightLog, getUserTodayMeals,
+  saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement, saveWeightLog, getUserTodayMeals, saveSteps,
 } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
@@ -210,6 +210,18 @@ function CheckinPageInner() {
       if (weightNum && user.wingId) {
         try {
           await saveWeightLog(user.wingId, { userId: firebaseUser.uid, userName: user.displayName, date: selectedDate, weightKg: weightNum });
+        } catch { /* non-critical */ }
+      }
+
+      if (stepsNum && user.wingId) {
+        try {
+          await saveSteps(user.wingId, {
+            wingId: user.wingId,
+            userId: firebaseUser.uid,
+            userName: user.displayName,
+            date: selectedDate,
+            steps: stepsNum,
+          });
         } catch { /* non-critical */ }
       }
 
