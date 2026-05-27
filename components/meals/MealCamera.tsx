@@ -32,19 +32,19 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
   const { t, lang } = useLanguage();
 
   useEffect(() => {
-    const SpeechRecognition =
-      (window as unknown as { SpeechRecognition?: typeof globalThis.SpeechRecognition }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).webkitSpeechRecognition;
-    if (!SpeechRecognition) { setVoiceSupported(false); return; }
-    const recognition = new SpeechRecognition();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setVoiceSupported(false); return; }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recognition = new SR() as any;
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = lang === "he" ? "he-IL" : "en-US";
-    recognition.onresult = (e: Event) => {
-      const se = e as unknown as { results: SpeechRecognitionResultList };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (e: any) => {
       let final = "";
-      for (let i = 0; i < se.results.length; i++) {
-        if (se.results[i].isFinal) final += se.results[i][0].transcript + " ";
+      for (let i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
       }
       if (final) setVoiceTranscript((prev) => (prev + " " + final).trim());
     };
