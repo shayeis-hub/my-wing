@@ -64,6 +64,9 @@ export function CreatePostForm({ wingId, userId, userName, userPhotoURL, onPostC
       });
       setText("");
       setImageDataUrl(null);
+    } catch (err) {
+      console.error("Failed to create post:", err);
+      alert("לא הצליח לפרסם. נסה שוב.");
     } finally {
       setSubmitting(false);
     }
