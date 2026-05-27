@@ -12,6 +12,7 @@ import {
   serverTimestamp,
   arrayUnion,
   updateDoc,
+  deleteDoc,
   increment,
   onSnapshot,
   type Unsubscribe,
@@ -173,6 +174,10 @@ export async function updateMeal(
   updates: Partial<Pick<Meal, "analysis" | "mealType" | "mealTime" | "notes">>
 ): Promise<void> {
   await updateDoc(doc(db, "wings", wingId, "meals", mealId), updates);
+}
+
+export async function deleteMeal(wingId: string, mealId: string): Promise<void> {
+  await deleteDoc(doc(db, "wings", wingId, "meals", mealId));
 }
 
 export async function getWingMeals(wingId: string, limitN = 20): Promise<Meal[]> {

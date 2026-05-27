@@ -4,12 +4,12 @@ import { useState } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { addMealComment, updateMeal } from "@/lib/firebase/firestore";
+import { addMealComment, updateMeal, deleteMeal } from "@/lib/firebase/firestore";
 import type { Meal, Encouragement } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
 import toast from "react-hot-toast";
-import { X, Pencil, MessageCircle } from "lucide-react";
+import { X, Pencil, Trash2, MessageCircle } from "lucide-react";
 
 interface MealCardProps {
   meal: Meal;
@@ -42,6 +42,8 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
     mealTime: meal.mealTime ?? "",
   });
   const [savingEdit, setSavingEdit] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const timeAgo = meal.createdAt?.toDate
     ? formatDistanceToNow(meal.createdAt.toDate(), { addSuffix: true, locale: he })
@@ -60,6 +62,18 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
       mealTime: meal.mealTime ?? "",
     });
     setEditing(true);
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await deleteMeal(meal.wingId, meal.id);
+      toast.success("הארוחה נמחקה");
+      setShowModal(false);
+    } catch {
+      toast.error("שגיאה במחיקה");
+      setDeleting(false);
+    }
   }
 
   async function handleSaveEdit() {
@@ -262,7 +276,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                     <Pencil size={18} />
                   </button>
                 )}
-                <button onClick={() => { setShowModal(false); setEditing(false); }} className="p-2 rounded-xl hover:bg-wing-elevated text-wing-muted">
+                <button onClick={() => { setShowModal(false); setEditing(false); setConfirmDelete(false); }} className="p-2 rounded-xl hover:bg-wing-elevated text-wing-muted">
                   <X size={20} />
                 </button>
               </div>
@@ -316,6 +330,38 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                 <div className="flex gap-3 sticky bottom-0 bg-wing-surface pt-2 pb-1">
                   <Button variant="secondary" onClick={() => setEditing(false)} className="flex-1">בטל</Button>
                   <Button onClick={handleSaveEdit} loading={savingEdit} className="flex-1">שמור</Button>
+                </div>
+
+                {/* Delete */}
+                <div className="border-t border-wing-border pt-3 mt-1">
+                  {!confirmDelete ? (
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                      מחק ארוחה
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-center text-sm text-wing-ink font-medium">למחוק את הארוחה לצמיתות?</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setConfirmDelete(false)}
+                          className="flex-1 py-2 rounded-2xl text-sm border border-wing-border text-wing-muted hover:bg-wing-elevated transition-colors"
+                        >
+                          ביטול
+                        </button>
+                        <button
+                          onClick={handleDelete}
+                          disabled={deleting}
+                          className="flex-1 py-2 rounded-2xl text-sm bg-red-500 text-white font-bold hover:bg-red-600 disabled:opacity-60 transition-colors"
+                        >
+                          {deleting ? "מוחק..." : "כן, מחק"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
