@@ -73,6 +73,28 @@ service cloud.firestore {
         allow read, write: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
       }
+
+      // Daily Prompts: members can read and update (for responses/reactions); only members can create
+      match /prompts/{promptId} {
+        allow read: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow create, update: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow delete: if false;
+      }
+
+      // Wing posts: members can read, create their own; any member can update (comments/reactions); only author can delete
+      match /posts/{postId} {
+        allow read: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow create: if request.auth != null &&
+          request.auth.uid == request.resource.data.userId &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow update: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow delete: if request.auth != null &&
+          request.auth.uid == resource.data.userId;
+      }
     }
   }
 }

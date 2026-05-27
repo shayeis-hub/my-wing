@@ -27,6 +27,7 @@ import type {
   ReactionType,
   DailyPrompt,
   PromptResponse,
+  WingPost,
   StepsEntry,
   Challenge,
   Trophy,
@@ -381,6 +382,50 @@ export async function getRecentPrompts(wingId: string, days: number = 14): Promi
     query(collection(db, "wings", wingId, "prompts"), orderBy("date", "desc"), limit(days)),
   );
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<DailyPrompt, "id">) }));
+}
+
+// ── Wing Posts (social feed) ──────────────────────────────────────────────────
+export async function createWingPost(
+  wingId: string,
+  post: Omit<WingPost, "id" | "createdAt">,
+): Promise<string> {
+  const ref = await addDoc(collection(db, "wings", wingId, "posts"), {
+    ...post,
+    createdAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function getWingPosts(wingId: string, max: number = 50): Promise<WingPost[]> {
+  const snap = await getDocs(
+    query(collection(db, "wings", wingId, "posts"), orderBy("createdAt", "desc"), limit(max)),
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<WingPost, "id">) }));
+}
+
+export async function deleteWingPost(wingId: string, postId: string): Promise<void> {
+  await deleteDoc(doc(db, "wings", wingId, "posts", postId));
+}
+
+export async function addPostComment(
+  wingId: string,
+  postId: string,
+  comment: Encouragement,
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "posts", postId), {
+    comments: arrayUnion(comment),
+  });
+}
+
+export async function togglePostReaction(
+  wingId: string,
+  postId: string,
+  current: Reaction[] | undefined,
+  userId: string,
+  userName: string,
+  type: ReactionType,
+): Promise<Reaction[]> {
+  return toggleReactionGeneric(["wings", wingId, "posts", postId], current, userId, userName, type);
 }
 
 // ── Steps ─────────────────────────────────────────────────────────────────────

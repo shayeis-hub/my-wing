@@ -111,6 +111,19 @@ export interface DailyPrompt {
   createdAt: Timestamp;
 }
 
+export interface WingPost {
+  id: string;
+  wingId: string;
+  userId: string;
+  userName: string;
+  userPhotoURL?: string;
+  text?: string;              // Optional text content (one of text/image required)
+  imageURL?: string;          // Optional image
+  reactions?: Reaction[];
+  comments?: Encouragement[];
+  createdAt: Timestamp;
+}
+
 export interface Workout {
   done: boolean;
   type?: string;
