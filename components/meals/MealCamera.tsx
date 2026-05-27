@@ -165,7 +165,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
               <Button variant="secondary" onClick={() => setMode("choose")} className="flex-1">
                 {t("back")}
               </Button>
-              <Button onClick={processText} loading={analyzing} disabled={!textInput.trim()} className="flex-1">
+              <Button onClick={() => processText()} loading={analyzing} disabled={!textInput.trim()} className="flex-1">
                 {analyzing ? t("meals_analyzing") : t("meals_calc_cta")}
               </Button>
             </div>
