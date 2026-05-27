@@ -82,6 +82,26 @@ export default function DashboardPage() {
     };
     // Optimistic UI update
     setTodayCheckin({ ...merged, id: `${firebaseUser.uid}_${today}`, createdAt: todayCheckin?.createdAt ?? (null as unknown as DailyCheckin["createdAt"]) });
+    // Also sync wingSteps optimistically so the dashboard shows the new value immediately
+    // (displaySteps prefers wingSteps over todayCheckin.steps)
+    if (updates.steps !== undefined) {
+      const myUid = firebaseUser.uid;
+      setWingSteps((prev) => {
+        const others = prev.filter((s) => s.userId !== myUid);
+        return [
+          ...others,
+          {
+            id: `${myUid}_${today}`,
+            wingId: user.wingId!,
+            userId: myUid,
+            userName: user.displayName,
+            date: today,
+            steps: updates.steps!,
+            createdAt: null as unknown as StepsEntry["createdAt"],
+          },
+        ];
+      });
+    }
     if (pulseKey) {
       setPulseField(pulseKey);
       setTimeout(() => setPulseField(null), 400);
