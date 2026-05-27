@@ -52,19 +52,35 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets (_next/static): cache-first
+  // Static assets (_next/static): network-first for chunks (avoid stale chunk errors),
+  // cache-first only for truly immutable assets like fonts/images
   if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
+    const isChunk = url.pathname.includes("/chunks/");
+    if (isChunk) {
+      // Network-first: ensures fresh chunks after deploy
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
             return response;
           })
-      )
-    );
+          .catch(() => caches.match(request).then((r) => r ?? Response.error()))
+      );
+    } else {
+      // Cache-first for fonts, images, css
+      event.respondWith(
+        caches.match(request).then(
+          (cached) =>
+            cached ||
+            fetch(request).then((response) => {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+              return response;
+            })
+        )
+      );
+    }
     return;
   }
 });
