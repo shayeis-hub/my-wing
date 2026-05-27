@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { he } from "date-fns/locale";
@@ -38,6 +38,12 @@ export function DayModal({
 }: DayModalProps) {
   const [texts, setTexts] = useState<Record<string, string>>({});
   const [sending, setSending] = useState<string | null>(null);
+
+  // Hide bottom nav while modal is open
+  useEffect(() => {
+    document.body.setAttribute("data-modal-open", "true");
+    return () => document.body.removeAttribute("data-modal-open");
+  }, []);
 
   async function handleSend(checkin: DailyCheckin) {
     const text = texts[checkin.id]?.trim();

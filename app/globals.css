@@ -20,6 +20,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Hide bottom nav when any modal is open — slides down smoothly */
+body[data-modal-open="true"] .wing-bottom-nav {
+  transform: translateY(140%);
+  pointer-events: none;
+}
+
 /* Smooth scroll */
 * {
   scroll-behavior: smooth;

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -47,6 +47,13 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
   const [savingEdit, setSavingEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Hide bottom nav while detail modal is open
+  useEffect(() => {
+    if (showModal) document.body.setAttribute("data-modal-open", "true");
+    else document.body.removeAttribute("data-modal-open");
+    return () => document.body.removeAttribute("data-modal-open");
+  }, [showModal]);
 
   const timeAgo = meal.createdAt?.toDate
     ? formatDistanceToNow(meal.createdAt.toDate(), { addSuffix: true, locale: lang === "he" ? he : enUS })

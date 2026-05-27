@@ -30,7 +30,7 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 mx-3 bg-wing-surface border border-wing-border rounded-[22px] flex justify-around items-center h-16 z-50 shadow-[0_4px_24px_rgba(0,0,0,0.08)]" style={{ marginBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
+      <nav className="wing-bottom-nav fixed bottom-0 left-0 right-0 mx-3 bg-wing-surface border border-wing-border rounded-[22px] flex justify-around items-center h-16 z-40 shadow-[0_4px_24px_rgba(0,0,0,0.08)] transition-transform duration-300 ease-out" style={{ marginBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
         {navItems.map(({ href, icon: Icon, label }) => {
           const active = pathname.startsWith(href);
           return (
