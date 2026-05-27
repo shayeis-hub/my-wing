@@ -97,6 +97,8 @@ function StepsPageInner() {
   const [syncing, setSyncing] = useState(false);
   const [fitConnected, setFitConnected] = useState<boolean | null>(null);
   const today = format(new Date(), "yyyy-MM-dd");
+  const [selectedDate, setSelectedDate] = useState(today);
+  const isRetro = selectedDate !== today;
 
   useEffect(() => {
     if (searchParams.get("fitConnected") === "1") {
@@ -111,20 +113,21 @@ function StepsPageInner() {
 
   useEffect(() => {
     if (!user?.wingId || !firebaseUser) return;
+    setEntries([]);
     Promise.all([
-      getWingSteps(user.wingId, today),
-      getTodayCheckin(user.wingId, firebaseUser.uid, today),
+      getWingSteps(user.wingId, selectedDate),
+      getTodayCheckin(user.wingId, firebaseUser.uid, selectedDate),
     ]).then(([stepsEntries, checkin]) => {
       const hasMyEntry = stepsEntries.some((e) => e.userId === firebaseUser.uid);
       if (!hasMyEntry && checkin?.steps) {
         setEntries([
           ...stepsEntries,
           {
-            id: `${firebaseUser.uid}_${today}`,
+            id: `${firebaseUser.uid}_${selectedDate}`,
             wingId: user.wingId!,
             userId: firebaseUser.uid,
             userName: user.displayName,
-            date: today,
+            date: selectedDate,
             steps: checkin.steps,
             createdAt: null as unknown as import("firebase/firestore").Timestamp,
           },
@@ -133,25 +136,25 @@ function StepsPageInner() {
         setEntries(stepsEntries);
       }
     });
-  }, [user?.wingId, firebaseUser, today]);
+  }, [user?.wingId, firebaseUser, selectedDate]);
 
-  const saveAndUpdateEntries = useCallback(async (steps: number) => {
+  const saveAndUpdateEntries = useCallback(async (steps: number, dateToSave = today) => {
     if (!user?.wingId || !firebaseUser) return;
     await saveSteps(user.wingId, {
       wingId: user.wingId,
       userId: firebaseUser.uid,
       userName: user.displayName,
-      date: today,
+      date: dateToSave,
       steps,
     });
     setEntries((prev) => [
       ...prev.filter((e) => e.userId !== firebaseUser.uid),
       {
-        id: `${firebaseUser.uid}_${today}`,
+        id: `${firebaseUser.uid}_${dateToSave}`,
         wingId: user.wingId!,
         userId: firebaseUser.uid,
         userName: user.displayName,
-        date: today,
+        date: dateToSave,
         steps,
         createdAt: null as unknown as StepsEntry["createdAt"],
       },
@@ -160,18 +163,18 @@ function StepsPageInner() {
   }, [user, firebaseUser, today]);
 
   useEffect(() => {
-    if (!firebaseUser) return;
+    if (!firebaseUser || isRetro) return; // only auto-sync for today
     setSyncing(true);
     fetchStepsFromServer(firebaseUser.uid)
       .then(async ({ connected, steps }) => {
         setFitConnected(connected);
         if (connected && steps && steps > 0) {
-          await saveAndUpdateEntries(steps);
+          await saveAndUpdateEntries(steps, today);
         }
       })
       .catch(() => setFitConnected(false))
       .finally(() => setSyncing(false));
-  }, [firebaseUser]);
+  }, [firebaseUser, isRetro]);
 
   async function handleManualSync() {
     if (!firebaseUser) return;
@@ -190,7 +193,7 @@ function StepsPageInner() {
     if (isNaN(steps) || steps < 0) { toast.error(t("steps_invalid") as string); return; }
     setSaving(true);
     try {
-      await saveAndUpdateEntries(steps);
+      await saveAndUpdateEntries(steps, selectedDate);
       toast.success((t("steps_saved_toast") as (n: number) => string)(steps));
       setManualSteps("");
     } catch {
@@ -204,11 +207,24 @@ function StepsPageInner() {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="pt-4">
-        <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("steps_ring_label") as string}</h1>
-        <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
-          {format(new Date(), "d MMMM yyyy")}
-        </p>
+      <div className="pt-4 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("steps_ring_label") as string}</h1>
+          <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
+            {format(new Date(selectedDate + "T12:00:00"), "d MMMM yyyy")}
+          </p>
+        </div>
+        <input
+          type="date"
+          value={selectedDate}
+          max={today}
+          onChange={(e) => {
+            setSelectedDate(e.target.value);
+            setEditing(false);
+            setManualSteps("");
+          }}
+          className="bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+        />
       </div>
 
       <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4">
@@ -229,7 +245,7 @@ function StepsPageInner() {
                   >
                     {t("steps_update_manual") as string}
                   </button>
-                  {fitConnected && (
+                  {fitConnected && !isRetro && (
                     <button onClick={handleManualSync} className="text-sm text-wing-heat underline">
                       {t("steps_refresh") as string}
                     </button>
@@ -242,7 +258,7 @@ function StepsPageInner() {
           <div className="space-y-3 py-2">
             <p className="text-sm font-semibold text-wing-ink text-center mb-4">{t("steps_enter_prompt") as string}</p>
 
-            {fitConnected === false && firebaseUser && (
+            {fitConnected === false && firebaseUser && !isRetro && (
               <button
                 onClick={() => connectGoogleFit(firebaseUser.uid)}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-wing-elevated border border-wing-border text-sm font-medium text-wing-ink hover:border-wing-ink transition-colors"
@@ -252,7 +268,7 @@ function StepsPageInner() {
               </button>
             )}
 
-            {fitConnected === false && (
+            {fitConnected === false && !isRetro && (
               <div className="flex items-center gap-2 text-xs text-wing-muted">
                 <div className="flex-1 h-px bg-wing-border" />
                 <span>{t("steps_or_manual") as string}</span>

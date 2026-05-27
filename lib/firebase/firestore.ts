@@ -317,6 +317,8 @@ export async function getUserTodayMeals(
   return snap.docs
     .map((d) => ({ ...(d.data() as Omit<Meal, "id">), id: d.id }))
     .filter((m) => {
+      // mealDate is set for retroactive meals — use it first to avoid affecting today's window
+      if (m.mealDate) return m.mealDate === date;
       const ts = m.createdAt as unknown as { toDate?: () => Date; _seconds?: number };
       if (!ts) return false;
       const d = ts.toDate ? ts.toDate() : new Date((ts._seconds ?? 0) * 1000);
