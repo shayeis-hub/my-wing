@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   type User as FirebaseUser,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
@@ -40,6 +41,10 @@ export async function signInWithGoogle() {
 
 export async function signOut() {
   await firebaseSignOut(auth);
+}
+
+export async function sendPasswordReset(email: string) {
+  await firebaseSendPasswordResetEmail(auth, email);
 }
 
 async function createUserDoc(user: FirebaseUser, displayName: string) {

@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { signIn, signInWithGoogle } from "@/lib/firebase/auth";
+import { signIn, signInWithGoogle, sendPasswordReset } from "@/lib/firebase/auth";
 import { useLanguage } from "@/lib/i18n";
 
 function WingLogo() {
@@ -45,6 +45,10 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,6 +63,19 @@ function LoginForm() {
     }
   }
 
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      await sendPasswordReset(forgotEmail);
+      setForgotSent(true);
+    } catch {
+      toast.error(t("login_forgot_error") as string);
+    } finally {
+      setForgotLoading(false);
+    }
+  }
+
   async function handleGoogle() {
     setGoogleLoading(true);
     try {
@@ -69,6 +86,62 @@ function LoginForm() {
     } finally {
       setGoogleLoading(false);
     }
+  }
+
+  // ── Forgot password screen ───────────────────────────────────────
+  if (showForgot) {
+    return (
+      <div className="w-full max-w-[340px] flex flex-col items-center" dir={dir}>
+        <div className="flex flex-col items-center gap-3 mb-8">
+          <WingLogo />
+          <h2 className="text-2xl font-black text-wing-ink tracking-tight">{t("login_forgot_title") as string}</h2>
+          {!forgotSent && (
+            <p className="text-sm text-wing-muted text-center">{t("login_forgot_desc") as string}</p>
+          )}
+        </div>
+
+        {forgotSent ? (
+          <div className="w-full flex flex-col items-center gap-5">
+            <div className="w-16 h-16 rounded-full bg-wing-surface border border-wing-border flex items-center justify-center text-3xl">
+              ✉️
+            </div>
+            <p className="text-sm font-semibold text-wing-ink text-center">{t("login_forgot_success") as string}</p>
+            <button
+              onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(""); }}
+              className="text-sm text-wing-heat font-bold underline"
+            >
+              {t("login_back") as string}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleForgot} className="w-full flex flex-col gap-2.5">
+            <input
+              type="email"
+              placeholder={t("login_email") as string}
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+              required
+              dir="ltr"
+              className="w-full bg-wing-surface border border-wing-border rounded-[14px] px-4 py-3.5 text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
+            />
+            <button
+              type="submit"
+              disabled={forgotLoading}
+              className="w-full bg-sunrise text-wing-ink font-extrabold text-sm py-3.5 rounded-[14px] mt-1 active:scale-[0.97] transition-transform disabled:opacity-60"
+            >
+              {forgotLoading ? t("login_forgot_sending") as string : t("login_forgot_send") as string}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowForgot(false)}
+              className="text-sm text-wing-muted text-center mt-1 underline"
+            >
+              {t("login_back") as string}
+            </button>
+          </form>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -134,6 +207,14 @@ function LoginForm() {
           {loading ? t("login_submitting") : t("login_submit")}
         </button>
       </form>
+
+      <button
+        type="button"
+        onClick={() => { setShowForgot(true); setForgotEmail(email); }}
+        className="text-xs text-wing-muted underline mt-3 self-end"
+      >
+        {t("login_forgot") as string}
+      </button>
 
       {/* Divider */}
       <div className="flex items-center gap-2 w-full my-5">
