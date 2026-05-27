@@ -77,6 +77,10 @@ export default function DashboardPage() {
 
   const otherMembers = (wing?.members ?? []).filter((m) => m.uid !== firebaseUser?.uid);
 
+  // Steps: prefer Google Fit sync, fall back to check-in
+  const myStepsEntry = wingSteps.find((s) => s.userId === firebaseUser?.uid);
+  const displaySteps = myStepsEntry?.steps ?? todayCheckin?.steps ?? null;
+
   return (
     <div className="p-4 space-y-4">
       {/* Notification banner */}
@@ -193,10 +197,10 @@ export default function DashboardPage() {
                   <Footprints size={9} /> {t("steps_label")}
                 </p>
                 <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
-                  {todayCheckin?.steps
-                    ? todayCheckin.steps >= 1000
-                      ? `${(todayCheckin.steps / 1000).toFixed(1)}k`
-                      : todayCheckin.steps
+                  {displaySteps != null
+                    ? displaySteps >= 1000
+                      ? `${(displaySteps / 1000).toFixed(1)}k`
+                      : displaySteps
                     : "—"}
                 </p>
               </div>
