@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, useCallback, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { useTrialLock } from "@/hooks/useTrialLock";
@@ -106,6 +106,10 @@ function CheckinPageInner() {
   const [ewClose, setEwClose] = useState("");
   const [ewManual, setEwManual] = useState(false);
   const [stepsEditing, setStepsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"essential" | "advanced">("essential");
+  const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const autosaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const initialLoadDone = useRef(false);
   const today = format(new Date(), "yyyy-MM-dd");
   const selectedDate = paramDate ?? today;
   const isRetro = selectedDate !== today;
@@ -145,6 +149,9 @@ function CheckinPageInner() {
       getUserTodayMeals(user.wingId!, uid, selectedDate)
         .then((meals) => applyMealTimes(meals, c?.eatingWindow?.open))
         .catch(() => {/* non-critical */});
+
+      // Allow autosave after initial data load
+      setTimeout(() => { initialLoadDone.current = true; }, 500);
     });
   }, [user?.wingId, firebaseUser, today]);
 
@@ -172,6 +179,64 @@ function CheckinPageInner() {
     const mins = (ch * 60 + cm) - (oh * 60 + om);
     return Math.max(0, Math.round(mins / 6) / 10);
   }
+
+  // ── Autosave ────────────────────────────────────────────────────
+  const performAutosave = useCallback(async () => {
+    if (!user?.wingId || !firebaseUser) return;
+    setAutosaveState("saving");
+    try {
+      const trimmedNotes = notes.trim();
+      const stepsNum = steps ? parseInt(steps) : undefined;
+      const weightNum = weight ? parseFloat(weight) : undefined;
+      const durationMin = workoutDuration ? parseInt(workoutDuration) : undefined;
+      const weightForCalc = weightNum ?? user.profile?.weightKg ?? 70;
+      const workoutCalNum = (workoutDone && durationMin)
+        ? calcWorkoutCalories(workoutType, workoutIntensity, durationMin, weightForCalc)
+        : undefined;
+      const workoutTypeLabel = WORKOUT_TYPES.find(t => t.value === workoutType)?.label ?? workoutType;
+      const intensityLabel = workoutIntensity === "light" ? t("checkin_workout_light") : workoutIntensity === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense");
+
+      await saveCheckin(user.wingId, {
+        wingId: user.wingId,
+        userId: firebaseUser.uid,
+        userName: user.displayName,
+        date: selectedDate,
+        waterGlasses: water,
+        vegetablesServings: vegetables,
+        mood,
+        ...(trimmedNotes ? { notes: trimmedNotes } : {}),
+        ...(stepsNum ? { steps: stepsNum } : {}),
+        ...(weightNum ? { weightKg: weightNum } : {}),
+        ...(ewOpen && ewClose ? { eatingWindow: { open: ewOpen, close: ewClose, durationHours: calcEwDuration(ewOpen, ewClose) } } : {}),
+        workout: {
+          done: workoutDone,
+          ...(workoutDone ? { type: workoutType, intensity: workoutIntensity } : {}),
+          ...(workoutDone && durationMin ? { durationMinutes: durationMin, description: `${workoutTypeLabel} · ${intensityLabel} · ${durationMin} ${t("minutes_short")}` } : {}),
+          ...(workoutCalNum ? { caloriesBurned: workoutCalNum } : {}),
+        },
+      });
+
+      if (weightNum && user.wingId) {
+        try {
+          await saveWeightLog(user.wingId, { userId: firebaseUser.uid, userName: user.displayName, date: selectedDate, weightKg: weightNum });
+        } catch { /* non-critical */ }
+      }
+
+      setAutosaveState("saved");
+      setTimeout(() => setAutosaveState((s) => s === "saved" ? "idle" : s), 2000);
+    } catch {
+      setAutosaveState("idle");
+    }
+  }, [user, firebaseUser, water, vegetables, mood, notes, steps, weight, workoutDone, workoutType, workoutIntensity, workoutDuration, ewOpen, ewClose, selectedDate, t, WORKOUT_TYPES]);
+
+  // Debounced trigger — runs after 1s of no changes
+  useEffect(() => {
+    if (!initialLoadDone.current) return; // skip on first load
+    if (trialLocked) return;
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => { performAutosave(); }, 1000);
+    return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current); };
+  }, [water, vegetables, mood, notes, steps, weight, workoutDone, workoutType, workoutIntensity, workoutDuration, ewOpen, ewClose, performAutosave, trialLocked]);
 
   async function handleSave() {
     if (!user?.wingId || !firebaseUser) return;
@@ -268,10 +333,20 @@ function CheckinPageInner() {
   return (
     <div className="p-4 space-y-4">
       <div className="pt-4">
-        <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("checkin_title")}</h1>
-        <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
-          {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: lang === "he" ? he : enUS })}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("checkin_title")}</h1>
+            <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
+              {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: lang === "he" ? he : enUS })}
+            </p>
+          </div>
+          {/* Autosave indicator */}
+          {autosaveState !== "idle" && (
+            <span className={`font-mono text-[10px] tracking-widest uppercase px-2 py-1 rounded-full mt-1 ${autosaveState === "saved" ? "text-green-700 bg-green-50 border border-green-200" : "text-wing-muted bg-wing-elevated border border-wing-border"}`}>
+              {autosaveState === "saved" ? t("checkin_autosave_saved") as string : t("checkin_autosave_saving") as string}
+            </span>
+          )}
+        </div>
         {isRetro && (
           <span className="inline-block text-xs text-wing-heat font-medium bg-wing-elevated border border-wing-border px-3 py-1 rounded-full mt-2">
             ✏️ מילוי רטרואקטיבי
@@ -279,7 +354,29 @@ function CheckinPageInner() {
         )}
       </div>
 
-      {/* Water slider */}
+      {/* Tabs */}
+      <div className="flex gap-2 bg-wing-elevated border border-wing-border rounded-[14px] p-1">
+        {([
+          { key: "essential", label: t("checkin_tab_essential") as string },
+          { key: "advanced",  label: t("checkin_tab_advanced") as string },
+        ] as const).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`flex-1 text-sm py-2 rounded-[10px] font-bold transition-all ${
+              activeTab === tab.key
+                ? "bg-wing-surface text-wing-ink shadow-sm"
+                : "text-wing-muted"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "essential" && (
+      <>
+      {/* Water */}
       <SectionCard>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -355,6 +452,11 @@ function CheckinPageInner() {
         </div>
       </SectionCard>
 
+      </>
+      )}
+
+      {activeTab === "advanced" && (
+      <>
       {/* Eating Window */}
       <SectionCard>
         <div className="flex items-center justify-between mb-3">
@@ -435,6 +537,11 @@ function CheckinPageInner() {
         )}
       </SectionCard>
 
+      </>
+      )}
+
+      {activeTab === "essential" && (
+      <>
       {/* Steps */}
       <SectionCard>
         <div className="flex items-center justify-between mb-3">
@@ -472,6 +579,11 @@ function CheckinPageInner() {
         )}
       </SectionCard>
 
+      </>
+      )}
+
+      {activeTab === "advanced" && (
+      <>
       {/* Workout */}
       <SectionCard>
         <div className="flex items-center justify-between">
@@ -537,6 +649,11 @@ function CheckinPageInner() {
         )}
       </SectionCard>
 
+      </>
+      )}
+
+      {activeTab === "essential" && (
+      <>
       {/* Mood */}
       <SectionCard>
         <div className="flex items-center gap-2 mb-4">
@@ -560,6 +677,11 @@ function CheckinPageInner() {
         </div>
       </SectionCard>
 
+      </>
+      )}
+
+      {activeTab === "advanced" && (
+      <>
       {/* Weight */}
       <SectionCard>
         <div className="flex items-center gap-2 mb-3">
@@ -595,6 +717,9 @@ function CheckinPageInner() {
           className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
         />
       </SectionCard>
+
+      </>
+      )}
 
       {/* CTA */}
       <button

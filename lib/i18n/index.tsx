@@ -102,6 +102,10 @@ export const T = {
     // Checkin
     checkin_title: "צ'ק אפ יומי",
     checkin_retro: "✏️ מילוי רטרואקטיבי",
+    checkin_tab_essential: "חיוני",
+    checkin_tab_advanced: "מתקדם",
+    checkin_autosave_saved: "נשמר",
+    checkin_autosave_saving: "שומר...",
     checkin_water: "שתיית מים",
     checkin_veg: "ירקות",
     checkin_veg_sub: "בארוחות היום",
@@ -695,6 +699,10 @@ export const T = {
     // Checkin
     checkin_title: "Daily Check-up",
     checkin_retro: "✏️ Retroactive entry",
+    checkin_tab_essential: "Essential",
+    checkin_tab_advanced: "Advanced",
+    checkin_autosave_saved: "Saved",
+    checkin_autosave_saving: "Saving...",
     checkin_water: "Water Intake",
     checkin_veg: "Vegetables",
     checkin_veg_sub: "Today's servings",

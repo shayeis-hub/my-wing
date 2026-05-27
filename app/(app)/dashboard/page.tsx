@@ -274,8 +274,8 @@ export default function DashboardPage() {
             <div className="mt-3 grid grid-cols-3 gap-2">
               {/* Water */}
               <div className={`bg-white/80 rounded-2xl px-2 pt-2 pb-1.5 transition-all ${pulseField === "water" ? "ring-2 ring-[#c79a00]" : ""}`}>
-                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
-                  <Droplets size={11} strokeWidth={2.5} /> {t("water_label")}
+                <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                  <Droplets size={10} strokeWidth={2.5} /> {t("water_label")}
                 </p>
                 <div className="flex items-center justify-between mt-1">
                   <button
@@ -302,8 +302,8 @@ export default function DashboardPage() {
 
               {/* Vegetables */}
               <div className={`bg-white/80 rounded-2xl px-2 pt-2 pb-1.5 transition-all ${pulseField === "veg" ? "ring-2 ring-green-600" : ""}`}>
-                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
-                  <Leaf size={11} strokeWidth={2.5} /> {t("dashboard_mini_veggies")}
+                <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                  <Leaf size={10} strokeWidth={2.5} /> {t("dashboard_mini_veggies")}
                 </p>
                 <div className="flex items-center justify-between mt-1">
                   <button
@@ -331,8 +331,8 @@ export default function DashboardPage() {
               {/* Steps */}
               {editingSteps ? (
                 <div className="bg-white rounded-2xl px-2 pt-2 pb-1.5">
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
-                    <Footprints size={11} strokeWidth={2.5} /> {t("steps_label")}
+                  <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                    <Footprints size={10} strokeWidth={2.5} /> {t("steps_label")}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
                     <input
@@ -354,8 +354,8 @@ export default function DashboardPage() {
                   onClick={startEditingSteps}
                   className={`bg-white/80 rounded-2xl px-2 pt-2 pb-1.5 active:scale-95 transition-all ${pulseField === "steps" ? "ring-2 ring-wing-heat" : ""}`}
                 >
-                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
-                    <Footprints size={11} strokeWidth={2.5} /> {t("steps_label")}
+                  <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                    <Footprints size={10} strokeWidth={2.5} /> {t("steps_label")}
                   </p>
                   <div className="flex items-center justify-between mt-1">
                     <span className="w-6 h-6" aria-hidden />
