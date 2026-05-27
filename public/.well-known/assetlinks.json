@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.wingpact.twa",
+    "sha256_cert_fingerprints": ["7F:FA:F9:74:FF:62:D8:18:61:E0:F9:24:30:20:1A:CC:4A:C7:82:9C:E5:9A:EC:6D:80:AB:F3:2D:B3:4D:58:AA"]
+  }
+}]
