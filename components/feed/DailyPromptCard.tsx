@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, Send } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Reactions } from "@/components/ui/Reactions";
 import { addPromptResponse, togglePromptReaction } from "@/lib/firebase/firestore";
@@ -60,22 +60,30 @@ export function DailyPromptCard({
   }
 
   return (
-    <div
-      className="rounded-[20px] p-5 space-y-4"
-      style={{ background: "linear-gradient(135deg, #fff3b8, #ffc89a)" }}
-    >
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-2xl bg-white/40 flex items-center justify-center">
-          <MessageCircle size={16} className="text-[#c79a00]" strokeWidth={2.5} />
+    <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 space-y-3">
+      {/* Header — looks like a post header, but with a Wingpact "system" identity */}
+      <div className="flex items-start gap-3">
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm"
+          style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+        >
+          <Sparkles size={18} className="text-wing-ink" strokeWidth={2.5} />
         </div>
-        <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#a07a00] font-bold">
-          {t("feed_prompt_label") as string}
-        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-bold text-wing-ink leading-tight">Wingpact</p>
+            <span className="font-mono text-[9px] tracking-[0.16em] uppercase text-wing-heat bg-wing-elevated border border-wing-border rounded-full px-1.5 py-0.5 font-bold">
+              {t("feed_prompt_system_badge") as string}
+            </span>
+          </div>
+          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-wing-muted mt-0.5">
+            {t("feed_prompt_label") as string}
+          </p>
+        </div>
       </div>
 
       {/* Question */}
-      <p className="font-black text-wing-ink text-lg leading-tight">
+      <p className="text-[16px] font-bold text-wing-ink leading-snug">
         {prompt.question}
       </p>
 
@@ -84,21 +92,17 @@ export function DailyPromptCard({
         reactions={prompt.reactions ?? []}
         currentUserId={currentUserId}
         onToggle={handleReaction}
-        size="md"
       />
 
       {/* Responses */}
       {responses.length > 0 && (
-        <div className="space-y-2 pt-1">
+        <div className="space-y-1.5 pt-1">
           {responses.map((r, i) => {
             const photo = memberMap[r.userId]?.photoURL;
             const isMine = r.userId === currentUserId;
             return (
-              <div
-                key={i}
-                className="flex items-start gap-2.5 bg-white/60 rounded-[14px] px-3 py-2.5"
-              >
-                <Avatar name={r.userName} photoURL={photo} size={28} isCurrentUser={isMine} />
+              <div key={i} className="flex items-start gap-2.5 bg-wing-elevated rounded-[12px] px-3 py-2">
+                <Avatar name={r.userName} photoURL={photo} size={26} isCurrentUser={isMine} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-wing-ink">{r.userName.split(" ")[0]}</p>
                   <p className="text-sm text-wing-ink/85 leading-snug mt-0.5">{r.text}</p>
@@ -111,22 +115,22 @@ export function DailyPromptCard({
 
       {/* Response input — only if user hasn't responded yet */}
       {!myResponse && (
-        <div className="flex gap-2 items-center bg-white/60 rounded-[14px] p-1.5">
+        <div className="flex gap-2 items-center bg-wing-elevated rounded-[14px] p-1.5">
           <input
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
             placeholder={t("feed_prompt_input_ph") as string}
-            className="flex-1 bg-transparent text-sm text-wing-ink placeholder:text-wing-ink/50 px-2 py-2 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-wing-ink placeholder:text-wing-subtle px-2 py-1.5 focus:outline-none"
           />
           <button
             onClick={handleSend}
             disabled={!text.trim() || sending}
-            className="w-9 h-9 rounded-full bg-wing-ink flex items-center justify-center disabled:opacity-40 active:scale-90 transition-transform shrink-0"
+            className="w-8 h-8 rounded-full bg-wing-ink flex items-center justify-center disabled:opacity-40 active:scale-90 transition-transform shrink-0"
             aria-label="send"
           >
-            <Send size={14} className="text-wing-elevated" strokeWidth={2.5} />
+            <Send size={13} className="text-wing-elevated" strokeWidth={2.5} />
           </button>
         </div>
       )}

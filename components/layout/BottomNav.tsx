@@ -39,7 +39,7 @@ export function BottomNav() {
               href={href}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-colors",
-                active ? "text-wing-heat" : "text-wing-subtle"
+                active ? "text-wing-heat" : "text-wing-muted"
               )}
             >
               <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
@@ -53,7 +53,7 @@ export function BottomNav() {
           onClick={() => setMenuOpen(true)}
           className={cn(
             "flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-colors",
-            menuOpen ? "text-wing-heat" : "text-wing-subtle"
+            menuOpen ? "text-wing-heat" : "text-wing-muted"
           )}
         >
           <Menu size={21} strokeWidth={1.8} />
