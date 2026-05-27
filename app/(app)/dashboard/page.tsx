@@ -9,6 +9,7 @@ import { SOSButton } from "@/components/wing/SOSButton";
 import { MealCard } from "@/components/meals/MealCard";
 import { WeightChart } from "@/components/dashboard/WeightChart";
 import { MemberDashboard } from "@/components/dashboard/MemberDashboard";
+import { Leaderboard } from "@/components/steps/Leaderboard";
 import { useMeals } from "@/hooks/useMeals";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
@@ -375,23 +376,24 @@ export default function DashboardPage() {
           </div>
 
 
-          {/* Secondary 2-col grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/checkin">
-              <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center hover:border-wing-ink transition-colors">
-                <CheckSquare size={24} className="mx-auto mb-2 text-wing-heat" />
-                <p className="text-sm font-bold text-wing-ink">{t("nav_checkin")}</p>
-                <p className="text-xs text-wing-muted mt-0.5">{t("dashboard_checkin_sub")}</p>
+          {/* Wing Leaderboard (steps) */}
+          {wing && firebaseUser && wingSteps.length > 0 && (
+            <Leaderboard entries={wingSteps} currentUserId={firebaseUser.uid} members={wing.members} />
+          )}
+
+          {/* Detailed check-in shortcut */}
+          <Link href="/checkin">
+            <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex items-center gap-3 hover:border-wing-ink transition-colors">
+              <div className="w-11 h-11 rounded-2xl bg-wing-elevated flex items-center justify-center shrink-0">
+                <CheckSquare size={20} className="text-wing-heat" />
               </div>
-            </Link>
-            <Link href="/steps">
-              <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center hover:border-wing-ink transition-colors">
-                <Footprints size={24} className="mx-auto mb-2 text-wing-heat" />
-                <p className="text-sm font-bold text-wing-ink">{t("steps_label")}</p>
-                <p className="text-xs text-wing-muted mt-0.5">{t("dashboard_steps_sub")}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-wing-ink">{t("dashboard_full_checkin_title")}</p>
+                <p className="text-xs text-wing-muted mt-0.5">{t("dashboard_full_checkin_sub")}</p>
               </div>
-            </Link>
-          </div>
+              <ChevronLeft size={16} className="text-wing-muted shrink-0" />
+            </div>
+          </Link>
 
           {/* User Guide banner */}
           <a

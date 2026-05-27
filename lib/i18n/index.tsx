@@ -436,6 +436,8 @@ export const T = {
     dashboard_mini_streak: "סטריק",
     dashboard_mini_veggies: "ירקות",
     dashboard_checkin_sub: "מים, אימון, משקל",
+    dashboard_full_checkin_title: "צ'ק-אין יומי מלא",
+    dashboard_full_checkin_sub: "משקל, מצב רוח, אימון, צום לסירוגין והערות",
     dashboard_steps_sub: "לוח תוצאות",
     dashboard_guide_title: "מדריך למשתמש",
     dashboard_guide_sub: "כל הפיצ'רים, טיפים ושאלות נפוצות",
@@ -1026,6 +1028,8 @@ export const T = {
     // Dashboard extras
     dashboard_mini_streak: "Streak",
     dashboard_mini_veggies: "Veggies",
+    dashboard_full_checkin_title: "Full Daily Check-in",
+    dashboard_full_checkin_sub: "Weight, mood, workout, intermittent fasting & notes",
     dashboard_checkin_sub: "Water, workout, weight",
     dashboard_steps_sub: "Leaderboard",
     dashboard_guide_title: "User Guide",
