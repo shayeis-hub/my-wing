@@ -23,6 +23,8 @@ import type {
   Meal,
   DailyCheckin,
   Encouragement,
+  Reaction,
+  ReactionType,
   StepsEntry,
   Challenge,
   Trophy,
@@ -283,6 +285,46 @@ export async function addEncouragement(
   await updateDoc(doc(db, "wings", wingId, "checkins", checkinId), {
     encouragements: arrayUnion(encouragement),
   });
+}
+
+// ── Reactions ─────────────────────────────────────────────────────────────────
+// One reaction per user per item. If user clicks same type → remove. Different type → replace.
+async function toggleReactionGeneric(
+  docPath: string[],
+  current: Reaction[] | undefined,
+  userId: string,
+  userName: string,
+  type: ReactionType,
+): Promise<Reaction[]> {
+  const existing = (current ?? []).find((r) => r.userId === userId);
+  const withoutMine = (current ?? []).filter((r) => r.userId !== userId);
+  const next: Reaction[] = existing && existing.type === type
+    ? withoutMine // toggle off
+    : [...withoutMine, { userId, userName, type, createdAt: Date.now() }];
+  await updateDoc(doc(db, ...(docPath as [string, ...string[]])), { reactions: next });
+  return next;
+}
+
+export async function toggleMealReaction(
+  wingId: string,
+  mealId: string,
+  current: Reaction[] | undefined,
+  userId: string,
+  userName: string,
+  type: ReactionType,
+): Promise<Reaction[]> {
+  return toggleReactionGeneric(["wings", wingId, "meals", mealId], current, userId, userName, type);
+}
+
+export async function toggleCheckinReaction(
+  wingId: string,
+  checkinId: string,
+  current: Reaction[] | undefined,
+  userId: string,
+  userName: string,
+  type: ReactionType,
+): Promise<Reaction[]> {
+  return toggleReactionGeneric(["wings", wingId, "checkins", checkinId], current, userId, userName, type);
 }
 
 // ── Steps ─────────────────────────────────────────────────────────────────────

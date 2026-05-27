@@ -8,14 +8,15 @@ import { g } from "@/lib/utils/gender";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
 import {
-  saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement, saveWeightLog, getUserTodayMeals,
+  saveCheckin, getTodayCheckin, getWingCheckins, getWingSteps, addEncouragement, saveWeightLog, getUserTodayMeals, toggleCheckinReaction,
 } from "@/lib/firebase/firestore";
+import { Reactions } from "@/components/ui/Reactions";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { enUS } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
-import type { DailyCheckin, Encouragement } from "@/types";
+import type { DailyCheckin, Encouragement, ReactionType } from "@/types";
 import { Droplets, Leaf, Footprints, Dumbbell, Smile, Scale, Pencil, Moon, Lightbulb, Timer } from "lucide-react";
 
 const MOOD_EMOJIS = ["😞", "😕", "😐", "😊", "🤩"];
@@ -806,6 +807,19 @@ function CheckinPageInner() {
                     &ldquo;{c.notes}&rdquo;
                   </p>
                 )}
+                {/* Reactions */}
+                {firebaseUser && user && (c.userId !== firebaseUser.uid || (c.reactions ?? []).length > 0) && (
+                  <Reactions
+                    reactions={c.reactions ?? []}
+                    currentUserId={firebaseUser.uid}
+                    onToggle={async (type: ReactionType) => {
+                      if (!user.wingId || c.userId === firebaseUser.uid) return;
+                      const next = await toggleCheckinReaction(user.wingId, c.id, c.reactions, firebaseUser.uid, user.displayName, type);
+                      setGroupCheckins((prev) => prev.map((x) => x.id === c.id ? { ...x, reactions: next } : x));
+                    }}
+                  />
+                )}
+
                 {(c.encouragements ?? []).map((enc, i) => (
                   <div key={i} className="text-sm bg-wing-soft rounded-xl px-3 py-2">
                     <span className="font-medium text-wing-primary">{enc.authorName}: </span>

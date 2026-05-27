@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { addMealComment, updateMeal, deleteMeal } from "@/lib/firebase/firestore";
-import type { Meal, Encouragement } from "@/types";
+import { addMealComment, updateMeal, deleteMeal, toggleMealReaction } from "@/lib/firebase/firestore";
+import type { Meal, Encouragement, Reaction, ReactionType } from "@/types";
+import { Reactions } from "@/components/ui/Reactions";
 import { formatDistanceToNow } from "date-fns";
 import { he, enUS } from "date-fns/locale";
 import toast from "react-hot-toast";
@@ -30,6 +31,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
   };
 
   const [comments, setComments] = useState<Encouragement[]>(meal.comments ?? []);
+  const [reactions, setReactions] = useState<Reaction[]>(meal.reactions ?? []);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -453,6 +455,26 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                       ))}
                     </div>
                   </div>
+                )}
+
+                {/* Reactions row */}
+                {currentUserId && currentUserName && !isOwn && (
+                  <Reactions
+                    reactions={reactions}
+                    currentUserId={currentUserId}
+                    onToggle={async (type: ReactionType) => {
+                      const next = await toggleMealReaction(meal.wingId, meal.id, reactions, currentUserId, currentUserName, type);
+                      setReactions(next);
+                    }}
+                  />
+                )}
+                {/* Show reactions to the owner as read-only counts */}
+                {currentUserId && isOwn && reactions.length > 0 && (
+                  <Reactions
+                    reactions={reactions}
+                    currentUserId={currentUserId}
+                    onToggle={async () => { /* owner can't react to own meal */ }}
+                  />
                 )}
 
                 {/* Comment input */}

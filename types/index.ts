@@ -55,6 +55,7 @@ export interface Meal {
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
   mealTime?: string;   // "HH:mm"
   mealDate?: string;   // "yyyy-MM-dd" — explicit date, falls back to createdAt date
+  reactions?: Reaction[];
   createdAt: Timestamp;
 }
 
@@ -83,6 +84,15 @@ export interface Encouragement {
   createdAt: number;
 }
 
+export type ReactionType = "heart" | "flame" | "sparkles" | "trophy";
+
+export interface Reaction {
+  userId: string;
+  userName: string;
+  type: ReactionType;
+  createdAt: number;
+}
+
 export interface Workout {
   done: boolean;
   type?: string;
@@ -106,6 +116,7 @@ export interface DailyCheckin {
   workout?: Workout;
   weightKg?: number;
   encouragements?: Encouragement[];
+  reactions?: Reaction[];
   daySummary?: { summary: string; insights: string[]; tip: string };
   eatingWindow?: { open: string; close: string; durationHours: number };
   createdAt: Timestamp;
