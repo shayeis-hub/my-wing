@@ -274,7 +274,7 @@ export default function DashboardPage() {
             <div className="mt-3 grid grid-cols-3 gap-2">
               {/* Water */}
               <div className={`bg-white/80 rounded-2xl px-2 pt-2 pb-1.5 transition-all ${pulseField === "water" ? "ring-2 ring-[#c79a00]" : ""}`}>
-                <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
                   <Droplets size={10} strokeWidth={2.5} /> {t("water_label")}
                 </p>
                 <div className="flex items-center justify-between mt-1">
@@ -286,7 +286,7 @@ export default function DashboardPage() {
                   >
                     <Minus size={12} className="text-wing-ink" strokeWidth={3} />
                   </button>
-                  <span className="font-black text-wing-ink tabular text-lg" style={{ letterSpacing: "-0.04em" }}>
+                  <span className="font-black text-wing-ink tabular text-sm" style={{ letterSpacing: "-0.04em" }}>
                     {todayCheckin?.waterGlasses ? `${todayCheckin.waterGlasses.toFixed(2).replace(/\.?0+$/, "")}L` : "0L"}
                   </span>
                   <button
@@ -302,7 +302,7 @@ export default function DashboardPage() {
 
               {/* Vegetables */}
               <div className={`bg-white/80 rounded-2xl px-2 pt-2 pb-1.5 transition-all ${pulseField === "veg" ? "ring-2 ring-green-600" : ""}`}>
-                <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
                   <Leaf size={10} strokeWidth={2.5} /> {t("dashboard_mini_veggies")}
                 </p>
                 <div className="flex items-center justify-between mt-1">
@@ -314,7 +314,7 @@ export default function DashboardPage() {
                   >
                     <Minus size={12} className="text-wing-ink" strokeWidth={3} />
                   </button>
-                  <span className="font-black text-wing-ink tabular text-lg" style={{ letterSpacing: "-0.04em" }}>
+                  <span className="font-black text-wing-ink tabular text-sm" style={{ letterSpacing: "-0.04em" }}>
                     {todayCheckin?.vegetablesServings ?? 0}
                   </span>
                   <button
@@ -331,7 +331,7 @@ export default function DashboardPage() {
               {/* Steps */}
               {editingSteps ? (
                 <div className="bg-white rounded-2xl px-2 pt-2 pb-1.5">
-                  <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
                     <Footprints size={10} strokeWidth={2.5} /> {t("steps_label")}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
@@ -342,7 +342,7 @@ export default function DashboardPage() {
                       onChange={(e) => setStepsInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") saveStepsInline(); if (e.key === "Escape") setEditingSteps(false); }}
                       autoFocus
-                      className="flex-1 min-w-0 text-center font-black text-wing-ink text-base bg-transparent border-b border-wing-border focus:outline-none focus:border-wing-ink tabular"
+                      className="flex-1 min-w-0 text-center font-black text-wing-ink text-sm bg-transparent border-b border-wing-border focus:outline-none focus:border-wing-ink tabular"
                     />
                     <button onClick={saveStepsInline} className="shrink-0 w-6 h-6 rounded-full bg-wing-ink flex items-center justify-center active:scale-90 transition-transform">
                       <Check size={12} className="text-wing-elevated" strokeWidth={3} />
@@ -354,12 +354,12 @@ export default function DashboardPage() {
                   onClick={startEditingSteps}
                   className={`bg-white/80 rounded-2xl px-2 pt-2 pb-1.5 active:scale-95 transition-all ${pulseField === "steps" ? "ring-2 ring-wing-heat" : ""}`}
                 >
-                  <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
+                  <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-wing-ink/70 flex items-center justify-center gap-1 font-bold">
                     <Footprints size={10} strokeWidth={2.5} /> {t("steps_label")}
                   </p>
                   <div className="flex items-center justify-between mt-1">
                     <span className="w-6 h-6" aria-hidden />
-                    <span className="font-black text-wing-ink tabular text-lg" style={{ letterSpacing: "-0.04em" }}>
+                    <span className="font-black text-wing-ink tabular text-sm" style={{ letterSpacing: "-0.04em" }}>
                       {displaySteps != null
                         ? displaySteps >= 1000
                           ? `${(displaySteps / 1000).toFixed(1)}k`
