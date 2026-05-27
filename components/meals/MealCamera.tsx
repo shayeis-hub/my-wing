@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
-import { Camera, Upload, X, Loader2, PencilLine } from "lucide-react";
+import { useRef, useState, useCallback, useEffect } from "react";
+import { Camera, Upload, X, Loader2, PencilLine, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { MealAnalysis } from "@/types";
 import { useLanguage } from "@/lib/i18n";
@@ -14,7 +14,7 @@ interface MealCameraProps {
   userEmail?: string | null;
 }
 
-type Mode = "choose" | "text";
+type Mode = "choose" | "text" | "voice";
 
 export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userEmail }: MealCameraProps) {
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -24,7 +24,43 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("choose");
   const [textInput, setTextInput] = useState("");
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [listening, setListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(true);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { t, lang } = useLanguage();
+
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as unknown as { SpeechRecognition?: typeof globalThis.SpeechRecognition }).SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).webkitSpeechRecognition;
+    if (!SpeechRecognition) { setVoiceSupported(false); return; }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = lang === "he" ? "he-IL" : "en-US";
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
+      let final = "";
+      for (let i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript + " ";
+      }
+      if (final) setVoiceTranscript((prev) => (prev + " " + final).trim());
+    };
+    recognition.onend = () => setListening(false);
+    recognitionRef.current = recognition;
+  }, [lang]);
+
+  function toggleListening() {
+    if (!recognitionRef.current) return;
+    if (listening) {
+      recognitionRef.current.stop();
+      setListening(false);
+    } else {
+      setVoiceTranscript("");
+      recognitionRef.current.start();
+      setListening(true);
+    }
+  }
 
   const processImage = useCallback(async (dataUrl: string) => {
     setAnalyzing(true);
@@ -57,8 +93,8 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     }
   }, [onAnalysis, onLimitReached, userId, userEmail, t, lang]);
 
-  async function processText() {
-    const trimmed = textInput.trim();
+  async function processText(overrideText?: string) {
+    const trimmed = (overrideText ?? textInput).trim();
     if (!trimmed) return;
     setAnalyzing(true);
     setError(null);
@@ -132,6 +168,61 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
               </Button>
             </div>
           </div>
+        ) : mode === "voice" ? (
+          /* Voice recording */
+          <div className="space-y-4">
+            {!voiceSupported ? (
+              <p className="text-sm text-center text-wing-muted py-4">{t("meals_voice_unsupported") as string}</p>
+            ) : (
+              <>
+                <div className="flex flex-col items-center gap-3 py-2">
+                  <button
+                    onClick={toggleListening}
+                    className={`w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg ${
+                      listening
+                        ? "bg-red-500 animate-pulse"
+                        : "bg-gradient-to-br from-[#f5dd4b] to-[#ff6b47]"
+                    }`}
+                  >
+                    {listening
+                      ? <MicOff size={32} className="text-white" />
+                      : <Mic size={32} className="text-wing-ink" />
+                    }
+                  </button>
+                  <p className="text-sm text-wing-muted text-center">
+                    {listening
+                      ? t("meals_voice_listening") as string
+                      : t("meals_voice_tap") as string
+                    }
+                  </p>
+                </div>
+                {voiceTranscript && (
+                  <textarea
+                    value={voiceTranscript}
+                    onChange={(e) => setVoiceTranscript(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-2xl border border-wing-border bg-wing-elevated text-wing-ink text-sm resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                  />
+                )}
+              </>
+            )}
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => { setMode("choose"); recognitionRef.current?.stop(); setListening(false); setVoiceTranscript(""); }} className="flex-1">
+                {t("back")}
+              </Button>
+              {voiceSupported && (
+                <Button
+                  onClick={() => processText(voiceTranscript)}
+                  loading={analyzing}
+                  disabled={!voiceTranscript.trim()}
+                  className="flex-1"
+                >
+                  {analyzing ? t("meals_analyzing") : t("meals_voice_analyze")}
+                </Button>
+              )}
+            </div>
+          </div>
         ) : (
           /* Choose mode */
           <div className="space-y-3">
@@ -148,6 +239,13 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
             >
               <Upload size={22} className="text-wing-muted" />
               <span className="text-sm font-medium text-wing-muted">{t("meals_pick_gallery")}</span>
+            </button>
+            <button
+              onClick={() => { setMode("voice"); setVoiceTranscript(""); setListening(false); }}
+              className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-white hover:bg-wing-elevated transition-colors"
+            >
+              <Mic size={22} className="text-wing-muted" />
+              <span className="text-sm font-medium text-wing-muted">{t("meals_voice") as string}</span>
             </button>
             <button
               onClick={() => setMode("text")}

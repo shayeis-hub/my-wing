@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { addMeal } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
-import { Camera, ChevronDown, PenLine, Clock } from "lucide-react";
+import { UtensilsCrossed, ChevronDown, PenLine, Clock } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -192,8 +192,8 @@ export default function MealsPage() {
             onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : setShowCamera(true)}
             className="flex items-center gap-1.5"
           >
-            <Camera size={16} />
-            {t("meals_photo_short")}
+            <UtensilsCrossed size={16} />
+            {t("meals_add_meal")}
           </Button>
         </div>
       </div>
