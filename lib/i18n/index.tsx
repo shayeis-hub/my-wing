@@ -434,6 +434,7 @@ export const T = {
 
     // Dashboard extras
     dashboard_mini_streak: "סטריק",
+    dashboard_mini_veggies: "ירקות",
     dashboard_checkin_sub: "מים, אימון, משקל",
     dashboard_steps_sub: "לוח תוצאות",
     dashboard_guide_title: "מדריך למשתמש",
@@ -1024,6 +1025,7 @@ export const T = {
 
     // Dashboard extras
     dashboard_mini_streak: "Streak",
+    dashboard_mini_veggies: "Veggies",
     dashboard_checkin_sub: "Water, workout, weight",
     dashboard_steps_sub: "Leaderboard",
     dashboard_guide_title: "User Guide",

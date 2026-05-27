@@ -16,10 +16,10 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { enUS } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
-import { getTodayCheckin, getWeightHistory } from "@/lib/firebase/firestore";
+import { getTodayCheckin, getWeightHistory, saveCheckin } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
-import { Bell, Footprints, Scale, CheckSquare, ChevronLeft, Droplets, Flame, BookOpen } from "lucide-react";
+import { Bell, Footprints, Scale, CheckSquare, ChevronLeft, Droplets, Flame, BookOpen, Plus, Leaf, Check } from "lucide-react";
 import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
 import { calcStreak } from "@/lib/utils/streak";
 import type { StepsEntry } from "@/types";
@@ -35,6 +35,9 @@ export default function DashboardPage() {
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [wingSteps, setWingSteps] = useState<StepsEntry[]>([]);
   const [streak, setStreak] = useState(0);
+  const [pulseField, setPulseField] = useState<"water" | "veg" | "steps" | null>(null);
+  const [editingSteps, setEditingSteps] = useState(false);
+  const [stepsInput, setStepsInput] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -55,6 +58,63 @@ export default function DashboardPage() {
     if (!firebaseUser) return;
     await requestNotificationPermission(firebaseUser.uid);
     setShowNotifBanner(false);
+  }
+
+  // Quick update — saves a partial change to today's checkin and updates UI
+  async function quickUpdate(updates: Partial<DailyCheckin>, pulseKey?: "water" | "veg" | "steps") {
+    if (!user?.wingId || !firebaseUser) return;
+    const today = format(new Date(), "yyyy-MM-dd");
+    const merged = {
+      wingId: user.wingId,
+      userId: firebaseUser.uid,
+      userName: user.displayName,
+      date: today,
+      waterGlasses: todayCheckin?.waterGlasses ?? 0,
+      vegetablesServings: todayCheckin?.vegetablesServings ?? 0,
+      mood: todayCheckin?.mood ?? 3,
+      workout: todayCheckin?.workout ?? { done: false },
+      ...(todayCheckin?.steps ? { steps: todayCheckin.steps } : {}),
+      ...(todayCheckin?.weightKg ? { weightKg: todayCheckin.weightKg } : {}),
+      ...(todayCheckin?.notes ? { notes: todayCheckin.notes } : {}),
+      ...(todayCheckin?.eatingWindow ? { eatingWindow: todayCheckin.eatingWindow } : {}),
+      ...updates,
+    };
+    // Optimistic UI update
+    setTodayCheckin({ ...merged, id: `${firebaseUser.uid}_${today}`, createdAt: todayCheckin?.createdAt ?? (null as unknown as DailyCheckin["createdAt"]) });
+    if (pulseKey) {
+      setPulseField(pulseKey);
+      setTimeout(() => setPulseField(null), 400);
+    }
+    try {
+      await saveCheckin(user.wingId, merged);
+    } catch {
+      // Revert on error
+      setTodayCheckin(todayCheckin);
+    }
+  }
+
+  function quickAddWater() {
+    const current = todayCheckin?.waterGlasses ?? 0;
+    const next = Math.min(4, Math.round((current + 0.25) * 100) / 100);
+    quickUpdate({ waterGlasses: next }, "water");
+  }
+
+  function quickAddVeg() {
+    const current = todayCheckin?.vegetablesServings ?? 0;
+    const next = Math.min(6, current + 1);
+    quickUpdate({ vegetablesServings: next }, "veg");
+  }
+
+  function startEditingSteps() {
+    setStepsInput(displaySteps != null ? String(displaySteps) : "");
+    setEditingSteps(true);
+  }
+
+  async function saveStepsInline() {
+    const n = parseInt(stepsInput);
+    if (isNaN(n) || n < 0) { setEditingSteps(false); return; }
+    await quickUpdate({ steps: n }, "steps");
+    setEditingSteps(false);
   }
 
   const { wing } = useWing(user?.wingId);
@@ -100,9 +160,16 @@ export default function DashboardPage() {
       <div className="pt-4 flex items-start justify-between">
         <div>
           <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted">{today}</p>
-          <h1 className="text-[28px] font-black text-wing-ink tracking-[-0.025em] mt-0.5">
-            {t("dashboard_hello")}, {user?.displayName?.split(" ")[0] ?? t("dashboard_hello_default")}
-          </h1>
+          <div className="flex items-center gap-2 mt-0.5">
+            <h1 className="text-[28px] font-black text-wing-ink tracking-[-0.025em]">
+              {t("dashboard_hello")}, {user?.displayName?.split(" ")[0] ?? t("dashboard_hello_default")}
+            </h1>
+            {streak > 0 && (
+              <span className="inline-flex items-center gap-0.5 text-sm font-bold text-wing-heat bg-wing-elevated border border-wing-border rounded-full px-2 py-0.5">
+                <Flame size={12} /> {streak}
+              </span>
+            )}
+          </div>
           {wing && (
             <p className="text-sm text-wing-muted mt-0.5">
               {(t("dashboard_wing_name") as (name: string, total: number, active: number) => string)(wing.name, wing.memberIds.length, wingSteps.length)}
@@ -190,36 +257,83 @@ export default function DashboardPage() {
               color={todayCalories > bmr ? "bg-red-500" : "bg-[#1a1814]"}
             />
 
-            {/* Mini stats: צעדים / מים / סטריק */}
+            {/* Quick Log mini stats: Water / Veggies / Steps */}
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
-                <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
-                  <Footprints size={9} /> {t("steps_label")}
-                </p>
-                <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
-                  {displaySteps != null
-                    ? displaySteps >= 1000
-                      ? `${(displaySteps / 1000).toFixed(1)}k`
-                      : displaySteps
-                    : "—"}
-                </p>
-              </div>
-              <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
+              {/* Water */}
+              <button
+                onClick={quickAddWater}
+                disabled={(todayCheckin?.waterGlasses ?? 0) >= 4}
+                className={`relative bg-white/50 rounded-2xl px-2 py-2 text-center active:scale-95 transition-transform disabled:opacity-60 ${pulseField === "water" ? "ring-2 ring-[#c79a00]" : ""}`}
+              >
                 <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
                   <Droplets size={9} /> {t("water_label")}
                 </p>
                 <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
-                  {todayCheckin?.waterGlasses ? `${todayCheckin.waterGlasses.toFixed(1)}L` : "—"}
+                  {todayCheckin?.waterGlasses ? `${todayCheckin.waterGlasses.toFixed(2).replace(/\.?0+$/, "")}L` : "0L"}
                 </p>
-              </div>
-              <div className="bg-white/50 rounded-2xl px-3 py-2 text-center">
+                <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-wing-ink/10 flex items-center justify-center pointer-events-none">
+                  <Plus size={11} className="text-wing-ink/70" strokeWidth={3} />
+                </div>
+              </button>
+
+              {/* Vegetables */}
+              <button
+                onClick={quickAddVeg}
+                disabled={(todayCheckin?.vegetablesServings ?? 0) >= 6}
+                className={`relative bg-white/50 rounded-2xl px-2 py-2 text-center active:scale-95 transition-transform disabled:opacity-60 ${pulseField === "veg" ? "ring-2 ring-green-500" : ""}`}
+              >
                 <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
-                  <Flame size={9} /> {t("dashboard_mini_streak")}
+                  <Leaf size={9} /> {t("dashboard_mini_veggies")}
                 </p>
-                <p className="font-black text-base tabular" style={{ letterSpacing: "-0.03em", color: streak > 0 ? "#d4541a" : "#1a1814" }}>
-                  {streak > 0 ? streak : "—"}
+                <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
+                  {todayCheckin?.vegetablesServings ?? 0}
                 </p>
-              </div>
+                <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-wing-ink/10 flex items-center justify-center pointer-events-none">
+                  <Plus size={11} className="text-wing-ink/70" strokeWidth={3} />
+                </div>
+              </button>
+
+              {/* Steps */}
+              {editingSteps ? (
+                <div className="relative bg-white rounded-2xl px-1.5 py-1.5 flex flex-col items-center gap-0.5">
+                  <p className="text-[10px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center gap-0.5">
+                    <Footprints size={9} /> {t("steps_label")}
+                  </p>
+                  <div className="flex items-center gap-0.5 w-full">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={stepsInput}
+                      onChange={(e) => setStepsInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") saveStepsInline(); if (e.key === "Escape") setEditingSteps(false); }}
+                      autoFocus
+                      className="w-full text-center font-black text-wing-ink text-sm bg-transparent border-b border-wing-border focus:outline-none focus:border-wing-ink tabular"
+                    />
+                    <button onClick={saveStepsInline} className="shrink-0 w-5 h-5 rounded-full bg-wing-ink flex items-center justify-center">
+                      <Check size={11} className="text-wing-elevated" strokeWidth={3} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={startEditingSteps}
+                  className={`relative bg-white/50 rounded-2xl px-2 py-2 text-center active:scale-95 transition-transform ${pulseField === "steps" ? "ring-2 ring-wing-heat" : ""}`}
+                >
+                  <p className="text-[11px] font-mono text-[#c79a00] uppercase tracking-wider flex items-center justify-center gap-0.5">
+                    <Footprints size={9} /> {t("steps_label")}
+                  </p>
+                  <p className="font-black text-wing-ink text-base tabular" style={{ letterSpacing: "-0.03em" }}>
+                    {displaySteps != null
+                      ? displaySteps >= 1000
+                        ? `${(displaySteps / 1000).toFixed(1)}k`
+                        : displaySteps
+                      : "—"}
+                  </p>
+                  <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-wing-ink/10 flex items-center justify-center pointer-events-none">
+                    <Plus size={11} className="text-wing-ink/70" strokeWidth={3} />
+                  </div>
+                </button>
+              )}
             </div>
           </div>
 
