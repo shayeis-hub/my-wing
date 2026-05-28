@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -30,12 +31,25 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
     snack: t("meal_type_snack") as string,
   };
 
-  const [comments, setComments] = useState<Encouragement[]>(meal.comments ?? []);
+  const initialComments = meal.comments ?? [];
+  const [comments, setComments] = useState<Encouragement[]>(initialComments);
   const [reactions, setReactions] = useState<Reaction[]>(meal.reactions ?? []);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  // Auto-expand comments on the hero card when there are any, so encouragements
+  // from teammates are visible without having to tap a tiny icon.
+  const [showComments, setShowComments] = useState(hero && initialComments.length > 0);
   const [showModal, setShowModal] = useState(false);
+
+  // Deep-link: when the URL has ?meal=<id> matching this card, open its modal
+  // automatically. Used by the encouragement push notification to land the user
+  // on the exact meal that got the comment.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams?.get("meal") === meal.id) {
+      setShowModal(true);
+    }
+  }, [searchParams, meal.id]);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     description: meal.analysis.description,
@@ -131,6 +145,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
           targetUserId: meal.userId,
           authorName: currentUserName,
           message: trimmed,
+          link: `/meals?meal=${meal.id}`,
         }),
       });
       setComments((prev) => [...prev, comment]);

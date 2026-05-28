@@ -5,7 +5,7 @@ import { admin, getAdminApp } from "@/lib/firebase/admin";
 
 export async function POST(req: NextRequest) {
   try {
-    const { targetUserId, authorName, message } = await req.json();
+    const { targetUserId, authorName, message, link } = await req.json();
     if (!targetUserId || !authorName || !message) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
 
     const token = userSnap.data()?.fcmToken;
     if (!token) return NextResponse.json({ ok: true });
+    // Caller can specify which page to open. Defaults to /checkin for back-compat.
+    const targetLink = typeof link === "string" && link.startsWith("/") ? link : "/checkin";
     await admin.messaging().send({
       token,
       notification: {
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest) {
       },
       webpush: {
         notification: { icon: "/icons/icon-192.png", dir: "rtl", lang: "he" },
-        fcmOptions: { link: "/checkin" },
+        fcmOptions: { link: targetLink },
       },
       apns: { payload: { aps: { sound: "default" } } },
       android: { notification: { sound: "default" } },
