@@ -182,12 +182,7 @@ export async function generatePersonalDaySummary(data: {
 - מצב רוח: ${data.mood}/5
 ${data.notes ? `- הערה: "${data.notes}"` : ""}
 
-ענה ב-JSON בלבד:
-{
-  "summary": "פסקה אישית קצרה (2-3 משפטים) על היום — מה השיג, איך הוא הרגיש, מה בולט לטוב",
-  "insights": ["תובנה קצרה 1", "תובנה קצרה 2", "תובנה קצרה 3"],
-  "tip": "טיפ אחד ספציפי לשיפור מחר"
-}`
+תן סיכום אישי, תובנות, וטיפ למחר.`
     : `You are a personal nutrition and fitness coach. Summarize ${data.userName}'s day in a warm, personal and encouraging way in English.
 
 Day data:
@@ -202,23 +197,52 @@ Day data:
 - Mood: ${data.mood}/5
 ${data.notes ? `- Note: "${data.notes}"` : ""}
 
-Reply ONLY with JSON:
-{
-  "summary": "Short personal paragraph (2-3 sentences) about the day — what was achieved, how they felt, what stood out positively",
-  "insights": ["short insight 1", "short insight 2", "short insight 3"],
-  "tip": "one specific tip to improve tomorrow"
-}`;
+Give a personal summary, insights, and a tip for tomorrow.`;
 
+  // Use tool_use to force a structured response. Avoids JSON parsing failures
+  // when the model emits unescaped quotes inside Hebrew text (the previous
+  // approach used `text.match(/\{[\s\S]*\}/)` + JSON.parse and broke on those).
   const response = await client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 1024,
+    tools: [
+      {
+        name: "submit_day_summary",
+        description: isHe
+          ? "החזר את סיכום היום במבנה הזה"
+          : "Return the day summary in this structure",
+        input_schema: {
+          type: "object" as const,
+          properties: {
+            summary: {
+              type: "string",
+              description: isHe
+                ? "פסקה אישית של 2-3 משפטים על היום"
+                : "Personal 2-3 sentence paragraph about the day",
+            },
+            insights: {
+              type: "array",
+              items: { type: "string" },
+              description: isHe ? "2-3 תובנות קצרות" : "2-3 short insights",
+            },
+            tip: {
+              type: "string",
+              description: isHe ? "טיפ אחד ספציפי למחר" : "One specific tip for tomorrow",
+            },
+          },
+          required: ["summary", "insights", "tip"],
+        },
+      },
+    ],
+    tool_choice: { type: "tool", name: "submit_day_summary" },
     messages: [{ role: "user", content: prompt }],
   });
 
-  const text = response.content[0].type === "text" ? response.content[0].text : "{}";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Claude did not return valid JSON");
-  return JSON.parse(jsonMatch[0]);
+  const toolUse = response.content.find((c) => c.type === "tool_use");
+  if (!toolUse || toolUse.type !== "tool_use") {
+    throw new Error("Claude did not call submit_day_summary tool");
+  }
+  return toolUse.input as { summary: string; insights: string[]; tip: string };
 }
 
 export async function generateDailySummary(
