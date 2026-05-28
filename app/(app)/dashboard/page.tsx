@@ -9,6 +9,7 @@ import { SOSButton } from "@/components/wing/SOSButton";
 import { MealCard } from "@/components/meals/MealCard";
 import { WeightChart } from "@/components/dashboard/WeightChart";
 import { MemberDashboard } from "@/components/dashboard/MemberDashboard";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { Leaderboard } from "@/components/steps/Leaderboard";
 import { useMeals } from "@/hooks/useMeals";
 import Link from "next/link";
@@ -265,6 +266,11 @@ export default function DashboardPage() {
       {/* Personal dashboard */}
       {!selectedMemberId && (
         <>
+          {/* Recent encouragements / comments received this week */}
+          {user?.wingId && firebaseUser && (
+            <RecentActivity wingId={user.wingId} userId={firebaseUser.uid} />
+          )}
+
           {/* Hero calorie card */}
           <div
             className="rounded-[20px] p-5"

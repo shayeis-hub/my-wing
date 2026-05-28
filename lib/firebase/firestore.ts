@@ -668,3 +668,99 @@ export async function incrementDailyMealCount(uid: string, date: string): Promis
   const ref = doc(db, "users", uid, "dailyUsage", date);
   await setDoc(ref, { mealPhotos: increment(1), date }, { merge: true });
 }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Recent encouragements / comments received                                 */
+/*  Aggregates across checkins + meals + posts so the dashboard can surface  */
+/*  what teammates wrote to the user, in one place.                          */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export interface RecentEncouragement {
+  type: "checkin" | "meal" | "post";
+  authorName: string;
+  text: string;
+  createdAt: number;      // ms since epoch
+  link: string;           // route to navigate to
+  // For meals/checkins we also pass a hint label so the UI can show context
+  contextLabel?: string;
+}
+
+export async function getRecentEncouragementsForUser(
+  wingId: string,
+  userId: string,
+  days: number = 7
+): Promise<RecentEncouragement[]> {
+  const since = Date.now() - days * 86400 * 1000;
+
+  // Build dateStr list for last N days
+  const dates: string[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(Date.now() - i * 86400000);
+    dates.push(d.toISOString().split("T")[0]);
+  }
+
+  // Fire all reads in parallel
+  const [checkinDocs, mealsSnap, postsSnap] = await Promise.all([
+    Promise.all(
+      dates.map((d) => getDoc(doc(db, "wings", wingId, "checkins", `${userId}_${d}`)))
+    ),
+    getDocs(query(collection(db, "wings", wingId, "meals"), where("userId", "==", userId))),
+    getDocs(query(collection(db, "wings", wingId, "posts"), where("userId", "==", userId))),
+  ]);
+
+  const items: RecentEncouragement[] = [];
+
+  // Checkins
+  for (const snap of checkinDocs) {
+    if (!snap.exists()) continue;
+    const data = snap.data() as DailyCheckin;
+    for (const enc of data.encouragements ?? []) {
+      if (enc.authorId === userId) continue;          // skip own replies
+      if ((enc.createdAt as number) < since) continue;
+      items.push({
+        type: "checkin",
+        authorName: enc.authorName,
+        text: enc.text,
+        createdAt: enc.createdAt as number,
+        link: `/checkin?date=${data.date}`,
+        contextLabel: data.date,
+      });
+    }
+  }
+
+  // Meals
+  for (const m of mealsSnap.docs) {
+    const md = m.data() as Meal;
+    for (const c of md.comments ?? []) {
+      if (c.authorId === userId) continue;
+      if ((c.createdAt as number) < since) continue;
+      items.push({
+        type: "meal",
+        authorName: c.authorName,
+        text: c.text,
+        createdAt: c.createdAt as number,
+        link: `/meals?meal=${m.id}`,
+        contextLabel: md.analysis?.description?.slice(0, 30),
+      });
+    }
+  }
+
+  // Posts
+  for (const p of postsSnap.docs) {
+    const pd = p.data() as WingPost;
+    for (const c of pd.comments ?? []) {
+      if (c.authorId === userId) continue;
+      if ((c.createdAt as number) < since) continue;
+      items.push({
+        type: "post",
+        authorName: c.authorName,
+        text: c.text,
+        createdAt: c.createdAt as number,
+        link: "/feed",
+      });
+    }
+  }
+
+  items.sort((a, b) => b.createdAt - a.createdAt);
+  return items;
+}

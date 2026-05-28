@@ -37,11 +37,16 @@ function calcWorkoutCalories(type: string, intensity: "light" | "moderate" | "in
   return Math.round(met * weightKg * (durationMin / 60));
 }
 
-async function sendEncouragementPush(targetUserId: string, authorName: string, text: string) {
+async function sendEncouragementPush(targetUserId: string, authorName: string, text: string, date?: string) {
   await fetch("/api/notifications/encouragement", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ targetUserId, authorName, message: text }),
+    body: JSON.stringify({
+      targetUserId,
+      authorName,
+      message: text,
+      link: date ? `/checkin?date=${date}` : "/checkin",
+    }),
   });
 }
 
@@ -298,7 +303,7 @@ function CheckinPageInner() {
     try {
       const enc: Encouragement = { authorId: firebaseUser.uid, authorName: user.displayName, text, createdAt: Date.now() };
       await addEncouragement(user.wingId!, checkin.id, enc);
-      await sendEncouragementPush(checkin.userId, user.displayName, text);
+      await sendEncouragementPush(checkin.userId, user.displayName, text, checkin.date);
       setGroupCheckins((prev) => prev.map((c) => c.id === checkin.id ? { ...c, encouragements: [...(c.encouragements ?? []), enc] } : c));
       setEncourageTexts((prev) => ({ ...prev, [checkin.id]: "" }));
       toast.success(t("checkin_enc_sent"));

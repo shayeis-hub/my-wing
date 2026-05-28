@@ -60,7 +60,12 @@ export function MemberDashboard({
         await fetch("/api/notifications/encouragement", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ targetUserId: memberId, authorName: currentUserName, message: text }),
+          body: JSON.stringify({
+            targetUserId: memberId,
+            authorName: currentUserName,
+            message: text,
+            link: `/checkin?date=${checkin.date}`,
+          }),
         });
       }
       setEncText("");
