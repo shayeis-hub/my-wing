@@ -116,13 +116,13 @@ export default function DashboardPage() {
 
   function quickAddWater() {
     const current = todayCheckin?.waterGlasses ?? 0;
-    const next = Math.min(4, Math.round((current + 0.25) * 100) / 100);
+    const next = Math.min(4, Math.round((current + 0.1) * 10) / 10);
     quickUpdate({ waterGlasses: next }, "water");
   }
 
   function quickRemoveWater() {
     const current = todayCheckin?.waterGlasses ?? 0;
-    const next = Math.max(0, Math.round((current - 0.25) * 100) / 100);
+    const next = Math.max(0, Math.round((current - 0.1) * 10) / 10);
     quickUpdate({ waterGlasses: next }, "water");
   }
 
