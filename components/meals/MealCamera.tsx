@@ -5,6 +5,7 @@ import { Camera, Upload, X, Loader2, PencilLine, Mic, MicOff } from "lucide-reac
 import { Button } from "@/components/ui/Button";
 import type { MealAnalysis } from "@/types";
 import { useLanguage } from "@/lib/i18n";
+import { compressImageToDataUrl } from "@/lib/utils/imageCompress";
 
 interface MealCameraProps {
   onAnalysis: (analysis: MealAnalysis, imageDataUrl: string) => void;
@@ -118,45 +119,9 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     }
   }
 
-  /**
-   * Resize + recompress the image client-side before sending to the API.
-   * Phone photos can be 5-10MB raw, ~13MB as base64 — well over Vercel's
-   * 4.5MB request body limit, which is what caused the 413 "Payload Too
-   * Large" failures users saw as "לא הצלחנו לנתח".
-   *
-   * Target: max 1280px on the longest side at 85% JPEG quality, which is
-   * plenty of resolution for the Claude vision model and brings typical
-   * outputs down to 200-500KB.
-   */
-  function handleFile(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const sourceDataUrl = e.target?.result as string;
-      const img = new window.Image();
-      img.onload = () => {
-        const MAX_DIM = 1280;
-        let { width, height } = img;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          setPreview(sourceDataUrl); // fall back to original if canvas failed
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressed = canvas.toDataURL("image/jpeg", 0.85);
-        setPreview(compressed);
-      };
-      img.onerror = () => setPreview(sourceDataUrl); // fallback on decode failure
-      img.src = sourceDataUrl;
-    };
-    reader.readAsDataURL(file);
+  async function handleFile(file: File) {
+    const dataUrl = await compressImageToDataUrl(file);
+    setPreview(dataUrl);
   }
 
   return (

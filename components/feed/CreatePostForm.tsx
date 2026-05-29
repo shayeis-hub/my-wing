@@ -7,6 +7,7 @@ import { createWingPost } from "@/lib/firebase/firestore";
 import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
 import { nanoid } from "@/lib/utils/nanoid";
+import { compressImageToDataUrl } from "@/lib/utils/imageCompress";
 import type { WingPost } from "@/types";
 
 interface CreatePostFormProps {
@@ -24,10 +25,9 @@ export function CreatePostForm({ wingId, userId, userName, userPhotoURL, onPostC
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  function handleFile(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e) => setImageDataUrl(e.target?.result as string);
-    reader.readAsDataURL(file);
+  async function handleFile(file: File) {
+    const dataUrl = await compressImageToDataUrl(file);
+    setImageDataUrl(dataUrl);
   }
 
   async function handleSubmit() {
