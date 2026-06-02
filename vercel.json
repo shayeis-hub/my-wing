@@ -13,13 +13,5 @@
         { "key": "Content-Type", "value": "application/json" }
       ]
     }
-  ],
-  "redirects": [
-    {
-      "source": "/((?!.well-known).*)",
-      "has": [{ "type": "host", "value": "wingpact.app" }],
-      "destination": "https://www.wingpact.app/$1",
-      "permanent": true
-    }
   ]
 }
