@@ -4,5 +4,22 @@
       "path": "/api/cron/nudge",
       "schedule": "0 14 * * *"
     }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Content-Type", "value": "application/json" }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/((?!.well-known).*)",
+      "has": [{ "type": "host", "value": "wingpact.app" }],
+      "destination": "https://www.wingpact.app/$1",
+      "permanent": true
+    }
   ]
 }
