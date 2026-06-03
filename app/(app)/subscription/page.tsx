@@ -31,7 +31,7 @@ function SubscriptionPageInner() {
   const email = firebaseUser?.email ?? user?.email ?? "";
   const sub: Subscription | undefined = user?.subscription;
   const grandfathered = isGrandfathered(email);
-  const premium = isPremium(email, sub?.plan);
+  const premium = isPremium(email, sub?.plan, sub);
   const isExpiredPaywall = searchParams.get("expired") === "1";
 
   const createdAtMs = toMs(user?.createdAt ?? null);

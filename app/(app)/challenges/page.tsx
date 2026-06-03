@@ -7,7 +7,13 @@ import { useLanguage } from "@/lib/i18n";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { saveChallenge, getWingChallenges } from "@/lib/firebase/firestore";
+import {
+  saveChallenge,
+  getWingChallenges,
+  getWingStepsRange,
+  getWingCheckinsRange,
+  finishChallenge,
+} from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format, addDays } from "date-fns";
 import { useRouter } from "next/navigation";
@@ -43,11 +49,41 @@ export default function ChallengesPage() {
     setLoadingPast(true);
     getWingChallenges(user.wingId)
       .then((all) => {
-        const past = all.filter((c) => c.status === "finished" || c.endDate < format(new Date(), "yyyy-MM-dd"));
+        const today = format(new Date(), "yyyy-MM-dd");
+        const past = all.filter((c) => c.status === "finished" || c.endDate < today);
         setPastChallenges(past);
       })
       .finally(() => setLoadingPast(false));
   }, [user?.wingId]);
+
+  // Auto-finish expired active challenge
+  useEffect(() => {
+    const ac = wing?.activeChallenge;
+    if (!ac || !user?.wingId || !wing?.members) return;
+    const today = format(new Date(), "yyyy-MM-dd");
+    if (ac.endDate >= today) return;
+
+    async function autoFinish() {
+      if (!user?.wingId || !wing?.members || !ac) return;
+      let progress: Record<string, number> = { ...ac.progress };
+      if (ac.type === "steps") {
+        const entries = await getWingStepsRange(user.wingId, ac.startDate, ac.endDate);
+        progress = {};
+        for (const e of entries) progress[e.userId] = (progress[e.userId] ?? 0) + e.steps;
+      } else if (ac.type === "water" || ac.type === "vegetables") {
+        const checkins = await getWingCheckinsRange(user.wingId, ac.startDate, ac.endDate);
+        progress = {};
+        for (const ci of checkins) {
+          const val = ac.type === "water" ? (ci.waterGlasses ?? 0) : (ci.vegetablesServings ?? 0);
+          progress[ci.userId] = (progress[ci.userId] ?? 0) + val;
+        }
+      }
+      await finishChallenge(user.wingId, { ...ac, progress }, wing.members);
+    }
+
+    autoFinish().catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wing?.activeChallenge?.id, user?.wingId]);
 
   async function handleCreate() {
     if (!user?.wingId || !title || !targetValue) return;
