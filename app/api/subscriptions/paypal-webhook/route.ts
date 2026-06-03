@@ -85,7 +85,25 @@ export async function POST(req: NextRequest) {
       break;
     }
 
-    case "BILLING.SUBSCRIPTION.CANCELLED":
+    case "BILLING.SUBSCRIPTION.CANCELLED": {
+      // PayPal fires this immediately on cancel, but user keeps access until period end.
+      // create-portal already set expiresAt + cancelPending — don't downgrade here.
+      const existing = (await userRef.get()).data()?.subscription ?? {};
+      await userRef.set(
+        {
+          subscription: {
+            ...existing,
+            status: "cancelled",
+            cancelPending: true,
+            cancelledAt: existing.cancelledAt ?? new Date().toISOString(),
+          },
+        },
+        { merge: true }
+      );
+      console.log(`User ${uid} → cancel pending (access until expiresAt)`);
+      break;
+    }
+
     case "BILLING.SUBSCRIPTION.EXPIRED":
     case "BILLING.SUBSCRIPTION.SUSPENDED": {
       await userRef.set(
