@@ -44,11 +44,14 @@ const COPY = {
     pricing_h2: "מחיר פשוט וכנה",
     pricing_sub: "מתחילים חינם, משדרגים כשצריך יותר",
     free_label: "חינם",
+    free_price: "₪0",
     free_period: "לתמיד",
     free_desc: "צ׳ק-אפ יומי, 3 ניתוחי ארוחה ביום, כנף של עד 3 חברים",
     premium_label: "פרמיום",
+    premium_price: "₪9.90",
     premium_period: "לחודש",
-    premium_save: "(חסכון 16%)",
+    premium_annual: "₪99 / שנה",
+    premium_save: "(חסכון 17%)",
     premium_desc: "ניתוח ללא הגבלה, כנף 20 חברים, AI יומי, ללא פרסומות",
     pricing_link: "כל הפרטים על המחירים ←",
     final_h2: "מוכן לטוס ביחד?",
@@ -95,11 +98,14 @@ const COPY = {
     pricing_h2: "Simple, honest pricing",
     pricing_sub: "Start free. Upgrade when you need more.",
     free_label: "Free",
+    free_price: "$0",
     free_period: "forever",
     free_desc: "Daily check-up, 3 AI meal analyses/day, wing of up to 3 members",
     premium_label: "Premium",
+    premium_price: "$3.90",
     premium_period: "/ month",
-    premium_save: "(save 16%)",
+    premium_annual: "$39 / year",
+    premium_save: "(save 17%)",
     premium_desc: "Unlimited meal analysis, 20-member wing, daily AI summary, no ads",
     pricing_link: "See full pricing details →",
     final_h2: "Ready to fly together?",
@@ -381,7 +387,7 @@ export default function LandingPage() {
             <p style={{ fontSize: 11, fontWeight: 700, color: "#8a7e68", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8 }}>
               {t.free_label}
             </p>
-            <p style={{ fontSize: 36, fontWeight: 900, margin: "0 0 4px" }}>₪0</p>
+            <p style={{ fontSize: 36, fontWeight: 900, margin: "0 0 4px" }}>{t.free_price}</p>
             <p style={{ fontSize: 13, color: "#8a7e68", marginBottom: 20 }}>{t.free_period}</p>
             <p style={{ fontSize: 13, color: "#5a4f3f", lineHeight: 1.55, margin: 0 }}>{t.free_desc}</p>
           </div>
@@ -390,12 +396,12 @@ export default function LandingPage() {
             <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8 }}>
               {t.premium_label}
             </p>
-            <p style={{ fontSize: 36, fontWeight: 900, margin: "0 0 2px" }}>₪9.90</p>
+            <p style={{ fontSize: 36, fontWeight: 900, margin: "0 0 2px" }}>{t.premium_price}</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>
               {t.premium_period}
             </p>
             <p style={{ fontSize: 12, color: "#fde68a", marginBottom: 16 }}>
-              ₪99 / {lang === "he" ? "שנה" : "year"} {t.premium_save}
+              {t.premium_annual} {t.premium_save}
             </p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.55, margin: 0 }}>{t.premium_desc}</p>
           </div>
