@@ -4,12 +4,16 @@ import { createSubscription } from "@/lib/paypal";
 
 export const dynamic = "force-dynamic";
 
+function clean(s: string | undefined): string {
+  return (s ?? "").replace(/^﻿/, "").replace(/[^\x20-\x7E]/g, "").trim();
+}
+
 function getPlanId(priceType: "monthly" | "yearly", currency: "ILS" | "USD"): string {
   const map: Record<string, string> = {
-    monthly_ILS: process.env.PAYPAL_PLAN_ILS_MONTHLY ?? "",
-    yearly_ILS:  process.env.PAYPAL_PLAN_ILS_YEARLY  ?? "",
-    monthly_USD: process.env.PAYPAL_PLAN_USD_MONTHLY ?? "",
-    yearly_USD:  process.env.PAYPAL_PLAN_USD_YEARLY  ?? "",
+    monthly_ILS: clean(process.env.PAYPAL_PLAN_ILS_MONTHLY),
+    yearly_ILS:  clean(process.env.PAYPAL_PLAN_ILS_YEARLY),
+    monthly_USD: clean(process.env.PAYPAL_PLAN_USD_MONTHLY),
+    yearly_USD:  clean(process.env.PAYPAL_PLAN_USD_YEARLY),
   };
   return map[`${priceType}_${currency}`] ?? "";
 }
