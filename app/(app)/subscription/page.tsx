@@ -27,6 +27,7 @@ function SubscriptionPageInner() {
   const searchParams = useSearchParams();
   const [loadingCheckout, setLoadingCheckout] = useState<"monthly" | "yearly" | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const email = firebaseUser?.email ?? user?.email ?? "";
   const sub: Subscription | undefined = user?.subscription;
@@ -71,12 +72,6 @@ function SubscriptionPageInner() {
 
   async function handlePortal() {
     if (!firebaseUser?.uid) return;
-    const confirmed = window.confirm(
-      lang === "he"
-        ? "האם אתה בטוח שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית."
-        : "Are you sure you want to cancel? Premium access will end at the current billing period."
-    );
-    if (!confirmed) return;
     setLoadingPortal(true);
     try {
       const res = await fetch("/api/subscriptions/create-portal", {
@@ -86,6 +81,7 @@ function SubscriptionPageInner() {
       });
       if (!res.ok) throw new Error();
       toast.success(lang === "he" ? "המנוי בוטל" : "Subscription cancelled");
+      setShowCancelConfirm(false);
       router.refresh();
     } catch {
       toast.error(lang === "he" ? "שגיאה בביטול המנוי" : "Failed to cancel subscription");
@@ -217,8 +213,7 @@ function SubscriptionPageInner() {
             <Button
               variant="secondary"
               className="w-full"
-              onClick={handlePortal}
-              loading={loadingPortal}
+              onClick={() => setShowCancelConfirm(true)}
             >
               {t("upgrade_cancel")}
             </Button>
@@ -276,6 +271,45 @@ function SubscriptionPageInner() {
           </div>
         )}
       </div>
+
+      {/* Cancel confirmation modal */}
+      {showCancelConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !loadingPortal && setShowCancelConfirm(false)}
+        >
+          <div
+            className="bg-wing-surface rounded-[20px] p-6 max-w-sm w-full space-y-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-black text-wing-ink text-lg">
+              {lang === "he" ? "ביטול מנוי" : "Cancel subscription"}
+            </h3>
+            <p className="text-sm text-wing-muted leading-relaxed">
+              {lang === "he"
+                ? "האם אתה בטוח שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית."
+                : "Are you sure you want to cancel? Premium access will end at the current billing period."}
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={() => setShowCancelConfirm(false)}
+                disabled={loadingPortal}
+              >
+                {lang === "he" ? "חזרה" : "Back"}
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handlePortal}
+                loading={loadingPortal}
+              >
+                {lang === "he" ? "בטל מנוי" : "Cancel"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
