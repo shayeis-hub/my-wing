@@ -1,181 +1,163 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
-import { Mail, AlertTriangle, Lightbulb, MessageSquare, ChevronRight, Send } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import toast from "react-hot-toast";
+import { Mail, AlertTriangle, Lightbulb, ShieldCheck, Handshake, Copy, Check, ChevronRight } from "lucide-react";
 
-type Subject = "bug" | "idea" | "other";
+const CONTACT_EMAIL = "contact@wingpact.app";
+
+const CATEGORIES = {
+  he: [
+    {
+      Icon: AlertTriangle,
+      title: "דיווח על תקלה",
+      desc: "משהו לא עובד כמו שצריך",
+      subject: "דיווח על תקלה",
+    },
+    {
+      Icon: Lightbulb,
+      title: "רעיון לפיצ׳ר",
+      desc: "יש לך רעיון שישפר את האפליקציה",
+      subject: "רעיון לפיצ׳ר",
+    },
+    {
+      Icon: ShieldCheck,
+      title: "פרטיות ומחיקת חשבון",
+      desc: "בקשה למחיקת נתוניך או שאלות פרטיות",
+      subject: "פרטיות ומחיקת חשבון",
+    },
+    {
+      Icon: Handshake,
+      title: "שיתוף פעולה",
+      desc: "עסקי, שיווקי או אחר",
+      subject: "שיתוף פעולה",
+    },
+  ],
+  en: [
+    {
+      Icon: AlertTriangle,
+      title: "Bug Report",
+      desc: "Something isn't working as expected",
+      subject: "Bug Report",
+    },
+    {
+      Icon: Lightbulb,
+      title: "Feature Request",
+      desc: "You have an idea that would improve the app",
+      subject: "Feature Request",
+    },
+    {
+      Icon: ShieldCheck,
+      title: "Privacy & Account Deletion",
+      desc: "Request to delete your data or privacy questions",
+      subject: "Privacy & Account Deletion",
+    },
+    {
+      Icon: Handshake,
+      title: "Partnership",
+      desc: "Business, marketing or other inquiries",
+      subject: "Partnership Inquiry",
+    },
+  ],
+};
 
 export default function ContactPage() {
   const { user, firebaseUser } = useAuth();
-  const { t, lang, dir } = useLanguage();
-  const router = useRouter();
-
-  const [name, setName] = useState(user?.displayName ?? "");
-  const [email, setEmail] = useState(firebaseUser?.email ?? user?.email ?? "");
-  const [subject, setSubject] = useState<Subject>("idea");
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const { lang, dir } = useLanguage();
+  const [copied, setCopied] = useState(false);
 
   const isAuthed = !!firebaseUser;
+  const categories = CATEGORIES[lang as "he" | "en"] ?? CATEGORIES.he;
 
-  // Sync state with auth user once it loads
-  if (isAuthed && !name && user?.displayName) setName(user.displayName);
-  if (isAuthed && !email && (firebaseUser?.email || user?.email)) setEmail(firebaseUser?.email ?? user?.email ?? "");
+  const isHe = lang === "he";
+  const title = isHe ? "צור קשר" : "Contact Us";
+  const subtitle = isHe
+    ? "שמחים לשמוע ממך — שאלות, בעיות, רעיונות או כל דבר אחר."
+    : "We'd love to hear from you — questions, issues, ideas, or anything else.";
+  const responseLabel = isHe ? "זמן תגובה ממוצע: עד 48 שעות" : "Average response time: up to 48 hours";
+  const copyLabel = isHe ? "העתקת כתובת" : "Copied!";
+  const backLabel = isHe
+    ? isAuthed ? "חזרה לאפליקציה" : "חזרה להתחברות"
+    : isAuthed ? "Back to app" : "Back to login";
 
-  const subjectOptions: { value: Subject; label: string; Icon: typeof AlertTriangle }[] = [
-    { value: "bug",   label: t("contact_subject_bug") as string,   Icon: AlertTriangle },
-    { value: "idea",  label: t("contact_subject_idea") as string,  Icon: Lightbulb },
-    { value: "other", label: t("contact_subject_other") as string, Icon: MessageSquare },
-  ];
-
-  async function handleSubmit() {
-    if (!message.trim() || !name.trim() || !email.trim() || submitting) return;
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          subject,
-          message: message.trim(),
-          userId: firebaseUser?.uid,
-        }),
-      });
-      if (!res.ok) throw new Error("send failed");
-      toast.success(t("contact_sent") as string);
-      setMessage("");
-      setTimeout(() => router.push(isAuthed ? "/dashboard" : "/login"), 800);
-    } catch {
-      toast.error(t("contact_error") as string);
-    } finally {
-      setSubmitting(false);
-    }
+  function copyEmail() {
+    navigator.clipboard.writeText(CONTACT_EMAIL).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   }
 
-  const canSubmit = name.trim() && email.trim() && message.trim() && !submitting;
-
   return (
-    <div className="min-h-screen bg-wing-bg p-4" dir={dir}>
-      <div className="max-w-lg mx-auto space-y-4">
-        <div className="pt-4 flex items-center gap-2">
+    <div className="min-h-screen bg-wing-bg" dir={dir}>
+      <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
+
+        {/* Header */}
+        <div className="flex items-center gap-2 pt-2">
           <Mail size={22} className="text-wing-heat" strokeWidth={2.5} />
-          <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("contact_title") as string}</h1>
+          <h1 className="text-2xl font-black text-wing-ink tracking-tight">{title}</h1>
+        </div>
+        <p className="text-sm text-wing-muted -mt-2">{subtitle}</p>
+
+        {/* Email + copy */}
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5">
+          <p className="font-mono text-[11px] tracking-[0.18em] uppercase text-wing-muted font-bold mb-3">
+            {isHe ? "כתובת מייל" : "Email address"}
+          </p>
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-mono text-sm text-wing-ink" dir="ltr">{CONTACT_EMAIL}</span>
+            <button
+              onClick={copyEmail}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-wing-border bg-wing-elevated text-xs font-semibold text-wing-ink transition-colors hover:border-wing-ink active:scale-95"
+            >
+              {copied
+                ? <><Check size={13} className="text-green-500" /> {copyLabel}</>
+                : <><Copy size={13} /> {isHe ? "העתק" : "Copy"}</>
+              }
+            </button>
+          </div>
+          <p className="text-xs text-wing-muted mt-3 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+            {responseLabel}
+          </p>
         </div>
 
-        <p className="text-sm text-wing-muted">{t("contact_subtitle") as string}</p>
-
-        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-4">
-          {/* Name */}
-          <div>
-            <label className="font-mono text-[11px] tracking-[0.18em] uppercase text-wing-muted font-bold">
-              {t("contact_name") as string}
-            </label>
-            {isAuthed && user?.displayName ? (
-              <div className="mt-1.5 bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3 text-sm text-wing-ink">
-                {name || "—"}
+        {/* Category cards */}
+        <div className="space-y-2">
+          <p className="font-mono text-[11px] tracking-[0.18em] uppercase text-wing-muted font-bold px-1">
+            {isHe ? "במה נוכל לעזור?" : "How can we help?"}
+          </p>
+          {categories.map(({ Icon, title: catTitle, desc, subject }) => (
+            <a
+              key={subject}
+              href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`}
+              className="flex items-center gap-4 bg-wing-surface border border-wing-border rounded-[20px] px-5 py-4 hover:border-wing-ink transition-colors group active:scale-[0.99]"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-wing-elevated border border-wing-border flex items-center justify-center flex-shrink-0 group-hover:bg-wing-ink group-hover:border-wing-ink transition-colors">
+                <Icon size={18} className="text-wing-muted group-hover:text-wing-elevated transition-colors" strokeWidth={2} />
               </div>
-            ) : (
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t("contact_name") as string}
-                className="mt-1.5 w-full bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3 text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
-              />
-            )}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="font-mono text-[11px] tracking-[0.18em] uppercase text-wing-muted font-bold">
-              {t("contact_email") as string}
-            </label>
-            {isAuthed && (firebaseUser?.email || user?.email) ? (
-              <div className="mt-1.5 bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3 text-sm text-wing-ink" dir="ltr" style={{ textAlign: lang === "he" ? "right" : "left" }}>
-                {email || "—"}
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm text-wing-ink">{catTitle}</p>
+                <p className="text-xs text-wing-muted mt-0.5">{desc}</p>
               </div>
-            ) : (
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("contact_email") as string}
-                dir="ltr"
-                className="mt-1.5 w-full bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3 text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
+              <ChevronRight
+                size={16}
+                className={`text-wing-subtle group-hover:text-wing-ink transition-colors flex-shrink-0 ${isHe ? "rotate-180" : ""}`}
               />
-            )}
-          </div>
-
-          {/* Subject */}
-          <div>
-            <label className="font-mono text-[11px] tracking-[0.18em] uppercase text-wing-muted font-bold">
-              {t("contact_subject_label") as string}
-            </label>
-            <div className="mt-1.5 grid grid-cols-3 gap-2">
-              {subjectOptions.map(({ value, label, Icon }) => {
-                const active = subject === value;
-                return (
-                  <button
-                    key={value}
-                    onClick={() => setSubject(value)}
-                    className={`flex flex-col items-center gap-1 px-2 py-3 rounded-[14px] border-2 transition-all active:scale-95 ${
-                      active
-                        ? "border-wing-ink bg-wing-elevated"
-                        : "border-wing-border bg-wing-elevated/50"
-                    }`}
-                  >
-                    <Icon
-                      size={20}
-                      strokeWidth={active ? 2.5 : 2}
-                      className={active ? "text-wing-heat" : "text-wing-muted"}
-                    />
-                    <span className={`text-xs text-center leading-tight ${active ? "font-bold text-wing-ink" : "text-wing-muted"}`}>
-                      {label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Message */}
-          <div>
-            <label className="font-mono text-[11px] tracking-[0.18em] uppercase text-wing-muted font-bold">
-              {t("contact_message_label") as string}
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={t("contact_message_ph") as string}
-              rows={5}
-              className="mt-1.5 w-full bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3 text-sm text-wing-ink placeholder:text-wing-subtle resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
-            />
-          </div>
-
-          {/* Submit */}
-          <Button
-            onClick={handleSubmit}
-            loading={submitting}
-            disabled={!canSubmit}
-            className="w-full flex items-center justify-center gap-2"
-          >
-            <Send size={15} strokeWidth={2.5} />
-            {submitting ? t("contact_sending") as string : t("contact_submit") as string}
-          </Button>
+            </a>
+          ))}
         </div>
 
-        <Link href={isAuthed ? "/dashboard" : "/login"} className="flex items-center justify-center gap-1 text-sm text-wing-muted py-2">
-          <ChevronRight size={14} />
-          {isAuthed ? t("contact_back") as string : (lang === "he" ? "חזרה להתחברות" : "Back to login")}
+        {/* Back link */}
+        <Link
+          href={isAuthed ? "/dashboard" : "/login"}
+          className="flex items-center justify-center gap-1 text-sm text-wing-muted py-2"
+        >
+          <ChevronRight size={14} className={isHe ? "" : "rotate-180"} />
+          {backLabel}
         </Link>
+
       </div>
     </div>
   );
