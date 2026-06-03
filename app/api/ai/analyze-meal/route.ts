@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         const sub = await getUserPlan(userId);
         const plan = sub?.plan ?? "free";
 
-        if (!isPremium(userEmail, plan)) {
+        if (!isPremium(userEmail, plan, sub)) {
           const todayCount = await getDailyMealCount(userId, today);
           if (!canAddMealPhoto(userEmail, plan, todayCount)) {
             return NextResponse.json(
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       const today = format(new Date(), "yyyy-MM-dd");
       const sub = await getUserPlan(userId);
       const plan = sub?.plan ?? "free";
-      if (!isPremium(userEmail, plan)) {
+      if (!isPremium(userEmail, plan, sub)) {
         await incrementDailyMealCount(userId, today);
       }
     }

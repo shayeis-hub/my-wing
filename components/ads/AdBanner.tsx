@@ -30,7 +30,7 @@ export function AdBanner({ slot, layoutKey, format = "auto", className = "" }: A
   const email = firebaseUser?.email ?? user?.email ?? "";
   const shouldShowAd =
     !isGrandfathered(email) &&
-    !isPremium(email, user?.subscription?.plan);
+    !isPremium(email, user?.subscription?.plan, user?.subscription);
 
   const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 

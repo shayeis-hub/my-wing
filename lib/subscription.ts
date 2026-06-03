@@ -49,9 +49,32 @@ export function isGrandfathered(email?: string | null): boolean {
   );
 }
 
-export function isPremium(email?: string | null, plan?: Plan): boolean {
+export function isPremium(
+  email?: string | null,
+  plan?: Plan,
+  subscription?: {
+    cancelPending?: boolean;
+    expiresAt?: string | { toDate?: () => Date; _seconds?: number } | null;
+  } | null
+): boolean {
   if (isGrandfathered(email)) return true;
-  return plan === "premium" || plan === "grandfathered";
+  if (plan !== "premium" && plan !== "grandfathered") return false;
+  // If cancellation is pending, check whether the paid period has already ended
+  if (subscription?.cancelPending && subscription.expiresAt) {
+    let expiresDate: Date;
+    const exp = subscription.expiresAt;
+    if (typeof exp === "string") {
+      expiresDate = new Date(exp);
+    } else if (typeof exp === "object" && exp !== null && typeof (exp as { toDate?: () => Date }).toDate === "function") {
+      expiresDate = (exp as { toDate: () => Date }).toDate();
+    } else if (typeof exp === "object" && exp !== null && typeof (exp as { _seconds?: number })._seconds === "number") {
+      expiresDate = new Date((exp as { _seconds: number })._seconds * 1000);
+    } else {
+      return true; // unknown format — assume still active
+    }
+    return expiresDate > new Date();
+  }
+  return true;
 }
 
 export function canAddMealPhoto(
