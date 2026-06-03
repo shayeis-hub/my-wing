@@ -42,7 +42,7 @@ export default function PricingEnPage() {
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 space-y-5">
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Free</p>
-              <p className="text-3xl font-black text-slate-800 mt-1">₪0</p>
+              <p className="text-3xl font-black text-slate-800 mt-1">$0</p>
               <p className="text-sm text-slate-400">forever</p>
             </div>
             <ul className="space-y-2.5">
@@ -66,10 +66,10 @@ export default function PricingEnPage() {
             <div>
               <p className="text-xs font-bold text-white/70 uppercase tracking-wider">Premium</p>
               <div className="flex items-end gap-1 mt-1">
-                <p className="text-3xl font-black">₪9.90</p>
+                <p className="text-3xl font-black">$3.90</p>
                 <p className="text-white/70 mb-1">/ month</p>
               </div>
-              <p className="text-sm text-white/70">or ₪99 / year <span className="text-yellow-300 font-semibold">(save 16%)</span></p>
+              <p className="text-sm text-white/70">or $39 / year <span className="text-yellow-300 font-semibold">(save 17%)</span></p>
             </div>
             <ul className="space-y-2.5">
               {PREMIUM_FEATURES.map((f) => (
@@ -103,7 +103,7 @@ export default function PricingEnPage() {
             </div>
             <div>
               <p className="font-semibold text-slate-800">Is VAT included in the price?</p>
-              <p className="mt-1">Prices shown are exclusive of applicable taxes. Israeli VAT (17%) will be added at checkout where required by law.</p>
+              <p className="mt-1">Prices shown are exclusive of applicable taxes. Local taxes may be added at checkout where required by law.</p>
             </div>
             <div>
               <p className="font-semibold text-slate-800">What is a "Wing"?</p>
