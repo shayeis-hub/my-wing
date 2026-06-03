@@ -19,7 +19,7 @@ import Link from "next/link";
 
 export default function ProfilePage() {
   const { user, firebaseUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const activityLabels: Record<string, string> = {
     sedentary: t("activity_sedentary") as string,
     light: t("activity_light") as string,
