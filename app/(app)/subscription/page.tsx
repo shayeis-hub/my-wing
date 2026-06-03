@@ -106,6 +106,9 @@ function SubscriptionPageInner() {
 
   const expiresAtMs = toMs(sub?.expiresAt as unknown as Timestamp);
   const expiresAt = expiresAtMs ? format(new Date(expiresAtMs), "dd/MM/yyyy") : null;
+  const daysUntilExpiry = expiresAtMs
+    ? Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 86_400_000))
+    : null;
 
   return (
     <div className="min-h-screen bg-wing-bg" dir={dir}>
@@ -122,6 +125,29 @@ function SubscriptionPageInner() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
+
+        {/* Countdown banner for active premium */}
+        {premium && !grandfathered && daysUntilExpiry !== null && expiresAt && (
+          <div className={`rounded-[20px] px-5 py-3 flex items-center justify-between ${
+            sub?.cancelPending
+              ? "bg-orange-50 border border-orange-200"
+              : "bg-wing-elevated border border-wing-border"
+          }`}>
+            <div>
+              <p className={`text-xs font-mono uppercase tracking-wider ${
+                sub?.cancelPending ? "text-orange-600" : "text-wing-muted"
+              }`}>
+                {sub?.cancelPending
+                  ? (lang === "he" ? "המנוי יסתיים בעוד" : "Subscription ends in")
+                  : (lang === "he" ? "חידוש הבא בעוד" : "Next renewal in")}
+              </p>
+              <p className={`font-black text-lg ${sub?.cancelPending ? "text-orange-700" : "text-wing-ink"}`}>
+                {daysUntilExpiry} {lang === "he" ? (daysUntilExpiry === 1 ? "יום" : "ימים") : (daysUntilExpiry === 1 ? "day" : "days")}
+              </p>
+            </div>
+            <p className="text-xs text-wing-muted">{expiresAt}</p>
+          </div>
+        )}
 
         {/* Paywall banner — trial expired */}
         {isExpiredPaywall && !premium && !grandfathered && (
