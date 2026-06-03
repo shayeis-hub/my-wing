@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import {
+  Camera, ClipboardCheck, MessageCircle, Footprints,
+  Trophy, Users, ArrowLeft, ArrowRight,
+} from "lucide-react";
 
 /* ─────────────────────────────────────────────
    All copy in both languages
@@ -12,12 +16,12 @@ const COPY = {
     lang: "he",
     nav_pricing: "מחירים",
     nav_login: "כניסה",
-    hero_badge: "🐦 ציפורי נדידה טסות ביחד — כך גם אתם",
+    hero_badge: "ציפורי נדידה טסות ביחד — כך גם אתם",
     hero_h1_a: "הקבוצה שתעזור לך",
     hero_h1_b: "להצליח לרדת במשקל",
     hero_sub:
       "קבוצה קטנה של חברים שמתעדים ארוחות יחד, עושים צ׳ק-אפ יומי ומתחרים על צעדים. AI מנתח כל ארוחה תוך שניות. האחריות ההדדית עובדת.",
-    cta_start: "התחל חינם ✦",
+    cta_start: "התחל חינם",
     cta_pricing: "ראה מחירים",
     cta_trial: "ניסיון חינם 14 יום · לא צריך כרטיס אשראי",
     concept_text:
@@ -27,12 +31,12 @@ const COPY = {
     concept_member: "חבר",
     features_h2: "כל מה שצריך במקום אחד",
     features: [
-      { icon: "📸", title: "AI ניתוח ארוחות", desc: "צלם את הצלחת — Claude AI מחשב קלוריות, חלבון, פחמימות ושומן תוך שניות." },
-      { icon: "✅", title: "צ׳ק-אפ יומי", desc: "2 דקות בערב: מים, ירקות, אימון, מצב רוח. AI מסכם את היום ונותן טיפ למחר." },
-      { icon: "💬", title: "פיד קבוצתי", desc: "שתפו פוסטים, ענו על שאלה יומית, ועודדו חברים עם תגובות מהירות." },
-      { icon: "👟", title: "תחרות צעדים", desc: "לוח תוצאות יומי של הקבוצה לפי צעדים. מי בראש הלהקה היום?" },
-      { icon: "🏆", title: "אתגרים שבועיים", desc: "מנהל הכנף מפעיל אתגרים — מים, ירקות, צעדים. המנצחים מקבלים גביעים." },
-      { icon: "🤝", title: "הכנף שלך", desc: "עד 20 חברים שרואים את הנתונים שלך ואתה רואה שלהם. אחריות אמיתית." },
+      { title: "AI ניתוח ארוחות", desc: "צלם את הצלחת — Claude AI מחשב קלוריות, חלבון, פחמימות ושומן תוך שניות." },
+      { title: "צ׳ק-אפ יומי", desc: "2 דקות בערב: מים, ירקות, אימון, מצב רוח. AI מסכם את היום ונותן טיפ למחר." },
+      { title: "פיד קבוצתי", desc: "שתפו פוסטים, ענו על שאלה יומית, ועודדו חברים עם תגובות מהירות." },
+      { title: "תחרות צעדים", desc: "לוח תוצאות יומי של הקבוצה לפי צעדים. מי בראש הלהקה היום?" },
+      { title: "אתגרים שבועיים", desc: "מנהל הכנף מפעיל אתגרים — מים, ירקות, צעדים. המנצחים מקבלים גביעים." },
+      { title: "הכנף שלך", desc: "עד 20 חברים שרואים את הנתונים שלך ואתה רואה שלהם. אחריות אמיתית." },
     ],
     how_h2: "איך זה עובד?",
     how_sub: "שלושה צעדים פשוטים",
@@ -66,12 +70,12 @@ const COPY = {
     lang: "en",
     nav_pricing: "Pricing",
     nav_login: "Log in",
-    hero_badge: "🐦 Migratory birds fly together — so do you",
+    hero_badge: "Migratory birds fly together — so do you",
     hero_h1_a: "The group that helps you",
     hero_h1_b: "actually lose weight",
     hero_sub:
       "A small circle of friends who log meals together, do a daily check-up, and compete on steps. AI analyses every meal in seconds. Mutual accountability works.",
-    cta_start: "Start for free ✦",
+    cta_start: "Start for free",
     cta_pricing: "View pricing",
     cta_trial: "14-day free trial · No credit card required",
     concept_text:
@@ -81,12 +85,12 @@ const COPY = {
     concept_member: "member",
     features_h2: "Everything you need, in one place",
     features: [
-      { icon: "📸", title: "AI Meal Analysis", desc: "Photograph your plate — Claude AI calculates calories, protein, carbs and fat in seconds." },
-      { icon: "✅", title: "Daily Check-up", desc: "2 minutes each evening: water, veggies, workout, mood. AI summarises the day and gives a tip for tomorrow." },
-      { icon: "💬", title: "Social Feed", desc: "Share posts, answer the daily question, and react to teammates with quick emoji reactions." },
-      { icon: "👟", title: "Step Leaderboard", desc: "Daily group leaderboard by steps. Who's leading the flock today?" },
-      { icon: "🏆", title: "Weekly Challenges", desc: "Your wing leader launches challenges — water, veggies, steps. Winners earn trophies." },
-      { icon: "🤝", title: "Your Wing", desc: "Up to 20 members who see your data and you see theirs. Real accountability." },
+      { title: "AI Meal Analysis", desc: "Photograph your plate — Claude AI calculates calories, protein, carbs and fat in seconds." },
+      { title: "Daily Check-up", desc: "2 minutes each evening: water, veggies, workout, mood. AI summarises the day and gives a tip for tomorrow." },
+      { title: "Social Feed", desc: "Share posts, answer the daily question, and react to teammates with quick reactions." },
+      { title: "Step Leaderboard", desc: "Daily group leaderboard by steps. Who's leading the flock today?" },
+      { title: "Weekly Challenges", desc: "Your wing leader launches challenges — water, veggies, steps. Winners earn trophies." },
+      { title: "Your Wing", desc: "Up to 20 members who see your data and you see theirs. Real accountability." },
     ],
     how_h2: "How does it work?",
     how_sub: "Three simple steps",
@@ -116,6 +120,9 @@ const COPY = {
     footer_login: "Log in",
   },
 };
+
+// Icons parallel to features array (language-agnostic)
+const FEATURE_ICONS = [Camera, ClipboardCheck, MessageCircle, Footprints, Trophy, Users];
 
 type Lang = "he" | "en";
 
@@ -224,7 +231,9 @@ export default function LandingPage() {
       <section style={{ maxWidth: 720, margin: "0 auto", padding: "72px 24px 56px", textAlign: "center" }}>
         <div
           style={{
-            display: "inline-block",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
             background: "white",
             border: "1px solid #ede5d0",
             borderRadius: 999,
@@ -234,6 +243,17 @@ export default function LandingPage() {
             marginBottom: 24,
           }}
         >
+          {/* Wing logo as badge icon */}
+          <svg width="16" height="10" viewBox="0 0 72 44" fill="none">
+            <defs>
+              <linearGradient id="bg" x1="72" y1="0" x2="0" y2="44">
+                <stop offset="0" stopColor="#f5dd4b" />
+                <stop offset="1" stopColor="#ff6b47" />
+              </linearGradient>
+            </defs>
+            <path d="M4 38 L36 8 L68 38" stroke="url(#bg)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="36" cy="8" r="5" fill="#d4541a" />
+          </svg>
           {t.hero_badge}
         </div>
         <h1
@@ -272,9 +292,15 @@ export default function LandingPage() {
               padding: "14px 32px",
               borderRadius: 999,
               textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
             {t.cta_start}
+            {lang === "he"
+              ? <ArrowLeft size={16} strokeWidth={2.5} />
+              : <ArrowRight size={16} strokeWidth={2.5} />}
           </Link>
           <Link
             href="/en/pricing"
@@ -339,13 +365,23 @@ export default function LandingPage() {
           {t.features_h2}
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
-          {t.features.map((f) => (
-            <div key={f.title} style={{ background: "white", border: "1px solid #ede5d0", borderRadius: 20, padding: "22px 24px" }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>
-              <h3 style={{ fontWeight: 800, fontSize: 16, margin: "0 0 6px" }}>{f.title}</h3>
-              <p style={{ fontSize: 14, color: "#5a4f3f", lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
-            </div>
-          ))}
+          {t.features.map((f, i) => {
+            const Icon = FEATURE_ICONS[i];
+            return (
+              <div key={f.title} style={{ background: "white", border: "1px solid #ede5d0", borderRadius: 20, padding: "22px 24px" }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 12,
+                  background: "linear-gradient(135deg, #f5dd4b, #ff6b47)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  marginBottom: 14,
+                }}>
+                  <Icon size={20} strokeWidth={2} color="#1a1814" />
+                </div>
+                <h3 style={{ fontWeight: 800, fontSize: 16, margin: "0 0 6px" }}>{f.title}</h3>
+                <p style={{ fontSize: 14, color: "#5a4f3f", lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -424,10 +460,13 @@ export default function LandingPage() {
             fontSize: 17, fontWeight: 800,
             background: "#1a1814", color: "#fbf4e6",
             padding: "16px 40px", borderRadius: 999, textDecoration: "none",
-            display: "inline-block",
+            display: "inline-flex", alignItems: "center", gap: 8,
           }}
         >
           {t.cta_start}
+          {lang === "he"
+            ? <ArrowLeft size={17} strokeWidth={2.5} />
+            : <ArrowRight size={17} strokeWidth={2.5} />}
         </Link>
       </section>
 
