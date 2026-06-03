@@ -13,8 +13,12 @@ import type { Subscription } from "@/types";
 import type { Timestamp } from "firebase/firestore";
 import { Suspense } from "react";
 
-function toMs(ts: Timestamp | null | undefined): number | null {
+function toMs(ts: Timestamp | string | null | undefined): number | null {
   if (!ts) return null;
+  if (typeof ts === "string") {
+    const ms = Date.parse(ts);
+    return isNaN(ms) ? null : ms;
+  }
   if (typeof ts.toDate === "function") return ts.toDate().getTime();
   const s = (ts as unknown as { _seconds?: number })._seconds;
   return s ? s * 1000 : null;
