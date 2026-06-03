@@ -152,7 +152,7 @@ export default function ChallengesPage() {
             ) : null}
             <div className="bg-white/70 rounded-2xl px-4 py-2 text-sm text-wing-heat font-medium inline-flex gap-2">
               <Trophy size={14} className="mt-0.5" />
-              {t("challenge_goal") as string}: {wing.activeChallenge.targetValue.toLocaleString()}{" "}
+              {lang === "he" ? "יעד יומי" : "Daily goal"}: {wing.activeChallenge.targetValue.toLocaleString()}{" "}
               {wing.activeChallenge.type === "steps" ? t("challenge_steps_unit") as string : ""}
             </div>
             <p className="text-xs text-wing-heat font-medium">
@@ -192,7 +192,7 @@ export default function ChallengesPage() {
           </div>
           <Input label={t("challenge_name_label") as string} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("challenge_name_ph") as string} />
           <Input label={t("challenge_desc_label") as string} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("challenge_desc_ph") as string} />
-          <Input label={t("challenge_target_label") as string} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder="10000" dir="ltr" />
+          <Input label={lang === "he" ? "יעד יומי" : "Daily target"} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder="6000" dir="ltr" />
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setShowCreate(false)} className="flex-1">
               {t("cancel") as string}

@@ -201,33 +201,36 @@ export default function ProfilePage() {
 
       {/* Trophy Cabinet */}
       <Card>
-        <h2 className="font-bold text-wing-ink mb-3 flex items-center gap-2">
+        <h2 className="font-bold text-wing-ink mb-4 flex items-center gap-2">
           <Trophy size={16} className="text-wing-heat" />
           {t("trophy_title")}
         </h2>
         {!user?.trophies || user.trophies.length === 0 ? (
           <p className="text-sm text-wing-muted text-center py-3">{t("trophy_empty")}</p>
-        ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {user.trophies.map((trophy, idx) => {
-              const medalLabel = trophy.medal === "gold" ? t("trophy_gold") : trophy.medal === "silver" ? t("trophy_silver") : t("trophy_bronze");
-              const styles =
-                trophy.medal === "gold"   ? { bg: "bg-yellow-50 border-yellow-200", text: "text-yellow-700", rank: "1" } :
-                trophy.medal === "silver" ? { bg: "bg-slate-50 border-slate-200",   text: "text-slate-500",  rank: "2" } :
-                                            { bg: "bg-orange-50 border-orange-200", text: "text-orange-600", rank: "3" };
-              return (
-                <div key={idx} className={`rounded-2xl border p-3 text-center ${styles.bg}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-base mx-auto mb-1 border ${styles.bg} ${styles.text}`}>
-                    {styles.rank}
-                  </div>
-                  <p className={`text-[10px] font-bold uppercase tracking-wide ${styles.text}`}>{medalLabel as string}</p>
-                  <p className="text-xs font-semibold text-wing-ink mt-1 leading-tight">{trophy.challengeTitle}</p>
-                  <p className="text-[10px] text-wing-muted mt-0.5">{trophy.endDate}</p>
+        ) : (() => {
+          const gold   = user.trophies!.filter(t => t.medal === "gold");
+          const silver = user.trophies!.filter(t => t.medal === "silver");
+          const bronze = user.trophies!.filter(t => t.medal === "bronze");
+          const cols = [
+            { medals: gold,   emoji: "🥇", label: t("trophy_gold")   as string, bg: "bg-yellow-50 border-yellow-200", text: "text-yellow-700" },
+            { medals: silver, emoji: "🥈", label: t("trophy_silver") as string, bg: "bg-slate-50 border-slate-200",   text: "text-slate-500"  },
+            { medals: bronze, emoji: "🥉", label: t("trophy_bronze") as string, bg: "bg-orange-50 border-orange-200", text: "text-orange-600" },
+          ];
+          return (
+            <div className="grid grid-cols-3 gap-3">
+              {cols.map(({ medals, emoji, label, bg, text }) => (
+                <div key={label} className={`rounded-2xl border p-3 text-center ${bg}`}>
+                  <div className="text-3xl mb-1">{emoji}</div>
+                  <p className={`text-[10px] font-bold uppercase tracking-wide ${text} mb-2`}>{label}</p>
+                  <p className={`font-black text-2xl ${text}`}>{medals.length}</p>
+                  <p className="text-[10px] text-wing-muted mt-0.5">
+                    {lang === "he" ? "זכיות" : "wins"}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          );
+        })()}
       </Card>
 
       {/* Logout */}

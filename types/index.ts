@@ -178,7 +178,7 @@ export interface Challenge {
   title: string;
   description: string;
   type: "steps" | "no_sugar" | "water" | "vegetables" | "calories";
-  targetValue: number;
+  targetValue: number;   // daily target (per day)
   startDate: string;
   endDate: string;
   progress: Record<string, number>; // userId → cumulative value (manual for no_sugar/calories)

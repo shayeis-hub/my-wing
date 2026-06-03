@@ -150,6 +150,10 @@ export default function ChallengeDetailPage() {
   const unit       = t(unitKey(challenge.type)) as string;
   const emoji      = CHALLENGE_EMOJIS[challenge.type];
 
+  // Daily target: total progress needed = targetValue (per day) × number of days
+  const totalDays = Math.max(1, differenceInDays(parseISO(challenge.endDate), parseISO(challenge.startDate)) + 1);
+  const totalTarget = challenge.targetValue * totalDays;
+
   const sortedMembers = [...(wing?.members ?? [])].sort(
     (a, b) => (progress[b.uid] ?? 0) - (progress[a.uid] ?? 0)
   );
@@ -197,7 +201,7 @@ export default function ChallengeDetailPage() {
         <div className="flex gap-2">
           <div className="flex-1 bg-wing-elevated rounded-2xl px-4 py-2.5 text-center">
             <p className="text-[10px] font-mono text-wing-muted uppercase tracking-wider mb-0.5">
-              {t("challenge_goal_label") as string}
+              {lang === "he" ? "יעד יומי" : "Daily goal"}
             </p>
             <p className="font-black text-wing-heat text-lg" style={{ letterSpacing: "-0.03em" }}>
               {challenge.targetValue.toLocaleString()}
@@ -269,7 +273,7 @@ export default function ChallengeDetailPage() {
           <div className="space-y-2">
             {sortedMembers.map((member, idx) => {
               const val  = progress[member.uid] ?? 0;
-              const pct  = Math.min(100, challenge.targetValue > 0 ? (val / challenge.targetValue) * 100 : 0);
+              const pct  = Math.min(100, totalTarget > 0 ? (val / totalTarget) * 100 : 0);
               const isMe = member.uid === firebaseUser?.uid;
               const rs   = idx < 3 ? RANK_STYLES[idx] : null;
 
