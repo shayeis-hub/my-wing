@@ -104,9 +104,8 @@ function SubscriptionPageInner() {
         "No ads",
       ];
 
-  const expiresAt = sub?.expiresAt
-    ? format((sub.expiresAt as unknown as { toDate: () => Date }).toDate(), "dd/MM/yyyy")
-    : null;
+  const expiresAtMs = toMs(sub?.expiresAt as unknown as Timestamp);
+  const expiresAt = expiresAtMs ? format(new Date(expiresAtMs), "dd/MM/yyyy") : null;
 
   return (
     <div className="min-h-screen bg-wing-bg" dir={dir}>
