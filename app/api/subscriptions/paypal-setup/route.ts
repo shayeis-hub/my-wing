@@ -18,6 +18,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Guard: if plans are already configured, don't create duplicates
+  const alreadyConfigured =
+    process.env.PAYPAL_PLAN_ILS_MONTHLY &&
+    process.env.PAYPAL_PLAN_ILS_YEARLY &&
+    process.env.PAYPAL_PLAN_USD_MONTHLY &&
+    process.env.PAYPAL_PLAN_USD_YEARLY;
+
+  if (alreadyConfigured) {
+    return NextResponse.json({
+      message: "Plans already configured — no changes made",
+      PAYPAL_PLAN_ILS_MONTHLY: process.env.PAYPAL_PLAN_ILS_MONTHLY,
+      PAYPAL_PLAN_ILS_YEARLY:  process.env.PAYPAL_PLAN_ILS_YEARLY,
+      PAYPAL_PLAN_USD_MONTHLY: process.env.PAYPAL_PLAN_USD_MONTHLY,
+      PAYPAL_PLAN_USD_YEARLY:  process.env.PAYPAL_PLAN_USD_YEARLY,
+    });
+  }
+
   const TRIAL_DAYS = 14;
 
   const [ilsMonthly, ilsYearly, usdMonthly, usdYearly] = await Promise.all([
