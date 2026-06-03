@@ -33,10 +33,12 @@ export const FREE_LIMITS = {
   wingMembers: 3,
 } as const;
 
-// ── Paddle price IDs (set in Vercel env vars) ─────────────────────────────────
-export const PADDLE_PRICES = {
-  monthly: process.env.PADDLE_PRICE_MONTHLY ?? "",
-  yearly:  process.env.PADDLE_PRICE_YEARLY  ?? "",
+// ── PayPal billing plan IDs (set in Vercel env vars after running paypal-setup) ──
+export const PAYPAL_PLANS = {
+  monthly_ILS: process.env.PAYPAL_PLAN_ILS_MONTHLY ?? "",
+  yearly_ILS:  process.env.PAYPAL_PLAN_ILS_YEARLY  ?? "",
+  monthly_USD: process.env.PAYPAL_PLAN_USD_MONTHLY ?? "",
+  yearly_USD:  process.env.PAYPAL_PLAN_USD_YEARLY  ?? "",
 } as const;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

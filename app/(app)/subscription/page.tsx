@@ -54,7 +54,11 @@ function SubscriptionPageInner() {
       const res = await fetch("/api/subscriptions/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceType: type, userId: firebaseUser.uid }),
+        body: JSON.stringify({
+          priceType: type,
+          userId: firebaseUser.uid,
+          currency: lang === "he" ? "ILS" : "USD",
+        }),
       });
       if (!res.ok) throw new Error();
       const { url } = await res.json();
@@ -67,6 +71,12 @@ function SubscriptionPageInner() {
 
   async function handlePortal() {
     if (!firebaseUser?.uid) return;
+    const confirmed = window.confirm(
+      lang === "he"
+        ? "האם אתה בטוח שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית."
+        : "Are you sure you want to cancel? Premium access will end at the current billing period."
+    );
+    if (!confirmed) return;
     setLoadingPortal(true);
     try {
       const res = await fetch("/api/subscriptions/create-portal", {
@@ -75,10 +85,11 @@ function SubscriptionPageInner() {
         body: JSON.stringify({ userId: firebaseUser.uid, action: "cancel" }),
       });
       if (!res.ok) throw new Error();
-      const { url } = await res.json();
-      window.location.href = url;
+      toast.success(lang === "he" ? "המנוי בוטל" : "Subscription cancelled");
+      router.refresh();
     } catch {
-      toast.error(lang === "he" ? "שגיאה בפתיחת ניהול מנוי" : "Failed to open billing portal");
+      toast.error(lang === "he" ? "שגיאה בביטול המנוי" : "Failed to cancel subscription");
+    } finally {
       setLoadingPortal(false);
     }
   }

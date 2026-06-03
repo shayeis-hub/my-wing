@@ -1,33 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Paddle, Environment } from "@paddle/paddle-node-sdk";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
-import { PADDLE_PRICES } from "@/lib/subscription";
+import { createSubscription } from "@/lib/paypal";
 
 export const dynamic = "force-dynamic";
 
-function getPaddle() {
-  const key = process.env.PADDLE_API_KEY;
-  if (!key) throw new Error("PADDLE_API_KEY env var is missing");
-  const isProd = process.env.NODE_ENV === "production";
-  return new Paddle(key, {
-    environment: isProd ? Environment.production : Environment.sandbox,
-  });
+function getPlanId(priceType: "monthly" | "yearly", currency: "ILS" | "USD"): string {
+  const map: Record<string, string> = {
+    monthly_ILS: process.env.PAYPAL_PLAN_ILS_MONTHLY ?? "",
+    yearly_ILS:  process.env.PAYPAL_PLAN_ILS_YEARLY  ?? "",
+    monthly_USD: process.env.PAYPAL_PLAN_USD_MONTHLY ?? "",
+    yearly_USD:  process.env.PAYPAL_PLAN_USD_YEARLY  ?? "",
+  };
+  return map[`${priceType}_${currency}`] ?? "";
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { priceType, userId } = (await req.json()) as {
+    const { priceType, userId, currency = "ILS" } = (await req.json()) as {
       priceType: "monthly" | "yearly";
       userId: string;
+      currency?: "ILS" | "USD";
     };
 
     if (!userId || !priceType) {
       return NextResponse.json({ error: "Missing params" }, { status: 400 });
     }
 
-    const priceId = priceType === "yearly" ? PADDLE_PRICES.yearly : PADDLE_PRICES.monthly;
-    if (!priceId) {
-      return NextResponse.json({ error: "Price not configured" }, { status: 500 });
+    const planId = getPlanId(priceType, currency);
+    if (!planId) {
+      return NextResponse.json(
+        { error: `PayPal plan not configured for ${priceType} ${currency}. Run /api/subscriptions/paypal-setup first.` },
+        { status: 500 }
+      );
     }
 
     getAdminApp();
@@ -37,54 +41,27 @@ export async function POST(req: NextRequest) {
     const email: string = userData.email ?? "";
     const displayName: string = userData.displayName ?? "";
 
-    const paddle = getPaddle();
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://wingpact.app";
+    const returnUrl = `${baseUrl}/subscription?success=1&userId=${userId}`;
+    const cancelUrl = `${baseUrl}/subscription?canceled=1`;
 
-    // Reuse existing Paddle customer or create one
-    let paddleCustomerId: string | undefined = userData?.subscription?.paddleCustomerId;
+    const { subscriptionId, approvalUrl } = await createSubscription(
+      planId,
+      returnUrl,
+      cancelUrl,
+      email || undefined,
+      displayName || undefined,
+    );
 
-    if (!paddleCustomerId && email) {
-      // Look up by email first
-      const existing = paddle.customers.list({ email: [email] });
-      for await (const customer of existing) {
-        paddleCustomerId = customer.id;
-        break;
-      }
-      // Create if not found
-      if (!paddleCustomerId) {
-        const created = await paddle.customers.create({
-          email,
-          name: displayName || undefined,
-        });
-        paddleCustomerId = created.id;
-        // Persist early so webhook can correlate
-        await db.collection("users").doc(userId).set(
-          { subscription: { paddleCustomerId, plan: "free" } },
-          { merge: true }
-        );
-      }
-    }
+    // Persist pending subscription ID so the webhook can correlate
+    await db.collection("users").doc(userId).set(
+      { subscription: { paypalSubscriptionId: subscriptionId, plan: "free", currency } },
+      { merge: true }
+    );
 
-    // Create a one-time checkout transaction
-    const txBody: Parameters<typeof paddle.transactions.create>[0] = {
-      items: [{ priceId, quantity: 1 }],
-      customData: { firebaseUid: userId } as Record<string, string>,
-      checkout: { url: `${baseUrl}/subscription?success=1` },
-    };
-    if (paddleCustomerId) {
-      txBody.customerId = paddleCustomerId;
-    }
-
-    const transaction = await paddle.transactions.create(txBody);
-
-    const checkoutUrl = transaction.checkout?.url;
-    if (!checkoutUrl) {
-      return NextResponse.json({ error: "No checkout URL returned" }, { status: 500 });
-    }
-
-    return NextResponse.json({ url: checkoutUrl });
+    return NextResponse.json({ url: approvalUrl });
   } catch (err) {
-    console.error("Create Paddle checkout error:", err);
+    console.error("Create PayPal checkout error:", err);
     return NextResponse.json({ error: "Failed to create checkout" }, { status: 500 });
   }
 }
