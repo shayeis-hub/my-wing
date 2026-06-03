@@ -18,14 +18,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Guard: if plans are already configured, don't create duplicates
+  // Guard: if plans are already configured, don't create duplicates (bypass with &force=1)
+  const force = req.nextUrl.searchParams.get("force") === "1";
   const alreadyConfigured =
     process.env.PAYPAL_PLAN_ILS_MONTHLY &&
     process.env.PAYPAL_PLAN_ILS_YEARLY &&
     process.env.PAYPAL_PLAN_USD_MONTHLY &&
     process.env.PAYPAL_PLAN_USD_YEARLY;
 
-  if (alreadyConfigured) {
+  if (alreadyConfigured && !force) {
     return NextResponse.json({
       message: "Plans already configured — no changes made",
       PAYPAL_PLAN_ILS_MONTHLY: process.env.PAYPAL_PLAN_ILS_MONTHLY,
@@ -35,8 +36,6 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const TRIAL_DAYS = 14;
-
   const [ilsMonthly, ilsYearly, usdMonthly, usdYearly] = await Promise.all([
     createBillingPlan({
       name: "Wingpact Premium — חודשי",
@@ -44,7 +43,6 @@ export async function GET(req: NextRequest) {
       currency: "ILS",
       amount: "9.90",
       interval: "MONTH",
-      trialDays: TRIAL_DAYS,
     }),
     createBillingPlan({
       name: "Wingpact Premium — שנתי",
@@ -52,7 +50,6 @@ export async function GET(req: NextRequest) {
       currency: "ILS",
       amount: "99.00",
       interval: "YEAR",
-      trialDays: TRIAL_DAYS,
     }),
     createBillingPlan({
       name: "Wingpact Premium — Monthly",
@@ -60,7 +57,6 @@ export async function GET(req: NextRequest) {
       currency: "USD",
       amount: "3.90",
       interval: "MONTH",
-      trialDays: TRIAL_DAYS,
     }),
     createBillingPlan({
       name: "Wingpact Premium — Yearly",
@@ -68,7 +64,6 @@ export async function GET(req: NextRequest) {
       currency: "USD",
       amount: "39.00",
       interval: "YEAR",
-      trialDays: TRIAL_DAYS,
     }),
   ]);
 
