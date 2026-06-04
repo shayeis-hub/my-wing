@@ -30,6 +30,16 @@ const QUOTES_HE = [
   "המוטיבציה מתחילה אותך, ההרגל ממשיך אותך.",
   "הגוף שלך שומע כל מה שאתה אומר לעצמך.",
   "דאג לגוף שלך — זה המקום היחיד שיש לך לגור בו.",
+  "הדרך לבריאות מתחילה בצלחת שלך.",
+  "לא מדובר בדיאטה — מדובר בחיים טובים יותר.",
+  "אתה לא צריך להיות מושלם, רק עקבי.",
+  "כל יום שאתה בוחר נכון, אתה מתקרב ליעד.",
+  "תזונה טובה היא אהבה עצמית בצלחת.",
+  "הגוף שלך עובד קשה עבורך — עבוד קשה עבורו.",
+  "שינוי אמיתי לוקח זמן — תן לו זמן.",
+  "אל תאכל פחות — אכול נכון.",
+  "ירידה במשקל היא תוצאה. בריאות היא המטרה.",
+  "מה שנראה כקורבן היום, ייראה כניצחון מחר.",
 ];
 
 const QUOTES_EN = [
@@ -99,7 +109,7 @@ export default function FeedPage() {
           <MessageSquare size={22} className="text-wing-heat" strokeWidth={2.5} />
           <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("feed_title") as string}</h1>
         </div>
-        <p className="text-sm text-wing-muted mt-1.5 leading-relaxed">
+        <p className="text-base text-wing-ink/70 mt-1.5 leading-relaxed">
           &ldquo;{getDailyQuote(lang === "he" ? QUOTES_HE : QUOTES_EN)}&rdquo;
         </p>
       </div>
