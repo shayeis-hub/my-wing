@@ -227,6 +227,32 @@ function StepsPageInner() {
         />
       </div>
 
+      {/* Google Fit status bar — always visible when not retro */}
+      {!isRetro && firebaseUser && (
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_android_48dp.png" alt="" className="w-5 h-5" />
+            <span className="text-sm font-medium text-wing-ink">Google Fit</span>
+            {syncing && <span className="text-xs text-wing-muted animate-pulse">{t("steps_syncing_short") as string}</span>}
+            {!syncing && fitConnected === true && <span className="text-xs text-green-600 font-medium">✓ {t("steps_connected") as string}</span>}
+            {!syncing && fitConnected === false && <span className="text-xs text-wing-muted">{t("steps_not_connected") as string}</span>}
+          </div>
+          {fitConnected === true && !syncing && (
+            <button onClick={handleManualSync} className="text-xs text-wing-heat font-semibold underline">
+              {t("steps_refresh") as string}
+            </button>
+          )}
+          {fitConnected === false && (
+            <button
+              onClick={() => connectGoogleFit(firebaseUser.uid)}
+              className="text-xs bg-wing-ink text-wing-elevated font-bold px-3 py-1.5 rounded-xl"
+            >
+              {t("steps_connect_fit") as string}
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4">
         {syncing && !myEntry ? (
           <div className="text-center py-12 text-wing-muted text-sm animate-pulse">
@@ -235,47 +261,18 @@ function StepsPageInner() {
         ) : myEntry && !editing ? (
           <>
             <StepsRing steps={myEntry.steps} goal={user?.profile?.stepsGoal ?? DEFAULT_GOAL} t={t as (k: string) => unknown} />
-            {syncing
-              ? <p className="text-xs text-center text-wing-muted animate-pulse pb-2">{t("steps_syncing_short") as string}</p>
-              : (
-                <div className="flex justify-center gap-4 pb-2">
-                  <button
-                    onClick={() => { setManualSteps(String(myEntry.steps)); setEditing(true); }}
-                    className="text-sm text-wing-muted underline"
-                  >
-                    {t("steps_update_manual") as string}
-                  </button>
-                  {fitConnected && !isRetro && (
-                    <button onClick={handleManualSync} className="text-sm text-wing-heat underline">
-                      {t("steps_refresh") as string}
-                    </button>
-                  )}
-                </div>
-              )
-            }
+            <div className="flex justify-center gap-4 pb-2">
+              <button
+                onClick={() => { setManualSteps(String(myEntry.steps)); setEditing(true); }}
+                className="text-sm text-wing-muted underline"
+              >
+                {t("steps_update_manual") as string}
+              </button>
+            </div>
           </>
         ) : !syncing && (
           <div className="space-y-3 py-2">
             <p className="text-sm font-semibold text-wing-ink text-center mb-4">{t("steps_enter_prompt") as string}</p>
-
-            {fitConnected === false && firebaseUser && !isRetro && (
-              <button
-                onClick={() => connectGoogleFit(firebaseUser.uid)}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-wing-elevated border border-wing-border text-sm font-medium text-wing-ink hover:border-wing-ink transition-colors"
-              >
-                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_android_48dp.png" alt="" className="w-5 h-5" />
-                {t("steps_connect_fit") as string}
-              </button>
-            )}
-
-            {fitConnected === false && !isRetro && (
-              <div className="flex items-center gap-2 text-xs text-wing-muted">
-                <div className="flex-1 h-px bg-wing-border" />
-                <span>{t("steps_or_manual") as string}</span>
-                <div className="flex-1 h-px bg-wing-border" />
-              </div>
-            )}
-
             <Input
               type="number"
               value={manualSteps}
