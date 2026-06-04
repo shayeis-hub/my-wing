@@ -413,7 +413,7 @@ export const T = {
     wing_or: "או",
 
     // SOS
-    sos_btn: "רגע לפני שבירה? 🤝",
+    sos_btn: "רגע לפני שבירה?",
     sos_sending: "שולח...",
     sos_sent: "נשלח ✓",
     sos_success: (n: number) => n > 0 ? `שלחנו סימן ל-${n} חברים 💪` : "שלחנו סימן!",
@@ -1061,7 +1061,7 @@ export const T = {
     wing_or: "or",
 
     // SOS
-    sos_btn: "About to break? 🤝",
+    sos_btn: "About to break?",
     sos_sending: "Sending...",
     sos_sent: "Sent ✓",
     sos_success: (n: number) => n > 0 ? `Sent a signal to ${n} friend${n === 1 ? "" : "s"} 💪` : "Signal sent!",

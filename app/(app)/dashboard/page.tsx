@@ -176,7 +176,7 @@ export default function DashboardPage() {
   const hasMealToday = myTodayMeals.length > 0;
   const ctaHref = !hasCheckedInToday ? "/checkin" : !hasMealToday ? "/meals" : "/feed";
   const ctaLabel = lang === "he"
-    ? (!hasCheckedInToday ? "צ׳ק-אפ יומי" : !hasMealToday ? "רשום ארוחה" : "שתף עם הכנף")
+    ? (!hasCheckedInToday ? "צ׳ק-אפ יומי" : !hasMealToday ? "רישום ארוחה" : "שתף עם הכנף")
     : (!hasCheckedInToday ? "Daily Check-up" : !hasMealToday ? "Log Meal" : "Share with Wing");
 
   // Steps: prefer Google Fit sync, fall back to check-in
@@ -233,8 +233,8 @@ export default function DashboardPage() {
       {user?.wingId && (
         <Link href={ctaHref}>
           <button
-            className="w-full py-3.5 rounded-[16px] font-bold text-base text-white transition-all active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+            className="w-full py-3.5 rounded-[16px] font-bold text-base text-[#7a4f00] transition-all active:scale-[0.98]"
+            style={{ background: "linear-gradient(135deg, #fff3b8, #ffc89a)" }}
           >
             {ctaLabel}
           </button>
@@ -277,35 +277,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Member selector strip */}
-      {wing && otherMembers.length > 0 && firebaseUser && (
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-          <button
-            onClick={() => setSelectedMemberId(null)}
-            className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-bold transition-all ${
-              selectedMemberId === null
-                ? "bg-wing-ink text-wing-elevated"
-                : "bg-wing-elevated border border-wing-border text-wing-muted"
-            }`}
-          >
-            {t("my")}
-          </button>
-          {otherMembers.map((m) => (
-            <button
-              key={m.uid}
-              onClick={() => setSelectedMemberId(m.uid)}
-              className={`flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                selectedMemberId === m.uid
-                  ? "bg-wing-ink text-wing-elevated"
-                  : "bg-wing-elevated border border-wing-border text-wing-muted"
-              }`}
-            >
-              <Avatar name={m.displayName} photoURL={m.photoURL} size={18} />
-              {m.displayName.split(" ")[0]}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Member view */}
       {selectedMemberId && wing && firebaseUser && user && (
@@ -463,6 +434,36 @@ export default function DashboardPage() {
           {/* Recent encouragements / comments received this week */}
           {user?.wingId && firebaseUser && (
             <RecentActivity wingId={user.wingId} userId={firebaseUser.uid} userName={user.displayName} />
+          )}
+
+          {/* Member selector strip */}
+          {wing && otherMembers.length > 0 && firebaseUser && (
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+              <button
+                onClick={() => setSelectedMemberId(null)}
+                className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-bold transition-all ${
+                  selectedMemberId === null
+                    ? "bg-wing-ink text-wing-elevated"
+                    : "bg-wing-elevated border border-wing-border text-wing-muted"
+                }`}
+              >
+                {t("my")}
+              </button>
+              {otherMembers.map((m) => (
+                <button
+                  key={m.uid}
+                  onClick={() => setSelectedMemberId(m.uid)}
+                  className={`flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+                    selectedMemberId === m.uid
+                      ? "bg-wing-ink text-wing-elevated"
+                      : "bg-wing-elevated border border-wing-border text-wing-muted"
+                  }`}
+                >
+                  <Avatar name={m.displayName} photoURL={m.photoURL} size={18} />
+                  {m.displayName.split(" ")[0]}
+                </button>
+              ))}
+            </div>
           )}
 
           {/* SOS */}
