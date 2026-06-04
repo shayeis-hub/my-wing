@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { enUS } from "date-fns/locale";
@@ -34,6 +34,14 @@ function MealsPageInner() {
   const searchParams = useSearchParams();
   const highlightMealId = searchParams.get("meal");
   const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to highlighted meal after load
+  useEffect(() => {
+    if (!highlightMealId || loading) return;
+    setTimeout(() => {
+      highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 400);
+  }, [highlightMealId, loading]);
 
   const mealTypeLabels = {
     breakfast: t("meals_type_breakfast"),
@@ -462,6 +470,8 @@ function MealsPageInner() {
           meals={selectedUserId === "all" ? meals : meals.filter((m) => m.userId === selectedUserId)}
           currentUserId={firebaseUser?.uid}
           currentUserName={user?.displayName}
+          highlightMealId={highlightMealId ?? undefined}
+          highlightRef={highlightRef}
         />
       )}
 
@@ -502,10 +512,14 @@ function MealsByDate({
   meals,
   currentUserId,
   currentUserName,
+  highlightMealId,
+  highlightRef,
 }: {
   meals: Meal[];
   currentUserId?: string;
   currentUserName?: string;
+  highlightMealId?: string;
+  highlightRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   const { t, lang } = useLanguage();
   // Group meals by date string yyyy-MM-dd
@@ -538,21 +552,14 @@ function MealsByDate({
     });
   }
 
-  // Today's group is open by default, past days are closed
+  // Today's group is open by default; also open the date of the highlighted meal
   const todayKey = format(new Date(), "yyyy-MM-dd");
-  const [openDates, setOpenDates] = useState<Set<string>>(new Set([todayKey]));
-
-  // Auto-open and scroll to highlighted meal
-  useEffect(() => {
-    if (!highlightMealId || loading) return;
-    const targetMeal = meals.find((m) => m.id === highlightMealId);
-    if (targetMeal) {
-      setOpenDates((prev) => new Set([...prev, targetMeal.date]));
-    }
-    setTimeout(() => {
-      highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 400);
-  }, [highlightMealId, loading, meals]);
+  const highlightDate = highlightMealId
+    ? meals.find((m) => m.id === highlightMealId)?.mealDate
+    : undefined;
+  const [openDates, setOpenDates] = useState<Set<string>>(
+    new Set([todayKey, ...(highlightDate ? [highlightDate] : [])])
+  );
 
   function toggle(date: string) {
     setOpenDates((prev) => {
@@ -605,7 +612,8 @@ function MealsByDate({
                 {isOpen && (
                   <div className="px-3 pb-3 space-y-3 border-t border-wing-border pt-3">
                     {dayMeals.map((meal) => (
-                      <div key={meal.id} ref={meal.id === highlightMealId ? highlightRef : null}
+                      <div key={meal.id}
+                        ref={meal.id === highlightMealId ? (highlightRef ?? null) : null}
                         className={meal.id === highlightMealId ? "ring-2 ring-wing-primary rounded-2xl" : ""}>
                         <MealCard meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
                       </div>
