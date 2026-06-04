@@ -18,10 +18,10 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { enUS } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
-import { getTodayCheckin, getWeightHistory, saveCheckin } from "@/lib/firebase/firestore";
+import { getTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, type GroupEnergy } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
-import { Bell, Footprints, Scale, ChevronLeft, Droplets, Flame, Plus, Minus, Leaf, Check, Pencil } from "lucide-react";
+import { Bell, Footprints, Scale, ChevronLeft, Droplets, Flame, Plus, Minus, Leaf, Check, Pencil, Users, UtensilsCrossed, MessageCircle, Trophy } from "lucide-react";
 import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
 import { calcStreak } from "@/lib/utils/streak";
 import type { StepsEntry } from "@/types";
@@ -33,6 +33,7 @@ export default function DashboardPage() {
   const { t, lang } = useLanguage();
   const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
+  const [groupEnergy, setGroupEnergy] = useState<GroupEnergy | null>(null);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [wingSteps, setWingSteps] = useState<StepsEntry[]>([]);
@@ -54,6 +55,7 @@ export default function DashboardPage() {
     getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
     getWingSteps(user.wingId, today).then(setWingSteps);
     getUserCheckinDates(user.wingId, firebaseUser.uid).then((dates) => setStreak(calcStreak(dates)));
+    getGroupEnergy(user.wingId, wing?.memberIds.length ?? 1).then(setGroupEnergy);
   }, [user?.wingId, firebaseUser]);
 
   async function handleEnableNotifications() {
@@ -170,6 +172,12 @@ export default function DashboardPage() {
   const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
 
   const otherMembers = (wing?.members ?? []).filter((m) => m.uid !== firebaseUser?.uid);
+  const hasCheckedInToday = !!todayCheckin;
+  const hasMealToday = myTodayMeals.length > 0;
+  const ctaHref = !hasCheckedInToday ? "/checkin" : !hasMealToday ? "/meals" : "/feed";
+  const ctaLabel = lang === "he"
+    ? (!hasCheckedInToday ? "צ׳ק-אפ יומי" : !hasMealToday ? "רשום ארוחה" : "שתף עם הכנף")
+    : (!hasCheckedInToday ? "Daily Check-up" : !hasMealToday ? "Log Meal" : "Share with Wing");
 
   // Steps: prefer Google Fit sync, fall back to check-in
   const myStepsEntry = wingSteps.find((s) => s.userId === firebaseUser?.uid);
@@ -220,6 +228,54 @@ export default function DashboardPage() {
           />
         </Link>
       </div>
+
+      {/* CTA — primary action */}
+      {user?.wingId && (
+        <Link href={ctaHref}>
+          <button
+            className="w-full py-3.5 rounded-[16px] font-bold text-base text-white transition-all active:scale-[0.98]"
+            style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+          >
+            {ctaLabel}
+          </button>
+        </Link>
+      )}
+
+      {/* Group Energy */}
+      {user?.wingId && groupEnergy && (
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] px-4 py-3">
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div>
+              <div className="flex justify-center mb-1">
+                <Users size={16} className="text-wing-muted" />
+              </div>
+              <p className="font-black text-wing-ink text-lg leading-none">{groupEnergy.checkinsToday}</p>
+              <p className="text-[10px] text-wing-muted mt-0.5">{lang === "he" ? "צ׳ק-אפ היום" : "checked in"}</p>
+            </div>
+            <div>
+              <div className="flex justify-center mb-1">
+                <UtensilsCrossed size={16} className="text-wing-muted" />
+              </div>
+              <p className="font-black text-wing-ink text-lg leading-none">{groupEnergy.mealsTodayCount}</p>
+              <p className="text-[10px] text-wing-muted mt-0.5">{lang === "he" ? "ארוחות היום" : "meals today"}</p>
+            </div>
+            <div>
+              <div className="flex justify-center mb-1">
+                <Trophy size={16} className="text-wing-muted" />
+              </div>
+              <p className="font-black text-wing-ink text-lg leading-none">{groupEnergy.streakDays}</p>
+              <p className="text-[10px] text-wing-muted mt-0.5">{lang === "he" ? "ימי רצף" : "day streak"}</p>
+            </div>
+            <div>
+              <div className="flex justify-center mb-1">
+                <MessageCircle size={16} className="text-wing-muted" />
+              </div>
+              <p className="font-black text-wing-ink text-lg leading-none">{groupEnergy.newActivity}</p>
+              <p className="text-[10px] text-wing-muted mt-0.5">{lang === "he" ? "פעילות חדשה" : "new activity"}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Member selector strip */}
       {wing && otherMembers.length > 0 && firebaseUser && (

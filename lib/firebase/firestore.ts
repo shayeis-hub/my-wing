@@ -819,3 +819,49 @@ export async function toggleEncouragementReaction(
   const updatedEnc = updated.find((enc) => `${enc.authorId}_${enc.createdAt}` === encKey);
   return updatedEnc?.reactions ?? [];
 }
+
+// ── Group Energy ──────────────────────────────────────────────────────────────
+
+export interface GroupEnergy {
+  checkinsToday: number;    // members who checked in today
+  mealsTodayCount: number;  // meals logged today across wing
+  streakDays: number;       // consecutive days with at least 1 checkin
+  newActivity: number;      // encouragements + reactions in last 24h
+}
+
+export async function getGroupEnergy(wingId: string, memberCount: number): Promise<GroupEnergy> {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const since24h = Date.now() - 86_400_000;
+
+  const [checkinsSnap, mealsSnap] = await Promise.all([
+    getDocs(query(collection(db, "wings", wingId, "checkins"), where("date", "==", todayStr))),
+    getDocs(query(collection(db, "wings", wingId, "meals"), where("mealDate", "==", todayStr))),
+  ]);
+
+  const checkinsToday = checkinsSnap.size;
+  const mealsTodayCount = mealsSnap.size;
+
+  // Streak: count consecutive days backwards with at least 1 checkin
+  let streakDays = 0;
+  const d = new Date();
+  for (let i = 0; i < 60; i++) {
+    const dateStr = new Date(d.getTime() - i * 86_400_000).toISOString().split("T")[0];
+    const snap = await getDocs(query(
+      collection(db, "wings", wingId, "checkins"),
+      where("date", "==", dateStr),
+    ));
+    if (snap.empty) break;
+    streakDays++;
+  }
+
+  // New activity: count encouragements across checkins in last 24h
+  let newActivity = 0;
+  checkinsSnap.forEach((doc) => {
+    const data = doc.data() as DailyCheckin;
+    for (const enc of data.encouragements ?? []) {
+      if ((enc.createdAt as number) >= since24h) newActivity++;
+    }
+  });
+
+  return { checkinsToday, mealsTodayCount, streakDays, newActivity };
+}
