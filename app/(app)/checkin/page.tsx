@@ -415,7 +415,7 @@ function CheckinPageInner() {
             <span className="text-xs font-semibold text-wing-ink">{t("checkin_water")}</span>
           </div>
           <span className="font-black text-wing-ink tabular" style={{ fontSize: 32, letterSpacing: "-0.04em", lineHeight: 1 }}>
-            {water.toFixed(1)} <span className="text-sm font-normal text-wing-muted">L</span>
+            {water.toFixed(1)} <span className="text-sm font-normal text-wing-muted">{lang === "he" ? "ליטר" : "L"}</span>
           </span>
           <div className="flex items-center gap-3">
             <button
