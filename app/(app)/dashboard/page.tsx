@@ -404,7 +404,7 @@ export default function DashboardPage() {
 
           {/* Recent encouragements / comments received this week */}
           {user?.wingId && firebaseUser && (
-            <RecentActivity wingId={user.wingId} userId={firebaseUser.uid} />
+            <RecentActivity wingId={user.wingId} userId={firebaseUser.uid} userName={user.displayName} />
           )}
 
           {/* SOS */}

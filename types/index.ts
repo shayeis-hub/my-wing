@@ -82,6 +82,7 @@ export interface Encouragement {
   authorName: string;
   text: string;
   createdAt: number;
+  reactions?: Reaction[];
 }
 
 export type ReactionType = "heart" | "flame" | "sparkles" | "trophy";

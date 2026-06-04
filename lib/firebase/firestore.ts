@@ -678,11 +678,15 @@ export async function incrementDailyMealCount(uid: string, date: string): Promis
 export interface RecentEncouragement {
   type: "checkin" | "meal" | "post";
   authorName: string;
+  authorId: string;
   text: string;
   createdAt: number;      // ms since epoch
   link: string;           // route to navigate to
-  // For meals/checkins we also pass a hint label so the UI can show context
   contextLabel?: string;
+  reactions?: Reaction[];
+  // For toggling reactions on this specific encouragement
+  parentDocId: string;    // mealId / "userId_date" / postId
+  encKey: string;         // `${authorId}_${createdAt}` — unique per encouragement
 }
 
 export async function getRecentEncouragementsForUser(
@@ -720,10 +724,14 @@ export async function getRecentEncouragementsForUser(
       items.push({
         type: "checkin",
         authorName: enc.authorName,
+        authorId: enc.authorId,
         text: enc.text,
         createdAt: enc.createdAt as number,
         link: `/checkin?date=${data.date}`,
         contextLabel: data.date,
+        reactions: enc.reactions ?? [],
+        parentDocId: snap.id,
+        encKey: `${enc.authorId}_${enc.createdAt}`,
       });
     }
   }
@@ -737,10 +745,14 @@ export async function getRecentEncouragementsForUser(
       items.push({
         type: "meal",
         authorName: c.authorName,
+        authorId: c.authorId,
         text: c.text,
         createdAt: c.createdAt as number,
         link: `/meals?meal=${m.id}`,
         contextLabel: md.analysis?.description?.slice(0, 30),
+        reactions: c.reactions ?? [],
+        parentDocId: m.id,
+        encKey: `${c.authorId}_${c.createdAt}`,
       });
     }
   }
@@ -754,13 +766,56 @@ export async function getRecentEncouragementsForUser(
       items.push({
         type: "post",
         authorName: c.authorName,
+        authorId: c.authorId,
         text: c.text,
         createdAt: c.createdAt as number,
         link: "/feed",
+        reactions: c.reactions ?? [],
+        parentDocId: p.id,
+        encKey: `${c.authorId}_${c.createdAt}`,
       });
     }
   }
 
   items.sort((a, b) => b.createdAt - a.createdAt);
   return items;
+}
+
+// Toggle reaction on a specific encouragement/comment inside a parent doc
+export async function toggleEncouragementReaction(
+  wingId: string,
+  parentType: "checkin" | "meal" | "post",
+  parentDocId: string,
+  encKey: string,          // `${authorId}_${createdAt}`
+  reaction: Reaction,
+  fieldName: "encouragements" | "comments",
+): Promise<Reaction[]> {
+  const collectionName =
+    parentType === "checkin" ? "checkins" :
+    parentType === "meal"    ? "meals" : "posts";
+
+  const ref = doc(db, "wings", wingId, collectionName, parentDocId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return [];
+
+  const data = snap.data() as Record<string, unknown>;
+  const arr: Encouragement[] = (data[fieldName] as Encouragement[] | undefined) ?? [];
+
+  const updated = arr.map((enc) => {
+    const key = `${enc.authorId}_${enc.createdAt}`;
+    if (key !== encKey) return enc;
+    const existing = enc.reactions ?? [];
+    const mine = existing.find((r) => r.userId === reaction.userId && r.type === reaction.type);
+    return {
+      ...enc,
+      reactions: mine
+        ? existing.filter((r) => !(r.userId === reaction.userId && r.type === reaction.type))
+        : [...existing, reaction],
+    };
+  });
+
+  await updateDoc(ref, { [fieldName]: updated });
+
+  const updatedEnc = updated.find((enc) => `${enc.authorId}_${enc.createdAt}` === encKey);
+  return updatedEnc?.reactions ?? [];
 }

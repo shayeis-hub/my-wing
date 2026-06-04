@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { enUS } from "date-fns/locale";
@@ -21,15 +21,22 @@ import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
 import { AdBanner } from "@/components/ads/AdBanner";
 import { useTrialLock } from "@/hooks/useTrialLock";
+import { useSearchParams } from "next/navigation";
 
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
 
-export default function MealsPage() {
+import { Suspense } from "react";
+
+function MealsPageInner() {
   const { user, firebaseUser } = useAuth();
   const { meals, loading } = useMeals(user?.wingId);
   const { wing } = useWing(user?.wingId);
   const { t, lang } = useLanguage();
   const trialLocked = useTrialLock();
+  const searchParams = useSearchParams();
+  const highlightMealId = searchParams.get("meal");
+  const highlightRef = useRef<HTMLDivElement>(null);
+
   const mealTypeLabels = {
     breakfast: t("meals_type_breakfast"),
     lunch: t("meals_type_lunch"),
@@ -537,6 +544,18 @@ function MealsByDate({
   const todayKey = format(new Date(), "yyyy-MM-dd");
   const [openDates, setOpenDates] = useState<Set<string>>(new Set([todayKey]));
 
+  // Auto-open and scroll to highlighted meal
+  useEffect(() => {
+    if (!highlightMealId || loading) return;
+    const targetMeal = meals.find((m) => m.id === highlightMealId);
+    if (targetMeal) {
+      setOpenDates((prev) => new Set([...prev, targetMeal.date]));
+    }
+    setTimeout(() => {
+      highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 400);
+  }, [highlightMealId, loading, meals]);
+
   function toggle(date: string) {
     setOpenDates((prev) => {
       const next = new Set(prev);
@@ -588,7 +607,10 @@ function MealsByDate({
                 {isOpen && (
                   <div className="px-3 pb-3 space-y-3 border-t border-wing-border pt-3">
                     {dayMeals.map((meal) => (
-                      <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
+                      <div key={meal.id} ref={meal.id === highlightMealId ? highlightRef : null}
+                        className={meal.id === highlightMealId ? "ring-2 ring-wing-primary rounded-2xl" : ""}>
+                        <MealCard meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
+                      </div>
                     ))}
                   </div>
                 )}
@@ -599,5 +621,9 @@ function MealsByDate({
       })}
     </div>
   );
+}
+
+export default function MealsPage() {
+  return <Suspense><MealsPageInner /></Suspense>;
 }
 
