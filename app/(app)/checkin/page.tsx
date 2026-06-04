@@ -334,6 +334,18 @@ function CheckinPageInner() {
     }
   }
 
+  // Progress: count filled fields out of 6
+  const filledFields = [
+    mood !== 3,          // mood changed from default
+    water > 0,
+    vegetables > 0,
+    !!steps,
+    workoutDone,
+    !!(notes || weight || ewOpen),
+  ].filter(Boolean).length;
+  const totalFields = 6;
+  const progressPct = Math.round((filledFields / totalFields) * 100);
+
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
@@ -344,7 +356,21 @@ function CheckinPageInner() {
             {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: lang === "he" ? he : enUS })}
           </p>
         </div>
-        {autosaveState !== "idle" && (
+        <div className="flex flex-col items-end gap-1 mt-1 shrink-0">
+          <span className="font-black text-wing-ink tabular text-sm">{progressPct}%</span>
+          <div className="w-16 h-1.5 bg-wing-border rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${progressPct}%`, background: "linear-gradient(90deg, #f5dd4b, #ff6b47)" }}
+            />
+          </div>
+          {autosaveState !== "idle" && (
+            <span className={`font-mono text-[10px] tracking-widest uppercase ${autosaveState === "saved" ? "text-green-600" : "text-wing-muted"}`}>
+              {autosaveState === "saved" ? t("checkin_autosave_saved") as string : t("checkin_autosave_saving") as string}
+            </span>
+          )}
+        </div>
+        {false && autosaveState !== "idle" && (
           <span className={`font-mono text-[10px] tracking-widest uppercase px-2 py-1 rounded-full mt-1 ${autosaveState === "saved" ? "text-green-700 bg-green-50 border border-green-200" : "text-wing-muted bg-wing-elevated border border-wing-border"}`}>
             {autosaveState === "saved" ? t("checkin_autosave_saved") as string : t("checkin_autosave_saving") as string}
           </span>
@@ -389,15 +415,15 @@ function CheckinPageInner() {
             <span className="text-xs font-semibold text-wing-ink">{t("checkin_water")}</span>
           </div>
           <span className="font-black text-wing-ink tabular" style={{ fontSize: 32, letterSpacing: "-0.04em", lineHeight: 1 }}>
-            {water.toFixed(1)}<span className="text-sm font-normal text-wing-muted">L</span>
+            {water.toFixed(1)} <span className="text-sm font-normal text-wing-muted">L</span>
           </span>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setWater((v) => Math.max(0, Math.round((v - 0.5) * 10) / 10))}
+              onClick={() => setWater((v) => Math.max(0, Math.round((v - 0.1) * 10) / 10))}
               className="w-9 h-9 bg-wing-elevated border border-wing-border rounded-full text-lg font-bold text-wing-muted transition-colors active:scale-95"
             >−</button>
             <button
-              onClick={() => setWater((v) => Math.min(4, Math.round((v + 0.5) * 10) / 10))}
+              onClick={() => setWater((v) => Math.min(4, Math.round((v + 0.1) * 10) / 10))}
               className="w-9 h-9 rounded-full text-lg font-bold text-wing-ink transition-all active:scale-95"
               style={{ background: "linear-gradient(135deg, #fff3b8, #ffc89a)" }}
             >+</button>
