@@ -17,6 +17,41 @@ import { CreatePostForm } from "@/components/feed/CreatePostForm";
 import { PostCard } from "@/components/feed/PostCard";
 import type { DailyPrompt, WingPost } from "@/types";
 
+const QUOTES_HE = [
+  "הגוף מגיע לאן שהמוח מוביל אותו.",
+  "אין קיצורי דרך לכל מקום שראוי ללכת אליו.",
+  "כל ארוחה היא הזדמנות לטפל בעצמך.",
+  "שינוי קטן בכל יום הוא שינוי עצום לאורך שנה.",
+  "אכול כדי לחיות, אל תחיה כדי לאכול.",
+  "הגוף שלך הוא השקעה הכי טובה שיש.",
+  "בריאות היא לא יעד — היא דרך חיים.",
+  "כל צעד קדימה הוא ניצחון, גם הקטן שבהם.",
+  "מה שאתה אוכל בפרטיות, אתה מראה בפומבי.",
+  "המוטיבציה מתחילה אותך, ההרגל ממשיך אותך.",
+  "הגוף שלך שומע כל מה שאתה אומר לעצמך.",
+  "דאג לגוף שלך — זה המקום היחיד שיש לך לגור בו.",
+];
+
+const QUOTES_EN = [
+  "Your body hears everything your mind says.",
+  "Take care of your body — it's the only place you have to live.",
+  "Every meal is a chance to nourish yourself.",
+  "Small daily improvements lead to stunning results.",
+  "Eat to live, don't live to eat.",
+  "Health is not a destination — it's a way of life.",
+  "Your body is your most priceless possession.",
+  "Every step forward is a victory, no matter how small.",
+  "What you eat in private, you wear in public.",
+  "Motivation gets you started. Habit keeps you going.",
+  "A healthy outside starts from the inside.",
+  "Don't eat less — eat right.",
+];
+
+function getDailyQuote(quotes: string[]): string {
+  const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+  return quotes[Math.floor(daysSinceEpoch / 3) % quotes.length];
+}
+
 export default function FeedPage() {
   const { user, firebaseUser } = useAuth();
   const { wing } = useWing(user?.wingId);
@@ -59,9 +94,14 @@ export default function FeedPage() {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="pt-4 flex items-center gap-2">
-        <MessageSquare size={22} className="text-wing-heat" strokeWidth={2.5} />
-        <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("feed_title") as string}</h1>
+      <div className="pt-4">
+        <div className="flex items-center gap-2">
+          <MessageSquare size={22} className="text-wing-heat" strokeWidth={2.5} />
+          <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("feed_title") as string}</h1>
+        </div>
+        <p className="text-sm text-wing-muted mt-1.5 leading-relaxed">
+          &ldquo;{getDailyQuote(lang === "he" ? QUOTES_HE : QUOTES_EN)}&rdquo;
+        </p>
       </div>
 
       {/* Create post form */}
