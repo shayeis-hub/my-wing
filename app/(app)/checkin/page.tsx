@@ -334,136 +334,201 @@ function CheckinPageInner() {
     }
   }
 
-  const waterPct = (water / 4) * 100;
-
   return (
     <div className="p-4 space-y-4">
-      <div className="pt-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("checkin_title")}</h1>
-            <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
-              {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: lang === "he" ? he : enUS })}
-            </p>
-          </div>
-          {/* Autosave indicator */}
-          {autosaveState !== "idle" && (
-            <span className={`font-mono text-[10px] tracking-widest uppercase px-2 py-1 rounded-full mt-1 ${autosaveState === "saved" ? "text-green-700 bg-green-50 border border-green-200" : "text-wing-muted bg-wing-elevated border border-wing-border"}`}>
-              {autosaveState === "saved" ? t("checkin_autosave_saved") as string : t("checkin_autosave_saving") as string}
-            </span>
-          )}
+      {/* Header */}
+      <div className="pt-4 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-black text-wing-ink tracking-tight">{t("checkin_title")}</h1>
+          <p className="font-mono text-xs tracking-[0.2em] uppercase text-wing-muted mt-0.5">
+            {format(new Date(selectedDate + "T12:00:00"), "EEEE, d MMMM", { locale: lang === "he" ? he : enUS })}
+          </p>
         </div>
-        {isRetro && (
-          <span className="inline-block text-xs text-wing-heat font-medium bg-wing-elevated border border-wing-border px-3 py-1 rounded-full mt-2">
-            ✏️ מילוי רטרואקטיבי
+        {autosaveState !== "idle" && (
+          <span className={`font-mono text-[10px] tracking-widest uppercase px-2 py-1 rounded-full mt-1 ${autosaveState === "saved" ? "text-green-700 bg-green-50 border border-green-200" : "text-wing-muted bg-wing-elevated border border-wing-border"}`}>
+            {autosaveState === "saved" ? t("checkin_autosave_saved") as string : t("checkin_autosave_saving") as string}
           </span>
         )}
       </div>
+      {isRetro && (
+        <span className="inline-block text-xs text-wing-heat font-medium bg-wing-elevated border border-wing-border px-3 py-1 rounded-full">
+          ✏️ מילוי רטרואקטיבי
+        </span>
+      )}
 
-      {/* Tabs */}
-      <div className="flex gap-2 bg-wing-elevated border border-wing-border rounded-[14px] p-1">
-        {([
-          { key: "essential", label: t("checkin_tab_essential") as string },
-          { key: "advanced",  label: t("checkin_tab_advanced") as string },
-        ] as const).map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 text-sm py-2 rounded-[10px] font-bold transition-all ${
-              activeTab === tab.key
-                ? "bg-wing-surface text-wing-ink shadow-sm"
-                : "text-wing-muted"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === "essential" && (
-      <>
-      {/* Water */}
-      <SectionCard>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Droplets size={16} className="text-blue-400" />
-            <span className="font-semibold text-wing-ink">{t("checkin_water")}</span>
-          </div>
-          <span
-            className="font-black tabular text-wing-ink"
-            style={{ fontSize: 22, letterSpacing: "-0.04em", fontFeatureSettings: '"tnum"' }}
-          >
-            {water.toFixed(1)}
-            <span className="text-sm font-normal text-wing-muted mr-0.5">L</span>
-          </span>
+      {/* 1. Mood — narrow strip */}
+      <SectionCard className="py-3">
+        <div className="flex items-center gap-2 mb-3">
+          <Smile size={14} className="text-wing-honey" />
+          <span className="font-semibold text-wing-ink text-sm">{t("checkin_mood")}</span>
         </div>
-        <input
-          type="range"
-          min={0} max={4} step={0.1}
-          value={water}
-          onChange={(e) => setWater(parseFloat(e.target.value))}
-          className="water-slider"
-          style={{
-            background: `linear-gradient(to left, #f5dd4b 0%, #ff6b47 ${waterPct}%, #ede5d0 ${waterPct}%, #ede5d0 100%)`,
-          }}
-        />
-        <div className="flex justify-between text-xs font-mono text-wing-muted mt-2 tracking-wider">
-          <span>0</span><span>1L</span><span>2L</span><span>3L</span><span>4L</span>
-        </div>
-        <div className="flex justify-center gap-1.5 mt-3 flex-wrap">
-          {[0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4].map((v) => (
+        <div className="flex justify-between gap-1">
+          {moods.map((m) => (
             <button
-              key={v}
-              onClick={() => setWater(v)}
-              className={`text-xs px-2.5 py-1 rounded-full font-medium transition-all ${
-                water === v ? "text-wing-ink font-bold" : "bg-wing-elevated border border-wing-border text-wing-muted"
+              key={m.value}
+              onClick={() => setMood(m.value as 1 | 2 | 3 | 4 | 5)}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-[12px] transition-all active:scale-95 ${
+                mood === m.value ? "scale-105" : "hover:bg-wing-elevated"
               }`}
-              style={water === v ? { background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" } : {}}
+              style={mood === m.value ? { background: "linear-gradient(135deg, #fff3b8, #ffc89a)" } : {}}
             >
-              {v}L
+              <span className="text-xl">{m.emoji}</span>
+              <MonoLabel>{m.label}</MonoLabel>
             </button>
           ))}
         </div>
       </SectionCard>
 
-      {/* Vegetables */}
-      <SectionCard>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Leaf size={16} className="text-green-500" />
-            <span className="font-semibold text-wing-ink">{t("checkin_veg")}</span>
+      {/* 2. 2×2 grid: water, vegetables, steps, workout */}
+      <div className="grid grid-cols-2 gap-3">
+
+        {/* Water */}
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-1.5 self-start">
+            <Droplets size={14} className="text-blue-400" />
+            <span className="text-xs font-semibold text-wing-ink">{t("checkin_water")}</span>
           </div>
-          <MonoLabel>{t("checkin_veg_sub")}</MonoLabel>
+          <span className="font-black text-wing-ink tabular" style={{ fontSize: 32, letterSpacing: "-0.04em", lineHeight: 1 }}>
+            {water.toFixed(1)}<span className="text-sm font-normal text-wing-muted">L</span>
+          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setWater((v) => Math.max(0, Math.round((v - 0.5) * 10) / 10))}
+              className="w-9 h-9 bg-wing-elevated border border-wing-border rounded-full text-lg font-bold text-wing-muted transition-colors active:scale-95"
+            >−</button>
+            <button
+              onClick={() => setWater((v) => Math.min(4, Math.round((v + 0.5) * 10) / 10))}
+              className="w-9 h-9 rounded-full text-lg font-bold text-wing-ink transition-all active:scale-95"
+              style={{ background: "linear-gradient(135deg, #fff3b8, #ffc89a)" }}
+            >+</button>
+          </div>
         </div>
-        <div className="flex items-center justify-center gap-6">
-          <button
-            onClick={() => setVegetables(Math.max(0, vegetables - 1))}
-            className="w-11 h-11 bg-wing-elevated border border-wing-border rounded-full text-xl font-bold text-wing-muted hover:border-wing-ink transition-colors"
-          >
-            −
-          </button>
-          <span
-            className="font-black tabular text-wing-ink w-14 text-center"
-            style={{ fontSize: 42, letterSpacing: "-0.05em", fontFeatureSettings: '"tnum"' }}
-          >
+
+        {/* Vegetables */}
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-1.5 self-start">
+            <Leaf size={14} className="text-green-500" />
+            <span className="text-xs font-semibold text-wing-ink">{t("checkin_veg")}</span>
+          </div>
+          <span className="font-black text-wing-ink tabular" style={{ fontSize: 32, letterSpacing: "-0.04em", lineHeight: 1 }}>
             {vegetables}
           </span>
-          <button
-            onClick={() => setVegetables(Math.min(6, vegetables + 1))}
-            className="w-11 h-11 rounded-full text-xl font-bold text-wing-ink transition-all active:scale-95"
-            style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
-          >
-            +
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setVegetables((v) => Math.max(0, v - 1))}
+              className="w-9 h-9 bg-wing-elevated border border-wing-border rounded-full text-lg font-bold text-wing-muted transition-colors active:scale-95"
+            >−</button>
+            <button
+              onClick={() => setVegetables((v) => Math.min(6, v + 1))}
+              className="w-9 h-9 rounded-full text-lg font-bold text-wing-ink transition-all active:scale-95"
+              style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+            >+</button>
+          </div>
         </div>
-      </SectionCard>
 
-      </>
+        {/* Steps */}
+        <div
+          className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2 cursor-pointer"
+          onClick={() => setStepsEditing(true)}
+        >
+          <div className="flex items-center gap-1.5">
+            <Footprints size={14} className="text-wing-muted" />
+            <span className="text-xs font-semibold text-wing-ink">{t("checkin_steps")}</span>
+          </div>
+          {stepsEditing ? (
+            <input
+              type="number"
+              value={steps}
+              onChange={(e) => setSteps(e.target.value)}
+              onBlur={() => setStepsEditing(false)}
+              placeholder="0"
+              inputMode="numeric"
+              autoFocus
+              className="w-full px-2 py-1 bg-wing-elevated border border-wing-border rounded-[10px] text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span className="font-black text-wing-ink tabular" style={{ fontSize: 28, letterSpacing: "-0.04em", lineHeight: 1 }}>
+              {steps ? parseInt(steps).toLocaleString() : <span className="text-wing-subtle text-sm font-normal">{t("checkin_steps_ph")}</span>}
+            </span>
+          )}
+          {!stepsEditing && (
+            <span className="text-[10px] text-wing-subtle">{lang === "he" ? "לחץ לעריכה" : "tap to edit"}</span>
+          )}
+        </div>
+
+        {/* Workout */}
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Dumbbell size={14} className="text-wing-muted" />
+              <span className="text-xs font-semibold text-wing-ink">{t("checkin_workout")}</span>
+            </div>
+            <Switch checked={workoutDone} onChange={setWorkoutDone} label="" />
+          </div>
+          {workoutDone ? (
+            <span className="text-xs text-green-700 font-medium">{lang === "he" ? "מעולה!" : "Great!"}</span>
+          ) : (
+            <span className="text-[10px] text-wing-subtle">{lang === "he" ? "התאמנת היום?" : "Did you train?"}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Workout details — expands below grid when done */}
+      {workoutDone && (
+        <SectionCard>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {WORKOUT_TYPES.map((wt) => (
+                <button
+                  key={wt.value}
+                  onClick={() => setWorkoutType(wt.value)}
+                  className={`text-sm px-3 py-2 rounded-[14px] border-2 text-right transition-all ${
+                    workoutType === wt.value
+                      ? "border-wing-ink bg-wing-elevated text-wing-ink font-semibold"
+                      : "border-wing-border bg-wing-elevated text-wing-muted"
+                  }`}
+                >
+                  {wt.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              {(["light", "moderate", "intense"] as const).map((lvl) => (
+                <button
+                  key={lvl}
+                  onClick={() => setWorkoutIntensity(lvl)}
+                  className={`flex-1 text-sm py-2 rounded-[14px] border-2 transition-all ${
+                    workoutIntensity === lvl
+                      ? "border-wing-ink bg-wing-elevated text-wing-ink font-semibold"
+                      : "border-wing-border bg-wing-elevated text-wing-muted"
+                  }`}
+                >
+                  {lvl === "light" ? t("checkin_workout_light") : lvl === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense")}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                value={workoutDuration}
+                onChange={(e) => setWorkoutDuration(e.target.value)}
+                placeholder={t("checkin_workout_dur")}
+                inputMode="numeric"
+                className="flex-1 px-4 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
+              />
+              <span className="text-sm text-wing-muted shrink-0">{t("checkin_workout_min")}</span>
+            </div>
+            {workoutDuration && parseInt(workoutDuration) > 0 && (
+              <p className="text-sm text-green-700 bg-green-50 rounded-[14px] px-4 py-2 text-center font-medium">
+                {(t("checkin_calories_est") as (n: number) => string)(calcWorkoutCalories(workoutType, workoutIntensity, parseInt(workoutDuration), user?.profile?.weightKg ?? 70))}
+              </p>
+            )}
+          </div>
+        </SectionCard>
       )}
 
-      {activeTab === "advanced" && (
-      <>
-      {/* Eating Window */}
+      {/* 3. Eating Window */}
       <SectionCard>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -475,14 +540,10 @@ function CheckinPageInner() {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setEwManual((v) => !v)}
-            className="text-xs text-wing-muted underline"
-          >
+          <button onClick={() => setEwManual((v) => !v)} className="text-xs text-wing-muted underline">
             {ewManual ? t("checkin_ew_auto") : t("checkin_ew_manual")}
           </button>
         </div>
-
         {ewOpen && ewClose && !ewManual ? (
           <div className="flex items-center justify-between bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3">
             <div className="text-center">
@@ -513,21 +574,13 @@ function CheckinPageInner() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-xs text-wing-muted mb-1.5">{t("checkin_ew_open_label")}</p>
-                <input
-                  type="time"
-                  value={ewOpen}
-                  onChange={(e) => setEwOpen(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
-                />
+                <input type="time" value={ewOpen} onChange={(e) => setEwOpen(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink" />
               </div>
               <div>
                 <p className="text-xs text-wing-muted mb-1.5">{t("checkin_ew_close_label")}</p>
-                <input
-                  type="time"
-                  value={ewClose}
-                  onChange={(e) => setEwClose(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
-                />
+                <input type="time" value={ewClose} onChange={(e) => setEwClose(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink" />
               </div>
             </div>
             {ewOpen && ewClose && (
@@ -537,158 +590,26 @@ function CheckinPageInner() {
             )}
           </div>
         ) : (
-          <p className="text-sm text-wing-subtle text-center py-2">
-            {t("checkin_ew_hint")}
-          </p>
+          <p className="text-sm text-wing-subtle text-center py-2">{t("checkin_ew_hint")}</p>
         )}
       </SectionCard>
 
-      </>
-      )}
-
-      {activeTab === "essential" && (
-      <>
-      {/* Steps */}
+      {/* 4. Free note */}
       <SectionCard>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Footprints size={16} className="text-wing-muted" />
-            <span className="font-semibold text-wing-ink">{t("checkin_steps")}</span>
-          </div>
-          <button
-            onClick={() => setStepsEditing((v) => !v)}
-            className="text-xs text-wing-muted underline"
-          >
-            {stepsEditing ? t("cancel") : t("steps_update_manual")}
-          </button>
+        <div className="flex items-center gap-2 mb-3">
+          <Pencil size={16} className="text-wing-muted" />
+          <span className="font-semibold text-wing-ink">{t("checkin_notes")}</span>
         </div>
-
-        {stepsEditing ? (
-          <input
-            type="number"
-            value={steps}
-            onChange={(e) => setSteps(e.target.value)}
-            placeholder={t("checkin_steps_ph")}
-            inputMode="numeric"
-            autoFocus
-            className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
-          />
-        ) : steps ? (
-          <div className="bg-wing-elevated border border-wing-border rounded-[14px] px-4 py-3 text-center">
-            <span className="font-black text-wing-ink tabular" style={{ fontSize: 28, letterSpacing: "-0.04em" }}>
-              {parseInt(steps).toLocaleString()}
-            </span>
-            <span className="text-sm text-wing-muted mr-1"> {lang === "he" ? "צעדים" : "steps"}</span>
-          </div>
-        ) : (
-          <p className="text-sm text-wing-subtle text-center py-2">{t("checkin_steps_ph")}</p>
-        )}
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder={t("checkin_notes_ph")}
+          rows={3}
+          className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
+        />
       </SectionCard>
 
-      </>
-      )}
-
-      {activeTab === "advanced" && (
-      <>
-      {/* Workout */}
-      <SectionCard>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Dumbbell size={16} className="text-wing-muted" />
-            <span className="font-semibold text-wing-ink">{t("checkin_workout")}</span>
-          </div>
-          <Switch checked={workoutDone} onChange={setWorkoutDone} label={t("workout_label")} />
-        </div>
-
-        {workoutDone && (
-          <div className="mt-4 space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              {WORKOUT_TYPES.map((t) => (
-                <button
-                  key={t.value}
-                  onClick={() => setWorkoutType(t.value)}
-                  className={`text-sm px-3 py-2 rounded-[14px] border-2 text-right transition-all ${
-                    workoutType === t.value
-                      ? "border-wing-ink bg-wing-elevated text-wing-ink font-semibold"
-                      : "border-wing-border bg-wing-elevated text-wing-muted"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              {(["light", "moderate", "intense"] as const).map((lvl) => (
-                <button
-                  key={lvl}
-                  onClick={() => setWorkoutIntensity(lvl)}
-                  className={`flex-1 text-sm py-2 rounded-[14px] border-2 transition-all ${
-                    workoutIntensity === lvl
-                      ? "border-wing-ink bg-wing-elevated text-wing-ink font-semibold"
-                      : "border-wing-border bg-wing-elevated text-wing-muted"
-                  }`}
-                >
-                  {lvl === "light" ? t("checkin_workout_light") : lvl === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense")}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <input
-                type="number"
-                value={workoutDuration}
-                onChange={(e) => setWorkoutDuration(e.target.value)}
-                placeholder={t("checkin_workout_dur")}
-                inputMode="numeric"
-                className="flex-1 px-4 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
-              />
-              <span className="text-sm text-wing-muted shrink-0">{t("checkin_workout_min")}</span>
-            </div>
-
-            {workoutDuration && parseInt(workoutDuration) > 0 && (
-              <p className="text-sm text-green-700 bg-green-50 rounded-[14px] px-4 py-2 text-center font-medium">
-                🔥 {(t("checkin_calories_est") as (n: number) => string)(calcWorkoutCalories(workoutType, workoutIntensity, parseInt(workoutDuration), user?.profile?.weightKg ?? 70))}
-              </p>
-            )}
-          </div>
-        )}
-      </SectionCard>
-
-      </>
-      )}
-
-      {activeTab === "essential" && (
-      <>
-      {/* Mood */}
-      <SectionCard>
-        <div className="flex items-center gap-2 mb-4">
-          <Smile size={16} className="text-wing-honey" />
-          <span className="font-semibold text-wing-ink">{t("checkin_mood")}</span>
-        </div>
-        <div className="flex justify-around">
-          {moods.map((m) => (
-            <button
-              key={m.value}
-              onClick={() => setMood(m.value as 1 | 2 | 3 | 4 | 5)}
-              className={`flex flex-col items-center gap-1 p-2.5 rounded-[14px] transition-all active:scale-95 ${
-                mood === m.value ? "scale-110" : "hover:bg-wing-elevated"
-              }`}
-              style={mood === m.value ? { background: "linear-gradient(135deg, #fff3b8, #ffc89a)" } : {}}
-            >
-              <span className="text-2xl">{m.emoji}</span>
-              <MonoLabel>{m.label}</MonoLabel>
-            </button>
-          ))}
-        </div>
-      </SectionCard>
-
-      </>
-      )}
-
-      {activeTab === "advanced" && (
-      <>
-      {/* Weight */}
+      {/* 5. Weight */}
       <SectionCard>
         <div className="flex items-center gap-2 mb-3">
           <Scale size={16} className="text-wing-muted" />
@@ -709,48 +630,32 @@ function CheckinPageInner() {
         </div>
       </SectionCard>
 
-      {/* Free text */}
-      <SectionCard>
-        <div className="flex items-center gap-2 mb-3">
-          <Pencil size={16} className="text-wing-muted" />
-          <span className="font-semibold text-wing-ink">{t("checkin_notes")}</span>
-        </div>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={t("checkin_notes_ph")}
-          rows={3}
-          className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
-        />
-      </SectionCard>
-
-      </>
-      )}
-
-      {/* CTA */}
-      <button
-        onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : handleSave()}
-        disabled={saving}
-        className="w-full py-4 rounded-[14px] font-extrabold text-wing-ink text-base transition-all active:scale-[0.97] disabled:opacity-60"
-        style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
-      >
-        {trialLocked
-          ? t("trial_upgrade_btn")
-          : saving
-          ? g(user?.profile?.gender, t("checkin_saving_m"), t("checkin_saving_f"))
-          : myCheckin
-          ? g(user?.profile?.gender, t("checkin_update_m"), t("checkin_update_f"))
-          : g(user?.profile?.gender, t("checkin_save_m"), t("checkin_save_f"))}
-      </button>
-
-      {/* Close day button */}
+      {/* 6. Close day */}
       {myCheckin && !daySummary && (
         <button
           onClick={handleCloseDay}
           disabled={closingDay}
-          className="w-full py-3.5 rounded-[14px] border-2 border-wing-ink font-bold text-wing-ink text-sm transition-all active:scale-[0.97] disabled:opacity-60 flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-[14px] font-extrabold text-wing-ink text-base transition-all active:scale-[0.97] disabled:opacity-60 flex items-center justify-center gap-2"
+          style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
         >
-          {closingDay ? g(user?.profile?.gender, t("checkin_closing_m"), t("checkin_closing_f")) : <><Moon size={16} /> {t("checkin_close_day")}</>}
+          {closingDay
+            ? g(user?.profile?.gender, t("checkin_closing_m"), t("checkin_closing_f"))
+            : <><Moon size={18} /> {t("checkin_close_day")}</>}
+        </button>
+      )}
+
+      {!myCheckin && (
+        <button
+          onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : handleSave()}
+          disabled={saving}
+          className="w-full py-4 rounded-[14px] font-extrabold text-wing-ink text-base transition-all active:scale-[0.97] disabled:opacity-60"
+          style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+        >
+          {trialLocked
+            ? t("trial_upgrade_btn")
+            : saving
+            ? g(user?.profile?.gender, t("checkin_saving_m"), t("checkin_saving_f"))
+            : g(user?.profile?.gender, t("checkin_save_m"), t("checkin_save_f"))}
         </button>
       )}
 
