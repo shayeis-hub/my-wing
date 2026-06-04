@@ -108,7 +108,7 @@ export const T = {
     reaction_flame: "חזק",
     reaction_sparkles: "וואו",
     reaction_trophy: "אלוף",
-    recent_activity_title: "תגובות שקיבלת השבוע",
+    recent_activity_title: "תמיכה ממבנה הכנף",
     recent_activity_checkin: "צ׳ק-אפ",
     recent_activity_meal: "ארוחה",
     recent_activity_post: "פיד",
@@ -413,7 +413,7 @@ export const T = {
     wing_or: "או",
 
     // SOS
-    sos_btn: "SOS – צריך חיזוק!",
+    sos_btn: "רגע לפני שבירה? 🤝",
     sos_sending: "שולח...",
     sos_sent: "נשלח ✓",
     sos_success: (n: number) => n > 0 ? `שלחנו סימן ל-${n} חברים 💪` : "שלחנו סימן!",
@@ -756,7 +756,7 @@ export const T = {
     reaction_flame: "On Fire",
     reaction_sparkles: "Wow",
     reaction_trophy: "Champion",
-    recent_activity_title: "Replies you got this week",
+    recent_activity_title: "Support from your wing",
     recent_activity_checkin: "check-up",
     recent_activity_meal: "meal",
     recent_activity_post: "feed",
@@ -1061,7 +1061,7 @@ export const T = {
     wing_or: "or",
 
     // SOS
-    sos_btn: "SOS – I need support!",
+    sos_btn: "About to break? 🤝",
     sos_sending: "Sending...",
     sos_sent: "Sent ✓",
     sos_success: (n: number) => n > 0 ? `Sent a signal to ${n} friend${n === 1 ? "" : "s"} 💪` : "Signal sent!",

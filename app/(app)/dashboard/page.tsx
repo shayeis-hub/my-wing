@@ -275,14 +275,16 @@ export default function DashboardPage() {
               <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#c79a00]">{t("dashboard_calories_today")}</span>
               <span className="text-xs text-wing-ink/60">{(t("dashboard_meals_count") as (n: number) => string)(myTodayMeals.length)}</span>
             </div>
-            <div className="flex items-end gap-3 mb-3">
+            <div className="flex items-end gap-2 mb-3 flex-wrap">
               <span
                 className="font-black tabular text-wing-ink"
                 style={{ fontSize: 52, letterSpacing: "-0.05em", fontFeatureSettings: '"tnum"', lineHeight: 1 }}
               >
                 {todayCalories}
               </span>
-              <span className="text-sm text-wing-ink/60 mb-2">/ {bmr} {t("kcal")}</span>
+              <span className="text-sm text-wing-ink/60 mb-2">
+                / {bmr} {t("kcal")} {lang === "he" ? "צרכת / יעד" : "consumed / goal"}
+              </span>
             </div>
             <ProgressBar
               value={todayCalories}
