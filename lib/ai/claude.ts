@@ -85,6 +85,59 @@ Reply ONLY with valid JSON in the following format, no extra text:
   return JSON.parse(jsonMatch[0]) as MealAnalysis;
 }
 
+export async function analyzeMealImages(
+  images: { base64: string; mediaType: "image/jpeg" | "image/png" | "image/webp" }[],
+  hint?: string,
+  lang: "he" | "en" = "he"
+): Promise<MealAnalysis> {
+  const isHe = lang === "he";
+  const count = images.length;
+
+  const promptText = isHe
+    ? `${hint ? `המשתמש מציין שהארוחה היא: "${hint}".\n\n` : ""}לפניך ${count} תמונות של אותה ארוחה מזוויות/מנות שונות. נתח את כולן יחד כארוחה אחת שלמה — סכום כל המנות — ותן ערכים תזונתיים כוללים.
+
+ענה אך ורק ב-JSON תקני, ללא טקסט נוסף:
+{
+  "description": "תיאור הארוחה הכוללת",
+  "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0,
+  "items": [{ "name": "שם הרכיב", "estimatedGrams": 0, "calories": 0 }],
+  "healthScore": 7,
+  "tips": "טיפ אופציונלי",
+  "containsVegetables": false
+}`
+    : `${hint ? `The user notes: "${hint}".\n\n` : ""}You have ${count} photos of the same meal from different angles/portions. Analyze them together as one complete meal — sum of all portions — and return total nutritional values.
+
+Reply ONLY with valid JSON:
+{
+  "description": "full meal description",
+  "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0,
+  "items": [{ "name": "ingredient name", "estimatedGrams": 0, "calories": 0 }],
+  "healthScore": 7,
+  "tips": "optional tip",
+  "containsVegetables": false
+}`;
+
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 1024,
+    messages: [{
+      role: "user",
+      content: [
+        ...images.map((img) => ({
+          type: "image" as const,
+          source: { type: "base64" as const, media_type: img.mediaType, data: img.base64 },
+        })),
+        { type: "text" as const, text: promptText },
+      ],
+    }],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("Claude did not return valid JSON");
+  return JSON.parse(jsonMatch[0]) as MealAnalysis;
+}
+
 export async function analyzeMealText(description: string, lang: "he" | "en" = "he"): Promise<MealAnalysis> {
   const isHe = lang === "he";
   const promptContent = isHe

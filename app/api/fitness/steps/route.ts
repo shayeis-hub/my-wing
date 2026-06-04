@@ -25,9 +25,23 @@ export async function GET(req: NextRequest) {
     }),
   });
 
-  if (!tokenRes.ok) return NextResponse.json({ connected: true, steps: null });
+  if (!tokenRes.ok) {
+    const tokenErr = await tokenRes.text();
+    console.error("Google token refresh failed:", tokenErr);
+    // Token expired/revoked — clear it so user re-connects
+    if (tokenRes.status === 400 || tokenRes.status === 401) {
+      await admin.firestore().doc(`users/${uid}`).update({ googleFitRefreshToken: admin.firestore.FieldValue.delete() });
+      return NextResponse.json({ connected: false, error: "token_expired" });
+    }
+    return NextResponse.json({ connected: true, steps: null });
+  }
 
-  const { access_token } = await tokenRes.json();
+  const tokenData = await tokenRes.json();
+  const access_token = tokenData.access_token;
+  if (!access_token) {
+    console.error("No access_token in response:", tokenData);
+    return NextResponse.json({ connected: true, steps: null });
+  }
 
   // Use client-provided timestamps to respect local timezone
   const startParam = req.nextUrl.searchParams.get("start");
@@ -53,7 +67,11 @@ export async function GET(req: NextRequest) {
     }
   );
 
-  if (!fitRes.ok) return NextResponse.json({ connected: true, steps: null });
+  if (!fitRes.ok) {
+    const fitErr = await fitRes.text();
+    console.error("Google Fit API error:", fitRes.status, fitErr);
+    return NextResponse.json({ connected: true, steps: null, fitError: fitRes.status });
+  }
 
   const data = await fitRes.json();
   let steps = 0;

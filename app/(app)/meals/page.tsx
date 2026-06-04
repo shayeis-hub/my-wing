@@ -62,8 +62,9 @@ function MealsPageInner() {
   const [savingManual, setSavingManual] = useState(false);
   const [pendingAnalysis, setPendingAnalysis] = useState<{
     analysis: MealAnalysis;
-    imageDataUrl: string;
+    imageDataUrls: string[];   // support multiple images
   } | null>(null);
+  const [stagedImages, setStagedImages] = useState<string[]>([]); // images waiting to be analyzed together
   const [mealType, setMealType] = useState<typeof mealTypes[number]>("lunch");
   const [mealTime, setMealTime] = useState(() => format(new Date(), "HH:mm"));
   const [mealDate, setMealDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
@@ -86,7 +87,29 @@ function MealsPageInner() {
     setShowCamera(false);
     setHint("");
     setEditingValues(false);
-    setPendingAnalysis({ analysis, imageDataUrl });
+
+    if (pendingAnalysis) {
+      // Adding another photo to existing analysis — re-analyze all together
+      const newUrls = [...pendingAnalysis.imageDataUrls, imageDataUrl].slice(0, 5);
+      setReanalyzing(true);
+      try {
+        const { analyzeMealImages } = await import("@/lib/ai/claude");
+        const images = newUrls.map((url) => ({
+          base64: url.split(",")[1],
+          mediaType: (url.startsWith("data:image/png") ? "image/png" : "image/jpeg") as "image/jpeg" | "image/png",
+        }));
+        const combined = await analyzeMealImages(images, undefined, lang as "he" | "en");
+        setPendingAnalysis({ analysis: combined, imageDataUrls: newUrls });
+        toast.success(lang === "he" ? `${newUrls.length} תמונות — מנותחות יחד` : `${newUrls.length} photos analyzed together`);
+      } catch {
+        toast.error(lang === "he" ? "שגיאה בניתוח" : "Analysis error");
+      } finally {
+        setReanalyzing(false);
+      }
+    } else {
+      // First image
+      setPendingAnalysis({ analysis, imageDataUrls: [imageDataUrl] });
+    }
   }
 
   async function saveManualMeal() {
@@ -129,8 +152,8 @@ function MealsPageInner() {
     if (!pendingAnalysis || !hint.trim()) return;
     setReanalyzing(true);
     try {
-      const base64 = pendingAnalysis.imageDataUrl.split(",")[1];
-      const mediaType = pendingAnalysis.imageDataUrl.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+      const base64 = pendingAnalysis.imageDataUrls[0].split(",")[1];
+      const mediaType = pendingAnalysis.imageDataUrls[0].startsWith("data:image/png") ? "image/png" : "image/jpeg";
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -158,19 +181,21 @@ function MealsPageInner() {
     if (!pendingAnalysis || !user || !firebaseUser || !user.wingId) return;
     setSaving(true);
     try {
-      let imageURL: string | undefined;
-      if (pendingAnalysis.imageDataUrl) {
-        const storage = getStorage();
+      // Upload all images, first one is the cover
+      const storage = getStorage();
+      const imageURLs: string[] = [];
+      for (const dataUrl of pendingAnalysis.imageDataUrls) {
+        if (!dataUrl) continue;
         const imageRef = ref(storage, `meals/${firebaseUser.uid}/${nanoid()}.jpg`);
-        await uploadString(imageRef, pendingAnalysis.imageDataUrl, "data_url");
-        imageURL = await getDownloadURL(imageRef);
+        await uploadString(imageRef, dataUrl, "data_url");
+        imageURLs.push(await getDownloadURL(imageRef));
       }
 
       await addMeal(user.wingId, {
         wingId: user.wingId,
         userId: firebaseUser.uid,
         userName: user.displayName,
-        ...(imageURL ? { imageURL } : {}),
+        ...(imageURLs.length > 0 ? { imageURL: imageURLs[0] } : {}),
         analysis: pendingAnalysis.analysis,
         mealType,
         mealTime,
@@ -201,6 +226,7 @@ function MealsPageInner() {
 
       toast.success(t("meals_saved"));
       setPendingAnalysis(null);
+      setStagedImages([]);
     } catch {
       toast.error(t("meals_save_error"));
     } finally {
@@ -356,12 +382,33 @@ function MealsPageInner() {
       {pendingAnalysis && (
         <div className="bg-white rounded-3xl shadow-card p-4 space-y-4 border-2 border-wing-border">
           <h2 className="font-bold text-wing-ink">{t("meals_analysis_title")}</h2>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={pendingAnalysis.imageDataUrl}
-            alt="meal"
-            className="w-full h-44 object-cover rounded-2xl"
-          />
+          {/* Images — horizontal scroll if multiple */}
+          <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
+            {pendingAnalysis.imageDataUrls.map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={url}
+                alt={`meal ${i + 1}`}
+                className={`${pendingAnalysis.imageDataUrls.length === 1 ? "w-full h-44" : "h-32 w-32 flex-shrink-0"} object-cover rounded-2xl`}
+              />
+            ))}
+            {/* Add another image button */}
+            {pendingAnalysis.imageDataUrls.length < 5 && (
+              <button
+                onClick={() => setShowCamera(true)}
+                className="h-32 w-32 flex-shrink-0 rounded-2xl border-2 border-dashed border-wing-border flex flex-col items-center justify-center gap-1 text-wing-muted hover:border-wing-ink transition-colors"
+              >
+                <span className="text-2xl">+</span>
+                <span className="text-xs font-medium">{lang === "he" ? "הוסף תמונה" : "Add photo"}</span>
+              </button>
+            )}
+          </div>
+          {pendingAnalysis.imageDataUrls.length > 1 && (
+            <p className="text-xs text-wing-muted text-center">
+              {lang === "he" ? `${pendingAnalysis.imageDataUrls.length} תמונות — מנותחות יחד כארוחה אחת` : `${pendingAnalysis.imageDataUrls.length} photos — analyzed as one meal`}
+            </p>
+          )}
           <div className="space-y-2 text-sm text-wing-ink">
             <p className="font-medium">{pendingAnalysis.analysis.description}</p>
 
