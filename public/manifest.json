@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Wingpact",
-  "short_name": "Wingpact",
-  "description": "Social weight loss support app — fly together with your wing",
+  "name": "מבנה כנף",
+  "short_name": "מבנה כנף",
+  "description": "אפליקציית תמיכה חברתית לירידה במשקל — יורדים ביחד",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",

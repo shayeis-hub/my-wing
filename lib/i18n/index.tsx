@@ -575,12 +575,12 @@ export const T = {
     trial_days_left: (n: number) => n === 1 ? "נשאר יום אחד בניסיון" : `נשארו ${n} ימים בניסיון`,
     trial_active_sub: "14 ימי ניסיון ללא תשלום",
     trial_expired_title: "תקופת הניסיון הסתיימה",
-    trial_expired_body: "כדי להמשיך להשתמש ב-Wingpact, בחר תכנית מנוי",
+    trial_expired_body: "כדי להמשיך להשתמש במבנה כנף, בחר תכנית מנוי",
     trial_view_only: "המשך בצפייה בלבד",
     trial_view_only_note: "לא ניתן להזין ארוחות, צ׳ק-אין או לשלוח תגובות",
     trial_locked_action: "שדרג לפרמיום כדי לבצע פעולה זו",
     trial_upgrade_btn: "שדרג עכשיו",
-    founders_message: "שי וסיוון — צוות המייסדים של Wingpact. גישה מלאה לעולם ועד.",
+    founders_message: "שי וסיוון — צוות המייסדים של מבנה כנף. גישה מלאה לעולם ועד.",
 
     // Steps page
     steps_ring_label: "צעדים",
@@ -1333,11 +1333,15 @@ function detectLang(): Lang {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("he");
-
-  useEffect(() => {
-    setLangState(detectLang());
-  }, []);
+  const [lang, setLangState] = useState<Lang>(() => {
+    if (typeof window !== "undefined") {
+      const detected = detectLang();
+      document.documentElement.setAttribute("lang", detected);
+      document.documentElement.setAttribute("dir", detected === "he" ? "rtl" : "ltr");
+      return detected;
+    }
+    return "he";
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute("lang", lang);
