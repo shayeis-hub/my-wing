@@ -69,6 +69,7 @@ export interface MealAnalysis {
   items: FoodItem[];
   healthScore: number;
   tips?: string;
+  containsVegetables?: boolean;
 }
 
 export interface FoodItem {

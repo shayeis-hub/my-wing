@@ -32,7 +32,8 @@ export async function analyzeMealImage(
     { "name": "שם הרכיב", "estimatedGrams": 0, "calories": 0 }
   ],
   "healthScore": 7,
-  "tips": "טיפ אופציונלי"
+  "tips": "טיפ אופציונלי",
+  "containsVegetables": false
 }`
     : `${hint ? `The user notes that the meal is: "${hint}". Use this alongside the image for a more accurate analysis.\n\n` : ""}Please analyze the plate in this image and provide:
 1. A short description of the meal in English
@@ -40,6 +41,7 @@ export async function analyzeMealImage(
 3. Nutritional values: calories, protein, carbs, fat, fiber
 4. A health score from 1 to 10
 5. A short tip in English to improve the meal (optional)
+6. Whether the meal contains vegetables (true/false)
 
 Reply ONLY with valid JSON in the following format, no extra text:
 {
@@ -53,7 +55,8 @@ Reply ONLY with valid JSON in the following format, no extra text:
     { "name": "ingredient name", "estimatedGrams": 0, "calories": 0 }
   ],
   "healthScore": 7,
-  "tips": "optional tip"
+  "tips": "optional tip",
+  "containsVegetables": false
 }`;
 
   const response = await client.messages.create({
@@ -92,6 +95,7 @@ export async function analyzeMealText(description: string, lang: "he" | "en" = "
 2. ערכים תזונתיים משוערים: קלוריות, חלבון, פחמימות, שומן, סיבים
 3. ציון בריאותי מ-1 עד 10
 4. טיפ קצר בעברית לשיפור (אופציונלי)
+5. האם הארוחה מכילה ירקות (true/false)
 
 ענה אך ורק ב-JSON תקני בפורמט הבא, ללא טקסט נוסף:
 {
@@ -105,7 +109,8 @@ export async function analyzeMealText(description: string, lang: "he" | "en" = "
     { "name": "שם הרכיב", "estimatedGrams": 0, "calories": 0 }
   ],
   "healthScore": 7,
-  "tips": "טיפ אופציונלי"
+  "tips": "טיפ אופציונלי",
+  "containsVegetables": false
 }`
     : `The user described their meal: "${description}"
 
@@ -114,6 +119,7 @@ Please analyze the meal and provide:
 2. Estimated nutritional values: calories, protein, carbs, fat, fiber
 3. A health score from 1 to 10
 4. A short tip in English to improve the meal (optional)
+5. Whether the meal contains vegetables (true/false)
 
 Reply ONLY with valid JSON in the following format, no extra text:
 {
@@ -127,7 +133,8 @@ Reply ONLY with valid JSON in the following format, no extra text:
     { "name": "ingredient name", "estimatedGrams": 0, "calories": 0 }
   ],
   "healthScore": 7,
-  "tips": "optional tip"
+  "tips": "optional tip",
+  "containsVegetables": false
 }`;
 
   const response = await client.messages.create({

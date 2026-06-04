@@ -10,7 +10,7 @@ import { MealCard } from "@/components/meals/MealCard";
 import { MealCamera } from "@/components/meals/MealCamera";
 import { UpgradeModal } from "@/components/subscription/UpgradeModal";
 import { Button } from "@/components/ui/Button";
-import { addMeal } from "@/lib/firebase/firestore";
+import { addMeal, getTodayCheckin, saveCheckin } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
 import { UtensilsCrossed, ChevronDown, PenLine, Clock } from "lucide-react";
@@ -176,6 +176,28 @@ function MealsPageInner() {
         mealTime,
         mealDate,
       });
+
+      // Auto-increment vegetable count in today's checkin if meal contains vegetables
+      if (pendingAnalysis.analysis.containsVegetables && user.wingId) {
+        try {
+          const todayStr = mealDate ?? new Date().toISOString().split("T")[0];
+          const existing = await getTodayCheckin(user.wingId, firebaseUser.uid, todayStr);
+          await saveCheckin(user.wingId, {
+            wingId: user.wingId,
+            userId: firebaseUser.uid,
+            userName: user.displayName,
+            date: todayStr,
+            waterGlasses: existing?.waterGlasses ?? 0,
+            vegetablesServings: (existing?.vegetablesServings ?? 0) + 1,
+            mood: existing?.mood ?? 3,
+            ...(existing?.steps ? { steps: existing.steps } : {}),
+            ...(existing?.notes ? { notes: existing.notes } : {}),
+            ...(existing?.weightKg ? { weightKg: existing.weightKg } : {}),
+            ...(existing?.eatingWindow ? { eatingWindow: existing.eatingWindow } : {}),
+            workout: existing?.workout ?? { done: false },
+          });
+        } catch { /* non-critical */ }
+      }
 
       toast.success(t("meals_saved"));
       setPendingAnalysis(null);
