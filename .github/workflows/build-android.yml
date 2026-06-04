@@ -28,6 +28,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
+      - name: Remove old reserved-keyword package dir
+        run: rm -rf android/app/src/main/java/app/wingpact/native
+
       - name: Build Debug APK
         run: |
           cd android
