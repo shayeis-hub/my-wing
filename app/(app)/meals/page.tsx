@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { enUS } from "date-fns/locale";
@@ -24,8 +24,6 @@ import { useTrialLock } from "@/hooks/useTrialLock";
 import { useSearchParams } from "next/navigation";
 
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
-
-import { Suspense } from "react";
 
 function MealsPageInner() {
   const { user, firebaseUser } = useAuth();
