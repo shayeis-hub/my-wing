@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 
 export type Lang = "he" | "en";
 
@@ -1342,6 +1343,29 @@ function detectLang(): Lang {
   return nav.startsWith("he") ? "he" : "en";
 }
 
+// Native WebView localStorage can be wiped between app launches, so on native we
+// also persist the language to Capacitor Preferences (native key-value store).
+async function loadStoredLangNative(): Promise<Lang | null> {
+  try {
+    if (!Capacitor.isNativePlatform()) return null;
+    const { Preferences } = await import("@capacitor/preferences");
+    const { value } = await Preferences.get({ key: "lang" });
+    return value === "he" || value === "en" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+async function persistLang(l: Lang): Promise<void> {
+  try { localStorage.setItem("lang", l); } catch { /* storage unavailable */ }
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { Preferences } = await import("@capacitor/preferences");
+      await Preferences.set({ key: "lang", value: l });
+    }
+  } catch { /* native store unavailable */ }
+}
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
     if (typeof window !== "undefined") {
@@ -1358,8 +1382,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute("dir", lang === "he" ? "rtl" : "ltr");
   }, [lang]);
 
+  // On native, restore the saved language from Preferences (survives WebView restarts).
+  useEffect(() => {
+    let cancelled = false;
+    loadStoredLangNative().then((stored) => {
+      if (!cancelled && stored && stored !== lang) setLangState(stored);
+    });
+    return () => { cancelled = true; };
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function setLang(l: Lang) {
-    localStorage.setItem("lang", l);
+    void persistLang(l);
     setLangState(l);
   }
 
