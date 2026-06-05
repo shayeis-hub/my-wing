@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { useWing } from "@/hooks/useWing";
@@ -18,10 +18,10 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { enUS } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
-import { isNativeApp } from "@/lib/fitness/healthConnect";
+import { isNativeApp, readTodayStepsFromHealth } from "@/lib/fitness/healthConnect";
 import { registerNativePush } from "@/lib/push/native";
 import { useRouter } from "next/navigation";
-import { getTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, type GroupEnergy } from "@/lib/firebase/firestore";
+import { getTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, saveSteps, type GroupEnergy } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
 import { Bell, Footprints, Scale, ChevronLeft, Droplets, Flame, Plus, Minus, Leaf, Check, Pencil, Users, UtensilsCrossed, MessageCircle, Trophy } from "lucide-react";
@@ -45,6 +45,7 @@ export default function DashboardPage() {
   const [pulseField, setPulseField] = useState<"water" | "veg" | "steps" | null>(null);
   const [editingSteps, setEditingSteps] = useState(false);
   const [stepsInput, setStepsInput] = useState("");
+  const healthSyncedRef = useRef(false);
 
   useEffect(() => {
     if (isNativeApp()) return; // native app handles its own permission prompt
@@ -64,10 +65,49 @@ export default function DashboardPage() {
     const today = format(new Date(), "yyyy-MM-dd");
     getTodayCheckin(user.wingId, firebaseUser.uid, today).then(setTodayCheckin);
     getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
-    getWingSteps(user.wingId, today).then(setWingSteps);
+    getWingSteps(user.wingId, today).then((entries) => {
+      setWingSteps(entries);
+      maybeSyncHealthSteps(entries);
+    });
     getUserCheckinDates(user.wingId, firebaseUser.uid).then((dates) => setStreak(calcStreak(dates)));
     getGroupEnergy(user.wingId, wing?.memberIds.length ?? 1).then(setGroupEnergy);
   }, [user?.wingId, firebaseUser]);
+
+  // Native app: auto-sync today's steps from Health Connect into the dashboard.
+  // No dedicated steps page needed — runs once per load, only updates upward.
+  async function maybeSyncHealthSteps(entries: StepsEntry[]) {
+    if (!isNativeApp() || !user?.wingId || !firebaseUser || healthSyncedRef.current) return;
+    healthSyncedRef.current = true;
+    try {
+      const r = await readTodayStepsFromHealth();
+      if (!r.authorized || !r.steps || r.steps <= 0) return;
+      const syncedSteps = r.steps;
+      const today = format(new Date(), "yyyy-MM-dd");
+      const current = entries.find((s) => s.userId === firebaseUser.uid)?.steps ?? 0;
+      if (syncedSteps <= current) return; // don't lower a manually-entered value
+      await saveSteps(user.wingId, {
+        wingId: user.wingId,
+        userId: firebaseUser.uid,
+        userName: user.displayName,
+        date: today,
+        steps: syncedSteps,
+      });
+      setWingSteps((prev) => [
+        ...prev.filter((s) => s.userId !== firebaseUser.uid),
+        {
+          id: `${firebaseUser.uid}_${today}`,
+          wingId: user.wingId!,
+          userId: firebaseUser.uid,
+          userName: user.displayName,
+          date: today,
+          steps: syncedSteps,
+          createdAt: null as unknown as StepsEntry["createdAt"],
+        },
+      ]);
+    } catch {
+      /* health sync failed — non-critical */
+    }
+  }
 
   async function handleEnableNotifications() {
     if (!firebaseUser) return;
