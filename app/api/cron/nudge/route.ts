@@ -88,6 +88,8 @@ export async function GET(req: Request) {
         await admin.messaging().send({
           token: fcmToken,
           notification: { title: msg.title[gender], body: msg.body[gender] },
+          // data.link is read by the native app (Capacitor) on notification tap
+          data: { link: "/checkin", type: "nudge" },
           webpush: {
             notification: { icon: "/icons/icon-192.png", dir: "rtl", lang: "he" },
             fcmOptions: { link: "/checkin" },

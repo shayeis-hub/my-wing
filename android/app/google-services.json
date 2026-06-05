@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "991022188498",
+    "project_id": "my-wing-46c77",
+    "storage_bucket": "my-wing-46c77.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991022188498:android:07c47743f906243e65aa0b",
+        "android_client_info": {
+          "package_name": "app.wingpact.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "991022188498-tj9q8si4lp3t20v16thi3midqeau2c9s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCURYyL33OwPyLIMig1WCZe1EmVh5xjubo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "991022188498-tj9q8si4lp3t20v16thi3midqeau2c9s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
         title: `💪 ${authorName} עודד/ה אותך!`,
         body: message,
       },
+      // data.link is read by the native app (Capacitor) on notification tap
+      data: { link: targetLink, type: "encouragement" },
       webpush: {
         notification: { icon: "/icons/icon-192.png", dir: "rtl", lang: "he" },
         fcmOptions: { link: targetLink },

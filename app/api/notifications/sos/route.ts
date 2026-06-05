@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
             title: "SOS – צריך תמיכה! 🆘",
             body: `${userName} זקוק/ה לחיזוק עכשיו. היכנסו לאפליקציה 💪`,
           },
+          // data.link is read by the native app (Capacitor) on notification tap
+          data: { link: "/wing", type: "sos", senderId: String(userId ?? "") },
           android: { notification: { sound: "default", channelId: "sos", priority: "high" } },
           apns: { payload: { aps: { sound: "default", badge: 1 } } },
           webpush: {

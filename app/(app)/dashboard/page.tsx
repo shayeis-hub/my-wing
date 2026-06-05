@@ -18,6 +18,9 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { enUS } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
+import { isNativeApp } from "@/lib/fitness/healthConnect";
+import { registerNativePush } from "@/lib/push/native";
+import { useRouter } from "next/navigation";
 import { getTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, type GroupEnergy } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
@@ -31,6 +34,7 @@ import { AdBanner } from "@/components/ads/AdBanner";
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
   const { t, lang } = useLanguage();
+  const router = useRouter();
   const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [groupEnergy, setGroupEnergy] = useState<GroupEnergy | null>(null);
@@ -43,10 +47,17 @@ export default function DashboardPage() {
   const [stepsInput, setStepsInput] = useState("");
 
   useEffect(() => {
+    if (isNativeApp()) return; // native app handles its own permission prompt
     if (typeof window !== "undefined" && "Notification" in window) {
       if (Notification.permission === "default") setShowNotifBanner(true);
     }
   }, []);
+
+  // Native app: register for FCM push + route taps to the right page.
+  useEffect(() => {
+    if (!firebaseUser || !isNativeApp()) return;
+    registerNativePush(firebaseUser.uid, (path) => router.push(path));
+  }, [firebaseUser, router]);
 
   useEffect(() => {
     if (!user?.wingId || !firebaseUser) return;
