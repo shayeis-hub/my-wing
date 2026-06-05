@@ -25,6 +25,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Fix SSL trust store for Temurin JDK on Linux
+        run: |
+          export JAVA_TRUSTSTORE=$JAVA_HOME/lib/security/cacerts
+          echo "org.gradle.jvmargs=-Djavax.net.ssl.trustStore=$JAVA_TRUSTSTORE -Djavax.net.ssl.trustStorePassword=changeit" >> ~/.gradle/gradle.properties
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
