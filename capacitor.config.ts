@@ -1,9 +1,9 @@
-﻿import type { CapacitorConfig } from "@capacitor/cli";
+import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId:    "app.wingpact.android",
-  appName:  "׳׳‘׳ ׳” ׳›׳ ׳£",
-  // Load the live site ג€” always up to date, no export needed
+  appName:  "מבנה כנף",
+  // Load the live site — always up to date, no export needed
   server: {
     url:             "https://wingpact.app",
     cleartext:       false,
@@ -36,4 +36,3 @@ const config: CapacitorConfig = {
 };
 
 export default config;
-
