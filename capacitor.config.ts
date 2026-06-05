@@ -3,9 +3,11 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId:    "app.wingpact.android",
   appName:  "מבנה כנף",
-  // Load the live site — always up to date, no export needed
+  // Load the live site — always up to date, no export needed.
+  // Start at /dashboard so the AuthGuard routes to /login when not signed in,
+  // skipping the public marketing landing page.
   server: {
-    url:             "https://wingpact.app",
+    url:             "https://wingpact.app/dashboard",
     cleartext:       false,
     allowNavigation: ["wingpact.app", "*.wingpact.app", "accounts.google.com", "*.googleapis.com", "*.paypal.com"],
   },
