@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { saveSteps, getWingSteps, getTodayCheckin } from "@/lib/firebase/firestore";
 import { connectGoogleFit, fetchStepsFromServer } from "@/lib/fitness/googleFit";
+import { isNativeApp, readTodayStepsFromHealth, openHealthSettings } from "@/lib/fitness/healthConnect";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { useSearchParams } from "next/navigation";
@@ -96,9 +97,14 @@ function StepsPageInner() {
   const [editing, setEditing] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [fitConnected, setFitConnected] = useState<boolean | null>(null);
+  const [native, setNative] = useState(false);
+  const [healthUnavailable, setHealthUnavailable] = useState(false);
   const today = format(new Date(), "yyyy-MM-dd");
   const [selectedDate, setSelectedDate] = useState(today);
   const isRetro = selectedDate !== today;
+
+  // Detect native app shell after mount (avoids SSR hydration mismatch)
+  useEffect(() => { setNative(isNativeApp()); }, []);
 
   useEffect(() => {
     if (searchParams.get("fitConnected") === "1") {
@@ -165,25 +171,45 @@ function StepsPageInner() {
   useEffect(() => {
     if (!firebaseUser || isRetro) return; // only auto-sync for today
     setSyncing(true);
-    fetchStepsFromServer(firebaseUser.uid)
-      .then(async ({ connected, steps }) => {
-        setFitConnected(connected);
-        if (connected && steps && steps > 0) {
-          await saveAndUpdateEntries(steps, today);
-        }
-      })
-      .catch(() => setFitConnected(false))
-      .finally(() => setSyncing(false));
-  }, [firebaseUser, isRetro]);
+    const run = native
+      ? readTodayStepsFromHealth().then(async (r) => {
+          setHealthUnavailable(r.reason === "unavailable");
+          setFitConnected(r.authorized);
+          if (r.authorized && r.steps && r.steps > 0) {
+            await saveAndUpdateEntries(r.steps, today);
+          }
+        })
+      : fetchStepsFromServer(firebaseUser.uid).then(async ({ connected, steps }) => {
+          setFitConnected(connected);
+          if (connected && steps && steps > 0) {
+            await saveAndUpdateEntries(steps, today);
+          }
+        });
+    run.catch(() => setFitConnected(false)).finally(() => setSyncing(false));
+  }, [firebaseUser, isRetro, native]);
 
   async function handleManualSync() {
     if (!firebaseUser) return;
     setSyncing(true);
-    const { connected, steps } = await fetchStepsFromServer(firebaseUser.uid).finally(() => setSyncing(false));
-    setFitConnected(connected);
-    if (connected && steps && steps > 0) {
-      await saveAndUpdateEntries(steps);
-      toast.success((t("steps_synced_toast") as (n: number) => string)(steps));
+    try {
+      if (native) {
+        const r = await readTodayStepsFromHealth();
+        setHealthUnavailable(r.reason === "unavailable");
+        setFitConnected(r.authorized);
+        if (r.authorized && r.steps && r.steps > 0) {
+          await saveAndUpdateEntries(r.steps);
+          toast.success((t("steps_synced_toast") as (n: number) => string)(r.steps));
+        }
+      } else {
+        const { connected, steps } = await fetchStepsFromServer(firebaseUser.uid);
+        setFitConnected(connected);
+        if (connected && steps && steps > 0) {
+          await saveAndUpdateEntries(steps);
+          toast.success((t("steps_synced_toast") as (n: number) => string)(steps));
+        }
+      }
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -227,24 +253,46 @@ function StepsPageInner() {
         />
       </div>
 
-      {/* Google Fit status bar — always visible when not retro */}
+      {/* Health source status bar — always visible when not retro.
+          Native app → Health Connect / HealthKit. Browser/PWA → Google Fit. */}
       {!isRetro && firebaseUser && (
         <div className="bg-wing-surface border border-wing-border rounded-[20px] px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_android_48dp.png" alt="" className="w-5 h-5" />
-            <span className="text-sm font-medium text-wing-ink">Google Fit</span>
+            {native ? (
+              <span className="text-base leading-none">❤️</span>
+            ) : (
+              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_android_48dp.png" alt="" className="w-5 h-5" />
+            )}
+            <span className="text-sm font-medium text-wing-ink">
+              {native ? (t("steps_health_label") as string) : "Google Fit"}
+            </span>
             {syncing && <span className="text-xs text-wing-muted animate-pulse">{t("steps_syncing_short") as string}</span>}
-            {!syncing && fitConnected === true && <span className="text-xs text-green-600 font-medium">✓ {t("steps_connected") as string}</span>}
-            {!syncing && fitConnected === false && <span className="text-xs text-wing-muted">{t("steps_not_connected") as string}</span>}
+            {!syncing && native && healthUnavailable && <span className="text-xs text-wing-muted">{t("steps_health_unavailable") as string}</span>}
+            {!syncing && !healthUnavailable && fitConnected === true && <span className="text-xs text-green-600 font-medium">✓ {t("steps_connected") as string}</span>}
+            {!syncing && !healthUnavailable && fitConnected === false && <span className="text-xs text-wing-muted">{t("steps_not_connected") as string}</span>}
           </div>
-          {fitConnected === true && !syncing && (
+
+          {/* Refresh when connected */}
+          {fitConnected === true && !syncing && !healthUnavailable && (
             <button onClick={handleManualSync} className="text-xs text-wing-heat font-semibold underline">
               {t("steps_refresh") as string}
             </button>
           )}
-          {fitConnected === false && (
+
+          {/* Native: install Health Connect when unavailable */}
+          {native && healthUnavailable && !syncing && (
             <button
-              onClick={() => connectGoogleFit(firebaseUser.uid)}
+              onClick={openHealthSettings}
+              className="text-xs bg-wing-ink text-wing-elevated font-bold px-3 py-1.5 rounded-xl"
+            >
+              {t("steps_health_install") as string}
+            </button>
+          )}
+
+          {/* Connect / grant access when not connected */}
+          {fitConnected === false && !healthUnavailable && (
+            <button
+              onClick={() => (native ? handleManualSync() : connectGoogleFit(firebaseUser.uid))}
               className="text-xs bg-wing-ink text-wing-elevated font-bold px-3 py-1.5 rounded-xl"
             >
               {t("steps_connect_fit") as string}
