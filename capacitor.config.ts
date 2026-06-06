@@ -34,6 +34,13 @@ const config: CapacitorConfig = {
       style:           "DARK",
       backgroundColor: "#fbf4e6",
     },
+    FirebaseAuthentication: {
+      // We keep using the Firebase JS SDK for auth state (Firestore reads rely
+      // on it), so the native plugin only fetches the Google credential and we
+      // sign into the JS SDK ourselves with signInWithCredential.
+      skipNativeAuth: true,
+      providers: ["google.com"],
+    },
   },
 };
 

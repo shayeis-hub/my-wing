@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "991022188498-58f4ch2t4porgivrp96gudef43k6n4be.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.wingpact.android",
+            "certificate_hash": "f673e3bf4dc6a533ec2d8976f864da6dc510ca8e"
+          }
+        },
+        {
           "client_id": "991022188498-tj9q8si4lp3t20v16thi3midqeau2c9s.apps.googleusercontent.com",
           "client_type": 3
         }

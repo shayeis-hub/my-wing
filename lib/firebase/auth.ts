@@ -5,11 +5,13 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithCredential,
   onAuthStateChanged,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   type User as FirebaseUser,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { Capacitor } from "@capacitor/core";
 import { auth, db } from "./config";
 import type { User, UserProfile } from "@/types";
 
@@ -30,13 +32,32 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signInWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  const credential = await signInWithPopup(auth, provider);
-  const existing = await getDoc(doc(db, "users", credential.user.uid));
-  if (!existing.exists()) {
-    await createUserDoc(credential.user, credential.user.displayName ?? "");
+  let firebaseUser: FirebaseUser;
+
+  if (Capacitor.isNativePlatform()) {
+    // Native: popups/redirects are blocked inside the WebView (Google rejects
+    // OAuth in embedded user-agents). Use the native Google account picker via
+    // the Capacitor plugin, then sign into the JS SDK with the returned token.
+    const { FirebaseAuthentication } = await import("@capacitor-firebase/authentication");
+    const result = await FirebaseAuthentication.signInWithGoogle();
+    const idToken = result.credential?.idToken;
+    const accessToken = result.credential?.accessToken;
+    if (!idToken) throw new Error("No Google idToken returned");
+    const cred = GoogleAuthProvider.credential(idToken, accessToken);
+    const credential = await signInWithCredential(auth, cred);
+    firebaseUser = credential.user;
+  } else {
+    // Web: standard popup flow.
+    const provider = new GoogleAuthProvider();
+    const credential = await signInWithPopup(auth, provider);
+    firebaseUser = credential.user;
   }
-  return credential.user;
+
+  const existing = await getDoc(doc(db, "users", firebaseUser.uid));
+  if (!existing.exists()) {
+    await createUserDoc(firebaseUser, firebaseUser.displayName ?? "");
+  }
+  return firebaseUser;
 }
 
 export async function signOut() {
