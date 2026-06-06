@@ -51,17 +51,18 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <!-- Quarter 3: Water (minus / value+label / plus) -->
+    <!-- Quarter 3: Water (minus / value+label / plus) — a bit wider since it
+         holds three controls, so the +/- buttons never get clipped. -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="1.7"
         android:orientation="horizontal"
         android:gravity="center">
         <ImageButton
             android:id="@+id/btn_water_minus"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:background="@drawable/wing_widget_btn_bg"
             android:src="@drawable/ic_widget_minus"
             android:scaleType="centerInside"
@@ -71,8 +72,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp">
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp">
             <TextView
                 android:id="@+id/tv_water"
                 android:layout_width="wrap_content"
@@ -92,8 +93,8 @@
         </LinearLayout>
         <ImageButton
             android:id="@+id/btn_water_plus"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:background="@drawable/wing_widget_btn_bg"
             android:src="@drawable/ic_widget_plus"
             android:scaleType="centerInside"
