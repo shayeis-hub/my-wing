@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">מבנה כנף</string>
     <string name="title_activity_main">מבנה כנף</string>
+    <string name="widget_description">צעדים, מים ו-SOS במבט חטוף</string>
 </resources>

@@ -19,6 +19,7 @@ import { he } from "date-fns/locale";
 import { enUS } from "date-fns/locale";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
 import { isNativeApp, readTodayStepsFromHealth } from "@/lib/fitness/healthConnect";
+import { pushWidgetData } from "@/lib/widget/native";
 import { registerNativePush } from "@/lib/push/native";
 import { useRouter } from "next/navigation";
 import { getTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, saveSteps, type GroupEnergy } from "@/lib/firebase/firestore";
@@ -243,6 +244,12 @@ export default function DashboardPage() {
   // Steps: prefer Google Fit sync, fall back to check-in
   const myStepsEntry = wingSteps.find((s) => s.userId === firebaseUser?.uid);
   const displaySteps = myStepsEntry?.steps ?? todayCheckin?.steps ?? null;
+
+  // Keep the home-screen widget's steps/water in sync with the dashboard.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    void pushWidgetData(displaySteps ?? 0, todayCheckin?.waterGlasses ?? 0);
+  }, [displaySteps, todayCheckin?.waterGlasses]);
 
   return (
     <div className="p-4 space-y-4">

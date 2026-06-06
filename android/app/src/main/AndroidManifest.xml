@@ -24,6 +24,20 @@
 
         </activity>
 
+        <receiver
+            android:name=".WingWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="app.wingpact.android.WIDGET_WATER_PLUS" />
+                <action android:name="app.wingpact.android.WIDGET_WATER_MINUS" />
+                <action android:name="app.wingpact.android.WIDGET_SOS" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/wing_widget_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

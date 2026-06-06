@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="34dp"
+    android:height="34dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Wing chevron -->
+    <path
+        android:pathData="M10,30 L24,16 L38,30"
+        android:strokeColor="#1a1814"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <!-- Apex + arm dots -->
+    <path
+        android:fillColor="#1a1814"
+        android:pathData="M24,16m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" />
+</vector>
