@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId:    "app.wingpact.android",
-  appName:  "מבנה כנף",
+  appName:  "Wingpact",
   // Load the live site — always up to date, no export needed.
   // Start at /dashboard so the AuthGuard routes to /login when not signed in,
   // skipping the public marketing landing page.

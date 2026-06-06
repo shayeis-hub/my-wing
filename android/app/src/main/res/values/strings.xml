@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">מבנה כנף</string>
-    <string name="title_activity_main">מבנה כנף</string>
+    <string name="app_name">Wingpact</string>
+    <string name="title_activity_main">Wingpact</string>
     <string name="package_name">app.wingpact.android</string>
     <string name="custom_url_scheme">app.wingpact.android</string>
     <string name="health_connect_privacy_policy_url">https://wingpact.app/privacy</string>
