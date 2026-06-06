@@ -7,26 +7,33 @@
     android:gravity="center_vertical"
     android:layoutDirection="ltr"
     android:background="@drawable/wing_widget_bg"
-    android:paddingStart="12dp"
-    android:paddingEnd="10dp"
+    android:paddingStart="6dp"
+    android:paddingEnd="6dp"
     android:paddingTop="6dp"
     android:paddingBottom="6dp">
 
-    <!-- Logo (actual app icon) -->
-    <ImageView
-        android:id="@+id/iv_logo"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:src="@mipmap/ic_launcher"
-        android:contentDescription="Wingpact" />
-
-    <!-- Steps: value + label -->
+    <!-- Quarter 1: Logo -->
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <ImageView
+            android:id="@+id/iv_logo"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="Wingpact" />
+    </LinearLayout>
+
+    <!-- Quarter 2: Steps -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginStart="12dp">
+        android:gravity="center">
         <TextView
             android:id="@+id/tv_steps"
             android:layout_width="wrap_content"
@@ -39,72 +46,77 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_steps_label"
-            android:textColor="#7a6a4a"
-            android:textSize="10sp" />
-    </LinearLayout>
-
-    <!-- spacer (TextView, since a bare View is unsupported in RemoteViews) -->
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
-
-    <!-- Water: minus / (value + label) / plus -->
-    <ImageButton
-        android:id="@+id/btn_water_minus"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:background="@drawable/wing_widget_btn_bg"
-        android:src="@drawable/ic_widget_minus"
-        android:scaleType="centerInside"
-        android:contentDescription="-" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp">
-        <TextView
-            android:id="@+id/tv_water"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="40dp"
-            android:gravity="center"
-            android:text="0L"
-            android:textColor="#1a1814"
+            android:textColor="#5c4f37"
             android:textStyle="bold"
-            android:textSize="16sp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/widget_water_label"
-            android:textColor="#7a6a4a"
-            android:textSize="10sp" />
+            android:textSize="12sp" />
     </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/btn_water_plus"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:background="@drawable/wing_widget_btn_bg"
-        android:src="@drawable/ic_widget_plus"
-        android:scaleType="centerInside"
-        android:contentDescription="+" />
+    <!-- Quarter 3: Water (minus / value+label / plus) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <ImageButton
+            android:id="@+id/btn_water_minus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/wing_widget_btn_bg"
+            android:src="@drawable/ic_widget_minus"
+            android:scaleType="centerInside"
+            android:contentDescription="-" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp">
+            <TextView
+                android:id="@+id/tv_water"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="0L"
+                android:textColor="#1a1814"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_water_label"
+                android:textColor="#5c4f37"
+                android:textStyle="bold"
+                android:textSize="12sp" />
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/btn_water_plus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/wing_widget_btn_bg"
+            android:src="@drawable/ic_widget_plus"
+            android:scaleType="centerInside"
+            android:contentDescription="+" />
+    </LinearLayout>
 
-    <!-- SOS -->
-    <TextView
-        android:id="@+id/tv_sos"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="12dp"
-        android:gravity="center"
-        android:background="@drawable/wing_widget_sos_bg"
-        android:text="SOS"
-        android:textColor="#d92d20"
-        android:textStyle="bold"
-        android:textSize="11sp" />
+    <!-- Quarter 4: SOS -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <TextView
+            android:id="@+id/tv_sos"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:gravity="center"
+            android:background="@drawable/wing_widget_sos_bg"
+            android:text="SOS"
+            android:textColor="#d92d20"
+            android:textStyle="bold"
+            android:textSize="11sp" />
+    </LinearLayout>
 
 </LinearLayout>
