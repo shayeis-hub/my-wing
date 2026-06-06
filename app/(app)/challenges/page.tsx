@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import { format, addDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { Trophy, ChevronRight, ChevronLeft } from "lucide-react";
+import { isWingAdmin } from "@/lib/wing/roles";
 import type { Challenge } from "@/types";
 
 export default function ChallengesPage() {
@@ -34,7 +35,7 @@ export default function ChallengesPage() {
   const [pastChallenges, setPastChallenges] = useState<Challenge[]>([]);
   const [loadingPast, setLoadingPast] = useState(false);
 
-  const isMember = !!user?.wingId;
+  const canManage = isWingAdmin(wing, user?.uid);
 
   const challengeTypes: { value: Challenge["type"]; label: string; emoji: string }[] = [
     { value: "steps", label: t("ct_steps") as string, emoji: "👟" },
@@ -118,7 +119,7 @@ export default function ChallengesPage() {
     <div className="p-4 space-y-4" dir={dir}>
       <div className="pt-4 flex items-center justify-between">
         <h1 className="text-xl font-bold text-wing-ink">{t("challenges_title") as string}</h1>
-        {isMember && (
+        {canManage && (
           <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
             {t("challenge_add") as string}
           </Button>
@@ -165,13 +166,13 @@ export default function ChallengesPage() {
           <div className="text-4xl mb-3">🏆</div>
           <p className="font-semibold text-wing-ink">{t("challenge_no_active") as string}</p>
           <p className="text-sm text-wing-subtle mt-1">
-            {isMember ? t("challenge_no_active_member") as string : t("challenge_no_active_guest") as string}
+            {canManage ? t("challenge_no_active_member") as string : t("challenge_no_active_guest") as string}
           </p>
         </Card>
       )}
 
       {/* Create form */}
-      {showCreate && isMember && (
+      {showCreate && canManage && (
         <Card className="space-y-4 border-2 border-wing-border">
           <h3 className="font-bold text-wing-ink">{t("challenge_new") as string}</h3>
           <div className="grid grid-cols-2 gap-2">

@@ -29,6 +29,8 @@ export interface Wing {
   id: string;
   name: string;
   ownerId: string;
+  /** Co-admins (besides the owner) who share management rights. */
+  adminIds?: string[];
   memberIds: string[];
   members: WingMember[];
   inviteToken: string;

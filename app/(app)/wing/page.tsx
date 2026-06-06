@@ -10,8 +10,9 @@ import { Avatar } from "@/components/ui/Avatar";
 import { SOSButton } from "@/components/wing/SOSButton";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import toast from "react-hot-toast";
-import { Copy, Pencil, Trophy, UserPlus, Flame } from "lucide-react";
+import { Copy, Pencil, Trophy, UserPlus, Flame, MoreVertical, Crown, Shield, ArrowRightLeft, UserMinus, LogOut } from "lucide-react";
 import { getWingCheckins } from "@/lib/firebase/firestore";
+import { isWingAdmin, isWingOwner } from "@/lib/wing/roles";
 import type { DailyCheckin } from "@/types";
 import { format, subDays } from "date-fns";
 
@@ -19,6 +20,79 @@ export default function WingPage() {
   const { user, firebaseUser } = useAuth();
   const { wing, loading } = useWing(user?.wingId);
   const { t } = useLanguage();
+  const [manageMemberId, setManageMemberId] = useState<string | null>(null);
+  const [busyAction, setBusyAction] = useState(false);
+
+  const uid = firebaseUser?.uid;
+  const viewerIsOwner = isWingOwner(wing, uid);
+  const viewerIsAdmin = isWingAdmin(wing, uid);
+
+  async function wingAction(path: string, body: Record<string, unknown>, successKey: string) {
+    if (busyAction) return;
+    setBusyAction(true);
+    try {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(t(successKey as Parameters<typeof t>[0]) as string);
+      setManageMemberId(null);
+    } catch {
+      toast.error(t("wing_action_error") as string);
+    } finally {
+      setBusyAction(false);
+    }
+  }
+
+  async function handleMakeAdmin(targetId: string, makeAdmin: boolean) {
+    if (!wing || !uid) return;
+    await wingAction(
+      "/api/wing/admins",
+      { wingId: wing.id, requesterId: uid, targetId, action: makeAdmin ? "add" : "remove" },
+      makeAdmin ? "wing_admin_added" : "wing_admin_removed"
+    );
+  }
+
+  async function handleTransfer(targetId: string, name: string) {
+    if (!wing || !uid) return;
+    if (!window.confirm((t("wing_transfer_confirm") as (n: string) => string)(name))) return;
+    await wingAction(
+      "/api/wing/transfer",
+      { wingId: wing.id, requesterId: uid, targetId },
+      "wing_transfer_done"
+    );
+  }
+
+  async function handleRemoveMember(targetId: string, name: string) {
+    if (!wing || !uid) return;
+    if (!window.confirm((t("wing_remove_member_confirm") as (n: string) => string)(name))) return;
+    await wingAction(
+      "/api/wing/remove-member",
+      { wingId: wing.id, requesterId: uid, targetId },
+      "wing_member_removed"
+    );
+  }
+
+  async function handleLeave() {
+    if (!wing || !uid) return;
+    if (!window.confirm(t("wing_leave_confirm") as string)) return;
+    setBusyAction(true);
+    try {
+      const res = await fetch("/api/wing/leave", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wingId: wing.id, userId: uid }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(t("wing_left") as string);
+      window.location.reload();
+    } catch {
+      toast.error(t("wing_action_error") as string);
+      setBusyAction(false);
+    }
+  }
 
   const [wingName, setWingName] = useState("");
   const [joinToken, setJoinToken] = useState("");
@@ -112,7 +186,7 @@ export default function WingPage() {
       const res = await fetch("/api/wing/rename", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wingId: wing.id, name: newName.trim() }),
+        body: JSON.stringify({ wingId: wing.id, name: newName.trim(), requesterId: uid }),
       });
       if (!res.ok) throw new Error();
       toast.success(t("wing_rename_saved") as string);
@@ -187,10 +261,12 @@ export default function WingPage() {
                     <h2 className="text-xl font-black text-wing-ink">
                       {wing.name || <span className="text-wing-muted italic">{t("wing_no_name")}</span>}
                     </h2>
-                    <button onClick={() => { setNewName(wing.name); setEditingName(true); }}
-                      className="p-1.5 hover:bg-wing-elevated rounded-lg transition-colors">
-                      <Pencil size={14} className="text-wing-muted" />
-                    </button>
+                    {viewerIsAdmin && (
+                      <button onClick={() => { setNewName(wing.name); setEditingName(true); }}
+                        className="p-1.5 hover:bg-wing-elevated rounded-lg transition-colors">
+                        <Pencil size={14} className="text-wing-muted" />
+                      </button>
+                    )}
                   </div>
                 )}
                 <p className="text-sm text-wing-muted mt-0.5">
@@ -205,31 +281,85 @@ export default function WingPage() {
               {members.map((m) => {
                 const isMe = m.uid === firebaseUser?.uid;
                 const isOwner = m.uid === wing.ownerId;
+                const isAdmin = !isOwner && (wing.adminIds ?? []).includes(m.uid);
+                const ownerCanManage = viewerIsOwner && !isOwner;
+                const adminCanManage = viewerIsAdmin && !isOwner && !isAdmin && !isMe;
+                const canManage = ownerCanManage || adminCanManage;
+                const open = manageMemberId === m.uid;
                 return (
-                  <div key={m.uid} className="flex items-center gap-3 py-1">
-                    <Avatar
-                      name={m.displayName ?? "?"}
-                      photoURL={m.photoURL}
-                      size={36}
-                      isCurrentUser={isMe}
-                      showYouBadge={isMe}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold ${isMe ? "text-wing-ink" : "text-slate-700"}`}>
-                        {m.displayName ?? ""}
-                      </p>
-                    </div>
-                    {isOwner && (
-                      <span className="font-mono text-[11px] tracking-[0.14em] uppercase text-wing-muted bg-wing-elevated border border-wing-border px-2 py-0.5 rounded-full">
-                        {t("wing_admin")}
-                      </span>
-                    )}
-                    {(memberStreaks[m.uid] ?? 0) > 0 && (
-                      <div className="mr-auto flex flex-col items-center">
-                        <span className="font-mono font-bold text-[11px]" style={{ color: "#d4541a" }}>
-                          {memberStreaks[m.uid]}
+                  <div key={m.uid} className="py-1">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        name={m.displayName ?? "?"}
+                        photoURL={m.photoURL}
+                        size={36}
+                        isCurrentUser={isMe}
+                        showYouBadge={isMe}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${isMe ? "text-wing-ink" : "text-slate-700"}`}>
+                          {m.displayName ?? ""}
+                        </p>
+                      </div>
+                      {(memberStreaks[m.uid] ?? 0) > 0 && (
+                        <div className="flex flex-col items-center">
+                          <span className="font-mono font-bold text-[11px]" style={{ color: "#d4541a" }}>
+                            {memberStreaks[m.uid]}
+                          </span>
+                          <span className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">{t("wing_days_streak")}</span>
+                        </div>
+                      )}
+                      {isOwner && (
+                        <span className="inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.1em] uppercase text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                          <Crown size={11} /> {t("wing_owner")}
                         </span>
-                        <span className="font-mono text-[11px] text-wing-muted uppercase tracking-wider">{t("wing_days_streak")}</span>
+                      )}
+                      {isAdmin && (
+                        <span className="inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.1em] uppercase text-wing-muted bg-wing-elevated border border-wing-border px-2 py-0.5 rounded-full">
+                          <Shield size={11} /> {t("wing_admin")}
+                        </span>
+                      )}
+                      {canManage && (
+                        <button
+                          onClick={() => setManageMemberId(open ? null : m.uid)}
+                          className="p-1.5 rounded-lg hover:bg-wing-elevated text-wing-muted"
+                          aria-label="manage"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                      )}
+                    </div>
+
+                    {open && canManage && (
+                      <div className="mt-2 ms-12 flex flex-wrap gap-2">
+                        {ownerCanManage && (
+                          <button
+                            disabled={busyAction}
+                            onClick={() => handleMakeAdmin(m.uid, !isAdmin)}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-wing-elevated border border-wing-border text-wing-ink disabled:opacity-50"
+                          >
+                            <Shield size={13} />
+                            {isAdmin ? t("wing_remove_admin") : t("wing_make_admin")}
+                          </button>
+                        )}
+                        {ownerCanManage && (
+                          <button
+                            disabled={busyAction}
+                            onClick={() => handleTransfer(m.uid, m.displayName ?? "")}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-wing-elevated border border-wing-border text-wing-ink disabled:opacity-50"
+                          >
+                            <ArrowRightLeft size={13} />
+                            {t("wing_transfer")}
+                          </button>
+                        )}
+                        <button
+                          disabled={busyAction}
+                          onClick={() => handleRemoveMember(m.uid, m.displayName ?? "")}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-600 disabled:opacity-50"
+                        >
+                          <UserMinus size={13} />
+                          {t("wing_remove_member")}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -245,6 +375,16 @@ export default function WingPage() {
               <UserPlus size={16} />
               {t("wing_invite_btn")}
               <Copy size={14} className="opacity-60" />
+            </button>
+
+            {/* Leave wing */}
+            <button
+              onClick={handleLeave}
+              disabled={busyAction}
+              className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-red-500/80 hover:text-red-600 transition-colors disabled:opacity-50"
+            >
+              <LogOut size={14} />
+              {t("wing_leave")}
             </button>
           </div>
 

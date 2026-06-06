@@ -19,6 +19,19 @@ export default function DeleteAccountPage() {
     if (!firebaseUser) return;
     setDeleting(true);
     try {
+      // Remove from the wing first (handles owner succession) so we don't leave
+      // a ghost member behind. Best-effort — don't block deletion if it fails.
+      if (user?.wingId) {
+        try {
+          await fetch("/api/wing/leave", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ wingId: user.wingId, userId: firebaseUser.uid }),
+          });
+        } catch {
+          /* ignore — proceed with account deletion */
+        }
+      }
       const [{ doc: fsDoc, deleteDoc: fsDeleteDoc }, { db }] = await Promise.all([
         import("firebase/firestore"),
         import("@/lib/firebase/config"),
