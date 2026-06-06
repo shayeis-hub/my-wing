@@ -87,7 +87,7 @@ public class WingWidgetProvider extends AppWidgetProvider {
 
         // Steps
         long steps = parseLong(prefs.getString(KEY_STEPS, "0"));
-        views.setTextViewText(R.id.tv_steps, "👟 " + String.format("%,d", steps));
+        views.setTextViewText(R.id.tv_steps, String.format("%,d", steps));
 
         // Water
         float water = parseFloat(prefs.getString(KEY_WATER, "0"));

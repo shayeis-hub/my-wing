@@ -6,4 +6,6 @@
     <string name="custom_url_scheme">app.wingpact.android</string>
     <string name="health_connect_privacy_policy_url">https://wingpact.app/privacy</string>
     <string name="widget_description">Steps, water and SOS at a glance</string>
+    <string name="widget_steps_label">Steps</string>
+    <string name="widget_water_label">Water</string>
 </resources>

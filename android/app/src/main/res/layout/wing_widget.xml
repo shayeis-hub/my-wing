@@ -7,29 +7,41 @@
     android:gravity="center_vertical"
     android:layoutDirection="ltr"
     android:background="@drawable/wing_widget_bg"
-    android:paddingStart="14dp"
+    android:paddingStart="12dp"
     android:paddingEnd="10dp"
     android:paddingTop="6dp"
     android:paddingBottom="6dp">
 
-    <!-- Logo -->
+    <!-- Logo (actual app icon) -->
     <ImageView
         android:id="@+id/iv_logo"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:src="@drawable/ic_widget_logo"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:src="@mipmap/ic_launcher"
         android:contentDescription="Wingpact" />
 
-    <!-- Steps -->
-    <TextView
-        android:id="@+id/tv_steps"
+    <!-- Steps: value + label -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:text="👟 0"
-        android:textColor="#1a1814"
-        android:textStyle="bold"
-        android:textSize="15sp" />
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginStart="12dp">
+        <TextView
+            android:id="@+id/tv_steps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="#1a1814"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_steps_label"
+            android:textColor="#7a6a4a"
+            android:textSize="10sp" />
+    </LinearLayout>
 
     <!-- spacer (TextView, since a bare View is unsupported in RemoteViews) -->
     <TextView
@@ -38,7 +50,7 @@
         android:layout_weight="1"
         android:text="" />
 
-    <!-- Water: minus / value / plus -->
+    <!-- Water: minus / (value + label) / plus -->
     <ImageButton
         android:id="@+id/btn_water_minus"
         android:layout_width="30dp"
@@ -48,18 +60,30 @@
         android:scaleType="centerInside"
         android:contentDescription="-" />
 
-    <TextView
-        android:id="@+id/tv_water"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="42dp"
+        android:orientation="vertical"
         android:gravity="center"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:text="0L"
-        android:textColor="#1a1814"
-        android:textStyle="bold"
-        android:textSize="15sp" />
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp">
+        <TextView
+            android:id="@+id/tv_water"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="40dp"
+            android:gravity="center"
+            android:text="0L"
+            android:textColor="#1a1814"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_water_label"
+            android:textColor="#7a6a4a"
+            android:textSize="10sp" />
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/btn_water_plus"
@@ -73,8 +97,8 @@
     <!-- SOS -->
     <TextView
         android:id="@+id/tv_sos"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
         android:layout_marginStart="12dp"
         android:gravity="center"
         android:background="@drawable/wing_widget_sos_bg"

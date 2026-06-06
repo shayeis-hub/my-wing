@@ -3,4 +3,6 @@
     <string name="app_name">מבנה כנף</string>
     <string name="title_activity_main">מבנה כנף</string>
     <string name="widget_description">צעדים, מים ו-SOS במבט חטוף</string>
+    <string name="widget_steps_label">צעדים</string>
+    <string name="widget_water_label">מים</string>
 </resources>
