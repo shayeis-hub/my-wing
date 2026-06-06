@@ -300,8 +300,8 @@ body {
   <!-- Bottom: meta -->
   <div style="display:flex; align-items:flex-end; justify-content:space-between; position:relative;">
     <div>
-      <div class="kicker">גרסה 2.0 · מאי 2026</div>
-      <div style="font-size:14px; color:var(--muted); margin-top:4px;">אפליקציית ווב · iOS · Android</div>
+      <div class="kicker">גרסה 1.0 · יוני 2026</div>
+      <div style="font-size:14px; color:var(--muted); margin-top:4px;">אפליקציה לאנדרואיד · ווב</div>
     </div>
     <div style="display:flex; gap:12px; align-items:center;">
       <div style="text-align:center;">
@@ -418,10 +418,11 @@ body {
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 32px;">
         <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">לוח הבקרה עם Quick Log</span><span class="toc-desc">עמ׳ 3</span></div>
         <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">הוספת ארוחה (תמונה/קול/ידני)</span><span class="toc-desc">עמ׳ 4</span></div>
-        <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">צ'ק אפ יומי (חיוני/מתקדם)</span><span class="toc-desc">עמ׳ 5</span></div>
+        <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">צ'ק אפ יומי · מים, אימון, מצב רוח</span><span class="toc-desc">עמ׳ 5</span></div>
         <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">פיד · פוסטים ושאלה יומית</span><span class="toc-desc">עמ׳ 6</span></div>
         <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">אתגרים וגביעים</span><span class="toc-desc">עמ׳ 7</span></div>
-        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">06</span><span class="toc-title">טיפים ושאלות נפוצות</span><span class="toc-desc">עמ׳ 8</span></div>
+        <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">טיפים ושאלות נפוצות</span><span class="toc-desc">עמ׳ 8</span></div>
+        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">07</span><span class="toc-title">האפליקציה לנייד · ווידג'ט וצעדים</span><span class="toc-desc">עמ׳ 9</span></div>
       </div>
     </div>
   </div>
@@ -460,7 +461,7 @@ body {
         <div class="num">2</div>
         <div class="body">
           <b>Quick Log · מים, ירקות, צעדים</b>
-          <p>שלוש קוביות מתחת לקלוריות — כל אחת עם <b>+</b> ו<b>−</b>. לחיצה אחת מוסיפה 0.25L מים, מנת ירקות, או פותחת שדה עריכת צעדים. שמירה אוטומטית.</p>
+          <p>שלוש קוביות מתחת לקלוריות — כל אחת עם <b>+</b> ו<b>−</b>. לחיצה אחת מוסיפה 0.1L מים או מנת ירקות, ושמירה אוטומטית. הצעדים מסתנכרנים אוטומטית מ-Health Connect (ראה עמ׳ 9), וניתן גם לערוך ידנית.</p>
         </div>
       </div>
       <div class="step">
@@ -639,7 +640,7 @@ body {
           <div class="kicker" style="font-size:9px; margin-bottom:12px;">4 שיטות קלט</div>
           <div class="step">
             <div class="num">1</div>
-            <div class="body"><b>צלם תמונה</b><p>פותח את המצלמה. מסגרת את הצלחת ולחץ על כפתור הצילום.</p></div>
+            <div class="body"><b>צלם תמונה</b><p>פותח את המצלמה. מסגרת את הצלחת ולחץ על כפתור הצילום. אפשר לצרף כמה תמונות לארוחה אחת.</p></div>
           </div>
           <div class="step">
             <div class="num">2</div>
@@ -1292,7 +1293,7 @@ body {
         </div>
         <div style="display:flex; gap:12px; padding:12px; background:linear-gradient(135deg,rgba(245,221,75,.15),rgba(255,107,71,.1)); border:1px solid rgba(212,84,26,.2); border-radius:12px;">
           <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">07</div>
-          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>צעדים = הכל.</b> Google Fit מסנכרן אוטומטי. 10,000 צעדים ביום = ~350 קלוריות נוספות שנשרפות — בלי אימון מיוחד.</p>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>צעדים = הכל.</b> Health Connect (גוגל פיט / סמסונג הלת') מסנכרן אוטומטי. 10,000 צעדים ביום = ~350 קלוריות נוספות שנשרפות — בלי אימון מיוחד.</p>
         </div>
       </div>
     </div>
@@ -1302,7 +1303,90 @@ body {
 
 
 <!-- ═══════════════════════════════════════════
-     PAGE 9 — BACK COVER
+     PAGE 9 — MOBILE APP (steps / widget / notifications)
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">07 · האפליקציה לנייד</div>
+      <h2>צעדים, ווידג'ט<br><span class="gradient-text">והתראות</span></h2>
+    </div>
+    <span class="badge">Android App</span>
+  </div>
+
+  <div style="padding:32px 72px 48px;">
+    <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+      Wingpact זמין גם כאפליקציה מלאה לאנדרואיד — עם ספירת צעדים אוטומטית, ווידג'ט למסך הבית, והתראות חכמות. כל הנתונים מסונכרנים עם גרסת הווב.
+    </p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div>
+        <div class="kicker" style="font-size:9px; margin-bottom:12px;">ספירת צעדים אוטומטית</div>
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body"><b>חיבור ל-Health Connect</b><p>בכניסה הראשונה האפליקציה תבקש הרשאה לקרוא צעדים. אשר פעם אחת — וזהו.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body"><b>סנכרון אוטומטי</b><p>הצעדים נקראים מ-Health Connect (גוגל פיט / סמסונג הלת') ומופיעים בדאשבורד ובלוח התוצאות — בלי להזין ידנית.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="body"><b>עריכה ידנית תמיד אפשרית</b><p>אין Health Connect? אפשר לערוך את הצעדים ידנית בכרטיס ה-Quick Log שבדאשבורד.</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="kicker" style="font-size:9px; margin-bottom:12px;">התראות פוש</div>
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body"><b>מישהו עודד אותך</b><p>קיבלת תגובה או עידוד על ארוחה או צ'ק אפ — מגיעה התראה מיידית.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body"><b>קריאת SOS</b><p>חבר לחץ "זקוק לתמיכה" — כל הכנף מקבלת התראה. לחיצה עליה פותחת את העמוד שלו.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="body"><b>תזכורת 17:00</b><p>לא תיעדת צ'ק אפ עד אחה"צ? מגיעה תזכורת עדינה כדי לא לשבור את הרצף.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget showcase -->
+    <div style="margin-top:26px; padding:20px; background:white; border:1px solid #ede5d0; border-radius:16px;">
+      <div class="kicker" style="font-size:9px; margin-bottom:12px;">ווידג'ט למסך הבית</div>
+      <div style="display:flex; align-items:center; background:linear-gradient(90deg,#fff3b8,#ffd89a,#ffb27a); border-radius:999px; padding:10px 16px;" dir="ltr">
+        <div style="flex:1; display:flex; justify-content:center;">
+          <svg width="36" height="22" viewBox="0 0 72 44" fill="none"><path d="M4 38 L36 8 L68 38" stroke="#1a1814" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="8" r="5.5" fill="#d4541a"/><circle cx="20" cy="23" r="3.5" fill="#1a1814"/><circle cx="52" cy="23" r="3.5" fill="#1a1814"/></svg>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div style="font-weight:900; font-size:16px; color:#1a1814;">6,548</div>
+          <div style="font-size:11px; font-weight:700; color:#5c4f37;">צעדים</div>
+        </div>
+        <div style="flex:1.7; display:flex; align-items:center; justify-content:center; gap:7px;">
+          <div style="width:24px; height:24px; border-radius:999px; background:rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; font-weight:900; color:#1a1814;">−</div>
+          <div style="text-align:center;"><div style="font-weight:900; font-size:16px; color:#1a1814;">1.5L</div><div style="font-size:11px; font-weight:700; color:#5c4f37;">מים</div></div>
+          <div style="width:24px; height:24px; border-radius:999px; background:rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; font-weight:900; color:#1a1814;">+</div>
+        </div>
+        <div style="flex:1; display:flex; justify-content:center;">
+          <div style="width:40px; height:40px; border-radius:999px; background:#fff; border:2px solid #d92d20; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; color:#d92d20;">SOS</div>
+        </div>
+      </div>
+      <p style="font-size:12px; color:#3a3329; line-height:1.5; margin-top:12px;">פס מהיר במסך הבית: לוגו, צעדים, כמות המים עם <b>+</b>/<b>−</b>, וכפתור SOS. לחיצה על <b>+</b>/<b>−</b> מעדכנת מים מיד — גם כשהאפליקציה סגורה; כפתור SOS פותח את האפליקציה ושולח קריאה לכנף.</p>
+      <p style="font-size:11px; color:var(--muted); margin-top:6px;">הוספה: לחיצה ארוכה על מסך הבית ← ווידג'טים ← Wingpact.</p>
+    </div>
+
+    <div class="tip" style="margin-top:18px;">
+      <div class="tip-label">טיפ · מסך הבית</div>
+      <p>הצמד את הווידג'ט למסך הבית כדי לראות צעדים ולהוסיף מים בלי לפתוח את האפליקציה — שתי שניות ביום.</p>
+    </div>
+  </div>
+  <div class="page-num">עמ׳ 9</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 10 — BACK COVER
 ═══════════════════════════════════════════ -->
 <section class="page" style="background:#1a1814; color:#fbf4e6;">
   <div style="position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 80% 20%, rgba(245,221,75,.12) 0%, transparent 55%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,107,71,.1) 0%, transparent 50%); pointer-events:none;"></div>
@@ -1336,7 +1420,7 @@ body {
     <div style="display:flex; justify-content:space-between; align-items:flex-end;">
       <div>
         <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.22em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">Wingpact</div>
-        <div style="font-size:13px; color:#7a8492;">גרסה 2.0 · מאי 2026</div>
+        <div style="font-size:13px; color:#7a8492;">גרסה 1.0 · יוני 2026</div>
       </div>
       <div style="text-align:left;">
         <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.18em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">שאלות ותמיכה</div>
