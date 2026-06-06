@@ -46,6 +46,9 @@ export default function DashboardPage() {
   const [editingSteps, setEditingSteps] = useState(false);
   const [stepsInput, setStepsInput] = useState("");
   const healthSyncedRef = useRef(false);
+  // On native, the Health Connect prompt must wait until the push-permission
+  // dialog is dismissed (Android shows one permission dialog at a time).
+  const [pushSettled, setPushSettled] = useState(!isNativeApp());
 
   useEffect(() => {
     if (isNativeApp()) return; // native app handles its own permission prompt
@@ -55,9 +58,12 @@ export default function DashboardPage() {
   }, []);
 
   // Native app: register for FCM push + route taps to the right page.
+  // Only after the push dialog is dismissed do we allow the Health prompt.
   useEffect(() => {
     if (!firebaseUser || !isNativeApp()) return;
-    registerNativePush(firebaseUser.uid, (path) => router.push(path));
+    registerNativePush(firebaseUser.uid, (path) => router.push(path)).finally(() =>
+      setPushSettled(true)
+    );
   }, [firebaseUser, router]);
 
   useEffect(() => {
@@ -65,13 +71,17 @@ export default function DashboardPage() {
     const today = format(new Date(), "yyyy-MM-dd");
     getTodayCheckin(user.wingId, firebaseUser.uid, today).then(setTodayCheckin);
     getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
-    getWingSteps(user.wingId, today).then((entries) => {
-      setWingSteps(entries);
-      maybeSyncHealthSteps(entries);
-    });
+    getWingSteps(user.wingId, today).then(setWingSteps);
     getUserCheckinDates(user.wingId, firebaseUser.uid).then((dates) => setStreak(calcStreak(dates)));
     getGroupEnergy(user.wingId, wing?.memberIds.length ?? 1).then(setGroupEnergy);
   }, [user?.wingId, firebaseUser]);
+
+  // Native app: sync Health steps once push has settled and today's steps loaded.
+  // Guarded by healthSyncedRef so it runs at most once per dashboard load.
+  useEffect(() => {
+    if (!pushSettled) return;
+    maybeSyncHealthSteps(wingSteps);
+  }, [pushSettled, wingSteps]);
 
   // Native app: auto-sync today's steps from Health Connect into the dashboard.
   // No dedicated steps page needed — runs once per load, only updates upward.

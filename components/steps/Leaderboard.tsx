@@ -13,7 +13,7 @@ interface LeaderboardProps {
 const medals = ["🥇", "🥈", "🥉"];
 
 export function Leaderboard({ entries, currentUserId, members = [] }: LeaderboardProps) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const sorted = [...entries].sort((a, b) => b.steps - a.steps);
   const memberMap = Object.fromEntries(members.map((m) => [m.uid, m]));
 
@@ -55,11 +55,11 @@ export function Leaderboard({ entries, currentUserId, members = [] }: Leaderboar
                   {isMe ? t("leaderboard_me") as string : entry.userName.split(" ")[0]}
                 </span>
               </div>
-              <div className="text-left" dir="ltr">
+              <div dir={lang === "he" ? "rtl" : "ltr"}>
                 <span className="font-black text-sm text-wing-ink tabular" style={{ letterSpacing: "-0.03em" }}>
                   {entry.steps.toLocaleString()}
                 </span>
-                <span className="text-sm text-wing-muted font-mono mr-1">{t("leaderboard_unit") as string}</span>
+                <span className="text-sm text-wing-muted font-mono ms-1">{t("leaderboard_unit") as string}</span>
               </div>
             </div>
           );

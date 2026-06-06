@@ -610,7 +610,7 @@ export const T = {
     steps_save_btn: "שמור צעדים",
     leaderboard_title: "לוח תוצאות היום",
     leaderboard_me: "אני",
-    leaderboard_unit: "צעד",
+    leaderboard_unit: "צעדים",
     leaderboard_empty: "עדיין אין נתוני צעדים להיום",
 
     // Calculator page
