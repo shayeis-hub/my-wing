@@ -143,6 +143,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           targetUserId: meal.userId,
+          authorId: currentUserId,
           authorName: currentUserName,
           message: trimmed,
           link: `/meals?meal=${meal.id}`,

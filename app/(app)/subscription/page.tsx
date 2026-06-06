@@ -26,7 +26,7 @@ function toMs(ts: Timestamp | string | null | undefined): number | null {
 
 function SubscriptionPageInner() {
   const { user, firebaseUser } = useAuth();
-  const { t, lang, dir } = useLanguage();
+  const { t, lang, dir, gender } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loadingCheckout, setLoadingCheckout] = useState<"monthly" | "yearly" | null>(null);
@@ -316,7 +316,7 @@ function SubscriptionPageInner() {
             </h3>
             <p className="text-sm text-wing-muted leading-relaxed">
               {lang === "he"
-                ? "האם אתה בטוח שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית."
+                ? (gender === "female" ? "האם את בטוחה שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית." : "האם אתה בטוח שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית.")
                 : "Are you sure you want to cancel? Premium access will end at the current billing period."}
             </p>
             <div className="flex gap-3 pt-2">

@@ -5,7 +5,7 @@ import { admin, getAdminApp } from "@/lib/firebase/admin";
 
 export async function POST(req: NextRequest) {
   try {
-    const { targetUserId, authorName, message, link } = await req.json();
+    const { targetUserId, authorId, authorName, message, link } = await req.json();
     if (!targetUserId || !authorName || !message) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -16,12 +16,23 @@ export async function POST(req: NextRequest) {
 
     const token = userSnap.data()?.fcmToken;
     if (!token) return NextResponse.json({ ok: true });
+
+    // Gender the verb after the author's name ("עודד" / "עודדה").
+    let authorGender: "male" | "female" = "male";
+    if (typeof authorId === "string" && authorId) {
+      try {
+        const authorSnap = await admin.firestore().doc(`users/${authorId}`).get();
+        if (authorSnap.data()?.profile?.gender === "female") authorGender = "female";
+      } catch { /* gender lookup failed — default masculine */ }
+    }
+    const encouraged = authorGender === "female" ? "עודדה" : "עודד";
+
     // Caller can specify which page to open. Defaults to /checkin for back-compat.
     const targetLink = typeof link === "string" && link.startsWith("/") ? link : "/checkin";
     await admin.messaging().send({
       token,
       notification: {
-        title: `💪 ${authorName} עודד/ה אותך!`,
+        title: `💪 ${authorName} ${encouraged} אותך!`,
         body: message,
       },
       // data.link is read by the native app (Capacitor) on notification tap

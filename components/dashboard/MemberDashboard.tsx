@@ -62,6 +62,7 @@ export function MemberDashboard({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             targetUserId: memberId,
+            authorId: currentUserId,
             authorName: currentUserName,
             message: text,
             link: `/checkin?date=${checkin.date}`,

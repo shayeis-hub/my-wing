@@ -30,7 +30,7 @@ interface HamburgerMenuProps {
 
 export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
   const { user, firebaseUser } = useAuth();
-  const { t, lang, setLang, dir } = useLanguage();
+  const { t, lang, setLang, dir, gender } = useLanguage();
   const email = firebaseUser?.email ?? user?.email ?? "";
   const grandfathered = isGrandfathered(email);
   const premium = isPremium(email, user?.subscription?.plan, user?.subscription);
@@ -132,7 +132,7 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
                 <span className="text-xs font-bold text-white bg-wing-primary px-2 py-0.5 rounded-full">Premium</span>
               ) : (
                 <span className="text-xs font-bold text-wing-heat bg-wing-primary/10 px-2 py-0.5 rounded-full">
-                  {lang === "he" ? "שדרג" : "Upgrade"}
+                  {lang === "he" ? (gender === "female" ? "שדרגי" : "שדרג") : "Upgrade"}
                 </span>
               )}
             </div>

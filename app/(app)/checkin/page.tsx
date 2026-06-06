@@ -37,12 +37,13 @@ function calcWorkoutCalories(type: string, intensity: "light" | "moderate" | "in
   return Math.round(met * weightKg * (durationMin / 60));
 }
 
-async function sendEncouragementPush(targetUserId: string, authorName: string, text: string, date?: string) {
+async function sendEncouragementPush(targetUserId: string, authorId: string, authorName: string, text: string, date?: string) {
   await fetch("/api/notifications/encouragement", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       targetUserId,
+      authorId,
       authorName,
       message: text,
       link: date ? `/checkin?date=${date}` : "/checkin",
@@ -68,7 +69,7 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 
 function CheckinPageInner() {
   const { user, firebaseUser } = useAuth();
-  const { t, lang } = useLanguage();
+  const { t, lang, gender } = useLanguage();
   const trialLocked = useTrialLock();
 
   const moods = [
@@ -303,7 +304,7 @@ function CheckinPageInner() {
     try {
       const enc: Encouragement = { authorId: firebaseUser.uid, authorName: user.displayName, text, createdAt: Date.now() };
       await addEncouragement(user.wingId!, checkin.id, enc);
-      await sendEncouragementPush(checkin.userId, user.displayName, text, checkin.date);
+      await sendEncouragementPush(checkin.userId, firebaseUser.uid, user.displayName, text, checkin.date);
       setGroupCheckins((prev) => prev.map((c) => c.id === checkin.id ? { ...c, encouragements: [...(c.encouragements ?? []), enc] } : c));
       setEncourageTexts((prev) => ({ ...prev, [checkin.id]: "" }));
       toast.success(t("checkin_enc_sent"));
@@ -479,7 +480,7 @@ function CheckinPageInner() {
             </span>
           )}
           {!stepsEditing && (
-            <span className="text-[10px] text-wing-subtle">{lang === "he" ? "לחץ לעריכה" : "tap to edit"}</span>
+            <span className="text-[10px] text-wing-subtle">{lang === "he" ? (gender === "female" ? "לחצי לעריכה" : "לחץ לעריכה") : "tap to edit"}</span>
           )}
         </div>
 

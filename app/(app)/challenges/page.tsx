@@ -23,7 +23,7 @@ import type { Challenge } from "@/types";
 export default function ChallengesPage() {
   const { user } = useAuth();
   const { wing } = useWing(user?.wingId);
-  const { t, lang, dir } = useLanguage();
+  const { t, lang, dir, gender } = useLanguage();
   const router = useRouter();
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState("");
@@ -156,7 +156,7 @@ export default function ChallengesPage() {
               {wing.activeChallenge.type === "steps" ? t("challenge_steps_unit") as string : ""}
             </div>
             <p className="text-xs text-wing-heat font-medium">
-              {lang === "he" ? "לחץ לצפייה בלוח התוצאות ←" : "Tap to view leaderboard →"}
+              {lang === "he" ? (gender === "female" ? "לחצי לצפייה בלוח התוצאות ←" : "לחץ לצפייה בלוח התוצאות ←") : "Tap to view leaderboard →"}
             </p>
           </div>
         </button>

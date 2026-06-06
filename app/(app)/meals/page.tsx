@@ -29,7 +29,7 @@ function MealsPageInner() {
   const { user, firebaseUser } = useAuth();
   const { meals, loading } = useMeals(user?.wingId);
   const { wing } = useWing(user?.wingId);
-  const { t, lang } = useLanguage();
+  const { t, lang, gender } = useLanguage();
   const trialLocked = useTrialLock();
   const searchParams = useSearchParams();
   const highlightMealId = searchParams.get("meal");
@@ -400,7 +400,7 @@ function MealsPageInner() {
                 className="h-32 w-32 flex-shrink-0 rounded-2xl border-2 border-dashed border-wing-border flex flex-col items-center justify-center gap-1 text-wing-muted hover:border-wing-ink transition-colors"
               >
                 <span className="text-2xl">+</span>
-                <span className="text-xs font-medium">{lang === "he" ? "הוסף תמונה" : "Add photo"}</span>
+                <span className="text-xs font-medium">{lang === "he" ? (gender === "female" ? "הוסיפי תמונה" : "הוסף תמונה") : "Add photo"}</span>
               </button>
             )}
           </div>

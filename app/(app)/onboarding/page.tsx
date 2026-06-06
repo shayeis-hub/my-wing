@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
@@ -54,7 +54,7 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 // ── Main component ──────────────────────────────────────────────────
 export default function OnboardingPage() {
   const { user, firebaseUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, setGender: setI18nGender } = useLanguage();
   const router = useRouter();
 
   const activityLevels: { value: UserProfile["activityLevel"]; label: string }[] = [
@@ -77,6 +77,9 @@ export default function OnboardingPage() {
 
   // Step 1 — profile
   const [gender, setGender] = useState<UserProfile["gender"]>("male");
+  // Reflect the selected gender immediately so onboarding copy (e.g. the finish
+  // button) shows the right masculine/feminine form before the profile is saved.
+  useEffect(() => { setI18nGender(gender); }, [gender, setI18nGender]);
   const [age, setAge] = useState("30");
   const [height, setHeight] = useState("170");
   const [weight, setWeight] = useState(80);

@@ -25,6 +25,14 @@ export async function POST(req: NextRequest) {
       (id) => id !== userId
     );
 
+    // Gender the sender's wording ("זקוק" / "זקוקה").
+    let senderGender: "male" | "female" = "male";
+    try {
+      const senderSnap = await admin.firestore().doc(`users/${userId}`).get();
+      if (senderSnap.data()?.profile?.gender === "female") senderGender = "female";
+    } catch { /* gender lookup failed — default masculine */ }
+    const needsWord = senderGender === "female" ? "זקוקה" : "זקוק";
+
     const tokens: string[] = [];
     for (const memberId of memberIds) {
       try {
@@ -48,7 +56,7 @@ export async function POST(req: NextRequest) {
           token,
           notification: {
             title: "SOS – צריך תמיכה! 🆘",
-            body: `${userName} זקוק/ה לחיזוק עכשיו. היכנסו לאפליקציה 💪`,
+            body: `${userName} ${needsWord} לחיזוק עכשיו. היכנסו לאפליקציה 💪`,
           },
           // data.link is read by the native app (Capacitor) on notification tap
           data: { link: "/wing", type: "sos", senderId: String(userId ?? "") },

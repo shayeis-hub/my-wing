@@ -19,7 +19,7 @@ interface CreatePostFormProps {
 }
 
 export function CreatePostForm({ wingId, userId, userName, userPhotoURL, onPostCreated }: CreatePostFormProps) {
-  const { t } = useLanguage();
+  const { t, gender } = useLanguage();
   const [text, setText] = useState("");
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -66,7 +66,7 @@ export function CreatePostForm({ wingId, userId, userName, userPhotoURL, onPostC
       setImageDataUrl(null);
     } catch (err) {
       console.error("Failed to create post:", err);
-      alert("לא הצליח לפרסם. נסה שוב.");
+      alert(gender === "female" ? "לא הצליח לפרסם. נסי שוב." : "לא הצליח לפרסם. נסה שוב.");
     } finally {
       setSubmitting(false);
     }

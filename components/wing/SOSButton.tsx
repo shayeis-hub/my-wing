@@ -15,7 +15,7 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
   const [sending, setSending] = useState(false);
   const [cooldown, setCooldown] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const { t, lang } = useLanguage();
+  const { t, lang, gender } = useLanguage();
 
   async function handleSOS() {
     if (sending || cooldown) return;
@@ -81,7 +81,7 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
             </div>
             <p className="text-sm text-wing-muted leading-relaxed">
               {lang === "he"
-                ? "לחיצה תשלח הודעה לכלל חברי הכנף. אתה בטוח?"
+                ? (gender === "female" ? "לחיצה תשלח הודעה לכלל חברי הכנף. את בטוחה?" : "לחיצה תשלח הודעה לכלל חברי הכנף. אתה בטוח?")
                 : "This will send a notification to all wing members. Are you sure?"}
             </p>
             <div className="flex gap-3 pt-1">

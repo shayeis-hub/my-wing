@@ -33,7 +33,7 @@ import { AdBanner } from "@/components/ads/AdBanner";
 
 export default function DashboardPage() {
   const { user, firebaseUser } = useAuth();
-  const { t, lang } = useLanguage();
+  const { t, lang, gender } = useLanguage();
   const router = useRouter();
   const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
@@ -237,7 +237,7 @@ export default function DashboardPage() {
   const hasMealToday = myTodayMeals.length > 0;
   const ctaHref = !hasCheckedInToday ? "/checkin" : !hasMealToday ? "/meals" : "/feed";
   const ctaLabel = lang === "he"
-    ? (!hasCheckedInToday ? "צ׳ק-אפ יומי" : !hasMealToday ? "רישום ארוחה" : "שתף עם הכנף")
+    ? (!hasCheckedInToday ? "צ׳ק-אפ יומי" : !hasMealToday ? "רישום ארוחה" : (gender === "female" ? "שתפי עם הכנף" : "שתף עם הכנף"))
     : (!hasCheckedInToday ? "Daily Check-up" : !hasMealToday ? "Log Meal" : "Share with Wing");
 
   // Steps: prefer Google Fit sync, fall back to check-in
@@ -590,7 +590,7 @@ export default function DashboardPage() {
           }}
           className="text-xs font-mono text-wing-subtle hover:text-wing-muted transition-colors tracking-widest uppercase"
         >
-          התנתק
+          {t("menu_signout")}
         </button>
       </div>
     </div>
