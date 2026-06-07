@@ -111,13 +111,17 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ textDescription: trimmed, lang }),
+        body: JSON.stringify({ textDescription: trimmed, lang, userId, userEmail: userEmail ?? null }),
       });
-      if (!res.ok) throw new Error("analysis error");
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.detail ?? `HTTP ${res.status}`);
+      }
       const analysis: MealAnalysis = await res.json();
       onAnalysis(analysis, "");
-    } catch {
-      setError(t("meals_analysis_error") as string);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      setError(`${t("meals_analysis_error") as string}${msg ? ` (${msg})` : ""}`);
     } finally {
       setAnalyzing(false);
     }
