@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { cancelSubscription, getSubscription } from "@/lib/paypal";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, action = "cancel" } = (await req.json()) as {
-      userId: string;
+    const userId = await getUidFromRequest(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { action = "cancel" } = (await req.json()) as {
       action?: "cancel" | "status";
     };
-
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
 
     getAdminApp();
     const db = admin.firestore();

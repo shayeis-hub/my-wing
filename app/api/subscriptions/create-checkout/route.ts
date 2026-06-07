@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { createSubscription } from "@/lib/paypal";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -20,13 +21,15 @@ function getPlanId(priceType: "monthly" | "yearly", currency: "ILS" | "USD"): st
 
 export async function POST(req: NextRequest) {
   try {
-    const { priceType, userId, currency = "ILS" } = (await req.json()) as {
+    const userId = await getUidFromRequest(req);
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { priceType, currency = "ILS" } = (await req.json()) as {
       priceType: "monthly" | "yearly";
-      userId: string;
       currency?: "ILS" | "USD";
     };
 
-    if (!userId || !priceType) {
+    if (!priceType) {
       return NextResponse.json({ error: "Missing params" }, { status: 400 });
     }
 

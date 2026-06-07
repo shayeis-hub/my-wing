@@ -35,12 +35,14 @@ export function UpgradeModal({ onClose, limitReached = false }: UpgradeModalProp
   const [loading, setLoading] = useState<"monthly" | "yearly" | null>(null);
 
   async function handleUpgrade(type: "monthly" | "yearly") {
+    if (!firebaseUser) return;
     setLoading(type);
     try {
+      const token = await firebaseUser.getIdToken();
       const res = await fetch("/api/subscriptions/create-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceType: type, userId: firebaseUser?.uid }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ priceType: type }),
       });
       if (!res.ok) throw new Error("checkout failed");
       const { url } = await res.json();

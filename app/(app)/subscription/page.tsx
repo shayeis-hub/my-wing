@@ -54,15 +54,15 @@ function SubscriptionPageInner() {
   }, [searchParams, lang]);
 
   async function handleUpgrade(type: "monthly" | "yearly") {
-    if (!firebaseUser?.uid) return;
+    if (!firebaseUser) return;
     setLoadingCheckout(type);
     try {
+      const token = await firebaseUser.getIdToken();
       const res = await fetch("/api/subscriptions/create-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           priceType: type,
-          userId: firebaseUser.uid,
           currency: lang === "he" ? "ILS" : "USD",
         }),
       });
@@ -76,13 +76,14 @@ function SubscriptionPageInner() {
   }
 
   async function handlePortal() {
-    if (!firebaseUser?.uid) return;
+    if (!firebaseUser) return;
     setLoadingPortal(true);
     try {
+      const token = await firebaseUser.getIdToken();
       const res = await fetch("/api/subscriptions/create-portal", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: firebaseUser.uid, action: "cancel" }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "cancel" }),
       });
       if (!res.ok) throw new Error();
       toast.success(lang === "he" ? "המנוי בוטל" : "Subscription cancelled");
