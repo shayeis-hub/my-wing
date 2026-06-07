@@ -25,22 +25,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // Verify webhook signature if webhook ID is configured
+  // Verify webhook signature — mandatory. Without this, anyone could POST a
+  // forged "subscription activated" event and be granted Premium for free.
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
-  if (webhookId) {
-    const valid = await verifyWebhook({
-      webhookId,
-      transmissionId: req.headers.get("paypal-transmission-id") ?? "",
-      transmissionTime: req.headers.get("paypal-transmission-time") ?? "",
-      certUrl: req.headers.get("paypal-cert-url") ?? "",
-      authAlgo: req.headers.get("paypal-auth-algo") ?? "",
-      transmissionSig: req.headers.get("paypal-transmission-sig") ?? "",
-      webhookEvent: event,
-    });
-    if (!valid) {
-      console.warn("PayPal webhook signature verification failed");
-      // Don't hard-reject — log and continue (during initial setup)
-    }
+  if (!webhookId) {
+    console.error("PAYPAL_WEBHOOK_ID not set — rejecting webhook");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+  const valid = await verifyWebhook({
+    webhookId,
+    transmissionId: req.headers.get("paypal-transmission-id") ?? "",
+    transmissionTime: req.headers.get("paypal-transmission-time") ?? "",
+    certUrl: req.headers.get("paypal-cert-url") ?? "",
+    authAlgo: req.headers.get("paypal-auth-algo") ?? "",
+    transmissionSig: req.headers.get("paypal-transmission-sig") ?? "",
+    webhookEvent: event,
+  });
+  if (!valid) {
+    console.warn("PayPal webhook signature verification failed — rejecting");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   getAdminApp();
