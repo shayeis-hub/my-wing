@@ -398,6 +398,16 @@ export async function addPromptResponse(
   });
 }
 
+export async function deletePromptResponse(
+  wingId: string,
+  promptDate: string,
+  response: PromptResponse,
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "prompts", promptDate), {
+    responses: arrayRemove(response),
+  });
+}
+
 export async function getRecentPrompts(wingId: string, days: number = 14): Promise<DailyPrompt[]> {
   const snap = await getDocs(
     query(collection(db, "wings", wingId, "prompts"), orderBy("date", "desc"), limit(days)),

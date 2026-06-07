@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles, Trash2 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Reactions } from "@/components/ui/Reactions";
-import { addPromptResponse, togglePromptReaction } from "@/lib/firebase/firestore";
+import { addPromptResponse, deletePromptResponse, togglePromptReaction } from "@/lib/firebase/firestore";
 import { useLanguage } from "@/lib/i18n";
 import type { DailyPrompt, PromptResponse, Reaction, ReactionType, WingMember } from "@/types";
 
@@ -14,7 +14,9 @@ interface DailyPromptCardProps {
   currentUserId: string;
   currentUserName: string;
   members?: WingMember[];
+  isViewerAdmin?: boolean;
   onResponseAdded?: (next: PromptResponse[]) => void;
+  onResponseDeleted?: (next: PromptResponse[]) => void;
   onReactionsChanged?: (next: Reaction[]) => void;
 }
 
@@ -24,12 +26,15 @@ export function DailyPromptCard({
   currentUserId,
   currentUserName,
   members = [],
+  isViewerAdmin = false,
   onResponseAdded,
+  onResponseDeleted,
   onReactionsChanged,
 }: DailyPromptCardProps) {
   const { t } = useLanguage();
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [confirmDeleteIdx, setConfirmDeleteIdx] = useState<number | null>(null);
 
   const responses = prompt.responses ?? [];
   const memberMap = Object.fromEntries(members.map((m) => [m.uid, m]));
@@ -52,6 +57,13 @@ export function DailyPromptCard({
     } finally {
       setSending(false);
     }
+  }
+
+  async function handleDeleteResponse(response: PromptResponse, idx: number) {
+    await deletePromptResponse(wingId, prompt.date, response);
+    const next = responses.filter((_, i) => i !== idx);
+    onResponseDeleted?.(next);
+    setConfirmDeleteIdx(null);
   }
 
   async function handleReaction(type: ReactionType) {
@@ -100,6 +112,7 @@ export function DailyPromptCard({
           {responses.map((r, i) => {
             const photo = memberMap[r.userId]?.photoURL;
             const isMine = r.userId === currentUserId;
+            const canDelete = isMine || isViewerAdmin;
             return (
               <div key={i} className="flex items-start gap-2.5 bg-wing-elevated rounded-[12px] px-3 py-2">
                 <Avatar name={r.userName} photoURL={photo} size={26} isCurrentUser={isMine} />
@@ -107,6 +120,31 @@ export function DailyPromptCard({
                   <p className="text-xs font-bold text-wing-ink">{r.userName.split(" ")[0]}</p>
                   <p className="text-sm text-wing-ink/85 leading-snug mt-0.5">{r.text}</p>
                 </div>
+                {canDelete && (
+                  confirmDeleteIdx === i ? (
+                    <div className="flex gap-1 shrink-0">
+                      <button
+                        onClick={() => handleDeleteResponse(r, i)}
+                        className="text-[10px] font-bold text-red-500 px-2 py-1 rounded-lg bg-red-50 active:scale-95"
+                      >
+                        {t("delete") as string}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteIdx(null)}
+                        className="text-[10px] text-wing-muted px-2 py-1 rounded-lg bg-wing-elevated active:scale-95"
+                      >
+                        {t("cancel") as string}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteIdx(i)}
+                      className="shrink-0 p-1 rounded-lg text-wing-subtle hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )
+                )}
               </div>
             );
           })}

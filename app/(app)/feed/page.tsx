@@ -134,7 +134,9 @@ export default function FeedPage() {
           currentUserId={firebaseUser.uid}
           currentUserName={user.displayName}
           members={wing.members}
+          isViewerAdmin={isWingAdmin(wing, firebaseUser.uid)}
           onResponseAdded={(next) => setTodayPrompt((p) => p ? { ...p, responses: next } : p)}
+          onResponseDeleted={(next) => setTodayPrompt((p) => p ? { ...p, responses: next } : p)}
           onReactionsChanged={(next) => setTodayPrompt((p) => p ? { ...p, reactions: next } : p)}
         />
       )}
