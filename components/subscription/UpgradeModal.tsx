@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { FREE_LIMITS } from "@/lib/subscription";
+import { isNativeApp } from "@/lib/platform";
 
 interface UpgradeModalProps {
   onClose: () => void;
@@ -98,41 +99,52 @@ export function UpgradeModal({ onClose, limitReached = false }: UpgradeModalProp
         </div>
 
         {/* Pricing */}
-        <div className="px-6 py-5 space-y-3">
-          {/* Yearly — highlighted */}
-          <button
-            onClick={() => handleUpgrade("yearly")}
-            disabled={loading !== null}
-            className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-2 border-wing-primary bg-wing-primary/5 hover:bg-wing-primary/10 transition-colors disabled:opacity-60"
-          >
-            <div className="text-start">
-              <p className="font-bold text-wing-ink text-sm">{t("upgrade_cta_yearly")}</p>
-              <p className="text-wing-muted text-xs">{t("upgrade_yearly")}</p>
+        {isNativeApp() ? (
+          <div className="px-6 py-5">
+            <div className="bg-wing-elevated border border-wing-border rounded-2xl p-4 text-center space-y-1.5">
+              <p className="font-bold text-wing-ink text-sm">{t("upgrade_web_only_title")}</p>
+              <p className="text-xs text-wing-muted leading-relaxed">{t("upgrade_web_only_body")}</p>
             </div>
-            <span className="text-xs font-bold text-white bg-wing-primary px-2.5 py-1 rounded-full">
-              {t("upgrade_yearly_badge")}
-            </span>
-          </button>
-
-          {/* Monthly */}
-          <button
-            onClick={() => handleUpgrade("monthly")}
-            disabled={loading !== null}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-2xl border border-wing-border bg-wing-elevated hover:bg-wing-surface transition-colors disabled:opacity-60"
-          >
-            <div className="text-start">
-              <p className="font-medium text-wing-ink text-sm">{t("upgrade_cta_monthly")}</p>
-              <p className="text-wing-muted text-xs">{t("upgrade_monthly")}</p>
-            </div>
-          </button>
-
-          <p className="text-center text-xs text-wing-subtle">{t("upgrade_cancel_anytime")}</p>
-        </div>
-
-        {loading && (
-          <div className="px-6 pb-5 text-center">
-            <p className="text-xs text-wing-muted animate-pulse">מעביר לדף תשלום...</p>
           </div>
+        ) : (
+          <>
+            <div className="px-6 py-5 space-y-3">
+              {/* Yearly — highlighted */}
+              <button
+                onClick={() => handleUpgrade("yearly")}
+                disabled={loading !== null}
+                className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-2 border-wing-primary bg-wing-primary/5 hover:bg-wing-primary/10 transition-colors disabled:opacity-60"
+              >
+                <div className="text-start">
+                  <p className="font-bold text-wing-ink text-sm">{t("upgrade_cta_yearly")}</p>
+                  <p className="text-wing-muted text-xs">{t("upgrade_yearly")}</p>
+                </div>
+                <span className="text-xs font-bold text-white bg-wing-primary px-2.5 py-1 rounded-full">
+                  {t("upgrade_yearly_badge")}
+                </span>
+              </button>
+
+              {/* Monthly */}
+              <button
+                onClick={() => handleUpgrade("monthly")}
+                disabled={loading !== null}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-2xl border border-wing-border bg-wing-elevated hover:bg-wing-surface transition-colors disabled:opacity-60"
+              >
+                <div className="text-start">
+                  <p className="font-medium text-wing-ink text-sm">{t("upgrade_cta_monthly")}</p>
+                  <p className="text-wing-muted text-xs">{t("upgrade_monthly")}</p>
+                </div>
+              </button>
+
+              <p className="text-center text-xs text-wing-subtle">{t("upgrade_cancel_anytime")}</p>
+            </div>
+
+            {loading && (
+              <div className="px-6 pb-5 text-center">
+                <p className="text-xs text-wing-muted animate-pulse">מעביר לדף תשלום...</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

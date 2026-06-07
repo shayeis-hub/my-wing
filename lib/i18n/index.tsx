@@ -594,6 +594,11 @@ export const T = {
     upgrade_cta_monthly: g("התחל חודשי", "התחילי חודשי"),
     upgrade_cta_yearly: g("התחל שנתי", "התחילי שנתי"),
     upgrade_cancel_anytime: "ביטול בכל עת",
+    upgrade_web_only_title: "השדרוג זמין באתר",
+    upgrade_web_only_body: g(
+      "כדי לשדרג ל-Premium, היכנס ל-wingpact.app מהדפדפן ובצע את השדרוג שם.",
+      "כדי לשדרג ל-Premium, היכנסי ל-wingpact.app מהדפדפן ובצעי את השדרוג שם."
+    ),
     upgrade_limit_title: "הגעת למגבלה היומית",
     upgrade_limit_body: (n: number) => `משתמשי Free מוגבלים ל-${n} תמונות ארוחה ביום`,
     upgrade_manage: "נהל מנוי",
@@ -1263,6 +1268,8 @@ export const T = {
     upgrade_cta_monthly: "Start Monthly",
     upgrade_cta_yearly: "Start Yearly",
     upgrade_cancel_anytime: "Cancel anytime",
+    upgrade_web_only_title: "Upgrade on the web",
+    upgrade_web_only_body: "To upgrade to Premium, open wingpact.app in your browser and subscribe there.",
     upgrade_limit_title: "Daily limit reached",
     upgrade_limit_body: (n: number) => `Free users are limited to ${n} meal photos per day`,
     upgrade_manage: "Manage Subscription",

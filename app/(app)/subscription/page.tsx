@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
+import { isNativeApp } from "@/lib/platform";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { Subscription } from "@/types";
@@ -252,6 +253,29 @@ function SubscriptionPageInner() {
                   ? "המנוי יסתיים בתום תקופת החיוב הנוכחית"
                   : "Your subscription will end at the current billing period"}
               </p>
+            )}
+          </div>
+        ) : isNativeApp() ? (
+          <div className="space-y-3">
+            {/* In-app purchases are routed to the web to comply with store
+                billing policies (no external digital-goods checkout in-app). */}
+            <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center space-y-2">
+              <div className="flex justify-center">
+                <Crown size={28} className="text-wing-primary" />
+              </div>
+              <p className="font-bold text-wing-ink">{t("upgrade_web_only_title")}</p>
+              <p className="text-sm text-wing-muted leading-relaxed">{t("upgrade_web_only_body")}</p>
+            </div>
+            {isExpiredPaywall && (
+              <div className="pt-2 border-t border-wing-border space-y-1.5">
+                <button
+                  onClick={() => router.replace("/dashboard")}
+                  className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
+                >
+                  {t("trial_view_only")}
+                </button>
+                <p className="text-center text-xs text-wing-subtle">{t("trial_view_only_note")}</p>
+              </div>
             )}
           </div>
         ) : (
