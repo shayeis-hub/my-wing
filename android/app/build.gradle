@@ -26,12 +26,22 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        // Release keystore is supplied via CI environment variables only —
+        // the file is decoded from the RELEASE_KEYSTORE_BASE64 secret and is
+        // never committed to the repository.
+        release {
+            storeFile file('release.keystore')
+            storePassword System.getenv('RELEASE_KEYSTORE_PASSWORD') ?: ''
+            keyAlias System.getenv('RELEASE_KEY_ALIAS') ?: ''
+            keyPassword System.getenv('RELEASE_KEY_PASSWORD') ?: ''
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
