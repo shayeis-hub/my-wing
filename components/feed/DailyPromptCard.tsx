@@ -127,7 +127,7 @@ export function DailyPromptCard({
                         onClick={() => handleDeleteResponse(r, i)}
                         className="text-[10px] font-bold text-red-500 px-2 py-1 rounded-lg bg-red-50 active:scale-95"
                       >
-                        {t("delete") as string}
+                        {t("post_yes_delete") as string}
                       </button>
                       <button
                         onClick={() => setConfirmDeleteIdx(null)}
