@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin } from "@/lib/firebase/admin";
 import { loadWing, isAdminOf } from "@/lib/server/wingMembership";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { wingId, name, requesterId } = await req.json();
-    if (!wingId || !name || !requesterId) {
+    const requesterId = await getUidFromRequest(req);
+    if (!requesterId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { wingId, name } = await req.json();
+    if (!wingId || !name) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 

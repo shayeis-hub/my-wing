@@ -23,10 +23,11 @@ export default function DeleteAccountPage() {
       // a ghost member behind. Best-effort — don't block deletion if it fails.
       if (user?.wingId) {
         try {
+          const token = await firebaseUser.getIdToken();
           await fetch("/api/wing/leave", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ wingId: user.wingId, userId: firebaseUser.uid }),
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ wingId: user.wingId }),
           });
         } catch {
           /* ignore — proceed with account deletion */

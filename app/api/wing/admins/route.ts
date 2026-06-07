@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin } from "@/lib/firebase/admin";
 import { loadWing } from "@/lib/server/wingMembership";
 import { sendUserPush, getUserGender } from "@/lib/server/push";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
 // Appoint or remove a co-admin. Only the owner may manage co-admins.
 export async function POST(req: NextRequest) {
   try {
-    const { wingId, requesterId, targetId, action } = await req.json();
-    if (!wingId || !requesterId || !targetId || !["add", "remove"].includes(action)) {
+    const requesterId = await getUidFromRequest(req);
+    if (!requesterId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { wingId, targetId, action } = await req.json();
+    if (!wingId || !targetId || !["add", "remove"].includes(action)) {
       return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
     }
 

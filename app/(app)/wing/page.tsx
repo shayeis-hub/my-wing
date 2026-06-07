@@ -31,9 +31,10 @@ export default function WingPage() {
     if (busyAction) return;
     setBusyAction(true);
     try {
+      const token = (await firebaseUser?.getIdToken()) ?? "";
       const res = await fetch(path, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error();
@@ -80,10 +81,11 @@ export default function WingPage() {
     if (!window.confirm(t("wing_leave_confirm") as string)) return;
     setBusyAction(true);
     try {
+      const token = (await firebaseUser?.getIdToken()) ?? "";
       const res = await fetch("/api/wing/leave", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wingId: wing.id, userId: uid }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ wingId: wing.id }),
       });
       if (!res.ok) throw new Error();
       toast.success(t("wing_left") as string);
@@ -183,10 +185,11 @@ export default function WingPage() {
     if (!newName.trim() || !wing) return;
     setRenamingWing(true);
     try {
+      const token = (await firebaseUser?.getIdToken()) ?? "";
       const res = await fetch("/api/wing/rename", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wingId: wing.id, name: newName.trim(), requesterId: uid }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ wingId: wing.id, name: newName.trim() }),
       });
       if (!res.ok) throw new Error();
       toast.success(t("wing_rename_saved") as string);

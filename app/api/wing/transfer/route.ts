@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loadWing } from "@/lib/server/wingMembership";
 import { sendUserPush, getUserGender } from "@/lib/server/push";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
 // Transfer wing ownership. Only the current owner may do this.
 export async function POST(req: NextRequest) {
   try {
-    const { wingId, requesterId, targetId } = await req.json();
-    if (!wingId || !requesterId || !targetId) {
+    const requesterId = await getUidFromRequest(req);
+    if (!requesterId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { wingId, targetId } = await req.json();
+    if (!wingId || !targetId) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
     if (requesterId === targetId) {
