@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
   },
   android: {
     allowMixedContent:   false,
-    captureInput:        true,
+    captureInput:        false,
     webContentsDebuggingEnabled: false,
     backgroundColor:     "#fbf4e6",
     overrideUserAgent:   "MabneKanaf/1.0 Android",
