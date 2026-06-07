@@ -18,9 +18,16 @@ service cloud.firestore {
       allow read: if request.auth != null &&
         request.auth.uid in resource.data.memberIds;
       allow create: if request.auth != null;
-      allow update: if request.auth != null &&
-        (request.auth.uid == resource.data.ownerId ||
-         request.auth.uid in resource.data.memberIds);
+      // Members may update the wing doc from the client ONLY for non-privileged
+      // fields (challenges + member-list sync/photo). Privileged fields
+      // (ownerId, adminIds, name, inviteToken) are changed exclusively via
+      // server API routes using the Admin SDK, which bypasses these rules.
+      // This blocks a member from escalating themselves to owner/admin or
+      // tampering with the wing name directly from the client.
+      allow update: if request.auth != null
+        && request.auth.uid in resource.data.memberIds
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['activeChallenge', 'members', 'memberIds']);
       allow delete: if request.auth != null &&
         request.auth.uid == resource.data.ownerId;
 
