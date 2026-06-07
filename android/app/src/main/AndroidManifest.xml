@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -57,5 +58,49 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Health Connect permissions are provided by @capgo/capacitor-health plugin manifest -->
+    <!-- Health Connect: only steps are used. Remove all other permissions the
+         @capgo/capacitor-health plugin declares but we do not need. -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_STEPS" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_DISTANCE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_DISTANCE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_ACTIVE_CALORIES_BURNED" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_HEART_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_WEIGHT" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_WEIGHT" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_SLEEP" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_RESPIRATORY_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_RESPIRATORY_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_OXYGEN_SATURATION" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_OXYGEN_SATURATION" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_RESTING_HEART_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_RESTING_HEART_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_HEART_RATE_VARIABILITY" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_HEART_RATE_VARIABILITY" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_VO2_MAX" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_VO2_MAX" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_BLOOD_PRESSURE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_BLOOD_PRESSURE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_BLOOD_GLUCOSE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_BLOOD_GLUCOSE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_BODY_TEMPERATURE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_BODY_TEMPERATURE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_HEIGHT" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_HEIGHT" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_FLOORS_CLIMBED" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_FLOORS_CLIMBED" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_BODY_FAT" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_BODY_FAT" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_BASAL_BODY_TEMPERATURE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_BASAL_BODY_TEMPERATURE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_BASAL_METABOLIC_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_BASAL_METABOLIC_RATE" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_TOTAL_CALORIES_BURNED" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_MINDFULNESS" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.WRITE_MINDFULNESS" />
+    <uses-permission tools:node="remove" android:name="android.permission.health.READ_EXERCISE" />
 </manifest>
