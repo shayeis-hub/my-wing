@@ -88,11 +88,15 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
         onLimitReached?.();
         return;
       }
-      if (!res.ok) throw new Error("analysis error");
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.detail ?? `HTTP ${res.status}`);
+      }
       const analysis: MealAnalysis = await res.json();
       onAnalysis(analysis, dataUrl);
-    } catch {
-      setError(t("meals_analysis_error") as string);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      setError(`${t("meals_analysis_error") as string}${msg ? ` (${msg})` : ""}`);
     } finally {
       setAnalyzing(false);
     }

@@ -54,7 +54,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(analysis);
   } catch (err) {
-    console.error("Meal analysis error:", err);
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Meal analysis error:", msg);
+    return NextResponse.json({ error: "Analysis failed", detail: msg }, { status: 500 });
   }
 }
