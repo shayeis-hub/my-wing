@@ -117,6 +117,16 @@ function CheckinPageInner() {
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved">("idle");
   const autosaveTimer = useRef<NodeJS.Timeout | null>(null);
   const initialLoadDone = useRef(false);
+  // Android WebView IME fix: track composition state to avoid React clearing text mid-type
+  const notesComposing = useRef(false);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
+
+  // Sync notes state → DOM when loaded from Firestore (but never while user is typing)
+  useEffect(() => {
+    if (notesRef.current && !notesComposing.current && document.activeElement !== notesRef.current) {
+      notesRef.current.value = notes;
+    }
+  }, [notes]);
   const today = format(new Date(), "yyyy-MM-dd");
   const selectedDate = paramDate ?? today;
   const isRetro = selectedDate !== today;
@@ -628,9 +638,17 @@ function CheckinPageInner() {
           <span className="font-semibold text-wing-ink">{t("checkin_notes")}</span>
         </div>
         <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={t("checkin_notes_ph")}
+          ref={notesRef}
+          defaultValue={notes}
+          onCompositionStart={() => { notesComposing.current = true; }}
+          onCompositionEnd={(e) => {
+            notesComposing.current = false;
+            setNotes((e.target as HTMLTextAreaElement).value);
+          }}
+          onChange={(e) => {
+            if (!notesComposing.current) setNotes(e.target.value);
+          }}
+          placeholder={t("checkin_notes_ph") as string}
           rows={3}
           className="w-full px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle resize-none focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
         />

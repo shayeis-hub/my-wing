@@ -13,7 +13,7 @@ export async function analyzeMealImage(
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
   const promptText = isHe
-    ? `${hint ? `המשתמש מציין שהארוחה היא: "${hint}". השתמש במידע זה לצד התמונה לניתוח מדויק יותר.\n\n` : ""}אנא נתח את הצלחת בתמונה הזו ותן לי:
+    ? `${hint ? `המשתמש מציין שהארוחה היא: "${hint}". השתמש במידע זה לצד התמונה לניתוח מדויק יותר.\n\n` : ""}המשתמש נמצא בתהליך ירידה במשקל. אנא נתח את הצלחת בתמונה הזו ותן לי:
 1. תיאור קצר של הארוחה בעברית
 2. רשימת רכיבים עם משקל משוער בגרמים לכל אחד
 3. ערכים תזונתיים: קלוריות, חלבון, פחמימות, שומן, סיבים
@@ -35,7 +35,7 @@ export async function analyzeMealImage(
   "tips": "טיפ אופציונלי",
   "containsVegetables": false
 }`
-    : `${hint ? `The user notes that the meal is: "${hint}". Use this alongside the image for a more accurate analysis.\n\n` : ""}Please analyze the plate in this image and provide:
+    : `${hint ? `The user notes that the meal is: "${hint}". Use this alongside the image for a more accurate analysis.\n\n` : ""}The user is on a weight loss journey. Please analyze the plate in this image and provide:
 1. A short description of the meal in English
 2. A list of ingredients with estimated weight in grams each
 3. Nutritional values: calories, protein, carbs, fat, fiber
@@ -141,7 +141,7 @@ Reply ONLY with valid JSON:
 export async function analyzeMealText(description: string, lang: "he" | "en" = "he"): Promise<MealAnalysis> {
   const isHe = lang === "he";
   const promptContent = isHe
-    ? `המשתמש תיאר את הארוחה שלו: "${description}"
+    ? `המשתמש נמצא בתהליך ירידה במשקל. הוא תיאר את הארוחה שלו: "${description}"
 
 אנא נתח את הארוחה ותן לי:
 1. תיאור קצר בעברית
@@ -165,7 +165,7 @@ export async function analyzeMealText(description: string, lang: "he" | "en" = "
   "tips": "טיפ אופציונלי",
   "containsVegetables": false
 }`
-    : `The user described their meal: "${description}"
+    : `The user is on a weight loss journey. They described their meal: "${description}"
 
 Please analyze the meal and provide:
 1. A short description in English
@@ -228,7 +228,7 @@ export async function generatePersonalDaySummary(data: {
   const isHe = (data.lang ?? "he") === "he";
 
   const prompt = isHe
-    ? `אתה מאמן תזונה וכושר אישי. סכם את היום של ${data.userName} בצורה חמה, אישית ומעודדת בעברית.
+    ? `אתה מאמן תזונה וכושר אישי. המשתמש נמצא בתהליך ירידה במשקל. סכם את היום של ${data.userName} בצורה חמה, אישית ומעודדת בעברית, עם התייחסות לירידה במשקל.
 
 נתוני היום:
 - ארוחות: ${data.meals.length === 0 ? "לא נרשמו ארוחות" : data.meals.map(m => `${m.description} (${m.calories} קק"ל)`).join(", ")}
@@ -243,7 +243,7 @@ export async function generatePersonalDaySummary(data: {
 ${data.notes ? `- הערה: "${data.notes}"` : ""}
 
 תן סיכום אישי, תובנות, וטיפ למחר.`
-    : `You are a personal nutrition and fitness coach. Summarize ${data.userName}'s day in a warm, personal and encouraging way in English.
+    : `You are a personal nutrition and fitness coach. The user is on a weight loss journey. Summarize ${data.userName}'s day in a warm, personal and encouraging way in English, with a focus on weight loss progress.
 
 Day data:
 - Meals: ${data.meals.length === 0 ? "No meals logged" : data.meals.map(m => `${m.description} (${m.calories} kcal)`).join(", ")}
