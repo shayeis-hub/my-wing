@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loadWing } from "@/lib/server/wingMembership";
+import { sendUserPush, getUserGender } from "@/lib/server/push";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,17 @@ export async function POST(req: NextRequest) {
     adminIds.push(requesterId);
 
     await wing.ref.update({ ownerId: targetId, adminIds });
+
+    // Notify the new owner (best-effort, gendered by recipient).
+    const gender = await getUserGender(targetId);
+    const youAre = gender === "female" ? "את עכשיו הבעלים הראשית" : "אתה עכשיו הבעלים הראשי";
+    await sendUserPush(targetId, {
+      title: "👑 הכנף עברה לבעלותך",
+      body: `קיבלת את הבעלות על הכנף! ${youAre} 👑`,
+      link: "/wing",
+      type: "wing_transfer",
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Transfer wing error:", err);

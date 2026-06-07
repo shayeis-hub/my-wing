@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin } from "@/lib/firebase/admin";
 import { loadWing } from "@/lib/server/wingMembership";
+import { sendUserPush, getUserGender } from "@/lib/server/push";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,20 @@ export async function POST(req: NextRequest) {
           ? admin.firestore.FieldValue.arrayUnion(targetId)
           : admin.firestore.FieldValue.arrayRemove(targetId),
     });
+
+    // Notify the newly-appointed admin (best-effort, gendered by recipient).
+    if (action === "add") {
+      const gender = await getUserGender(targetId);
+      const role = gender === "female" ? "למנהלת" : "למנהל";
+      const canDo = gender === "female" ? "תוכלי" : "תוכל";
+      await sendUserPush(targetId, {
+        title: "🛡️ מינוי לניהול הכנף",
+        body: `מונית ${role} בכנף! עכשיו ${canDo} לנהל אתגרים וחברים.`,
+        link: "/wing",
+        type: "wing_admin_added",
+      });
+    }
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Manage admin error:", err);
