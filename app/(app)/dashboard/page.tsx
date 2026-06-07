@@ -30,6 +30,7 @@ import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
 import { calcStreak } from "@/lib/utils/streak";
 import type { StepsEntry } from "@/types";
 import { AdBanner } from "@/components/ads/AdBanner";
+import { isWingAdmin } from "@/lib/wing/roles";
 
 
 export default function DashboardPage() {
@@ -354,6 +355,7 @@ export default function DashboardPage() {
           wingId={wing.id}
           currentUserId={firebaseUser.uid}
           currentUserName={user.displayName}
+          isViewerAdmin={isWingAdmin(wing, firebaseUser.uid)}
           todayMeals={todayMeals}
         />
       )}
@@ -552,7 +554,7 @@ export default function DashboardPage() {
                 </Link>
               </div>
               {myTodayMeals.slice(0, 3).map((meal) => (
-                <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} />
+                <MealCard key={meal.id} meal={meal} currentUserId={firebaseUser?.uid} currentUserName={user?.displayName} isViewerAdmin={isWingAdmin(wing, firebaseUser?.uid)} />
               ))}
             </div>
           )}

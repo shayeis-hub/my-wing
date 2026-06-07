@@ -8,6 +8,7 @@ import {
   togglePostReaction,
   addPostComment,
   deleteWingPost,
+  deletePostComment,
 } from "@/lib/firebase/firestore";
 import { useLanguage } from "@/lib/i18n";
 import type { Encouragement, Reaction, ReactionType, WingPost } from "@/types";
@@ -17,15 +18,17 @@ interface PostCardProps {
   wingId: string;
   currentUserId: string;
   currentUserName: string;
+  isViewerAdmin?: boolean;
   onUpdate: (next: WingPost) => void;
   onDelete: (postId: string) => void;
 }
 
-export function PostCard({ post, wingId, currentUserId, currentUserName, onUpdate, onDelete }: PostCardProps) {
+export function PostCard({ post, wingId, currentUserId, currentUserName, isViewerAdmin = false, onUpdate, onDelete }: PostCardProps) {
   const { t } = useLanguage();
   const [commentText, setCommentText] = useState("");
   const [sending, setSending] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDeleteComment, setConfirmDeleteComment] = useState<number | null>(null);
 
   const isOwn = post.userId === currentUserId;
   const comments = post.comments ?? [];
@@ -71,6 +74,14 @@ export function PostCard({ post, wingId, currentUserId, currentUserName, onUpdat
   async function handleDelete() {
     await deleteWingPost(wingId, post.id);
     onDelete(post.id);
+  }
+
+  async function handleDeleteComment(idx: number) {
+    const comment = comments[idx];
+    await deletePostComment(wingId, post.id, comment);
+    const next = comments.filter((_, i) => i !== idx);
+    onUpdate({ ...post, comments: next });
+    setConfirmDeleteComment(null);
   }
 
   return (
@@ -148,12 +159,39 @@ export function PostCard({ post, wingId, currentUserId, currentUserName, onUpdat
       {/* Comments */}
       {comments.length > 0 && (
         <div className="space-y-1.5 pt-1">
-          {comments.map((c, i) => (
-            <div key={i} className="bg-wing-elevated rounded-[12px] px-3 py-2">
-              <p className="text-xs font-bold text-wing-ink">{c.authorName.split(" ")[0]}</p>
-              <p className="text-sm text-wing-ink/85 leading-snug mt-0.5">{c.text}</p>
-            </div>
-          ))}
+          {comments.map((c, i) => {
+            const canDelete = c.authorId === currentUserId || isViewerAdmin;
+            return (
+              <div key={i} className="bg-wing-elevated rounded-[12px] px-3 py-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-wing-ink">{c.authorName.split(" ")[0]}</p>
+                    <p className="text-sm text-wing-ink/85 leading-snug mt-0.5">{c.text}</p>
+                  </div>
+                  {canDelete && (
+                    <button
+                      onClick={() => setConfirmDeleteComment(confirmDeleteComment === i ? null : i)}
+                      className="p-1 rounded-lg text-wing-muted hover:text-red-500 shrink-0"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+                {confirmDeleteComment === i && (
+                  <div className="mt-2 flex gap-2">
+                    <button onClick={() => setConfirmDeleteComment(null)}
+                      className="flex-1 py-1 rounded-xl text-xs border border-wing-border text-wing-muted">
+                      {t("cancel")}
+                    </button>
+                    <button onClick={() => handleDeleteComment(i)}
+                      className="flex-1 py-1 rounded-xl text-xs bg-red-500 text-white font-bold">
+                      {t("post_yes_delete")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

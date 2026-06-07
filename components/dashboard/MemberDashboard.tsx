@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { MealCard } from "@/components/meals/MealCard";
-import { getTodayCheckin, addEncouragement } from "@/lib/firebase/firestore";
+import { getTodayCheckin, addEncouragement, deleteEncouragement } from "@/lib/firebase/firestore";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { DailyCheckin, Encouragement, Meal } from "@/types";
-import { Droplets, Leaf, Footprints, Dumbbell, Scale, Smile } from "lucide-react";
+import { Droplets, Leaf, Footprints, Dumbbell, Scale, Smile, Trash2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
 const moods = [
@@ -24,6 +24,7 @@ interface MemberDashboardProps {
   wingId: string;
   currentUserId: string;
   currentUserName: string;
+  isViewerAdmin?: boolean;
   todayMeals: Meal[];
 }
 
@@ -33,11 +34,13 @@ export function MemberDashboard({
   wingId,
   currentUserId,
   currentUserName,
+  isViewerAdmin = false,
   todayMeals,
 }: MemberDashboardProps) {
   const [checkin, setCheckin] = useState<DailyCheckin | null | undefined>(undefined);
   const [encText, setEncText] = useState("");
   const [sending, setSending] = useState(false);
+  const [confirmDeleteEnc, setConfirmDeleteEnc] = useState<number | null>(null);
   const { t } = useLanguage();
   const today = format(new Date(), "yyyy-MM-dd");
   const isOwn = memberId === currentUserId;
@@ -76,6 +79,17 @@ export function MemberDashboard({
     } finally {
       setSending(false);
     }
+  }
+
+  async function handleDeleteEncouragement(idx: number) {
+    if (!checkin) return;
+    const enc = (checkin.encouragements ?? [])[idx];
+    await deleteEncouragement(wingId, checkin.id, enc);
+    setCheckin((prev) => prev ? {
+      ...prev,
+      encouragements: (prev.encouragements ?? []).filter((_, i) => i !== idx),
+    } : prev);
+    setConfirmDeleteEnc(null);
   }
 
   const memberMeals = todayMeals.filter((m) => m.userId === memberId);
@@ -161,12 +175,33 @@ export function MemberDashboard({
           {/* Encouragements */}
           {(checkin.encouragements ?? []).length > 0 && (
             <div className="space-y-2">
-              {checkin.encouragements!.map((enc, i) => (
-                <div key={i} className="text-sm bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2">
-                  <span className="font-bold text-wing-ink">{enc.authorName}: </span>
-                  <span className="text-wing-muted">{enc.text}</span>
-                </div>
-              ))}
+              {checkin.encouragements!.map((enc, i) => {
+                const canDel = enc.authorId === currentUserId || isViewerAdmin;
+                return (
+                  <div key={i} className="text-sm bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2">
+                    <div className="flex items-start gap-1">
+                      <span className="flex-1">
+                        <span className="font-bold text-wing-ink">{enc.authorName}: </span>
+                        <span className="text-wing-muted">{enc.text}</span>
+                      </span>
+                      {canDel && (
+                        <button onClick={() => setConfirmDeleteEnc(confirmDeleteEnc === i ? null : i)}
+                          className="p-0.5 text-wing-muted hover:text-red-500 shrink-0">
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                    {confirmDeleteEnc === i && (
+                      <div className="mt-1.5 flex gap-2">
+                        <button onClick={() => setConfirmDeleteEnc(null)}
+                          className="flex-1 py-1 rounded-xl text-xs border border-wing-border text-wing-muted">{t("cancel")}</button>
+                        <button onClick={() => handleDeleteEncouragement(i)}
+                          className="flex-1 py-1 rounded-xl text-xs bg-red-500 text-white font-bold">{t("post_yes_delete")}</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -192,7 +227,7 @@ export function MemberDashboard({
         <div className="space-y-3">
           <h3 className="font-bold text-wing-ink">{t("member_meals_today")}</h3>
           {memberMeals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} />
+            <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} currentUserName={currentUserName} isViewerAdmin={isViewerAdmin} />
           ))}
         </div>
       ) : (

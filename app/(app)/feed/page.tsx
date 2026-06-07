@@ -6,6 +6,7 @@ import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { useLanguage } from "@/lib/i18n";
+import { isWingAdmin } from "@/lib/wing/roles";
 import {
   createDailyPrompt,
   getTodayPrompt,
@@ -158,6 +159,7 @@ export default function FeedPage() {
           wingId={user.wingId!}
           currentUserId={firebaseUser.uid}
           currentUserName={user.displayName}
+          isViewerAdmin={isWingAdmin(wing, firebaseUser.uid)}
           onUpdate={(next) => setPosts((prev) => prev.map((p) => p.id === next.id ? next : p))}
           onDelete={(id) => setPosts((prev) => prev.filter((p) => p.id !== id))}
         />

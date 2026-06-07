@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { addMealComment, updateMeal, deleteMeal, toggleMealReaction } from "@/lib/firebase/firestore";
+import { addMealComment, deleteMealComment, updateMeal, deleteMeal, toggleMealReaction } from "@/lib/firebase/firestore";
 import type { Meal, Encouragement, Reaction, ReactionType } from "@/types";
 import { Reactions } from "@/components/ui/Reactions";
 import { formatDistanceToNow } from "date-fns";
@@ -18,10 +18,11 @@ interface MealCardProps {
   meal: Meal;
   currentUserId?: string;
   currentUserName?: string;
+  isViewerAdmin?: boolean;
   hero?: boolean;
 }
 
-export function MealCard({ meal, currentUserId, currentUserName, hero = false }: MealCardProps) {
+export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin = false, hero = false }: MealCardProps) {
   const { t, lang } = useLanguage();
 
   const mealTypeLabels: Record<Meal["mealType"], string> = {
@@ -63,6 +64,7 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
   const [savingEdit, setSavingEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteComment, setConfirmDeleteComment] = useState<number | null>(null);
 
   // Hide bottom nav while detail modal is open
   useEffect(() => {
@@ -160,6 +162,13 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
     }
   }
 
+  async function handleDeleteComment(idx: number) {
+    const c = comments[idx];
+    await deleteMealComment(meal.wingId, meal.id, c);
+    setComments((prev) => prev.filter((_, i) => i !== idx));
+    setConfirmDeleteComment(null);
+  }
+
   return (
     <>
       {hero ? (
@@ -224,12 +233,33 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
 
           {showComments && (
             <div className="px-3 pb-3 space-y-1.5">
-              {comments.map((c, i) => (
-                <div key={i} className="text-sm bg-wing-elevated rounded-xl px-3 py-2">
-                  <span className="font-semibold text-wing-heat">{c.authorName}: </span>
-                  <span className="text-wing-muted">{c.text}</span>
-                </div>
-              ))}
+              {comments.map((c, i) => {
+                const canDel = c.authorId === currentUserId || isViewerAdmin;
+                return (
+                  <div key={i} className="text-sm bg-wing-elevated rounded-xl px-3 py-2">
+                    <div className="flex items-start gap-1">
+                      <span className="flex-1">
+                        <span className="font-semibold text-wing-heat">{c.authorName}: </span>
+                        <span className="text-wing-muted">{c.text}</span>
+                      </span>
+                      {canDel && (
+                        <button onClick={() => setConfirmDeleteComment(confirmDeleteComment === i ? null : i)}
+                          className="p-0.5 text-wing-muted hover:text-red-500 shrink-0">
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                    {confirmDeleteComment === i && (
+                      <div className="mt-1.5 flex gap-2">
+                        <button onClick={() => setConfirmDeleteComment(null)}
+                          className="flex-1 py-1 rounded-xl text-xs border border-wing-border text-wing-muted">{t("cancel")}</button>
+                        <button onClick={() => handleDeleteComment(i)}
+                          className="flex-1 py-1 rounded-xl text-xs bg-red-500 text-white font-bold">{t("post_yes_delete")}</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
           {currentUserId && (isOwn ? comments.length > 0 : true) && (
@@ -463,12 +493,33 @@ export function MealCard({ meal, currentUserId, currentUserName, hero = false }:
                   <div>
                     <p className="font-semibold text-wing-ink mb-2">{t("meal_comments_title") as string}</p>
                     <div className="space-y-2">
-                      {comments.map((c, i) => (
-                        <div key={i} className="text-sm bg-wing-elevated rounded-xl px-3 py-2">
-                          <span className="font-semibold text-wing-heat">{c.authorName}: </span>
-                          <span className="text-wing-muted">{c.text}</span>
-                        </div>
-                      ))}
+                      {comments.map((c, i) => {
+                        const canDel = c.authorId === currentUserId || isViewerAdmin;
+                        return (
+                          <div key={i} className="text-sm bg-wing-elevated rounded-xl px-3 py-2">
+                            <div className="flex items-start gap-1">
+                              <span className="flex-1">
+                                <span className="font-semibold text-wing-heat">{c.authorName}: </span>
+                                <span className="text-wing-muted">{c.text}</span>
+                              </span>
+                              {canDel && (
+                                <button onClick={() => setConfirmDeleteComment(confirmDeleteComment === i ? null : i)}
+                                  className="p-0.5 text-wing-muted hover:text-red-500 shrink-0">
+                                  <Trash2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                            {confirmDeleteComment === i && (
+                              <div className="mt-1.5 flex gap-2">
+                                <button onClick={() => setConfirmDeleteComment(null)}
+                                  className="flex-1 py-1 rounded-xl text-xs border border-wing-border text-wing-muted">{t("cancel")}</button>
+                                <button onClick={() => handleDeleteComment(i)}
+                                  className="flex-1 py-1 rounded-xl text-xs bg-red-500 text-white font-bold">{t("post_yes_delete")}</button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -11,6 +11,7 @@ import {
   limit,
   serverTimestamp,
   arrayUnion,
+  arrayRemove,
   updateDoc,
   deleteDoc,
   increment,
@@ -173,6 +174,16 @@ export async function addMealComment(
   });
 }
 
+export async function deleteMealComment(
+  wingId: string,
+  mealId: string,
+  comment: Encouragement
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "meals", mealId), {
+    comments: arrayRemove(comment),
+  });
+}
+
 export async function updateMeal(
   wingId: string,
   mealId: string,
@@ -287,6 +298,16 @@ export async function addEncouragement(
 ): Promise<void> {
   await updateDoc(doc(db, "wings", wingId, "checkins", checkinId), {
     encouragements: arrayUnion(encouragement),
+  });
+}
+
+export async function deleteEncouragement(
+  wingId: string,
+  checkinId: string,
+  encouragement: Encouragement
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "checkins", checkinId), {
+    encouragements: arrayRemove(encouragement),
   });
 }
 
@@ -414,6 +435,16 @@ export async function addPostComment(
 ): Promise<void> {
   await updateDoc(doc(db, "wings", wingId, "posts", postId), {
     comments: arrayUnion(comment),
+  });
+}
+
+export async function deletePostComment(
+  wingId: string,
+  postId: string,
+  comment: Encouragement
+): Promise<void> {
+  await updateDoc(doc(db, "wings", wingId, "posts", postId), {
+    comments: arrayRemove(comment),
   });
 }
 
