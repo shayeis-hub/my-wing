@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "991022188498-682dbrdnp97773tvk653husci7tepqfg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.wingpact.android",
+            "certificate_hash": "f4ac72ee632c99a46b4e6ea0b7743cdec032302c"
+          }
+        },
+        {
           "client_id": "991022188498-tj9q8si4lp3t20v16thi3midqeau2c9s.apps.googleusercontent.com",
           "client_type": 3
         }
