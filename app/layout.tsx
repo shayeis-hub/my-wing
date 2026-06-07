@@ -26,12 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
       <head>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3097267578681712"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+        {/* AdSense script is intentionally NOT loaded globally. It is loaded
+            on demand by <AdBanner> only on content pages, for free users, on
+            the web (never in the native app) — this avoids ads on no-content
+            screens (login/onboarding) and AdSense policy violations. */}
         <Script id="register-sw" strategy="afterInteractive">{`
           if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
