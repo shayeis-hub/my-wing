@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { useWing } from "@/hooks/useWing";
@@ -93,9 +93,7 @@ export default function DashboardPage() {
     healthSyncedRef.current = true;
     try {
       const r = await readTodayStepsFromHealth();
-      // Debug toast — remove after diagnosis
-      toast(`HC: auth=${r.authorized} steps=${r.steps} reason=${r.reason ?? "ok"}`);
-      if (!r.authorized || !r.steps || r.steps <= 0) return;
+if (!r.authorized || !r.steps || r.steps <= 0) return;
       const syncedSteps = r.steps;
       const today = format(new Date(), "yyyy-MM-dd");
       const current = entries.find((s) => s.userId === firebaseUser.uid)?.steps ?? 0;
