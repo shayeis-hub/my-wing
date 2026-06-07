@@ -8,10 +8,12 @@ import { admin, getAdminApp } from "@/lib/firebase/admin";
 
 // ── Admin-SDK helpers (server-safe, no client SDK) ────────────────────────────
 
-async function getUserPlanAdmin(uid: string): Promise<{ plan: Plan; cancelAtMs?: number | null; endsAtMs?: number | null } | null> {
+type SubDoc = { plan: Plan; cancelPending?: boolean; expiresAt?: { _seconds?: number } | null };
+
+async function getUserPlanAdmin(uid: string): Promise<SubDoc | null> {
   const snap = await admin.firestore().doc(`users/${uid}`).get();
   if (!snap.exists) return null;
-  return (snap.data() as { subscription?: { plan: Plan; cancelAtMs?: number | null; endsAtMs?: number | null } }).subscription ?? null;
+  return (snap.data() as { subscription?: SubDoc }).subscription ?? null;
 }
 
 async function getDailyMealCountAdmin(uid: string, date: string): Promise<number> {
