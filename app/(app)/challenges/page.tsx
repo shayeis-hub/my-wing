@@ -17,7 +17,8 @@ import {
 import toast from "react-hot-toast";
 import { format, addDays } from "date-fns";
 import { useRouter } from "next/navigation";
-import { Trophy, ChevronRight, ChevronLeft } from "lucide-react";
+import { Trophy, ChevronRight, ChevronLeft, Footprints, Droplets, Salad, Ban, Flame, Award } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { isWingAdmin } from "@/lib/wing/roles";
 import type { Challenge } from "@/types";
 
@@ -37,12 +38,12 @@ export default function ChallengesPage() {
 
   const canManage = isWingAdmin(wing, user?.uid);
 
-  const challengeTypes: { value: Challenge["type"]; label: string; emoji: string }[] = [
-    { value: "steps", label: t("ct_steps") as string, emoji: "👟" },
-    { value: "water", label: t("ct_water") as string, emoji: "💧" },
-    { value: "vegetables", label: t("ct_veg") as string, emoji: "🥦" },
-    { value: "no_sugar", label: t("ct_sugar") as string, emoji: "🚫🍬" },
-    { value: "calories", label: t("ct_cal") as string, emoji: "🔥" },
+  const challengeTypes: { value: Challenge["type"]; label: string; Icon: LucideIcon }[] = [
+    { value: "steps",      label: t("ct_steps") as string, Icon: Footprints },
+    { value: "water",      label: t("ct_water") as string, Icon: Droplets   },
+    { value: "vegetables", label: t("ct_veg")   as string, Icon: Salad      },
+    { value: "no_sugar",   label: t("ct_sugar") as string, Icon: Ban        },
+    { value: "calories",   label: t("ct_cal")   as string, Icon: Flame      },
   ];
 
   useEffect(() => {
@@ -163,7 +164,7 @@ export default function ChallengesPage() {
         </button>
       ) : (
         <Card className="text-center py-8">
-          <div className="text-4xl mb-3">🏆</div>
+          <div className="flex justify-center mb-3"><Trophy size={36} className="text-wing-heat" /></div>
           <p className="font-semibold text-wing-ink">{t("challenge_no_active") as string}</p>
           <p className="text-sm text-wing-subtle mt-1">
             {canManage ? t("challenge_no_active_member") as string : t("challenge_no_active_guest") as string}
@@ -186,7 +187,7 @@ export default function ChallengesPage() {
                     : "border-wing-border text-wing-muted hover:bg-wing-elevated"
                 }`}
               >
-                <span>{ct.emoji}</span>
+                <ct.Icon size={16} />
                 <span className="font-medium">{ct.label}</span>
               </button>
             ))}
@@ -210,7 +211,7 @@ export default function ChallengesPage() {
         <div className="space-y-2">
           <h2 className="font-bold text-wing-ink text-sm px-1">{t("challenge_past_title") as string}</h2>
           {pastChallenges.map((c) => {
-            const emoji = challengeTypes.find((ct) => ct.value === c.type)?.emoji ?? "🏆";
+            const Icon = challengeTypes.find((ct) => ct.value === c.type)?.Icon ?? Trophy;
             return (
               <button
                 key={c.id}
@@ -218,13 +219,13 @@ export default function ChallengesPage() {
                 onClick={() => router.push(`/challenges/${c.id}`)}
               >
                 <div className="bg-wing-surface border border-wing-border rounded-[16px] px-4 py-3 flex items-center gap-3">
-                  <span className="text-2xl">{emoji}</span>
+                  <Icon size={22} className="text-wing-heat shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-wing-ink text-sm">{c.title}</p>
                     <p className="text-xs text-wing-muted">{c.startDate} – {c.endDate}</p>
                   </div>
                   {c.winners && c.winners.length > 0 && (
-                    <span className="text-lg">🥇</span>
+                    <Award size={18} className="text-yellow-500" />
                   )}
                   <ChevronIcon size={16} className="text-wing-muted" />
                 </div>

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { addMeal, getTodayCheckin, saveCheckin } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
-import { UtensilsCrossed, ChevronDown, PenLine, Clock } from "lucide-react";
+import { UtensilsCrossed, ChevronDown, PenLine, Clock, Lightbulb, Flame, Beef, Wheat, Droplets } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -329,10 +329,10 @@ function MealsPageInner() {
           />
           <div className="grid grid-cols-2 gap-2">
             {([
-              ["manualCalories", `🔥 ${t("kcal")}`, manualCalories, setManualCalories],
-              ["manualProtein", `🥩 ${t("ob_protein")} g`, manualProtein, setManualProtein],
-              ["manualCarbs", `🌾 ${t("ob_carbs")} g`, manualCarbs, setManualCarbs],
-              ["manualFat", `🧈 ${t("ob_fat")} g`, manualFat, setManualFat],
+              ["manualCalories", `${t("kcal")}`, manualCalories, setManualCalories],
+              ["manualProtein", `${t("ob_protein")} g`, manualProtein, setManualProtein],
+              ["manualCarbs", `${t("ob_carbs")} g`, manualCarbs, setManualCarbs],
+              ["manualFat", `${t("ob_fat")} g`, manualFat, setManualFat],
             ] as [string, string, string, (v: string) => void][]).map(([key, label, val, setter]) => (
               <label key={key} className="flex flex-col gap-0.5">
                 <span className="text-xs text-wing-subtle">{label}</span>
@@ -425,7 +425,7 @@ function MealsPageInner() {
                 {(["calories", "protein", "carbs", "fat"] as const).map((field) => (
                   <label key={field} className="flex flex-col gap-0.5">
                     <span className="text-xs text-wing-subtle">
-                      {field === "calories" ? `🔥 ${t("kcal")}` : field === "protein" ? `🥩 ${t("ob_protein")} g` : field === "carbs" ? `🌾 ${t("ob_carbs")} g` : `🧈 ${t("ob_fat")} g`}
+                      {field === "calories" ? `${t("kcal")}` : field === "protein" ? `${t("ob_protein")} g` : field === "carbs" ? `${t("ob_carbs")} g` : `${t("ob_fat")} g`}
                     </span>
                     <input
                       type="number"
@@ -437,11 +437,11 @@ function MealsPageInner() {
                 ))}
               </div>
             ) : (
-              <div className="flex gap-4 text-xs text-wing-muted">
-                <span>🔥 {pendingAnalysis.analysis.calories} {t("kcal")}</span>
-                <span>🥩 {pendingAnalysis.analysis.protein}g {t("ob_protein")}</span>
-                <span>🌾 {pendingAnalysis.analysis.carbs}g {t("ob_carbs")}</span>
-                <span>🧈 {pendingAnalysis.analysis.fat}g {t("ob_fat")}</span>
+              <div className="flex gap-3 text-xs text-wing-muted flex-wrap">
+                <span className="flex items-center gap-1"><Flame size={11} />{pendingAnalysis.analysis.calories} {t("kcal")}</span>
+                <span className="flex items-center gap-1"><Beef size={11} />{pendingAnalysis.analysis.protein}g {t("ob_protein")}</span>
+                <span className="flex items-center gap-1"><Wheat size={11} />{pendingAnalysis.analysis.carbs}g {t("ob_carbs")}</span>
+                <span className="flex items-center gap-1"><Droplets size={11} />{pendingAnalysis.analysis.fat}g {t("ob_fat")}</span>
               </div>
             )}
 
@@ -453,8 +453,8 @@ function MealsPageInner() {
             </button>
 
             {pendingAnalysis.analysis.tips && (
-              <p className="text-xs text-wing-heat bg-wing-elevated px-3 py-2 rounded-xl">
-                💡 {pendingAnalysis.analysis.tips}
+              <p className="text-xs text-wing-heat bg-wing-elevated px-3 py-2 rounded-xl flex items-start gap-1.5">
+                <Lightbulb size={13} className="shrink-0 mt-0.5" />{pendingAnalysis.analysis.tips}
               </p>
             )}
           </div>
@@ -539,7 +539,7 @@ function MealsPageInner() {
         </div>
       ) : meals.length === 0 ? (
         <div className="text-center py-12 text-wing-subtle">
-          <div className="text-4xl mb-3">🍽️</div>
+          <div className="flex justify-center mb-3"><UtensilsCrossed size={36} className="text-wing-subtle" /></div>
           <p>{t("meals_no_meals_feed")}</p>
         </div>
       ) : (

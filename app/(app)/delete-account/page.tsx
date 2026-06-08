@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { Button } from "@/components/ui/Button";
+import { AlertTriangle } from "lucide-react";
 import { deleteUser } from "firebase/auth";
 import toast from "react-hot-toast";
 
@@ -61,7 +62,7 @@ export default function DeleteAccountPage() {
       </div>
 
       <div className="bg-red-50 rounded-3xl p-5 space-y-3">
-        <div className="text-3xl text-center">⚠️</div>
+        <div className="flex justify-center"><AlertTriangle size={28} className="text-red-600" /></div>
         <h2 className="font-bold text-red-700 text-center">{t("delete_warning_title") as string}</h2>
         <ul className="text-sm text-red-600 space-y-1 list-disc list-inside">
           <li>{t("delete_warning_1") as string}</li>

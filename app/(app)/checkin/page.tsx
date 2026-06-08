@@ -19,7 +19,7 @@ import { useSearchParams } from "next/navigation";
 import type { DailyCheckin, Encouragement, ReactionType } from "@/types";
 import { Droplets, Leaf, Footprints, Dumbbell, Smile, Scale, Pencil, Moon, Lightbulb, Timer } from "lucide-react";
 
-const MOOD_EMOJIS = ["😞", "😕", "😐", "😊", "🤩"];
+const MOOD_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
 
 const MET: Record<string, Record<"light" | "moderate" | "intense", number>> = {
   running:  { light: 8,   moderate: 11,  intense: 14  },
@@ -73,11 +73,11 @@ function CheckinPageInner() {
   const trialLocked = useTrialLock();
 
   const moods = [
-    { value: 1, emoji: MOOD_EMOJIS[0], label: t("mood_1") },
-    { value: 2, emoji: MOOD_EMOJIS[1], label: t("mood_2") },
-    { value: 3, emoji: MOOD_EMOJIS[2], label: t("mood_3") },
-    { value: 4, emoji: MOOD_EMOJIS[3], label: t("mood_4") },
-    { value: 5, emoji: MOOD_EMOJIS[4], label: t("mood_5") },
+    { value: 1, color: MOOD_COLORS[0], label: t("mood_1") },
+    { value: 2, color: MOOD_COLORS[1], label: t("mood_2") },
+    { value: 3, color: MOOD_COLORS[2], label: t("mood_3") },
+    { value: 4, color: MOOD_COLORS[3], label: t("mood_4") },
+    { value: 5, color: MOOD_COLORS[4], label: t("mood_5") },
   ];
 
   const WORKOUT_TYPES: { value: string; label: string }[] = [
@@ -389,7 +389,7 @@ function CheckinPageInner() {
       </div>
       {isRetro && (
         <span className="inline-block text-xs text-wing-heat font-medium bg-wing-elevated border border-wing-border px-3 py-1 rounded-full">
-          ✏️ מילוי רטרואקטיבי
+          <Pencil size={12} className="inline mr-1" />מילוי רטרואקטיבי
         </span>
       )}
 
@@ -409,7 +409,7 @@ function CheckinPageInner() {
               }`}
               style={mood === m.value ? { background: "linear-gradient(135deg, #fff3b8, #ffc89a)" } : {}}
             >
-              <span className="text-xl">{m.emoji}</span>
+              <span className="w-5 h-5 rounded-full inline-block" style={{ background: m.color }} />
               <MonoLabel>{m.label}</MonoLabel>
             </button>
           ))}
@@ -744,17 +744,17 @@ function CheckinPageInner() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-wing-ink font-semibold">{c.userName}</span>
                   <div className="flex gap-1.5 text-wing-muted text-xs flex-wrap justify-end">
-                    <span>💧 {c.waterGlasses.toFixed(1)}L</span>
-                    <span>🥦 {c.vegetablesServings}</span>
-                    {c.steps ? <span>👟 {c.steps.toLocaleString()}</span> : null}
-                    {c.workout?.done && <span>🏋️</span>}
-                    {c.weightKg ? <span>⚖️ {c.weightKg}</span> : null}
-                    <span>{moods.find((m) => m.value === c.mood)?.emoji}</span>
+                    <span className="flex items-center gap-0.5"><Droplets size={11} />{c.waterGlasses.toFixed(1)}L</span>
+                    <span className="flex items-center gap-0.5"><Leaf size={11} />{c.vegetablesServings}</span>
+                    {c.steps ? <span className="flex items-center gap-0.5"><Footprints size={11} />{c.steps.toLocaleString()}</span> : null}
+                    {c.workout?.done && <Dumbbell size={11} />}
+                    {c.weightKg ? <span className="flex items-center gap-0.5"><Scale size={11} />{c.weightKg}</span> : null}
+                    <span className="w-3 h-3 rounded-full inline-block" style={{ background: moods.find((m) => m.value === c.mood)?.color ?? "#eab308" }} />
                   </div>
                 </div>
                 {c.workout?.done && c.workout.description && (
                   <p className="text-xs text-green-700 bg-green-50 rounded-xl px-3 py-1.5">
-                    🏋️ {c.workout.description}{c.workout.caloriesBurned ? ` · ${c.workout.caloriesBurned} ${t("kcal")}` : ""}
+                    <Dumbbell size={12} className="inline mr-1" />{c.workout.description}{c.workout.caloriesBurned ? ` · ${c.workout.caloriesBurned} ${t("kcal")}` : ""}
                   </p>
                 )}
                 {c.notes && (

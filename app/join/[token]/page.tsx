@@ -85,7 +85,6 @@ export default function JoinPage() {
 
         {done ? (
           <div className="bg-green-50 text-green-600 rounded-3xl p-6">
-            <div className="text-4xl mb-2">🎉</div>
             <p className="font-bold">הצטרפת בהצלחה!</p>
             <p className="text-sm mt-1">מעביר אותך לדשבורד...</p>
           </div>

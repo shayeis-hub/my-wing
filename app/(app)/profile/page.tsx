@@ -212,15 +212,14 @@ export default function ProfilePage() {
           const silver = user.trophies!.filter(t => t.medal === "silver");
           const bronze = user.trophies!.filter(t => t.medal === "bronze");
           const cols = [
-            { medals: gold,   emoji: "🥇", label: t("trophy_gold")   as string, bg: "bg-yellow-50 border-yellow-200", text: "text-yellow-700" },
-            { medals: silver, emoji: "🥈", label: t("trophy_silver") as string, bg: "bg-slate-50 border-slate-200",   text: "text-slate-500"  },
-            { medals: bronze, emoji: "🥉", label: t("trophy_bronze") as string, bg: "bg-orange-50 border-orange-200", text: "text-orange-600" },
+            { medals: gold,   label: t("trophy_gold")   as string, bg: "bg-yellow-50 border-yellow-200", text: "text-yellow-700" },
+            { medals: silver, label: t("trophy_silver") as string, bg: "bg-slate-50 border-slate-200",   text: "text-slate-500"  },
+            { medals: bronze, label: t("trophy_bronze") as string, bg: "bg-orange-50 border-orange-200", text: "text-orange-600" },
           ];
           return (
             <div className="grid grid-cols-3 gap-3">
-              {cols.map(({ medals, emoji, label, bg, text }) => (
+              {cols.map(({ medals, label, bg, text }) => (
                 <div key={label} className={`rounded-2xl border p-3 text-center ${bg}`}>
-                  <div className="text-3xl mb-1">{emoji}</div>
                   <p className={`text-[10px] font-bold uppercase tracking-wide ${text} mb-2`}>{label}</p>
                   <p className={`font-black text-2xl ${text}`}>{medals.length}</p>
                   <p className="text-[10px] text-wing-muted mt-0.5">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { useLanguage } from "@/lib/i18n";
@@ -259,7 +260,7 @@ function StepsPageInner() {
         <div className="bg-wing-surface border border-wing-border rounded-[20px] px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             {native ? (
-              <span className="text-base leading-none">❤️</span>
+              <Heart size={18} className="text-red-500" />
             ) : (
               <img src="https://www.gstatic.com/images/branding/product/1x/gsa_android_48dp.png" alt="" className="w-5 h-5" />
             )}

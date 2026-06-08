@@ -31,7 +31,7 @@ export default function GlobalError({
         alignItems: "center", justifyContent: "center",
         background: "#fbf4e6", fontFamily: "system-ui, sans-serif", gap: 12,
       }}>
-        <span style={{ fontSize: 32 }}>🔄</span>
+        <div style={{ width: 32, height: 32, border: "3px solid #f5dd4b", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         <p style={{ color: "#8a7e6a", fontSize: 14 }}>מעדכן לגרסה החדשה...</p>
       </div>
     );

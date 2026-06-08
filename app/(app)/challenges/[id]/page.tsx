@@ -16,7 +16,8 @@ import {
 } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format, differenceInDays, parseISO } from "date-fns";
-import { ArrowRight, ArrowLeft, Trophy, Flag } from "lucide-react";
+import { ArrowRight, ArrowLeft, Trophy, Flag, Footprints, Droplets, Salad, Ban, Flame } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { Challenge } from "@/types";
 
 type ProgressMap = Record<string, number>;
@@ -27,12 +28,12 @@ const RANK_STYLES = [
   { bg: "bg-orange-100", text: "text-orange-600", border: "border-orange-200" },
 ];
 
-const CHALLENGE_EMOJIS: Record<Challenge["type"], string> = {
-  steps: "👟",
-  water: "💧",
-  vegetables: "🥦",
-  no_sugar: "🚫",
-  calories: "🔥",
+const CHALLENGE_ICONS: Record<Challenge["type"], LucideIcon> = {
+  steps:      Footprints,
+  water:      Droplets,
+  vegetables: Salad,
+  no_sugar:   Ban,
+  calories:   Flame,
 };
 
 type TKey = Parameters<ReturnType<typeof import("@/lib/i18n")["useLanguage"]>["t"]>[0];
@@ -148,7 +149,7 @@ export default function ChallengeDetailPage() {
   const daysLeft   = differenceInDays(parseISO(challenge.endDate), new Date());
   const isManual   = challenge.type === "no_sugar" || challenge.type === "calories";
   const unit       = t(unitKey(challenge.type)) as string;
-  const emoji      = CHALLENGE_EMOJIS[challenge.type];
+  const ChallengeIcon = CHALLENGE_ICONS[challenge.type];
 
   // Daily target: total progress needed = targetValue (per day) × number of days
   const totalDays = Math.max(1, differenceInDays(parseISO(challenge.endDate), parseISO(challenge.startDate)) + 1);
@@ -174,7 +175,7 @@ export default function ChallengeDetailPage() {
       {/* Header card */}
       <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-3">
         <div className="flex items-start gap-3">
-          <span className="text-4xl leading-none">{emoji}</span>
+          <ChallengeIcon size={36} className="text-wing-heat shrink-0" />
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="font-black text-wing-ink text-lg leading-tight">{challenge.title}</h1>

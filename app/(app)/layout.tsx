@@ -70,7 +70,7 @@ function WidgetActions() {
           body: JSON.stringify({ wingId, userId: uid, userName }),
         });
         const toast = (await import("react-hot-toast")).default;
-        toast.success("SOS נשלח לחברי הכנף 💪");
+        toast.success("SOS נשלח לחברי הכנף");
       } catch { /* network error — ignore */ }
     }
 

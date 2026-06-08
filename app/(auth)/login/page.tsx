@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { Mail } from "lucide-react";
 import { signIn, signInWithGoogle, sendPasswordReset } from "@/lib/firebase/auth";
 import { useLanguage } from "@/lib/i18n";
 
@@ -102,8 +103,8 @@ function LoginForm() {
 
         {forgotSent ? (
           <div className="w-full flex flex-col items-center gap-5">
-            <div className="w-16 h-16 rounded-full bg-wing-surface border border-wing-border flex items-center justify-center text-3xl">
-              ✉️
+            <div className="w-16 h-16 rounded-full bg-wing-surface border border-wing-border flex items-center justify-center">
+              <Mail size={28} className="text-wing-heat" />
             </div>
             <p className="text-sm font-semibold text-wing-ink text-center">{t("login_forgot_success") as string}</p>
             <button

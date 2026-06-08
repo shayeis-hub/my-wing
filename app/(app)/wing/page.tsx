@@ -276,7 +276,7 @@ export default function WingPage() {
                   {(t("wing_members_count") as (n: number) => string)(memberCount)}
                 </p>
               </div>
-              <div className="text-3xl">🪽</div>
+              <svg width="36" height="22" viewBox="0 0 60 36" fill="none"><defs><linearGradient id="wl-wing" x1="0" y1="0" x2="60" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stopColor="#f5dd4b"/><stop offset="1" stopColor="#ff6b47"/></linearGradient></defs><path d="M4 30 L30 8 L56 30" stroke="url(#wl-wing)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="30" cy="8" r="3" fill="#d4541a"/><circle cx="17" cy="19" r="1.8" fill="#1a1814"/><circle cx="43" cy="19" r="1.8" fill="#1a1814"/></svg>
             </div>
 
             {/* Members list */}

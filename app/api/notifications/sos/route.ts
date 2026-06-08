@@ -71,7 +71,13 @@ export async function POST(req: NextRequest) {
     );
 
     const notified = results.filter((r) => r.status === "fulfilled").length;
-    return NextResponse.json({ success: true, notified });
+    const errors = results
+      .filter((r): r is PromiseRejectedResult => r.status === "rejected")
+      .map((r) => (r.reason instanceof Error ? r.reason.message : String(r.reason)));
+    if (errors.length > 0) {
+      console.error("SOS send errors:", errors);
+    }
+    return NextResponse.json({ success: true, notified, errors });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("SOS notification error:", msg, err);
