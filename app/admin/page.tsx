@@ -86,7 +86,10 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/admin/stats", { headers: { "x-admin-secret": key } });
       if (res.status === 401) { setError("סיסמה שגויה"); setLoading(false); return; }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail ?? `HTTP ${res.status}`);
+      }
       const data: Stats = await res.json();
       setStats(data);
       setSavedSecret(key);
