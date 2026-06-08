@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
-import { analyzeMealImage, analyzeMealText } from "@/lib/ai/claude";
+import { analyzeMealImage, analyzeMealImages, analyzeMealText } from "@/lib/ai/claude";
 import { isGrandfathered, isPremium, canAddMealPhoto, FREE_LIMITS, type Plan } from "@/lib/subscription";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 
@@ -31,7 +31,7 @@ async function incrementDailyMealCountAdmin(uid: string, date: string): Promise<
 
 export async function POST(req: NextRequest) {
   try {
-    const { base64Image, mediaType, hint, textDescription, userId, userEmail, lang } = await req.json();
+    const { base64Image, base64Images, mediaType, hint, textDescription, userId, userEmail, lang } = await req.json();
 
     // ── Enforce meal-photo limit (only for image analysis, not text) ──────────
     if (base64Image && userId && userEmail !== undefined) {
@@ -58,6 +58,12 @@ export async function POST(req: NextRequest) {
     if (textDescription) {
       getAdminApp();
       const analysis = await analyzeMealText(textDescription, lang ?? "he");
+      return NextResponse.json(analysis);
+    }
+
+    // ── Multi-image analysis ───────────────────────────────────────────────────
+    if (base64Images && Array.isArray(base64Images) && base64Images.length > 0) {
+      const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he");
       return NextResponse.json(analysis);
     }
 

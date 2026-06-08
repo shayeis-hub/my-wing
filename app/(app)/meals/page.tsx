@@ -93,12 +93,20 @@ function MealsPageInner() {
       const newUrls = [...pendingAnalysis.imageDataUrls, imageDataUrl].slice(0, 5);
       setReanalyzing(true);
       try {
-        const { analyzeMealImages } = await import("@/lib/ai/claude");
         const images = newUrls.map((url) => ({
           base64: url.split(",")[1],
           mediaType: (url.startsWith("data:image/png") ? "image/png" : "image/jpeg") as "image/jpeg" | "image/png",
         }));
-        const combined = await analyzeMealImages(images, undefined, lang as "he" | "en");
+        const res = await fetch("/api/ai/analyze-meal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ base64Images: images, lang, userId: firebaseUser?.uid, userEmail: firebaseUser?.email ?? null }),
+        });
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.detail ?? `HTTP ${res.status}`);
+        }
+        const combined: MealAnalysis = await res.json();
         setPendingAnalysis({ analysis: combined, imageDataUrls: newUrls });
         toast.success(lang === "he" ? `${newUrls.length} תמונות — מנותחות יחד` : `${newUrls.length} photos analyzed together`);
       } catch {
