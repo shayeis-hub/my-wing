@@ -113,7 +113,7 @@ export default function ChallengesPage() {
     }
   }
 
-  const activeEmoji = challengeTypes.find((ct) => ct.value === wing?.activeChallenge?.type)?.emoji;
+  const ActiveIcon = challengeTypes.find((ct) => ct.value === wing?.activeChallenge?.type)?.Icon ?? Trophy;
   const ChevronIcon = lang === "he" ? ChevronLeft : ChevronRight;
 
   return (
@@ -135,7 +135,7 @@ export default function ChallengesPage() {
         >
           <div className="bg-gradient-to-br from-wing-heat/10 to-yellow-50 border-2 border-wing-heat/20 rounded-[20px] p-5 space-y-3">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{activeEmoji}</span>
+              <ActiveIcon size={28} className="text-wing-heat shrink-0" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h2 className="font-bold text-wing-ink">{wing.activeChallenge.title}</h2>
