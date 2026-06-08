@@ -6,6 +6,23 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
+function WingLogo() {
+  return (
+    <svg width="56" height="34" viewBox="0 0 60 36" fill="none">
+      <defs>
+        <linearGradient id="wl-join" x1="0" y1="0" x2="60" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#f5dd4b" />
+          <stop offset="1" stopColor="#ff6b47" />
+        </linearGradient>
+      </defs>
+      <path d="M4 30 L30 8 L56 30" stroke="url(#wl-join)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="30" cy="8" r="3" fill="#d4541a" />
+      <circle cx="17" cy="19" r="1.8" fill="#1a1814" />
+      <circle cx="43" cy="19" r="1.8" fill="#1a1814" />
+    </svg>
+  );
+}
+
 export default function JoinPage() {
   const { token } = useParams<{ token: string }>();
   const { firebaseUser, user, loading } = useAuth();
@@ -50,7 +67,7 @@ export default function JoinPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-wing-bg flex items-center justify-center">
-        <div className="text-4xl animate-bounce">🪽</div>
+        <div className="animate-bounce"><WingLogo /></div>
       </div>
     );
   }
@@ -58,7 +75,7 @@ export default function JoinPage() {
   return (
     <div className="min-h-screen bg-wing-bg flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm text-center space-y-6">
-        <div className="text-6xl">🪽</div>
+        <div className="flex justify-center"><WingLogo /></div>
         <div>
           <h1 className="text-2xl font-bold text-slate-800">הצטרף למבנה כנף</h1>
           <p className="text-slate-500 text-sm mt-2">
@@ -97,7 +114,7 @@ export default function JoinPage() {
           </div>
         ) : (
           <Button size="lg" className="w-full" onClick={handleJoin} loading={joining}>
-            הצטרף למבנה 🪽
+            הצטרף למבנה
           </Button>
         )}
       </div>
