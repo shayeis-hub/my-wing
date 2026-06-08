@@ -260,6 +260,18 @@ export async function getTodayCheckin(
     : null;
 }
 
+export function subscribeTodayCheckin(
+  wingId: string,
+  userId: string,
+  date: string,
+  cb: (checkin: DailyCheckin | null) => void
+): Unsubscribe {
+  const id = `${userId}_${date}`;
+  return onSnapshot(doc(db, "wings", wingId, "checkins", id), (snap) => {
+    cb(snap.exists() ? { ...(snap.data() as Omit<DailyCheckin, "id">), id: snap.id } : null);
+  });
+}
+
 export async function getWingCheckins(
   wingId: string,
   date: string

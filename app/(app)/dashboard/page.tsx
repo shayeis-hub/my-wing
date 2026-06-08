@@ -23,7 +23,7 @@ import { isNativeApp, readTodayStepsFromHealth } from "@/lib/fitness/healthConne
 import { pushWidgetData } from "@/lib/widget/native";
 import { registerNativePush } from "@/lib/push/native";
 import { useRouter } from "next/navigation";
-import { getTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, saveSteps, type GroupEnergy } from "@/lib/firebase/firestore";
+import { subscribeTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, saveSteps, type GroupEnergy } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import type { DailyCheckin, WeightLog } from "@/types";
 import { Bell, Footprints, Scale, ChevronLeft, Droplets, Flame, Plus, Minus, Leaf, Check, Pencil, Users, UtensilsCrossed, MessageCircle, Trophy } from "lucide-react";
@@ -72,11 +72,13 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user?.wingId || !firebaseUser) return;
     const today = format(new Date(), "yyyy-MM-dd");
-    getTodayCheckin(user.wingId, firebaseUser.uid, today).then(setTodayCheckin);
+    // Real-time listener so widget/checkin-page updates reflect immediately
+    const unsub = subscribeTodayCheckin(user.wingId, firebaseUser.uid, today, setTodayCheckin);
     getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
     getWingSteps(user.wingId, today).then(setWingSteps);
     getUserCheckinDates(user.wingId, firebaseUser.uid).then((dates) => setStreak(calcStreak(dates)));
     getGroupEnergy(user.wingId, wing?.memberIds.length ?? 1).then(setGroupEnergy);
+    return unsub;
   }, [user?.wingId, firebaseUser]);
 
   // Native app: sync Health steps once push has settled and today's steps loaded.
