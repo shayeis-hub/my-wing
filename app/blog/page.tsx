@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { posts } from "@/lib/blog/posts";
 import { Clock, Tag } from "lucide-react";
+import { PublicAdBanner } from "@/components/ads/PublicAdBanner";
 
 const CATEGORY_COLORS: Record<string, string> = {
   מוטיבציה: "#ff6b47",
@@ -25,6 +26,11 @@ export default function BlogPage() {
           מדע, טיפים ומוטיבציה לדרך לעבר המשקל שלך
         </p>
       </section>
+
+      {/* Ad banner */}
+      <div className="max-w-5xl mx-auto px-6 mb-2">
+        <PublicAdBanner className="rounded-xl overflow-hidden" />
+      </div>
 
       {/* Posts grid */}
       <section className="max-w-5xl mx-auto px-6 pb-20">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Calculator, ChevronRight } from "lucide-react";
+import { PublicAdBanner } from "@/components/ads/PublicAdBanner";
 
 type Gender = "male" | "female";
 type Activity = "sedentary" | "light" | "moderate" | "active" | "very_active";
@@ -242,8 +243,11 @@ export default function CalculatorPage() {
           </div>
         )}
 
+        {/* Ad between calculator and explanation */}
+        <PublicAdBanner className="my-8 rounded-xl overflow-hidden" />
+
         {/* Explanation article */}
-        <div className="mt-10 bg-white rounded-3xl p-8 shadow-sm">
+        <div className="bg-white rounded-3xl p-8 shadow-sm">
           <h2 className="text-xl font-bold mb-4" style={{ color: "#1a1814" }}>
             איך עובד החישוב?
           </h2>

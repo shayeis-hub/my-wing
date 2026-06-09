@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getPost, getAllSlugs, posts } from "@/lib/blog/posts";
 import { Clock, Tag, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
+import { PublicAdBanner } from "@/components/ads/PublicAdBanner";
 
 export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
@@ -108,9 +109,12 @@ export default async function BlogPostPage({
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
+        {/* Ad between content and CTA */}
+        <PublicAdBanner className="my-10 rounded-xl overflow-hidden" />
+
         {/* CTA */}
         <div
-          className="mt-12 p-6 rounded-2xl text-center"
+          className="mt-4 p-6 rounded-2xl text-center"
           style={{ background: "linear-gradient(135deg, #fff9e6, #fff0e6)" }}
         >
           <p className="font-bold text-xl mb-2" style={{ color: "#1a1814" }}>

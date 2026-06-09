@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { PublicAdBanner } from "@/components/ads/PublicAdBanner";
 
 interface FAQ {
   q: string;
@@ -178,9 +179,12 @@ export default function FAQPage() {
           </div>
         ))}
 
+        {/* Ad before contact CTA */}
+        <PublicAdBanner className="my-8 rounded-xl overflow-hidden" />
+
         {/* Contact CTA */}
         <div
-          className="mt-10 p-6 rounded-2xl text-center"
+          className="p-6 rounded-2xl text-center"
           style={{ background: "linear-gradient(135deg, #fff9e6, #fff0e6)" }}
         >
           <p className="font-bold text-lg mb-2" style={{ color: "#1a1814" }}>
