@@ -15,63 +15,42 @@ const C = {
   green: "#4caf96",
 };
 
-/* ── 8 שבועות ──────────────────────────────────────────── */
-const WEEKS = [
+/* ── 8 הרגלים ──────────────────────────────────────────── */
+const NUTRITION_HABITS = [
   {
     n: 1,
-    emoji: "💧",
-    title: "מים",
-    subtitle: "המגן של הגוף",
-    desc: "2.5 ליטר ביום, תמיד לפני הארוחה. הרגל אחד שמשנה הכל.",
+    desc: "הרגל שמשאיר אותך שבע יותר זמן — בלי לאכול פחות",
   },
   {
     n: 2,
-    emoji: "🥩",
-    title: "חלבון",
-    subtitle: "הגוף תמיד צריך חלבון",
-    desc: "כף יד אחת בכל ארוחה. עוצר רעב, שומר על שריר.",
+    desc: "שינוי בצלחת שמייצר נפח בלי עומס קלורי",
   },
   {
     n: 3,
-    emoji: "🥦",
-    title: "ירקות",
-    subtitle: "נפח בלי מחיר",
-    desc: "חצי צלחת ירקות בכל ארוחה. שובע מוחלט, קלוריות מינימליות.",
+    desc: "שבוע שמאפס את הגוף ומשנה את הקשר שלך למתוק לתמיד",
   },
   {
     n: 4,
-    emoji: "🚫",
-    title: "ניקוי סוכר",
-    subtitle: "7 ימים ללא סוכר מוסף",
-    desc: "שבוע אחד שמאפס את הגוף. הכי קשה — ומשתלם ביותר.",
+    desc: "שיטה שמלמדת דיוק — לא ויתור",
   },
+];
+
+const LIFE_HABITS = [
   {
     n: 5,
-    emoji: "🚶",
-    title: "תנועה",
-    subtitle: "לא אימון. תנועה.",
-    desc: "8,000 צעדים ביום. מדבר בטלפון? תלך. זה הכלל.",
+    desc: "הרגל יומיומי שמגביר שריפת קלוריות בלי חדר כושר",
   },
   {
     n: 6,
-    emoji: "🌾",
-    title: "פחמימות טובות",
-    subtitle: "דיוק",
-    desc: "רבע צלחת בלבד, מורכבות בלבד. לא לוותר — למדוד.",
+    desc: "שינוי קטן שמשפיע על רמת האנרגיה, הריכוז והרעב לאורך כל היום",
   },
   {
     n: 7,
-    emoji: "🫒",
-    title: "שומן",
-    subtitle: "הקלוריות הבלתי נראות",
-    desc: "לתחיל למדוד, לעצור לשפוך. שינוי קטן, אפקט גדול.",
+    desc: "הכלי שחושף את הקלוריות שאתה לא רואה — ולא יודע שאתה אוכל",
   },
   {
     n: 8,
-    emoji: "🧠",
-    title: "אכילה רגשית",
-    subtitle: "הסיום",
-    desc: "כלל 10 השניות לפני כל אכילה. מי שולט — אתה או הרגש?",
+    desc: "הטכניקה שמנתקת בין רגשות לאכילה — ונותנת לך שליטה אמיתית",
   },
 ];
 
@@ -244,35 +223,57 @@ export default function CoursePage() {
         </div>
       </section>
 
-      {/* ── 8 שבועות ── */}
-      <section className="px-6 py-10 max-w-5xl mx-auto">
+      {/* ── 8 הרגלים ── */}
+      <section className="px-6 py-12 max-w-4xl mx-auto">
         <h2 className="text-3xl font-black text-center mb-3" style={{ color: C.dark }}>
-          8 שבועות. 8 הרגלים.
+          8 הרגלי בסיס. 8 שבועות.
         </h2>
-        <p className="text-center mb-10 text-base" style={{ color: C.muted }}>
-          שבוע אחד — עקרון אחד — שלושה סרטונים. לא פחות, לא יותר.
+        <p className="text-center mb-12 text-base max-w-xl mx-auto leading-relaxed" style={{ color: C.muted }}>
+          לא דיאטה, לא תוכנית אכילה. כל שבוע תאמץ הרגל אחד — ותעשה אותו עד שהוא הופך לחלק ממך.
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {WEEKS.map((week) => (
-            <div
-              key={week.n}
-              className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">{week.emoji}</span>
-                <span
-                  className="text-xs font-bold px-2 py-0.5 rounded-full"
-                  style={{ background: "#f5dd4b20", color: C.muted }}
-                >
-                  שבוע {week.n}
-                </span>
-              </div>
-              <h3 className="font-bold text-base mb-0.5" style={{ color: C.dark }}>{week.title}</h3>
-              <p className="text-xs font-semibold mb-2" style={{ color: C.orange }}>{week.subtitle}</p>
-              <p className="text-sm leading-relaxed" style={{ color: C.muted }}>{week.desc}</p>
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* תזונה */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="text-xl">🥗</span>
+              <h3 className="font-black text-lg" style={{ color: C.dark }}>4 הרגלי תזונה</h3>
             </div>
-          ))}
+            <div className="space-y-4">
+              {NUTRITION_HABITS.map((h) => (
+                <div key={h.n} className="flex items-start gap-3">
+                  <span
+                    className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black mt-0.5"
+                    style={{ background: "#f5dd4b30", color: C.dark }}
+                  >
+                    {h.n}
+                  </span>
+                  <p className="text-sm leading-relaxed" style={{ color: C.muted }}>{h.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* חיים */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="text-xl">⚡</span>
+              <h3 className="font-black text-lg" style={{ color: C.dark }}>4 הרגלי חיים</h3>
+            </div>
+            <div className="space-y-4">
+              {LIFE_HABITS.map((h) => (
+                <div key={h.n} className="flex items-start gap-3">
+                  <span
+                    className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black mt-0.5"
+                    style={{ background: "#ff6b4720", color: C.orange }}
+                  >
+                    {h.n}
+                  </span>
+                  <p className="text-sm leading-relaxed" style={{ color: C.muted }}>{h.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
