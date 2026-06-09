@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Play, ChevronDown } from "lucide-react";
+import { CheckCircle2, Play, Utensils, Zap } from "lucide-react";
 
 /* ── Brand colours ─────────────────────────────────────── */
 const C = {
@@ -236,7 +236,7 @@ export default function CoursePage() {
           {/* תזונה */}
           <div className="bg-white rounded-3xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
-              <span className="text-xl">🥗</span>
+              <Utensils size={20} style={{ color: C.orange }} />
               <h3 className="font-black text-lg" style={{ color: C.dark }}>4 הרגלי תזונה</h3>
             </div>
             <div className="space-y-4">
@@ -257,7 +257,7 @@ export default function CoursePage() {
           {/* חיים */}
           <div className="bg-white rounded-3xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
-              <span className="text-xl">⚡</span>
+              <Zap size={20} style={{ color: C.orange }} />
               <h3 className="font-black text-lg" style={{ color: C.dark }}>4 הרגלי חיים</h3>
             </div>
             <div className="space-y-4">
