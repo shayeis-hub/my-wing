@@ -26,6 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
       <head>
+        {/* Google AdSense site verification */}
+        <meta name="google-adsense-account" content="ca-pub-3097267578681712" />
         {/* AdSense script is intentionally NOT loaded globally. It is loaded
             on demand by <AdBanner> only on content pages, for free users, on
             the web (never in the native app) — this avoids ads on no-content
