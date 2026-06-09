@@ -14,6 +14,9 @@ const COPY = {
   he: {
     dir: "rtl" as const,
     lang: "he",
+    nav_blog: "בלוג",
+    nav_calculator: "מחשבון",
+    nav_faq: "שאלות",
     nav_pricing: "מחירים",
     nav_login: "כניסה",
     hero_badge: "ציפורי נדידה טסות ביחד — כך גם אתם",
@@ -68,6 +71,9 @@ const COPY = {
   en: {
     dir: "ltr" as const,
     lang: "en",
+    nav_blog: "Blog",
+    nav_calculator: "Calculator",
+    nav_faq: "FAQ",
     nav_pricing: "Pricing",
     nav_login: "Log in",
     hero_badge: "Migratory birds fly together — so do you",
@@ -204,6 +210,15 @@ export default function LandingPage() {
           >
             {lang === "he" ? "EN" : "עב"}
           </button>
+          <Link href="/blog" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
+            {t.nav_blog}
+          </Link>
+          <Link href="/calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
+            {t.nav_calculator}
+          </Link>
+          <Link href="/faq" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
+            {t.nav_faq}
+          </Link>
           <Link
             href="/en/pricing"
             style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}
@@ -473,6 +488,9 @@ export default function LandingPage() {
       {/* ── Footer ── */}
       <footer style={{ borderTop: "1px solid #ede5d0", padding: "24px", textAlign: "center" }}>
         <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap", marginBottom: 16 }}>
+          <Link href="/blog" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_blog}</Link>
+          <Link href="/calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_calculator}</Link>
+          <Link href="/faq" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_faq}</Link>
           <Link href="/en/pricing" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_pricing}</Link>
           <Link href="/terms" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.footer_terms}</Link>
           <Link href="/privacy" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.footer_privacy}</Link>

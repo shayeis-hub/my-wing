@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /meals
+Disallow: /checkin
+Disallow: /feed
+Disallow: /challenges
+Disallow: /settings
+Disallow: /profile
+Disallow: /admin
+Disallow: /join
+
+Sitemap: https://www.wingpact.app/sitemap.xml
