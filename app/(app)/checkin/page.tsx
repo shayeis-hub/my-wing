@@ -450,7 +450,10 @@ function CheckinPageInner() {
             <span className="text-xs font-semibold text-wing-ink">{t("checkin_veg")}</span>
           </div>
           <span className="font-black text-wing-ink tabular" style={{ fontSize: 32, letterSpacing: "-0.04em", lineHeight: 1 }}>
-            {vegetables}
+            {vegetables} <span className="text-sm font-normal text-wing-muted">{lang === "he" ? "מנות" : "srv"}</span>
+          </span>
+          <span className="text-[10px] text-wing-subtle text-center leading-tight">
+            {lang === "he" ? "חצי צלחת = מנה אחת" : "½ plate = 1 serving"}
           </span>
           <div className="flex items-center gap-3">
             <button
