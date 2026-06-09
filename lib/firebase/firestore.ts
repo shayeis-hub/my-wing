@@ -101,6 +101,10 @@ export async function updateUserStepsGoal(uid: string, stepsGoal: number): Promi
   await updateDoc(doc(db, "users", uid), { "profile.stepsGoal": stepsGoal });
 }
 
+export async function updateUserWeight(uid: string, weightKg: number): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { "profile.weightKg": weightKg });
+}
+
 export async function saveUserTimezone(uid: string, timezone: string): Promise<void> {
   await updateDoc(doc(db, "users", uid), { timezone });
 }

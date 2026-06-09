@@ -21,6 +21,7 @@ import {
   Crown,
   BookOpen,
   CalendarDays,
+  TrendingDown,
 } from "lucide-react";
 
 interface HamburgerMenuProps {
@@ -117,6 +118,14 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           {/* Calendar */}
           <Link href="/calendar" onClick={onClose}>
             <MenuItem icon={<CalendarDays size={20} />} label={t("nav_calendar")} />
+          </Link>
+
+          {/* Weight progress */}
+          <Link href="/profile" onClick={onClose}>
+            <MenuItem
+              icon={<TrendingDown size={20} />}
+              label={lang === "he" ? "גרף ירידה במשקל" : "Weight Progress"}
+            />
           </Link>
 
           {/* Subscription */}

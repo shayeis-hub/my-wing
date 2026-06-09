@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
@@ -8,13 +8,15 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { updateUserPhotoURL, signOut } from "@/lib/firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { updateUserStepsGoal } from "@/lib/firebase/firestore";
+import { updateUserStepsGoal, getWeightHistory } from "@/lib/firebase/firestore";
 import { compressImageToBlob } from "@/lib/utils/imageCompress";
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib/utils/calculator";
+import { WeightChart } from "@/components/dashboard/WeightChart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Camera, Footprints, Users, Trophy } from "lucide-react";
+import { Camera, Footprints, Users, Trophy, TrendingDown } from "lucide-react";
 import Link from "next/link";
+import type { WeightLog } from "@/types";
 
 
 export default function ProfilePage() {
@@ -36,6 +38,12 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [stepsGoal, setStepsGoal] = useState<string>("");
   const [savingSteps, setSavingSteps] = useState(false);
+  const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
+
+  useEffect(() => {
+    if (!user?.wingId || !firebaseUser) return;
+    getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
+  }, [user?.wingId, firebaseUser]);
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -176,6 +184,15 @@ export default function ProfilePage() {
           </div>
         </Card>
       )}
+
+      {/* Weight progress chart */}
+      <Card>
+        <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-1.5">
+          <TrendingDown size={16} className="text-wing-muted" />
+          {lang === "he" ? "גרף ירידה במשקל" : "Weight Progress"}
+        </h3>
+        <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} />
+      </Card>
 
       {/* Steps goal */}
       <Card>
