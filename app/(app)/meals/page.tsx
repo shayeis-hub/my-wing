@@ -527,9 +527,6 @@ function MealsPageInner() {
         </div>
       )}
 
-      {/* Ad Banner */}
-      <AdBanner slot="6335732261" layoutKey="-6t+ed+2i-1n-4w" format="fluid" className="rounded-2xl" />
-
       {/* Meals feed */}
       {loading ? (
         <div className="space-y-3">
@@ -648,12 +645,14 @@ function MealsByDate({
 
   return (
     <div className="space-y-3">
-      {groups.map(({ date, meals: dayMeals }) => {
+      {groups.map(({ date, meals: dayMeals }, groupIndex) => {
         const isOpen = openDates.has(date);
         const isTodays = date === todayKey;
 
         return (
           <div key={date}>
+            {/* Ad after the first group (today's meals), before past days */}
+            {groupIndex === 1 && <AdBanner slot="6335732261" format="auto" className="rounded-2xl mb-3" />}
             {isTodays ? (
               // Today: hero card first (most recent), then compact rows
               <div className="space-y-3">
