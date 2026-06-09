@@ -514,27 +514,27 @@ function MealsPageInner() {
           {/* Re-analyze with hint */}
           <div className="space-y-2">
             <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  value={hint}
-                  onChange={(e) => setHint(e.target.value)}
-                  placeholder={t("meals_hint_ph")}
-                  className="w-full border border-wing-border rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink pr-10"
-                  onKeyDown={(e) => { if (e.key === "Enter") handleReanalyze(); }}
-                />
-                {hintRecognitionRef.current && (
-                  <button
-                    type="button"
-                    onClick={toggleHintMic}
-                    className={`absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors ${
-                      hintListening ? "text-red-500 animate-pulse" : "text-wing-muted hover:text-wing-ink"
-                    }`}
-                  >
-                    {hintListening ? <MicOff size={16} /> : <Mic size={16} />}
-                  </button>
-                )}
-              </div>
+              <input
+                type="text"
+                value={hint}
+                onChange={(e) => setHint(e.target.value)}
+                placeholder={t("meals_hint_ph")}
+                className="flex-1 border border-wing-border rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                onKeyDown={(e) => { if (e.key === "Enter") handleReanalyze(); }}
+              />
+              {hintRecognitionRef.current && (
+                <button
+                  type="button"
+                  onClick={toggleHintMic}
+                  className={`w-9 h-9 flex items-center justify-center rounded-full border transition-colors shrink-0 ${
+                    hintListening
+                      ? "border-red-300 bg-red-50 text-red-500 animate-pulse"
+                      : "border-wing-border bg-wing-elevated text-wing-muted hover:text-wing-ink"
+                  }`}
+                >
+                  {hintListening ? <MicOff size={16} /> : <Mic size={16} />}
+                </button>
+              )}
               <Button
                 size="sm"
                 onClick={handleReanalyze}
