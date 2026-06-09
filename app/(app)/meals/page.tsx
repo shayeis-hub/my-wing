@@ -652,7 +652,7 @@ function MealsByDate({
         return (
           <div key={date}>
             {/* Ad after the first group (today's meals), before past days */}
-            {groupIndex === 1 && <AdBanner slot="6335732261" format="auto" className="rounded-2xl mb-3" />}
+            {groupIndex === 1 && <AdBanner slot="6335732261" size="large-banner" className="rounded-xl mb-3" />}
             {isTodays ? (
               // Today: hero card first (most recent), then compact rows
               <div className="space-y-3">

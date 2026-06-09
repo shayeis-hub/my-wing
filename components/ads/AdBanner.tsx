@@ -19,10 +19,16 @@ function ensureAdSenseScript(client: string) {
   document.head.appendChild(s);
 }
 
+type AdSize = "auto" | "banner" | "large-banner";
+// banner      = 320×50  (most compact)
+// large-banner = 320×100 (compact but readable)
+// auto        = AdSense picks best fit (default, can be large)
+
 interface AdBannerProps {
   slot?: string;
   layoutKey?: string;
   format?: string;
+  size?: AdSize;
   className?: string;
 }
 
@@ -38,7 +44,13 @@ declare global {
  * WebView apps). The AdSense script is loaded on demand here, so it never
  * loads on no-content screens like login/onboarding.
  */
-export function AdBanner({ slot, layoutKey, format = "auto", className = "" }: AdBannerProps) {
+const SIZE_HEIGHTS: Record<AdSize, number | undefined> = {
+  "auto":         undefined, // AdSense picks — no constraint
+  "banner":       50,        // 320×50 — most compact
+  "large-banner": 100,       // 320×100 — compact but more readable
+};
+
+export function AdBanner({ slot, layoutKey, format = "auto", size = "auto", className = "" }: AdBannerProps) {
   const { user, firebaseUser } = useAuth();
   const adRef = useRef<HTMLModElement>(null);
   const initialized = useRef(false);
@@ -62,16 +74,25 @@ export function AdBanner({ slot, layoutKey, format = "auto", className = "" }: A
 
   if (!shouldShowAd) return null;
 
+  const fixedHeight = SIZE_HEIGHTS[size];
+  const insStyle: React.CSSProperties = fixedHeight
+    ? { display: "block", width: "100%", height: fixedHeight }
+    : { display: "block" };
+
   return (
-    <div className={`w-full overflow-hidden ${className}`}>
+    <div
+      className={`w-full overflow-hidden ${className}`}
+      style={fixedHeight ? { maxHeight: fixedHeight, minHeight: fixedHeight } : undefined}
+    >
       <ins
         ref={adRef}
         className="adsbygoogle"
-        style={{ display: "block" }}
+        style={insStyle}
         data-ad-client={ADSENSE_CLIENT}
         data-ad-slot={slot ?? ""}
-        data-ad-format={format}
-        {...(layoutKey ? { "data-ad-layout-key": layoutKey } : { "data-full-width-responsive": "true" })}
+        data-ad-format={fixedHeight ? "fixed" : format}
+        {...(!fixedHeight && layoutKey ? { "data-ad-layout-key": layoutKey } : {})}
+        {...(!fixedHeight ? { "data-full-width-responsive": "true" } : {})}
       />
     </div>
   );
