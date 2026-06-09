@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { addMeal, getTodayCheckin, saveCheckin } from "@/lib/firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import toast from "react-hot-toast";
-import { UtensilsCrossed, ChevronDown, PenLine, Clock, Lightbulb, Flame, Beef, Wheat, Droplets } from "lucide-react";
+import { UtensilsCrossed, ChevronDown, PenLine, Clock, Lightbulb, Flame, Beef, Wheat, Droplets, Mic, MicOff } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -74,6 +74,53 @@ function MealsPageInner() {
   const [hint, setHint] = useState("");
   const [reanalyzing, setReanalyzing] = useState(false);
   const [editingValues, setEditingValues] = useState(false);
+  const [hintListening, setHintListening] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hintRecognitionRef = useRef<any>(null);
+
+  // Set up SpeechRecognition for hint field
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rec = new SR() as any;
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = lang === "he" ? "he-IL" : "en-US";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rec.onresult = (e: any) => {
+      const transcript = e.results[0]?.[0]?.transcript?.trim() ?? "";
+      if (transcript) setHint((prev) => (prev ? prev + " " + transcript : transcript));
+    };
+    rec.onend = () => setHintListening(false);
+    hintRecognitionRef.current = rec;
+  }, [lang]);
+
+  function toggleHintMic() {
+    if (!hintRecognitionRef.current) return;
+    if (hintListening) {
+      hintRecognitionRef.current.stop();
+      setHintListening(false);
+    } else {
+      hintRecognitionRef.current.start();
+      setHintListening(true);
+    }
+  }
+
+  // Smart default meal type based on what's already been logged today
+  function getSmartMealType(): typeof mealTypes[number] {
+    const today = format(new Date(), "yyyy-MM-dd");
+    const todayTypes = new Set(
+      meals
+        .filter((m) => m.userId === firebaseUser?.uid && (m.mealDate === today || !m.mealDate))
+        .map((m) => m.mealType)
+    );
+    if (!todayTypes.has("breakfast")) return "breakfast";
+    if (!todayTypes.has("lunch")) return "lunch";
+    if (!todayTypes.has("dinner")) return "dinner";
+    return "snack";
+  }
 
   // Reset time/date to now when opening a new meal entry
   useEffect(() => {
@@ -87,6 +134,11 @@ function MealsPageInner() {
     setShowCamera(false);
     setHint("");
     setEditingValues(false);
+
+    if (!pendingAnalysis) {
+      // First image — set smart default meal type
+      setMealType(getSmartMealType());
+    }
 
     if (pendingAnalysis) {
       // Adding another photo to existing analysis — re-analyze all together
@@ -250,7 +302,7 @@ function MealsPageInner() {
           <Button
             size="sm"
             variant="secondary"
-            onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : (setShowManualForm(true), setPendingAnalysis(null))}
+            onClick={() => trialLocked ? window.location.href = "/subscription?expired=1" : (setShowManualForm(true), setPendingAnalysis(null), setManualMealType(getSmartMealType()))}
             className="flex items-center gap-1.5"
           >
             <PenLine size={16} />
@@ -462,14 +514,27 @@ function MealsPageInner() {
           {/* Re-analyze with hint */}
           <div className="space-y-2">
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={hint}
-                onChange={(e) => setHint(e.target.value)}
-                placeholder={t("meals_hint_ph")}
-                className="flex-1 border border-wing-border rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink"
-                onKeyDown={(e) => { if (e.key === "Enter") handleReanalyze(); }}
-              />
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={hint}
+                  onChange={(e) => setHint(e.target.value)}
+                  placeholder={t("meals_hint_ph")}
+                  className="w-full border border-wing-border rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wing-ink pr-10"
+                  onKeyDown={(e) => { if (e.key === "Enter") handleReanalyze(); }}
+                />
+                {hintRecognitionRef.current && (
+                  <button
+                    type="button"
+                    onClick={toggleHintMic}
+                    className={`absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors ${
+                      hintListening ? "text-red-500 animate-pulse" : "text-wing-muted hover:text-wing-ink"
+                    }`}
+                  >
+                    {hintListening ? <MicOff size={16} /> : <Mic size={16} />}
+                  </button>
+                )}
+              </div>
               <Button
                 size="sm"
                 onClick={handleReanalyze}
