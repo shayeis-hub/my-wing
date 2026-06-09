@@ -180,7 +180,7 @@ function PublicNav() {
         <Link href="/blog" className="hover:text-[#ff6b47] transition-colors">
           בלוג
         </Link>
-        <Link href="/calculator" className="hover:text-[#ff6b47] transition-colors">
+        <Link href="/calorie-calculator" className="hover:text-[#ff6b47] transition-colors">
           מחשבון
         </Link>
         <Link href="/faq" className="hover:text-[#ff6b47] transition-colors">

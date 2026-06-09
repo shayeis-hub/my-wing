@@ -213,7 +213,7 @@ export default function LandingPage() {
           <Link href="/blog" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
             {t.nav_blog}
           </Link>
-          <Link href="/calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
+          <Link href="/calorie-calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
             {t.nav_calculator}
           </Link>
           <Link href="/faq" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
@@ -489,7 +489,7 @@ export default function LandingPage() {
       <footer style={{ borderTop: "1px solid #ede5d0", padding: "24px", textAlign: "center" }}>
         <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap", marginBottom: 16 }}>
           <Link href="/blog" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_blog}</Link>
-          <Link href="/calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_calculator}</Link>
+          <Link href="/calorie-calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_calculator}</Link>
           <Link href="/faq" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_faq}</Link>
           <Link href="/en/pricing" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_pricing}</Link>
           <Link href="/terms" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.footer_terms}</Link>
