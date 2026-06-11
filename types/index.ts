@@ -6,6 +6,7 @@ export interface User {
   displayName: string;
   photoURL?: string;
   wingId?: string;
+  wingIds?: string[];
   profile: UserProfile;
   fcmToken?: string;
   timezone?: string;

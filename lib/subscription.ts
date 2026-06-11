@@ -25,6 +25,7 @@ export function isTrialExpired(
 export const GRANDFATHERED_EMAILS = [
   "sivan.ati@gmail.com",
   "shayeis@gmail.com",
+  "shay@wingpact.app",
 ];
 
 // ── Free-plan limits ──────────────────────────────────────────────────────────

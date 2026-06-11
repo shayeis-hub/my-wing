@@ -109,6 +109,20 @@ export async function saveUserTimezone(uid: string, timezone: string): Promise<v
   await updateDoc(doc(db, "users", uid), { timezone });
 }
 
+export async function updateActiveWing(uid: string, wingId: string): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { wingId });
+}
+
+export async function getWingsByIds(wingIds: string[]): Promise<{ id: string; name: string }[]> {
+  if (!wingIds.length) return [];
+  const results = await Promise.all(
+    wingIds.map((id) => getDoc(doc(db, "wings", id)))
+  );
+  return results
+    .filter((s) => s.exists())
+    .map((s) => ({ id: s.id, name: (s.data() as { name?: string }).name ?? s.id }));
+}
+
 export async function renameWing(wingId: string, name: string): Promise<void> {
   await updateDoc(doc(db, "wings", wingId), { name });
 }

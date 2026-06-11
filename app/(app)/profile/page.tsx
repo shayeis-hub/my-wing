@@ -8,13 +8,13 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { updateUserPhotoURL, signOut } from "@/lib/firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { updateUserStepsGoal, getWeightHistory } from "@/lib/firebase/firestore";
+import { updateUserStepsGoal, getWeightHistory, updateActiveWing, getWingsByIds } from "@/lib/firebase/firestore";
 import { compressImageToBlob } from "@/lib/utils/imageCompress";
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib/utils/calculator";
 import { WeightChart } from "@/components/dashboard/WeightChart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Camera, Footprints, Users, Trophy, TrendingDown } from "lucide-react";
+import { Camera, Footprints, Users, Trophy, TrendingDown, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import type { WeightLog } from "@/types";
 
@@ -39,11 +39,31 @@ export default function ProfilePage() {
   const [stepsGoal, setStepsGoal] = useState<string>("");
   const [savingSteps, setSavingSteps] = useState(false);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
+  const [wings, setWings] = useState<{ id: string; name: string }[]>([]);
+  const [switchingWing, setSwitchingWing] = useState(false);
 
   useEffect(() => {
     if (!user?.wingId || !firebaseUser) return;
     getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
   }, [user?.wingId, firebaseUser]);
+
+  useEffect(() => {
+    if (!user?.wingIds || user.wingIds.length <= 1) return;
+    getWingsByIds(user.wingIds).then(setWings);
+  }, [user?.wingIds]);
+
+  async function handleSwitchWing(wingId: string) {
+    if (!firebaseUser || wingId === user?.wingId) return;
+    setSwitchingWing(true);
+    try {
+      await updateActiveWing(firebaseUser.uid, wingId);
+      toast.success(lang === "he" ? "מבנה כנף עודכן" : "Wing updated");
+    } catch {
+      toast.error(lang === "he" ? "שגיאה בעדכון" : "Update failed");
+    } finally {
+      setSwitchingWing(false);
+    }
+  }
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -138,6 +158,29 @@ export default function ProfilePage() {
           <Users size={16} /> {t("profile_wing_btn")}
         </Button>
       </Link>
+
+      {/* Wing switcher — only shown when user belongs to multiple wings */}
+      {wings.length > 1 && (
+        <Card>
+          <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-1.5">
+            <Users size={16} className="text-wing-muted" />
+            {lang === "he" ? "החלף מבנה כנף" : "Switch Wing"}
+          </h3>
+          <div className="relative">
+            <select
+              value={user?.wingId ?? ""}
+              onChange={(e) => handleSwitchWing(e.target.value)}
+              disabled={switchingWing}
+              className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-wing-primary disabled:opacity-50"
+            >
+              {wings.map((w) => (
+                <option key={w.id} value={w.id}>{w.name}</option>
+              ))}
+            </select>
+            <ChevronDown size={16} className="absolute left-3 top-3.5 text-slate-400 pointer-events-none" />
+          </div>
+        </Card>
+      )}
 
       {/* Stats */}
       {profile && (
