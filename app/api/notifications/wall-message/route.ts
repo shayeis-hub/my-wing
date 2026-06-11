@@ -35,14 +35,15 @@ export async function POST(req: NextRequest) {
         } catch { /* ignore */ }
       }
       const verb = authorGender === "female" ? "כתבה לך על הקיר" : "כתב לך על הקיר";
+      const link = `/member/${authorId}`;
 
       await admin.messaging().send({
         token,
         notification: { title: `${authorName} ${verb}`, body: message },
-        data: { link: "/dashboard", type: "wall_message" },
+        data: { link, type: "wall_message" },
         webpush: {
           notification: { icon: "/icons/icon-192.png", dir: "rtl", lang: "he" },
-          fcmOptions: { link: "/dashboard" },
+          fcmOptions: { link },
         },
         apns: { payload: { aps: { sound: "default" } } },
         android: { notification: { sound: "default" } },
