@@ -936,3 +936,43 @@ export async function getGroupEnergy(wingId: string, memberCount: number): Promi
 
   return { checkinsToday, mealsTodayCount, streakDays, newActivity };
 }
+
+// ── Member profile ────────────────────────────────────────────────────────────
+
+export async function getMemberRecentMeals(wingId: string, userId: string, limitN = 10): Promise<Meal[]> {
+  const snap = await getDocs(
+    query(collection(db, "wings", wingId, "meals"), where("userId", "==", userId), limit(50))
+  );
+  return snap.docs
+    .map((d) => ({ ...(d.data() as Omit<Meal, "id">), id: d.id }))
+    .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
+    .slice(0, limitN);
+}
+
+export interface WallMessage {
+  id: string;
+  wingId: string;
+  targetUserId: string;
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: import("firebase/firestore").Timestamp;
+}
+
+export async function addWallMessage(wingId: string, msg: Omit<WallMessage, "id" | "createdAt">): Promise<string> {
+  const ref = await addDoc(collection(db, "wings", wingId, "wallMessages"), {
+    ...msg,
+    createdAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+export async function getWallMessages(wingId: string, targetUserId: string, limitN = 10): Promise<WallMessage[]> {
+  const snap = await getDocs(
+    query(collection(db, "wings", wingId, "wallMessages"), where("targetUserId", "==", targetUserId), limit(30))
+  );
+  return snap.docs
+    .map((d) => ({ ...(d.data() as Omit<WallMessage, "id">), id: d.id }))
+    .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
+    .slice(0, limitN);
+}

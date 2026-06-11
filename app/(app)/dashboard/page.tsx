@@ -9,7 +9,6 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SOSButton } from "@/components/wing/SOSButton";
 import { MealCard } from "@/components/meals/MealCard";
 import { WeightChart } from "@/components/dashboard/WeightChart";
-import { MemberDashboard } from "@/components/dashboard/MemberDashboard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { Leaderboard } from "@/components/steps/Leaderboard";
 import { useMeals } from "@/hooks/useMeals";
@@ -42,7 +41,7 @@ export default function DashboardPage() {
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [groupEnergy, setGroupEnergy] = useState<GroupEnergy | null>(null);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [selectedMemberId] = useState<string | null>(null);
   const [wingSteps, setWingSteps] = useState<StepsEntry[]>([]);
   const [streak, setStreak] = useState(0);
   const [pulseField, setPulseField] = useState<"water" | "veg" | "steps" | null>(null);
@@ -350,19 +349,6 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
       )}
 
 
-      {/* Member view */}
-      {selectedMemberId && wing && firebaseUser && user && (
-        <MemberDashboard
-          memberId={selectedMemberId}
-          memberName={wing.members.find((m) => m.uid === selectedMemberId)?.displayName ?? ""}
-          wingId={wing.id}
-          currentUserId={firebaseUser.uid}
-          currentUserName={user.displayName}
-          isViewerAdmin={isWingAdmin(wing, firebaseUser.uid)}
-          todayMeals={todayMeals}
-        />
-      )}
-
       {/* Personal dashboard */}
       {!selectedMemberId && (
         <>
@@ -509,33 +495,31 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
             <RecentActivity wingId={user.wingId} userId={firebaseUser.uid} userName={user.displayName} />
           )}
 
-          {/* Member selector strip */}
-          {wing && otherMembers.length > 0 && firebaseUser && (
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-              <button
-                onClick={() => setSelectedMemberId(null)}
-                className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-bold transition-all ${
-                  selectedMemberId === null
-                    ? "bg-wing-ink text-wing-elevated"
-                    : "bg-wing-elevated border border-wing-border text-wing-muted"
-                }`}
-              >
-                {t("my")}
-              </button>
-              {otherMembers.map((m) => (
-                <button
-                  key={m.uid}
-                  onClick={() => setSelectedMemberId(m.uid)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                    selectedMemberId === m.uid
-                      ? "bg-wing-ink text-wing-elevated"
-                      : "bg-wing-elevated border border-wing-border text-wing-muted"
-                  }`}
-                >
-                  <Avatar name={m.displayName} photoURL={m.photoURL} size={18} />
-                  {m.displayName.split(" ")[0]}
-                </button>
-              ))}
+          {/* Member circles */}
+          {wing && otherMembers.length > 0 && (
+            <div>
+              <p className="text-xs font-mono uppercase tracking-widest text-wing-muted mb-3">
+                {lang === "he" ? "חברי הכנף" : "Wing members"}
+              </p>
+              <div className="flex gap-5 overflow-x-auto pb-1">
+                {otherMembers.map((m) => (
+                  <button
+                    key={m.uid}
+                    onClick={() => router.push(`/member/${m.uid}`)}
+                    className="flex-shrink-0 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+                  >
+                    <Avatar
+                      name={m.displayName}
+                      photoURL={m.photoURL}
+                      size={52}
+                      className="ring-2 ring-white shadow-sm"
+                    />
+                    <span className="text-xs text-wing-muted font-medium">
+                      {m.displayName.split(" ")[0]}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
