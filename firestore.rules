@@ -143,6 +143,18 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // Wall messages: members can read; author can create own message; only author can delete
+      match /wallMessages/{msgId} {
+        allow read: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow create: if request.auth != null &&
+          request.auth.uid == request.resource.data.authorId &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow update: if false;
+        allow delete: if request.auth != null &&
+          request.auth.uid == resource.data.authorId;
+      }
+
       // Wing posts: members can read, create their own; any member can update (comments/reactions); only author can delete
       match /posts/{postId} {
         allow read: if request.auth != null &&

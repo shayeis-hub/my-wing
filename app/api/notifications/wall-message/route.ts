@@ -13,15 +13,8 @@ export async function POST(req: NextRequest) {
     getAdminApp();
     const db = admin.firestore();
 
-    // Persist the wall message
-    await db.collection("wings").doc(wingId).collection("wallMessages").add({
-      wingId,
-      targetUserId,
-      authorId,
-      authorName,
-      text: message,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    // The message itself is persisted client-side (firestore.rules permit it);
+    // this endpoint only delivers the push notification.
 
     // Send push if the user has an FCM token
     const userSnap = await db.doc(`users/${targetUserId}`).get();
