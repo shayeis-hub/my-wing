@@ -42,11 +42,13 @@ export async function POST(req: NextRequest) {
     const expiresAt = new Date(startDate);
     expiresAt.setDate(expiresAt.getDate() + COURSE_WEEKS * 7);
 
+    // Add the course wing to the user's wingIds array (arrayUnion avoids duplicates)
     await userDoc.ref.update({
       courseAccess: {
         expiresAt: expiresAt.toISOString(),
         wingId: wingId.trim(),
       },
+      wingIds: admin.firestore.FieldValue.arrayUnion(wingId.trim()),
     });
 
     return NextResponse.json({
