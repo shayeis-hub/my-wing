@@ -59,7 +59,7 @@ export function AdBanner({ slot, layoutKey, format = "auto", size = "auto", clas
   const shouldShowAd =
     !isNativeApp() &&
     !isGrandfathered(email) &&
-    !isPremium(email, user?.subscription?.plan, user?.subscription);
+    !isPremium(email, user?.subscription?.plan, user?.subscription, user?.courseAccess);
 
   useEffect(() => {
     if (!shouldShowAd || initialized.current) return;

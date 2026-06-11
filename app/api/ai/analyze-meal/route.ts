@@ -9,11 +9,14 @@ import { admin, getAdminApp } from "@/lib/firebase/admin";
 // ── Admin-SDK helpers (server-safe, no client SDK) ────────────────────────────
 
 type SubDoc = { plan: Plan; cancelPending?: boolean; expiresAt?: { _seconds?: number } | null };
+type CourseAccess = { expiresAt: string; wingId: string };
+type UserDoc = { subscription?: SubDoc; courseAccess?: CourseAccess };
 
-async function getUserPlanAdmin(uid: string): Promise<SubDoc | null> {
+async function getUserPlanAdmin(uid: string): Promise<{ sub: SubDoc | null; courseAccess: CourseAccess | null }> {
   const snap = await admin.firestore().doc(`users/${uid}`).get();
-  if (!snap.exists) return null;
-  return (snap.data() as { subscription?: SubDoc }).subscription ?? null;
+  if (!snap.exists) return { sub: null, courseAccess: null };
+  const data = snap.data() as UserDoc;
+  return { sub: data.subscription ?? null, courseAccess: data.courseAccess ?? null };
 }
 
 async function getDailyMealCountAdmin(uid: string, date: string): Promise<number> {
@@ -39,10 +42,10 @@ export async function POST(req: NextRequest) {
       // Grandfathered users always pass
       if (!isGrandfathered(userEmail)) {
         const today = format(new Date(), "yyyy-MM-dd");
-        const sub = await getUserPlanAdmin(userId);
+        const { sub, courseAccess } = await getUserPlanAdmin(userId);
         const plan = sub?.plan ?? "free";
 
-        if (!isPremium(userEmail, plan, sub)) {
+        if (!isPremium(userEmail, plan, sub, courseAccess)) {
           const todayCount = await getDailyMealCountAdmin(userId, today);
           if (!canAddMealPhoto(userEmail, plan, todayCount)) {
             return NextResponse.json(
@@ -76,9 +79,9 @@ export async function POST(req: NextRequest) {
     // ── Increment daily count after successful analysis ────────────────────────
     if (userId && userEmail !== undefined && !isGrandfathered(userEmail)) {
       const today = format(new Date(), "yyyy-MM-dd");
-      const sub = await getUserPlanAdmin(userId);
+      const { sub, courseAccess } = await getUserPlanAdmin(userId);
       const plan = sub?.plan ?? "free";
-      if (!isPremium(userEmail, plan, sub)) {
+      if (!isPremium(userEmail, plan, sub, courseAccess)) {
         await incrementDailyMealCountAdmin(userId, today);
       }
     }

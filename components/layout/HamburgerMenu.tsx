@@ -34,7 +34,7 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
   const { t, lang, setLang, dir, gender } = useLanguage();
   const email = firebaseUser?.email ?? user?.email ?? "";
   const grandfathered = isGrandfathered(email);
-  const premium = isPremium(email, user?.subscription?.plan, user?.subscription);
+  const premium = isPremium(email, user?.subscription?.plan, user?.subscription, user?.courseAccess);
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
 

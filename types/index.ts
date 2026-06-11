@@ -10,6 +10,7 @@ export interface User {
   fcmToken?: string;
   timezone?: string;
   subscription?: Subscription;
+  courseAccess?: { expiresAt: string; wingId: string };
   trophies?: Trophy[];
   createdAt: Timestamp;
 }

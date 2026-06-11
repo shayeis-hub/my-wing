@@ -55,9 +55,11 @@ export function isPremium(
   subscription?: {
     cancelPending?: boolean;
     expiresAt?: string | { toDate?: () => Date; _seconds?: number } | null;
-  } | null
+  } | null,
+  courseAccess?: { expiresAt: string } | null
 ): boolean {
   if (isGrandfathered(email)) return true;
+  if (courseAccess?.expiresAt && new Date(courseAccess.expiresAt) > new Date()) return true;
   if (plan !== "premium" && plan !== "grandfathered") return false;
   // If cancellation is pending, check whether the paid period has already ended
   if (subscription?.cancelPending && subscription.expiresAt) {
