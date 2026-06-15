@@ -151,8 +151,10 @@ service cloud.firestore {
           request.auth.uid == request.resource.data.authorId &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow update: if false;
+        // Author of the message OR owner of the wall (target) may delete
         allow delete: if request.auth != null &&
-          request.auth.uid == resource.data.authorId;
+          (request.auth.uid == resource.data.authorId ||
+           request.auth.uid == resource.data.targetUserId);
       }
 
       // Wing posts: members can read, create their own; any member can update (comments/reactions); only author can delete

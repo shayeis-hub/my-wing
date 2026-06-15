@@ -12,13 +12,14 @@ import {
   getMemberRecentMeals,
   getWallMessages,
   addWallMessage,
+  deleteWallMessage,
   type WallMessage,
 } from "@/lib/firebase/firestore";
 import { format } from "date-fns";
 import { he, enUS } from "date-fns/locale";
 import toast from "react-hot-toast";
 import type { DailyCheckin, Meal } from "@/types";
-import { Droplets, Leaf, Footprints, Scale, Dumbbell, ArrowRight, Send } from "lucide-react";
+import { Droplets, Leaf, Footprints, Scale, Dumbbell, ArrowRight, Send, Trash2 } from "lucide-react";
 
 const MOOD_EMOJIS = ["😞", "😕", "😐", "😊", "🤩"];
 
@@ -37,6 +38,7 @@ export default function MemberPage() {
   const [wallMsgs, setWallMsgs] = useState<WallMessage[]>([]);
   const [msgText, setMsgText] = useState("");
   const [sending, setSending] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.wingId || !uid) return;
@@ -73,6 +75,19 @@ export default function MemberPage() {
       toast.error(lang === "he" ? "שגיאה בשליחה" : "Failed to send");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleDeleteMessage(msgId: string) {
+    if (!user?.wingId) return;
+    const prev = wallMsgs;
+    setWallMsgs((list) => list.filter((m) => m.id !== msgId));
+    setConfirmDelete(null);
+    try {
+      await deleteWallMessage(user.wingId, msgId);
+    } catch {
+      setWallMsgs(prev);
+      toast.error(lang === "he" ? "שגיאה במחיקה" : "Failed to delete");
     }
   }
 
@@ -173,15 +188,45 @@ export default function MemberPage() {
 
         {wallMsgs.length > 0 && (
           <div className="space-y-2 max-h-[228px] overflow-y-auto pr-0.5">
-            {wallMsgs.map((msg) => (
-              <div key={msg.id} className="bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm">
-                <div className="flex items-baseline justify-between gap-2 mb-0.5">
-                  <span className="font-bold text-wing-ink">{msg.authorName}</span>
-                  <span className="text-[11px] text-wing-subtle shrink-0 tabular">{formatMsgTime(msg)}</span>
+            {wallMsgs.map((msg) => {
+              const canDelete =
+                msg.authorId === firebaseUser?.uid || firebaseUser?.uid === uid;
+              return (
+                <div key={msg.id} className="bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm">
+                  <div className="flex items-baseline justify-between gap-2 mb-0.5">
+                    <span className="font-bold text-wing-ink">{msg.authorName}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] text-wing-subtle tabular">{formatMsgTime(msg)}</span>
+                      {canDelete && (
+                        <button
+                          onClick={() => setConfirmDelete(confirmDelete === msg.id ? null : msg.id)}
+                          className="text-wing-subtle hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-wing-muted">{msg.text}</span>
+                  {confirmDelete === msg.id && (
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="flex-1 py-1 rounded-xl text-xs border border-wing-border text-wing-muted"
+                      >
+                        {lang === "he" ? "ביטול" : "Cancel"}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        className="flex-1 py-1 rounded-xl text-xs bg-red-500 text-white font-bold"
+                      >
+                        {lang === "he" ? "מחק" : "Delete"}
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <span className="text-wing-muted">{msg.text}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

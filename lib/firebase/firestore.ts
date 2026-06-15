@@ -967,6 +967,10 @@ export async function addWallMessage(wingId: string, msg: Omit<WallMessage, "id"
   return ref.id;
 }
 
+export async function deleteWallMessage(wingId: string, msgId: string): Promise<void> {
+  await deleteDoc(doc(db, "wings", wingId, "wallMessages", msgId));
+}
+
 export async function getWallMessages(wingId: string, targetUserId: string, limitN = 10): Promise<WallMessage[]> {
   const snap = await getDocs(
     query(collection(db, "wings", wingId, "wallMessages"), where("targetUserId", "==", targetUserId), limit(30))
