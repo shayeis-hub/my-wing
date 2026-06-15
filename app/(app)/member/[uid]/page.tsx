@@ -15,6 +15,7 @@ import {
   type WallMessage,
 } from "@/lib/firebase/firestore";
 import { format } from "date-fns";
+import { he, enUS } from "date-fns/locale";
 import toast from "react-hot-toast";
 import type { DailyCheckin, Meal } from "@/types";
 import { Droplets, Leaf, Footprints, Scale, Dumbbell, ArrowRight, Send } from "lucide-react";
@@ -76,6 +77,12 @@ export default function MemberPage() {
   }
 
   const memberFirstName = member?.displayName?.split(" ")[0] ?? "";
+
+  function formatMsgTime(msg: WallMessage): string {
+    const d = msg.createdAt?.toDate?.();
+    if (!d) return lang === "he" ? "עכשיו" : "now";
+    return format(d, "d MMM, HH:mm", { locale: lang === "he" ? he : enUS });
+  }
 
   return (
     <div className="p-4 space-y-4">
@@ -164,12 +171,19 @@ export default function MemberPage() {
             : `Write to ${memberFirstName}`}
         </h3>
 
-        {wallMsgs.slice(0, 5).map((msg) => (
-          <div key={msg.id} className="bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm">
-            <span className="font-bold text-wing-ink">{msg.authorName}: </span>
-            <span className="text-wing-muted">{msg.text}</span>
+        {wallMsgs.length > 0 && (
+          <div className="space-y-2 max-h-[228px] overflow-y-auto pr-0.5">
+            {wallMsgs.map((msg) => (
+              <div key={msg.id} className="bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 text-sm">
+                <div className="flex items-baseline justify-between gap-2 mb-0.5">
+                  <span className="font-bold text-wing-ink">{msg.authorName}</span>
+                  <span className="text-[11px] text-wing-subtle shrink-0 tabular">{formatMsgTime(msg)}</span>
+                </div>
+                <span className="text-wing-muted">{msg.text}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
 
         <div className="flex gap-2">
           <input
