@@ -17,7 +17,7 @@ module.exports = {
           // טקסט
           ink:      "#1a1814",
           muted:    "#8a7e68",
-          subtle:   "#c9bc9c",
+          subtle:   "#a89878",
 
           // גבולות
           border:   "#ede5d0",
