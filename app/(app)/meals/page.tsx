@@ -108,18 +108,25 @@ function MealsPageInner() {
     }
   }
 
-  // Smart default meal type based on what's already been logged today
+  // Smart default meal type based on what's already been logged today.
+  // Snack is never auto-selected — only the user can pick it manually.
   function getSmartMealType(): typeof mealTypes[number] {
     const today = format(new Date(), "yyyy-MM-dd");
     const todayTypes = new Set(
       meals
-        .filter((m) => m.userId === firebaseUser?.uid && (m.mealDate === today || !m.mealDate))
+        .filter((m) => {
+          if (m.userId !== firebaseUser?.uid) return false;
+          const dateKey = m.mealDate ?? (() => {
+            const d = m.createdAt?.toDate?.();
+            return d ? format(d, "yyyy-MM-dd") : null;
+          })();
+          return dateKey === today;
+        })
         .map((m) => m.mealType)
     );
     if (!todayTypes.has("breakfast")) return "breakfast";
     if (!todayTypes.has("lunch")) return "lunch";
-    if (!todayTypes.has("dinner")) return "dinner";
-    return "snack";
+    return "dinner";
   }
 
   // Reset time/date to now when opening a new meal entry
