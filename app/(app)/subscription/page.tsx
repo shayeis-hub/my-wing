@@ -44,6 +44,13 @@ function SubscriptionPageInner() {
   const daysLeft = getTrialDaysLeft(createdAtMs);
   const inTrial = !premium && !grandfathered && daysLeft > 0;
 
+  // Business accounts manage their plan on the coach dashboard, not here.
+  useEffect(() => {
+    if (user?.accountType === "business") {
+      router.replace("/coach");
+    }
+  }, [user?.accountType, router]);
+
   useEffect(() => {
     if (searchParams.get("success") === "1") {
       toast.success(lang === "he" ? "ברוך הבא ל-Premium!" : "Welcome to Premium!");

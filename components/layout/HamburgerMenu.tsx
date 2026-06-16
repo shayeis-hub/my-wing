@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { signOut } from "@/lib/firebase/auth";
 import { Avatar } from "@/components/ui/Avatar";
-import { isGrandfathered, isPremium } from "@/lib/subscription";
+import { isGrandfathered, isPremium, isCoachActive, COACH_PLANS } from "@/lib/subscription";
 import {
   X,
   UserCircle,
@@ -35,6 +35,9 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
   const email = firebaseUser?.email ?? user?.email ?? "";
   const grandfathered = isGrandfathered(email);
   const premium = isPremium(email, user?.subscription?.plan, user?.subscription, user?.courseAccess);
+  const isBusiness = user?.accountType === "business";
+  const coachActive = isBusiness && isCoachActive(user?.coach);
+  const coachPlanLabel = user?.coach ? COACH_PLANS[user.coach.plan]?.label : "";
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -128,24 +131,46 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
             />
           </Link>
 
-          {/* Subscription */}
-          <Link href="/subscription" onClick={onClose}>
-            <div className="flex items-center gap-3 px-3 py-3 rounded-[14px] hover:bg-wing-elevated transition-colors">
-              <span className={grandfathered || premium ? "text-yellow-500" : "text-wing-muted"}>
-                {grandfathered || premium ? <Crown size={20} /> : <Zap size={20} />}
-              </span>
-              <span className="flex-1 text-sm font-medium text-wing-ink">{t("upgrade_manage")}</span>
-              {grandfathered ? (
-                <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">VIP</span>
-              ) : premium ? (
-                <span className="text-xs font-bold text-white bg-wing-primary px-2 py-0.5 rounded-full">Premium</span>
-              ) : (
-                <span className="text-xs font-bold text-wing-heat bg-wing-primary/10 px-2 py-0.5 rounded-full">
-                  {lang === "he" ? (gender === "female" ? "שדרגי" : "שדרג") : "Upgrade"}
+          {/* Subscription — business accounts manage their coach plan, not the personal one */}
+          {isBusiness ? (
+            <Link href="/coach" onClick={onClose}>
+              <div className="flex items-center gap-3 px-3 py-3 rounded-[14px] hover:bg-wing-elevated transition-colors">
+                <span className={coachActive ? "text-yellow-500" : "text-wing-muted"}>
+                  <Crown size={20} />
                 </span>
-              )}
-            </div>
-          </Link>
+                <span className="flex-1 text-sm font-medium text-wing-ink">
+                  {lang === "he" ? "ניהול מנוי עסקי" : "Business plan"}
+                </span>
+                {coachActive ? (
+                  <span className="text-xs font-bold text-white bg-wing-primary px-2 py-0.5 rounded-full">
+                    {coachPlanLabel}
+                  </span>
+                ) : (
+                  <span className="text-xs font-bold text-wing-heat bg-wing-primary/10 px-2 py-0.5 rounded-full">
+                    {lang === "he" ? "בחר/י מסלול" : "Choose plan"}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ) : (
+            <Link href="/subscription" onClick={onClose}>
+              <div className="flex items-center gap-3 px-3 py-3 rounded-[14px] hover:bg-wing-elevated transition-colors">
+                <span className={grandfathered || premium ? "text-yellow-500" : "text-wing-muted"}>
+                  {grandfathered || premium ? <Crown size={20} /> : <Zap size={20} />}
+                </span>
+                <span className="flex-1 text-sm font-medium text-wing-ink">{t("upgrade_manage")}</span>
+                {grandfathered ? (
+                  <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">VIP</span>
+                ) : premium ? (
+                  <span className="text-xs font-bold text-white bg-wing-primary px-2 py-0.5 rounded-full">Premium</span>
+                ) : (
+                  <span className="text-xs font-bold text-wing-heat bg-wing-primary/10 px-2 py-0.5 rounded-full">
+                    {lang === "he" ? (gender === "female" ? "שדרגי" : "שדרג") : "Upgrade"}
+                  </span>
+                )}
+              </div>
+            </Link>
+          )}
 
           {/* Language */}
           <div className="flex items-center gap-3 px-3 py-3 rounded-[14px] hover:bg-wing-elevated transition-colors">
