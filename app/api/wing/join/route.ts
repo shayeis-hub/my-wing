@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
-import { canAddWingMember, canCoachAddClient, FREE_LIMITS } from "@/lib/subscription";
+import { canAddWingMember, canCoachAddClient, isCoachActive, FREE_LIMITS } from "@/lib/subscription";
 import type { CoachPlanId } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       const ownerData = ownerDoc.data() ?? {};
       const ownerEmail: string = ownerData.email ?? "";
       const ownerPlan = ownerData.subscription?.plan ?? "free";
-      const isCoach = ownerData.accountType === "business" && ownerData.coach?.active;
+      const isCoach = ownerData.accountType === "business" && isCoachActive(ownerData.coach);
 
       // Limit check — coach plan limit for business owners, free limit otherwise
       if (isCoach) {
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
       const coachDoc = await db.collection("users").doc(coachId).get();
       const coachData = coachDoc.data() ?? {};
-      if (!(coachData.accountType === "business" && coachData.coach?.active)) {
+      if (!(coachData.accountType === "business" && isCoachActive(coachData.coach))) {
         return NextResponse.json({ error: "Coach plan inactive" }, { status: 403 });
       }
 

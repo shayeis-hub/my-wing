@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
-import { COACH_PLANS, type CoachPlanId } from "@/lib/subscription";
+import { COACH_PLANS, isCoachActive, type CoachPlanId } from "@/lib/subscription";
 import {
   getCoachClients,
   getCoachInvites,
@@ -29,8 +29,13 @@ export default function CoachPage() {
   const [copied, setCopied] = useState<string | null>(null);
 
   const coach = user?.coach;
-  const isActive = user?.accountType === "business" && coach?.active;
+  const isActive = user?.accountType === "business" && isCoachActive(coach);
   const origin = typeof window !== "undefined" ? window.location.origin : "";
+
+  // Days left on the free trial (only relevant for the free plan)
+  const trialDaysLeft = coach?.plan === "free" && coach.expiresAt
+    ? Math.max(0, Math.ceil((new Date(coach.expiresAt).getTime() - Date.now()) / 86400000))
+    : null;
 
   const reload = useCallback(async () => {
     if (!firebaseUser) return;
@@ -133,23 +138,30 @@ export default function CoachPage() {
           </p>
         </div>
 
-        {(Object.keys(COACH_PLANS) as CoachPlanId[]).map((id) => {
+        {(Object.keys(COACH_PLANS) as CoachPlanId[])
+          .filter((id) => !(id === "free" && coach?.expiresAt))
+          .map((id) => {
           const p = COACH_PLANS[id];
+          const isFree = id === "free";
           return (
-            <Card key={id}>
+            <Card key={id} className={isFree ? "border-wing-honey bg-wing-elevated" : undefined}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-bold text-wing-ink">{p.label}</p>
                   <p className="text-sm text-wing-muted mt-0.5">
-                    ₪{p.priceILS} <span className="text-wing-subtle">/ {lang === "he" ? "חודש" : "mo"}</span>
+                    {isFree
+                      ? (lang === "he" ? "לקוח אחד · 30 יום" : "1 client · 30 days")
+                      : <>₪{p.priceILS} <span className="text-wing-subtle">/ {lang === "he" ? "חודש" : "mo"}</span></>}
                   </p>
                 </div>
                 <button
                   onClick={() => handleActivate(id)}
                   disabled={busy}
-                  className="px-4 py-2 rounded-2xl bg-wing-ink text-wing-elevated text-sm font-bold disabled:opacity-50 active:scale-95 transition-transform"
+                  className={`px-4 py-2 rounded-2xl text-sm font-bold disabled:opacity-50 active:scale-95 transition-transform ${
+                    isFree ? "bg-wing-honey text-white" : "bg-wing-ink text-wing-elevated"
+                  }`}
                 >
-                  {lang === "he" ? "בחר/י" : "Select"}
+                  {isFree ? (lang === "he" ? "התחל/י" : "Start") : (lang === "he" ? "בחר/י" : "Select")}
                 </button>
               </div>
             </Card>
@@ -157,8 +169,8 @@ export default function CoachPage() {
         })}
         <p className="text-[11px] text-wing-subtle text-center">
           {lang === "he"
-            ? "* בשלב זה ההפעלה ללא חיוב — חיבור התשלום יתווסף בהמשך"
-            : "* Activation is currently free — billing will be added"}
+            ? "* בשלב זה הפעלת מסלול בתשלום היא ללא חיוב — חיבור התשלום יתווסף בהמשך"
+            : "* Paid plan activation is currently free — billing will be added"}
         </p>
       </div>
     );
@@ -182,6 +194,24 @@ export default function CoachPage() {
           </p>
         </div>
       </div>
+
+      {/* Free trial banner */}
+      {coach?.plan === "free" && trialDaysLeft != null && (
+        <div className="bg-wing-elevated border border-wing-honey rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-wing-ink font-medium">
+            {lang === "he"
+              ? `התנסות חינם · נותרו ${trialDaysLeft} ימים`
+              : `Free trial · ${trialDaysLeft} days left`}
+          </p>
+          <button
+            onClick={() => handleActivate("basic")}
+            disabled={busy}
+            className="px-3 py-1.5 rounded-xl bg-wing-honey text-white text-xs font-bold shrink-0 disabled:opacity-50"
+          >
+            {lang === "he" ? "שדרוג" : "Upgrade"}
+          </button>
+        </div>
+      )}
 
       {/* Create actions */}
       <div className="grid grid-cols-2 gap-3">

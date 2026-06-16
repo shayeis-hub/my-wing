@@ -1,10 +1,13 @@
 export type Plan = "free" | "premium" | "grandfathered";
 export type PriceType = "monthly" | "yearly";
-export type CoachPlanId = "basic" | "extended" | "unlimited";
+export type CoachPlanId = "free" | "basic" | "extended" | "unlimited";
+
+export const COACH_FREE_TRIAL_DAYS = 30;
 
 // ── Coach (business / dietitian) plans ──────────────────────────────────────────
 // maxClients is the number of CLIENTS (the coach herself is not counted).
-export const COACH_PLANS: Record<CoachPlanId, { maxClients: number | null; priceILS: number; label: string }> = {
+export const COACH_PLANS: Record<CoachPlanId, { maxClients: number | null; priceILS: number; label: string; trialDays?: number }> = {
+  free:      { maxClients: 1,    priceILS: 0,   label: "התנסות חינם", trialDays: COACH_FREE_TRIAL_DAYS },
   basic:     { maxClients: 10,   priceILS: 89,  label: "עד 10 לקוחות" },
   extended:  { maxClients: 30,   priceILS: 249, label: "עד 30 לקוחות" },
   unlimited: { maxClients: null, priceILS: 499, label: "ללא הגבלה" },
@@ -15,6 +18,15 @@ export function canCoachAddClient(plan: CoachPlanId, currentClientCount: number)
   const max = COACH_PLANS[plan].maxClients;
   if (max == null) return true;
   return currentClientCount < max;
+}
+
+/** True if the coach account is active — checks the flag and (for free) expiry. */
+export function isCoachActive(
+  coach: { active?: boolean; expiresAt?: string | null } | null | undefined
+): boolean {
+  if (!coach?.active) return false;
+  if (coach.expiresAt && new Date(coach.expiresAt) <= new Date()) return false;
+  return true;
 }
 
 // ── Trial ─────────────────────────────────────────────────────────────────────

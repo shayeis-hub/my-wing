@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
-import { COACH_PLANS, type CoachPlanId } from "@/lib/subscription";
+import { COACH_PLANS, COACH_FREE_TRIAL_DAYS, type CoachPlanId } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -21,15 +21,26 @@ export async function POST(req: NextRequest) {
 
   getAdminApp();
   const db = admin.firestore();
+
+  // Free plan: a one-time 30-day trial. Don't let a coach re-activate it to
+  // restart the clock if they already used it.
+  const coachData: Record<string, unknown> = {
+    plan,
+    maxClients: COACH_PLANS[plan].maxClients,
+    active: true,
+  };
+  if (plan === "free") {
+    const existing = (await db.collection("users").doc(uid).get()).data()?.coach;
+    if (existing?.plan === "free" && existing?.expiresAt) {
+      return NextResponse.json({ error: "Free trial already used" }, { status: 409 });
+    }
+    const expires = new Date();
+    expires.setDate(expires.getDate() + COACH_FREE_TRIAL_DAYS);
+    coachData.expiresAt = expires.toISOString();
+  }
+
   await db.collection("users").doc(uid).set(
-    {
-      accountType: "business",
-      coach: {
-        plan,
-        maxClients: COACH_PLANS[plan].maxClients,
-        active: true,
-      },
-    },
+    { accountType: "business", coach: coachData },
     { merge: true }
   );
 

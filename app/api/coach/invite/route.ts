@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
+import { isCoachActive } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   const coachDoc = await db.collection("users").doc(uid).get();
   const coachData = coachDoc.data() ?? {};
-  if (!(coachData.accountType === "business" && coachData.coach?.active)) {
+  if (!(coachData.accountType === "business" && isCoachActive(coachData.coach))) {
     return NextResponse.json({ error: "Coach plan inactive" }, { status: 403 });
   }
 

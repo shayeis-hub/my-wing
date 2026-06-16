@@ -27,13 +27,15 @@ export interface User {
   createdAt: Timestamp;
 }
 
-export type CoachPlan = "basic" | "extended" | "unlimited";
+export type CoachPlan = "free" | "basic" | "extended" | "unlimited";
 
 export interface CoachAccount {
   plan: CoachPlan;
   /** Max clients allowed by the plan. null = unlimited. */
   maxClients: number | null;
   active: boolean;
+  /** Free-trial expiry (ISO). Set only for the free plan; paid plans omit it. */
+  expiresAt?: string;
   paypalSubscriptionId?: string;
 }
 
