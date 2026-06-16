@@ -204,12 +204,12 @@ async function handleCoachEvent(
     }
 
     case "BILLING.SUBSCRIPTION.CANCELLED": {
-      // Cancellation is requested but the paid period may continue — mark pending,
-      // keep access until PayPal fires EXPIRED.
-      await userRef.set(
-        { coach: { cancelPending: true, status: "cancelled" } },
-        { merge: true }
-      );
+      // Use dot-notation update so other coach fields (active, plan, maxClients, etc.)
+      // are preserved — set() with merge:true replaces the whole nested object.
+      await userRef.update({
+        "coach.cancelPending": true,
+        "coach.status": "cancelled",
+      });
       console.log(`Coach ${coachId} → cancel pending`);
       break;
     }

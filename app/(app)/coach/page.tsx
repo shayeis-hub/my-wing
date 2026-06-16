@@ -283,6 +283,39 @@ export default function CoachPage() {
   const max = coach?.maxClients;
   const planLabel = coach ? COACH_PLANS[coach.plan].label : "";
   const atLimit = max != null && clients.length >= max;
+  const isPaidPlan = coach?.plan !== "free";
+  const cancelPending = coach?.cancelPending;
+  const coachExpiresAt = coach?.expiresAt
+    ? new Date(coach.expiresAt).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+
+  async function handleCancel() {
+    const confirmed = window.confirm(
+      lang === "he"
+        ? "האם לבטל את המנוי? הגישה תישמר עד סוף תקופת התשלום הנוכחית, לאחר מכן הלקוחות שלך יעברו לתקופת ניסיון אישית של 14 יום."
+        : "Cancel subscription? You keep access until the current billing period ends, then clients get a 14-day personal trial."
+    );
+    if (!confirmed) return;
+    setBusy(true);
+    try {
+      const token = (await firebaseUser?.getIdToken()) ?? "";
+      const res = await fetch("/api/coach/cancel", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error);
+      const until = data.expiresAt
+        ? new Date(data.expiresAt).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })
+        : "";
+      toast.success(lang === "he" ? `המנוי בוטל · גישה עד ${until}` : `Cancelled · access until ${until}`);
+    } catch (err) {
+      console.error("Cancel coach:", err);
+      toast.error(lang === "he" ? "שגיאה בביטול המנוי" : "Failed to cancel");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <div className="p-4 space-y-4" dir={lang === "he" ? "rtl" : "ltr"}>
@@ -295,8 +328,21 @@ export default function CoachPage() {
           <p className="text-sm text-wing-muted mt-1">
             {planLabel} · {clients.length}
             {max != null ? `/${max}` : ""} {lang === "he" ? "לקוחות" : "clients"}
+            {cancelPending && coachExpiresAt && (
+              <span className="text-wing-heat"> · {lang === "he" ? `פעיל עד ${coachExpiresAt}` : `active until ${coachExpiresAt}`}</span>
+            )}
           </p>
         </div>
+        {/* Cancel button — only for paid plans that haven't been cancelled yet */}
+        {isPaidPlan && !cancelPending && (
+          <button
+            onClick={handleCancel}
+            disabled={busy}
+            className="text-xs text-wing-subtle hover:text-red-500 transition-colors disabled:opacity-40 mt-1"
+          >
+            {lang === "he" ? "ביטול מנוי" : "Cancel plan"}
+          </button>
+        )}
       </div>
 
       {/* At-limit upgrade prompt — takes priority over the trial banner */}
