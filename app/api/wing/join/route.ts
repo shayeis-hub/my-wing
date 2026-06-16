@@ -141,7 +141,11 @@ export async function POST(req: NextRequest) {
         coachAccess: { coachId, wingId: wingRef.id, active: true },
       });
 
-      await inviteRef.update({ usedCount: admin.firestore.FieldValue.increment(1) });
+      // Private invites are single-use — deactivate after first join
+      await inviteRef.update({
+        usedCount: admin.firestore.FieldValue.increment(1),
+        active: false,
+      });
 
       const created = await wingRef.get();
       return NextResponse.json({ id: wingRef.id, ...created.data()!, createdAt: null });

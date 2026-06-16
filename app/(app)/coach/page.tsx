@@ -126,9 +126,11 @@ export default function CoachPage() {
   }
 
   async function handleCreatePrivate() {
+    const label = window.prompt(lang === "he" ? "שם הלקוח/ה (לזיהוי בלבד):" : "Client name (for your reference):");
+    if (label === null) return; // canceled
     setBusy(true);
     try {
-      const res = await authedFetch("/api/coach/invite", "POST", { type: "private" });
+      const res = await authedFetch("/api/coach/invite", "POST", { type: "private", label: label.trim() || undefined });
       const data = await res.json();
       if (!res.ok) {
         console.error("Create private invite error:", data);
@@ -341,9 +343,14 @@ export default function CoachPage() {
           <div className="space-y-2">
             {invites.map((inv) => (
               <div key={inv.code} className="flex items-center gap-2 bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5">
-                <span className="flex-1 text-xs text-wing-muted truncate tabular" dir="ltr">
-                  /join/{inv.code}
-                </span>
+                <div className="flex-1 min-w-0">
+                  {inv.label && (
+                    <p className="text-sm font-semibold text-wing-ink truncate">{inv.label}</p>
+                  )}
+                  <p className="text-xs text-wing-muted truncate tabular" dir="ltr">
+                    /join/{inv.code}
+                  </p>
+                </div>
                 <span className="text-[11px] text-wing-subtle shrink-0">
                   {inv.usedCount > 0 ? (lang === "he" ? "נוצל" : "used") : ""}
                 </span>
