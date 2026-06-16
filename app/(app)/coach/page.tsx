@@ -282,6 +282,7 @@ export default function CoachPage() {
   // ── Active dashboard ────────────────────────────────────────────────────────
   const max = coach?.maxClients;
   const planLabel = coach ? COACH_PLANS[coach.plan].label : "";
+  const atLimit = max != null && clients.length >= max;
 
   return (
     <div className="p-4 space-y-4" dir={lang === "he" ? "rtl" : "ltr"}>
@@ -298,34 +299,69 @@ export default function CoachPage() {
         </div>
       </div>
 
-      {/* Free trial banner */}
-      {coach?.plan === "free" && trialDaysLeft != null && (
-        <div className="bg-wing-elevated border border-wing-honey rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
-          <p className="text-sm text-wing-ink font-medium">
-            {lang === "he"
-              ? `התנסות חינם · נותרו ${trialDaysLeft} ימים`
-              : `Free trial · ${trialDaysLeft} days left`}
-          </p>
-          <button
-            onClick={() => handleActivate("basic")}
-            disabled={busy}
-            className="px-3 py-1.5 rounded-xl bg-wing-honey text-white text-xs font-bold shrink-0 disabled:opacity-50"
-          >
-            {lang === "he" ? "שדרוג" : "Upgrade"}
-          </button>
+      {/* At-limit upgrade prompt — takes priority over the trial banner */}
+      {atLimit ? (
+        <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-4 space-y-3">
+          <div>
+            <p className="text-sm font-bold text-red-700">
+              {lang === "he" ? `הגעת למגבלת ${max} לקוחות במסלול ${planLabel}` : `You've reached the ${max}-client limit on the ${planLabel} plan`}
+            </p>
+            <p className="text-xs text-red-500 mt-0.5">
+              {lang === "he" ? "שדרג/י כדי להוסיף לקוחות נוספים" : "Upgrade to add more clients"}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {(["basic", "extended", "unlimited"] as const)
+              .filter((id) => {
+                const planMax = COACH_PLANS[id].maxClients;
+                return planMax === null || planMax > (max ?? 0);
+              })
+              .map((id) => (
+                <button
+                  key={id}
+                  onClick={() => handleActivate(id)}
+                  disabled={busy}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-red-200 hover:border-wing-heat active:scale-[0.99] transition-transform disabled:opacity-50"
+                >
+                  <div className="text-start">
+                    <span className="text-sm font-bold text-wing-ink">{PLAN_META[id].name}</span>
+                    <span className="text-xs text-wing-muted mr-2">{PLAN_META[id].clients}</span>
+                  </div>
+                  <span className="text-sm font-black text-wing-heat">₪{COACH_PLANS[id].priceILS}<span className="text-xs font-normal text-wing-muted">/חו׳</span></span>
+                </button>
+              ))}
+          </div>
         </div>
+      ) : (
+        /* Free trial banner — shown only when not at limit */
+        coach?.plan === "free" && trialDaysLeft != null && (
+          <div className="bg-wing-elevated border border-wing-honey rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
+            <p className="text-sm text-wing-ink font-medium">
+              {lang === "he"
+                ? `התנסות חינם · נותרו ${trialDaysLeft} ימים`
+                : `Free trial · ${trialDaysLeft} days left`}
+            </p>
+            <button
+              onClick={() => handleActivate("basic")}
+              disabled={busy}
+              className="px-3 py-1.5 rounded-xl bg-wing-honey text-white text-xs font-bold shrink-0 disabled:opacity-50"
+            >
+              {lang === "he" ? "שדרוג" : "Upgrade"}
+            </button>
+          </div>
+        )
       )}
 
       {/* Create actions */}
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={handleCreatePrivate}
-          disabled={busy}
+          disabled={busy || atLimit}
           className="flex flex-col items-center gap-1.5 bg-wing-surface border border-wing-border rounded-2xl py-4 active:scale-[0.97] transition-transform disabled:opacity-50"
         >
-          <UserPlus size={22} className="text-wing-heat" />
+          <UserPlus size={22} className={atLimit ? "text-wing-muted" : "text-wing-heat"} />
           <span className="text-sm font-bold text-wing-ink">{lang === "he" ? "לקוח פרטי" : "Private client"}</span>
-          <span className="text-[11px] text-wing-muted">{lang === "he" ? "אחד על אחד" : "1-on-1"}</span>
+          <span className="text-[11px] text-wing-muted">{atLimit ? (lang === "he" ? "מלא" : "limit reached") : (lang === "he" ? "אחד על אחד" : "1-on-1")}</span>
         </button>
         <button
           onClick={handleCreateGroup}
