@@ -16,6 +16,32 @@ async function getUidBySubscription(
   return snap.empty ? null : snap.docs[0].id;
 }
 
+async function getUidByCoachSubscription(
+  db: admin.firestore.Firestore,
+  subscriptionId: string
+): Promise<string | null> {
+  const snap = await db
+    .collection("users")
+    .where("coach.paypalSubscriptionId", "==", subscriptionId)
+    .limit(1)
+    .get();
+  return snap.empty ? null : snap.docs[0].id;
+}
+
+// When a coach's plan ends, clients keep their data but restart their personal
+// 14-day trial (per product spec) and lose the coach-granted premium.
+async function churnCoachClients(db: admin.firestore.Firestore, coachId: string) {
+  const snap = await db.collection("users").where("coachAccess.coachId", "==", coachId).get();
+  if (snap.empty) return;
+  const now = new Date().toISOString();
+  const batch = db.batch();
+  snap.docs.forEach((d) => {
+    batch.update(d.ref, { "coachAccess.active": false, trialStartsAt: now });
+  });
+  await batch.commit();
+  console.log(`Coach ${coachId} ended → restarted trial for ${snap.size} client(s)`);
+}
+
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   let event: Record<string, unknown>;
@@ -60,7 +86,13 @@ export async function POST(req: NextRequest) {
   }
 
   const uid = await getUidBySubscription(db, subscriptionId);
+
+  // Not a personal subscription? Try coach (business) subscriptions.
   if (!uid) {
+    const coachUid = await getUidByCoachSubscription(db, subscriptionId);
+    if (coachUid) {
+      return handleCoachEvent(db, coachUid, eventType, resource, subscriptionId);
+    }
     console.warn("PayPal webhook: no user found for subscription", subscriptionId);
     return NextResponse.json({ ok: true });
   }
@@ -141,6 +173,60 @@ export async function POST(req: NextRequest) {
 
     default:
       console.log(`Unhandled PayPal event: ${eventType}`);
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+// Coach (business) subscription lifecycle. Activates/deactivates the coach plan
+// and, on end-of-life, restarts each client's personal trial.
+async function handleCoachEvent(
+  db: admin.firestore.Firestore,
+  coachId: string,
+  eventType: string,
+  resource: Record<string, unknown>,
+  subscriptionId: string
+) {
+  const userRef = db.collection("users").doc(coachId);
+
+  switch (eventType) {
+    case "BILLING.SUBSCRIPTION.ACTIVATED":
+    case "BILLING.SUBSCRIPTION.UPDATED":
+    case "BILLING.SUBSCRIPTION.RE-ACTIVATED": {
+      const status = resource.status as string;
+      const isActive = status === "ACTIVE" || status === "TRIALING";
+      await userRef.set(
+        { coach: { active: isActive, paypalSubscriptionId: subscriptionId, status } },
+        { merge: true }
+      );
+      console.log(`Coach ${coachId} → ${isActive ? "active" : "inactive"} (${status})`);
+      break;
+    }
+
+    case "BILLING.SUBSCRIPTION.CANCELLED": {
+      // Cancellation is requested but the paid period may continue — mark pending,
+      // keep access until PayPal fires EXPIRED.
+      await userRef.set(
+        { coach: { cancelPending: true, status: "cancelled" } },
+        { merge: true }
+      );
+      console.log(`Coach ${coachId} → cancel pending`);
+      break;
+    }
+
+    case "BILLING.SUBSCRIPTION.EXPIRED":
+    case "BILLING.SUBSCRIPTION.SUSPENDED": {
+      await userRef.set(
+        { coach: { active: false, status: eventType.split(".").pop()?.toLowerCase() } },
+        { merge: true }
+      );
+      await churnCoachClients(db, coachId);
+      console.log(`Coach ${coachId} → inactive (${eventType}), clients churned`);
+      break;
+    }
+
+    default:
+      console.log(`Unhandled coach PayPal event: ${eventType}`);
   }
 
   return NextResponse.json({ ok: true });

@@ -37,6 +37,8 @@ export interface CoachAccount {
   /** Free-trial expiry (ISO). Set only for the free plan; paid plans omit it. */
   expiresAt?: string;
   paypalSubscriptionId?: string;
+  cancelPending?: boolean;
+  status?: string;
 }
 
 export interface UserProfile {

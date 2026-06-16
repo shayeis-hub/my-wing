@@ -81,6 +81,18 @@ export default function CoachPage() {
     if (isActive) reload();
   }, [isActive, reload]);
 
+  // Toast on return from PayPal approval (webhook activates the plan shortly after).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "1") {
+      toast.success(lang === "he" ? "התשלום התקבל — המסלול יופעל תוך רגע" : "Payment received — activating shortly");
+      window.history.replaceState({}, "", "/coach");
+    } else if (params.get("canceled") === "1") {
+      toast(lang === "he" ? "התשלום בוטל" : "Payment canceled");
+      window.history.replaceState({}, "", "/coach");
+    }
+  }, [lang]);
+
   async function authedFetch(path: string, method: string, body: unknown) {
     const token = (await firebaseUser?.getIdToken()) ?? "";
     return fetch(path, {
@@ -93,9 +105,19 @@ export default function CoachPage() {
   async function handleActivate(plan: CoachPlanId) {
     setBusy(true);
     try {
-      const res = await authedFetch("/api/coach/activate", "POST", { plan });
-      if (!res.ok) throw new Error();
-      toast.success(lang === "he" ? "המסלול הופעל" : "Plan activated");
+      if (plan === "free") {
+        // Free trial activates immediately — no payment.
+        const res = await authedFetch("/api/coach/activate", "POST", { plan });
+        if (!res.ok) throw new Error();
+        toast.success(lang === "he" ? "ההתנסות הופעלה" : "Trial started");
+      } else {
+        // Paid plans go through PayPal checkout.
+        const res = await authedFetch("/api/coach/checkout", "POST", { plan });
+        const data = await res.json();
+        if (!res.ok || !data.url) throw new Error();
+        window.location.href = data.url; // redirect to PayPal approval
+        return;
+      }
     } catch {
       toast.error(lang === "he" ? "שגיאה בהפעלה" : "Activation failed");
     } finally {
@@ -233,7 +255,7 @@ export default function CoachPage() {
         })}
 
         <p className="text-[11px] text-wing-subtle text-center">
-          * בשלב זה הפעלת מסלול בתשלום היא ללא חיוב — חיבור התשלום יתווסף בהמשך
+          התשלום מאובטח דרך PayPal · ניתן לבטל בכל עת
         </p>
       </div>
     );
