@@ -18,6 +18,36 @@ import {
   Users, Link2, Copy, Trash2, UserPlus, UsersRound, Check, Crown,
 } from "lucide-react";
 
+// Display metadata for the paid plans (the free trial is shown separately).
+const PLAN_META: Record<
+  "basic" | "extended" | "unlimited",
+  { name: string; tagline: string; clients: string; recommended?: boolean }
+> = {
+  basic: {
+    name: "Starter",
+    tagline: "להתחלה — ליווי קבוצה קטנה או כמה לקוחות פרטיים",
+    clients: "עד 10 לקוחות",
+  },
+  extended: {
+    name: "Premium",
+    tagline: "לדיאטנ/ית עם מספר קבוצות ולקוחות פרטיים",
+    clients: "עד 30 לקוחות",
+  },
+  unlimited: {
+    name: "Business",
+    tagline: "לפרקטיקה גדולה — לקוחות ללא הגבלה",
+    clients: "לקוחות ללא הגבלה",
+    recommended: true,
+  },
+};
+
+const PLAN_FEATURES = [
+  "דף ניהול לקוחות מלא",
+  "קישורי הזמנה פרטיים וקבוצתיים",
+  "גישת פרימיום מלאה לכל הלקוחות",
+  "מעקב ארוחות, צ'ק-אפ והודעות לכל לקוח",
+];
+
 export default function CoachPage() {
   const { user, firebaseUser } = useAuth();
   const { lang } = useLanguage();
@@ -125,52 +155,85 @@ export default function CoachPage() {
   // ── Plan selection (no active plan) ─────────────────────────────────────────
   if (!isActive) {
     return (
-      <div className="p-4 space-y-4" dir={lang === "he" ? "rtl" : "ltr"}>
-        <div className="pt-4">
-          <h1 className="text-xl font-bold text-wing-ink flex items-center gap-2">
-            <Crown size={20} className="text-wing-honey" />
-            {lang === "he" ? "חשבון עסקי" : "Business account"}
+      <div className="p-4 space-y-4" dir="rtl">
+        <div className="pt-4 text-center">
+          <h1 className="text-2xl font-black text-wing-ink flex items-center justify-center gap-2">
+            <Crown size={22} className="text-wing-honey" />
+            מסלולי דיאטנ/ית
           </h1>
-          <p className="text-sm text-wing-muted mt-1">
-            {lang === "he"
-              ? "בחר/י מסלול כדי לפתוח את דף ניהול הלקוחות"
-              : "Choose a plan to unlock the client dashboard"}
+          <p className="text-sm text-wing-muted mt-1.5">
+            בחר/י מסלול כדי לפתוח את דף ניהול הלקוחות
           </p>
         </div>
 
-        {(Object.keys(COACH_PLANS) as CoachPlanId[])
-          .filter((id) => !(id === "free" && coach?.expiresAt))
-          .map((id) => {
+        {/* Free trial CTA */}
+        {!coach?.expiresAt && (
+          <button
+            onClick={() => handleActivate("free")}
+            disabled={busy}
+            className="w-full bg-wing-elevated border-2 border-dashed border-wing-honey rounded-[20px] px-4 py-3.5 text-center active:scale-[0.98] transition-transform disabled:opacity-50"
+          >
+            <span className="block font-bold text-wing-ink">התחלה בהתנסות חינם</span>
+            <span className="block text-xs text-wing-muted mt-0.5">לקוח אחד · 30 יום · ללא תשלום</span>
+          </button>
+        )}
+
+        {/* Paid plan cards */}
+        {(["unlimited", "extended", "basic"] as const).map((id) => {
           const p = COACH_PLANS[id];
-          const isFree = id === "free";
+          const meta = PLAN_META[id];
+          const recommended = meta.recommended;
+          const features = id === "basic" ? PLAN_FEATURES.slice(0, 3) : PLAN_FEATURES;
           return (
-            <Card key={id} className={isFree ? "border-wing-honey bg-wing-elevated" : undefined}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-wing-ink">{p.label}</p>
-                  <p className="text-sm text-wing-muted mt-0.5">
-                    {isFree
-                      ? (lang === "he" ? "לקוח אחד · 30 יום" : "1 client · 30 days")
-                      : <>₪{p.priceILS} <span className="text-wing-subtle">/ {lang === "he" ? "חודש" : "mo"}</span></>}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleActivate(id)}
-                  disabled={busy}
-                  className={`px-4 py-2 rounded-2xl text-sm font-bold disabled:opacity-50 active:scale-95 transition-transform ${
-                    isFree ? "bg-wing-honey text-white" : "bg-wing-ink text-wing-elevated"
-                  }`}
-                >
-                  {isFree ? (lang === "he" ? "התחל/י" : "Start") : (lang === "he" ? "בחר/י" : "Select")}
-                </button>
+            <div
+              key={id}
+              className={`relative rounded-[22px] p-5 border bg-wing-surface ${
+                recommended ? "border-wing-heat shadow-sm ring-1 ring-wing-heat/30" : "border-wing-border"
+              }`}
+            >
+              {recommended && (
+                <span className="absolute -top-2.5 right-5 bg-wing-heat text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                  מומלץ
+                </span>
+              )}
+
+              <p className="text-lg font-black text-wing-ink">{meta.name}</p>
+              <p className="text-xs text-wing-muted mt-1 leading-snug">{meta.tagline}</p>
+
+              <div className="flex items-end gap-1.5 mt-4">
+                <span className="text-[40px] font-black text-wing-ink leading-none tabular">₪{p.priceILS}</span>
+                <span className="text-sm text-wing-subtle mb-1">/ חודש</span>
               </div>
-            </Card>
+
+              <p className="text-sm font-bold text-wing-heat mt-2">{meta.clients}</p>
+
+              <button
+                onClick={() => handleActivate(id)}
+                disabled={busy}
+                className={`w-full mt-4 py-3 rounded-[14px] font-bold text-sm active:scale-[0.98] transition-transform disabled:opacity-50 ${
+                  recommended ? "bg-wing-heat text-white" : "border border-wing-heat text-wing-heat"
+                }`}
+              >
+                בואו נתחיל
+              </button>
+
+              <div className="mt-4 pt-4 border-t border-wing-divider">
+                <p className="text-xs font-bold text-wing-muted mb-2">מה כלול:</p>
+                <ul className="space-y-1.5">
+                  {features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-wing-ink">
+                      <Check size={15} className="text-wing-success shrink-0 mt-0.5" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           );
         })}
+
         <p className="text-[11px] text-wing-subtle text-center">
-          {lang === "he"
-            ? "* בשלב זה הפעלת מסלול בתשלום היא ללא חיוב — חיבור התשלום יתווסף בהמשך"
-            : "* Paid plan activation is currently free — billing will be added"}
+          * בשלב זה הפעלת מסלול בתשלום היא ללא חיוב — חיבור התשלום יתווסף בהמשך
         </p>
       </div>
     );
