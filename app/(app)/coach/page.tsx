@@ -372,6 +372,9 @@ export default function CoachPage() {
           <p className="text-sm text-wing-muted mt-1">
             {planLabel} · {clients.length}
             {max != null ? `/${max}` : ""} {lang === "he" ? "לקוחות" : "clients"}
+            {coach?.plan === "free" && trialDaysLeft != null && (
+              <span className="text-wing-honey font-medium"> · {lang === "he" ? `נותרו ${trialDaysLeft} ימי ניסיון` : `${trialDaysLeft} trial days left`}</span>
+            )}
             {cancelPending && coachExpiresAt && (
               <span className="text-wing-heat"> · {lang === "he" ? `פעיל עד ${coachExpiresAt}` : `active until ${coachExpiresAt}`}</span>
             )}
