@@ -177,7 +177,8 @@ export default function CoachPage() {
   // ── Plan selection (no active plan) ─────────────────────────────────────────
   if (!isActive) {
     return (
-      <div className="p-4 space-y-4" dir="rtl">
+      <div className="md:relative md:w-screen md:left-1/2 md:-translate-x-1/2">
+      <div className="p-4 md:py-8 md:max-w-5xl md:mx-auto space-y-4 md:space-y-6" dir="rtl">
         <div className="pt-4 text-center">
           <h1 className="text-2xl font-black text-wing-ink flex items-center justify-center gap-2">
             <Crown size={22} className="text-wing-honey" />
@@ -193,7 +194,7 @@ export default function CoachPage() {
           <button
             onClick={() => handleActivate("free")}
             disabled={busy}
-            className="w-full bg-wing-elevated border-2 border-dashed border-wing-honey rounded-[20px] px-4 py-3.5 text-center active:scale-[0.98] transition-transform disabled:opacity-50"
+            className="w-full md:max-w-md md:mx-auto md:block bg-wing-elevated border-2 border-dashed border-wing-honey rounded-[20px] px-4 py-3.5 text-center active:scale-[0.98] transition-transform disabled:opacity-50"
           >
             <span className="block font-bold text-wing-ink">התחלה בהתנסות חינם</span>
             <span className="block text-xs text-wing-muted mt-0.5">לקוח אחד · 30 יום · ללא תשלום</span>
@@ -201,6 +202,7 @@ export default function CoachPage() {
         )}
 
         {/* Paid plan cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 md:items-start">
         {(["unlimited", "extended", "basic"] as const).map((id) => {
           const p = COACH_PLANS[id];
           const meta = PLAN_META[id];
@@ -253,10 +255,12 @@ export default function CoachPage() {
             </div>
           );
         })}
+        </div>
 
         <p className="text-[11px] text-wing-subtle text-center">
           התשלום מאובטח דרך PayPal · ניתן לבטל בכל עת
         </p>
+      </div>
       </div>
     );
   }
