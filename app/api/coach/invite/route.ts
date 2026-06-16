@@ -45,6 +45,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Coach plan inactive" }, { status: 403 });
   }
 
+  // Enforce the plan's client limit at creation time — for BOTH group and private
+  // invites. Otherwise a coach at their limit could still hand out links that only
+  // fail once the recipient has already registered an account.
+  const coachPlan = (coachData.coach?.plan ?? "basic") as CoachPlanId;
+  const clientCount = await countCoachClients(db, uid);
+  if (!canCoachAddClient(coachPlan, clientCount)) {
+    return NextResponse.json({ error: "COACH_LIMIT_REACHED" }, { status: 403 });
+  }
+
   if (type === "group") {
     // Create a shared group wing; clients join via its standard invite token.
     const inviteToken = shortCode() + shortCode();
@@ -61,13 +70,6 @@ export async function POST(req: NextRequest) {
       wingIds: admin.firestore.FieldValue.arrayUnion(wingRef.id),
     });
     return NextResponse.json({ ok: true, type, wingId: wingRef.id, token: inviteToken });
-  }
-
-  // For private invites, enforce the plan's client limit at creation time
-  const coachPlan = (coachData.coach?.plan ?? "basic") as CoachPlanId;
-  const clientCount = await countCoachClients(db, uid);
-  if (!canCoachAddClient(coachPlan, clientCount)) {
-    return NextResponse.json({ error: "COACH_LIMIT_REACHED" }, { status: 403 });
   }
 
   // Private invite code (resolved by /api/wing/join → creates a 2-person wing)

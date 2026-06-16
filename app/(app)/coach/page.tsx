@@ -199,7 +199,12 @@ export default function CoachPage() {
       reload().catch(console.error);
     } catch (err) {
       console.error("handleCreateGroup:", err);
-      toast.error(lang === "he" ? "שגיאה ביצירה" : "Failed");
+      const msg = err instanceof Error ? err.message : "";
+      toast.error(
+        msg === "COACH_LIMIT_REACHED"
+          ? (lang === "he" ? "הגעת למגבלת הלקוחות במסלול הנוכחי — שדרג/י כדי להוסיף עוד" : "Client limit reached — upgrade to add more")
+          : (lang === "he" ? "שגיאה ביצירה" : "Failed")
+      );
     } finally {
       setBusy(false);
     }
@@ -458,12 +463,12 @@ export default function CoachPage() {
         </button>
         <button
           onClick={handleCreateGroup}
-          disabled={busy}
+          disabled={busy || atLimit}
           className="flex flex-col items-center gap-1.5 bg-wing-surface border border-wing-border rounded-2xl py-4 active:scale-[0.97] transition-transform disabled:opacity-50"
         >
-          <UsersRound size={22} className="text-wing-heat" />
+          <UsersRound size={22} className={atLimit ? "text-wing-muted" : "text-wing-heat"} />
           <span className="text-sm font-bold text-wing-ink">{lang === "he" ? "קבוצה" : "Group"}</span>
-          <span className="text-[11px] text-wing-muted">{lang === "he" ? "כולם רואים הכל" : "shared wing"}</span>
+          <span className="text-[11px] text-wing-muted">{atLimit ? (lang === "he" ? "מלא" : "limit reached") : (lang === "he" ? "כולם רואים הכל" : "shared wing")}</span>
         </button>
       </div>
 
