@@ -202,6 +202,10 @@ export default function CoachPage() {
           <p className="text-sm text-wing-muted mt-1.5">
             בחר/י מסלול כדי לפתוח את דף ניהול הלקוחות
           </p>
+          {/* TEMP DEBUG — remove after diagnosis */}
+          <p className="text-[10px] text-wing-subtle mt-2 font-mono break-all">
+            accountType={user?.accountType ?? "—"} · coach={JSON.stringify(user?.coach ?? null)}
+          </p>
         </div>
 
         {/* Free trial CTA */}
