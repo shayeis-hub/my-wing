@@ -81,23 +81,28 @@ export default function CoachPage() {
     if (isActive) reload();
   }, [isActive, reload]);
 
-  // Safety net: if a pending PayPal checkout exists (webhook never confirmed it),
-  // reconcile against PayPal once. Promotes to the live plan only if truly active.
+  // Detects the old-bug corruption: an inactive paid plan that still carries a
+  // valid free-trial expiry (i.e. an abandoned checkout clobbered a live trial).
+  const corruptedTrial =
+    !!coach && coach.active === false && coach.plan !== "free" &&
+    !!coach.expiresAt && new Date(coach.expiresAt).getTime() > Date.now();
+
+  // Safety net: reconcile a pending checkout against PayPal, or self-heal a
+  // corrupted trial — both run at most once on load.
   const pendingCheckoutId = user?.coachCheckout?.paypalSubscriptionId;
   const syncedRef = useRef(false);
   const [syncing, setSyncing] = useState(false);
   useEffect(() => {
     if (!firebaseUser || syncedRef.current) return;
-    if (isActive || !pendingCheckoutId) return;
+    if (isActive) return;
+    if (!pendingCheckoutId && !corruptedTrial) return;
     syncedRef.current = true;
     setSyncing(true);
     (async () => {
       try {
         const token = (await firebaseUser.getIdToken()) ?? "";
-        await fetch("/api/coach/sync-status", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const path = corruptedTrial ? "/api/coach/repair-trial" : "/api/coach/sync-status";
+        await fetch(path, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
         // onSnapshot in useAuth will pick up the updated coach state automatically.
       } catch (err) {
         console.error("Coach sync:", err);
@@ -105,7 +110,7 @@ export default function CoachPage() {
         setSyncing(false);
       }
     })();
-  }, [firebaseUser, isActive, pendingCheckoutId]);
+  }, [firebaseUser, isActive, pendingCheckoutId, corruptedTrial]);
 
   // Toast on return from PayPal approval (webhook activates the plan shortly after).
   useEffect(() => {
