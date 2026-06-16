@@ -81,14 +81,14 @@ export default function CoachPage() {
     if (isActive) reload();
   }, [isActive, reload]);
 
-  // Safety net: if a paid PayPal subscription exists but the plan isn't active
-  // (webhook never fired), reconcile the status directly from PayPal once.
+  // Safety net: if a pending PayPal checkout exists (webhook never confirmed it),
+  // reconcile against PayPal once. Promotes to the live plan only if truly active.
+  const pendingCheckoutId = user?.coachCheckout?.paypalSubscriptionId;
   const syncedRef = useRef(false);
   const [syncing, setSyncing] = useState(false);
   useEffect(() => {
     if (!firebaseUser || syncedRef.current) return;
-    if (isActive) return;
-    if (coach?.plan === "free" || !coach?.paypalSubscriptionId) return;
+    if (isActive || !pendingCheckoutId) return;
     syncedRef.current = true;
     setSyncing(true);
     (async () => {
@@ -98,14 +98,14 @@ export default function CoachPage() {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
-        // onSnapshot in useAuth will pick up the updated coach.active automatically.
+        // onSnapshot in useAuth will pick up the updated coach state automatically.
       } catch (err) {
         console.error("Coach sync:", err);
       } finally {
         setSyncing(false);
       }
     })();
-  }, [firebaseUser, isActive, coach?.plan, coach?.paypalSubscriptionId]);
+  }, [firebaseUser, isActive, pendingCheckoutId]);
 
   // Toast on return from PayPal approval (webhook activates the plan shortly after).
   useEffect(() => {

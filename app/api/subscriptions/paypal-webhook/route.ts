@@ -20,12 +20,20 @@ async function getUidByCoachSubscription(
   db: admin.firestore.Firestore,
   subscriptionId: string
 ): Promise<string | null> {
-  const snap = await db
+  // The subscription ID lives in `coach` once active, or in `coachCheckout`
+  // while a checkout is still pending. Check both (Firestore can't OR fields).
+  const live = await db
     .collection("users")
     .where("coach.paypalSubscriptionId", "==", subscriptionId)
     .limit(1)
     .get();
-  return snap.empty ? null : snap.docs[0].id;
+  if (!live.empty) return live.docs[0].id;
+  const pending = await db
+    .collection("users")
+    .where("coachCheckout.paypalSubscriptionId", "==", subscriptionId)
+    .limit(1)
+    .get();
+  return pending.empty ? null : pending.docs[0].id;
 }
 
 // When a coach's plan ends, clients keep their data but restart their personal
@@ -195,10 +203,28 @@ async function handleCoachEvent(
     case "BILLING.SUBSCRIPTION.RE-ACTIVATED": {
       const status = resource.status as string;
       const isActive = status === "ACTIVE" || status === "TRIALING";
-      await userRef.set(
-        { coach: { active: isActive, paypalSubscriptionId: subscriptionId, status } },
-        { merge: true }
-      );
+      const data = (await userRef.get()).data() ?? {};
+      const pending = data.coachCheckout;
+
+      if (isActive && pending?.paypalSubscriptionId === subscriptionId) {
+        // Promote the pending checkout into the live plan, and clear any stale
+        // free-trial expiry (paid plans renew, they don't expire on a fixed date).
+        await userRef.update({
+          coach: {
+            plan: pending.plan,
+            maxClients: pending.maxClients,
+            active: true,
+            paypalSubscriptionId: subscriptionId,
+            status,
+          },
+          coachCheckout: admin.firestore.FieldValue.delete(),
+        });
+      } else {
+        await userRef.set(
+          { coach: { active: isActive, paypalSubscriptionId: subscriptionId, status } },
+          { merge: true }
+        );
+      }
       console.log(`Coach ${coachId} → ${isActive ? "active" : "inactive"} (${status})`);
       break;
     }

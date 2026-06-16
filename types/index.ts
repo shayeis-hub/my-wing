@@ -16,6 +16,12 @@ export interface User {
   accountType?: "personal" | "business";
   /** Coach (business) subscription state — present on business accounts. */
   coach?: CoachAccount;
+  /**
+   * A paid plan the coach started checking out but hasn't completed yet.
+   * Kept separate from `coach` so an abandoned PayPal checkout never overwrites
+   * the live (e.g. free-trial) plan. Promoted to `coach` only once PayPal confirms.
+   */
+  coachCheckout?: { plan: CoachPlan; maxClients: number | null; paypalSubscriptionId: string };
   /** Granted to a coach's client; full access while the coach's plan is active. */
   coachAccess?: { coachId: string; wingId: string; active: boolean };
   /**
