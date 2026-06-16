@@ -42,6 +42,12 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // Coach invite codes — coach reads own; all writes via Admin SDK (server)
+    match /coachInvites/{code} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.coachId;
+      allow write: if false;
+    }
+
     // ── My Wing ────────────────────────────────────────────────────────────────
 
     // Users: owner or admin

@@ -1,24 +1,61 @@
 export type Plan = "free" | "premium" | "grandfathered";
 export type PriceType = "monthly" | "yearly";
+export type CoachPlanId = "basic" | "extended" | "unlimited";
+
+// ── Coach (business / dietitian) plans ──────────────────────────────────────────
+// maxClients is the number of CLIENTS (the coach herself is not counted).
+export const COACH_PLANS: Record<CoachPlanId, { maxClients: number | null; priceILS: number; label: string }> = {
+  basic:     { maxClients: 10,   priceILS: 89,  label: "עד 10 לקוחות" },
+  extended:  { maxClients: 30,   priceILS: 249, label: "עד 30 לקוחות" },
+  unlimited: { maxClients: null, priceILS: 499, label: "ללא הגבלה" },
+};
+
+/** True if the coach can add another client given their plan's maxClients. */
+export function canCoachAddClient(plan: CoachPlanId, currentClientCount: number): boolean {
+  const max = COACH_PLANS[plan].maxClients;
+  if (max == null) return true;
+  return currentClientCount < max;
+}
 
 // ── Trial ─────────────────────────────────────────────────────────────────────
 export const TRIAL_DAYS = 14;
 
-/** Returns days remaining in trial (0 = expired). Pass createdAt as ms since epoch. */
-export function getTrialDaysLeft(createdAtMs: number | null | undefined): number {
-  if (createdAtMs == null) return TRIAL_DAYS;
-  const elapsed = (Date.now() - createdAtMs) / (1000 * 60 * 60 * 24);
+/** Returns days remaining in trial (0 = expired). Pass the trial start as ms since epoch. */
+export function getTrialDaysLeft(trialStartMs: number | null | undefined): number {
+  if (trialStartMs == null) return TRIAL_DAYS;
+  const elapsed = (Date.now() - trialStartMs) / (1000 * 60 * 60 * 24);
   return Math.max(0, Math.ceil(TRIAL_DAYS - elapsed));
+}
+
+/**
+ * Resolves the effective trial-start timestamp (ms). Prefers trialStartsAt
+ * (set when a coach stops paying) and falls back to account creation.
+ */
+export function resolveTrialStartMs(
+  trialStartsAt: string | null | undefined,
+  createdAtMs: number | null | undefined
+): number | null {
+  if (trialStartsAt) {
+    const t = new Date(trialStartsAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  return createdAtMs ?? null;
 }
 
 export function isTrialExpired(
   email:        string | null | undefined,
   plan:         Plan   | undefined,
-  createdAtMs:  number | null | undefined
+  createdAtMs:  number | null | undefined,
+  opts?: {
+    trialStartsAt?: string | null;
+    courseAccess?: { expiresAt: string } | null;
+    coachAccess?: { active?: boolean } | null;
+  }
 ): boolean {
   if (isGrandfathered(email)) return false;
-  if (isPremium(email, plan)) return false;
-  return getTrialDaysLeft(createdAtMs) === 0;
+  if (isPremium(email, plan, undefined, opts?.courseAccess ?? null, opts?.coachAccess ?? null)) return false;
+  const startMs = resolveTrialStartMs(opts?.trialStartsAt, createdAtMs);
+  return getTrialDaysLeft(startMs) === 0;
 }
 
 // ── Grandfathered users — always premium, never see ads ──────────────────────
@@ -57,10 +94,13 @@ export function isPremium(
     cancelPending?: boolean;
     expiresAt?: string | { toDate?: () => Date; _seconds?: number } | null;
   } | null,
-  courseAccess?: { expiresAt: string } | null
+  courseAccess?: { expiresAt: string } | null,
+  coachAccess?: { active?: boolean } | null
 ): boolean {
   if (isGrandfathered(email)) return true;
   if (courseAccess?.expiresAt && new Date(courseAccess.expiresAt) > new Date()) return true;
+  // A coach's client has full access while the coach's plan is active.
+  if (coachAccess?.active) return true;
   if (plan !== "premium" && plan !== "grandfathered") return false;
   // If cancellation is pending, check whether the paid period has already ended
   if (subscription?.cancelPending && subscription.expiresAt) {

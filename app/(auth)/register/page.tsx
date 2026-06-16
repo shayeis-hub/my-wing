@@ -44,6 +44,7 @@ function RegisterForm() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accountType, setAccountType] = useState<"personal" | "business">("personal");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -52,8 +53,9 @@ function RegisterForm() {
     if (password.length < 6) { toast.error(t("register_password_short")); return; }
     setLoading(true);
     try {
-      await signUp(email, password, displayName);
-      router.replace(redirectTo);
+      await signUp(email, password, displayName, accountType);
+      // Business accounts go straight to the coach dashboard to pick a plan
+      router.replace(accountType === "business" ? "/coach" : redirectTo);
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes("email-already-in-use")) {
         toast.error(t("register_email_exists"));
@@ -103,6 +105,31 @@ function RegisterForm() {
         <div className="flex-1 h-px bg-wing-border" />
         <span className="font-mono text-xs tracking-[0.22em] uppercase text-wing-muted">{t("or")}</span>
         <div className="flex-1 h-px bg-wing-border" />
+      </div>
+
+      {/* Account type selector */}
+      <div className="w-full mb-3">
+        <p className="text-xs font-mono uppercase tracking-[0.18em] text-wing-muted mb-2">{t("register_account_type")}</p>
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            { value: "personal", label: t("register_account_personal"), desc: t("register_account_personal_desc") },
+            { value: "business", label: t("register_account_business"), desc: t("register_account_business_desc") },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setAccountType(opt.value)}
+              className={`text-start rounded-[14px] border px-3 py-2.5 transition-all ${
+                accountType === opt.value
+                  ? "border-wing-ink bg-wing-elevated ring-2 ring-wing-ink"
+                  : "border-wing-border bg-wing-surface"
+              }`}
+            >
+              <span className="block text-sm font-bold text-wing-ink">{opt.label}</span>
+              <span className="block text-[11px] text-wing-muted mt-0.5 leading-tight">{opt.desc}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Fields */}

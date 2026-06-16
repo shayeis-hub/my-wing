@@ -18,11 +18,12 @@ import type { User, UserProfile } from "@/types";
 export async function signUp(
   email: string,
   password: string,
-  displayName: string
+  displayName: string,
+  accountType: "personal" | "business" = "personal"
 ) {
   const credential = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(credential.user, { displayName });
-  await createUserDoc(credential.user, displayName);
+  await createUserDoc(credential.user, displayName, accountType);
   return credential.user;
 }
 
@@ -68,13 +69,18 @@ export async function sendPasswordReset(email: string) {
   await firebaseSendPasswordResetEmail(auth, email);
 }
 
-async function createUserDoc(user: FirebaseUser, displayName: string) {
+async function createUserDoc(
+  user: FirebaseUser,
+  displayName: string,
+  accountType: "personal" | "business" = "personal"
+) {
   await setDoc(doc(db, "users", user.uid), {
     uid: user.uid,
     email: user.email,
     displayName,
     photoURL: user.photoURL ?? null,
     wingId: null,
+    accountType,
     profile: {
       age: 0,
       heightCm: 0,

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { useLanguage } from "@/lib/i18n";
@@ -23,12 +23,16 @@ import { Droplets, Leaf, Footprints, Scale, Dumbbell, ArrowRight, Send, Trash2 }
 
 const MOOD_EMOJIS = ["😞", "😕", "😐", "😊", "🤩"];
 
-export default function MemberPage() {
+function MemberPageInner() {
   const { uid } = useParams<{ uid: string }>();
   const { user, firebaseUser } = useAuth();
-  const { wing } = useWing(user?.wingId);
   const { lang } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // A coach viewing a client passes ?wing=<id>; otherwise use the active wing.
+  const effectiveWingId = searchParams.get("wing") ?? user?.wingId;
+  const { wing } = useWing(effectiveWingId);
 
   const member = wing?.members.find((m) => m.uid === uid);
   const today = format(new Date(), "yyyy-MM-dd");
@@ -41,25 +45,25 @@ export default function MemberPage() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user?.wingId || !uid) return;
-    getTodayCheckin(user.wingId, uid, today).then(setCheckin);
-    getMemberRecentMeals(user.wingId, uid).then(setMeals);
-    getWallMessages(user.wingId, uid).then(setWallMsgs);
-  }, [user?.wingId, uid, today]);
+    if (!effectiveWingId || !uid) return;
+    getTodayCheckin(effectiveWingId, uid, today).then(setCheckin);
+    getMemberRecentMeals(effectiveWingId, uid).then(setMeals);
+    getWallMessages(effectiveWingId, uid).then(setWallMsgs);
+  }, [effectiveWingId, uid, today]);
 
   async function handleSendMessage() {
     const text = msgText.trim();
-    if (!text || !user?.wingId || !firebaseUser || !uid) return;
+    if (!text || !effectiveWingId || !firebaseUser || !uid) return;
     setSending(true);
     try {
       const msgData = {
-        wingId: user.wingId,
+        wingId: effectiveWingId,
         targetUserId: uid,
         authorId: firebaseUser.uid,
-        authorName: user.displayName,
+        authorName: user!.displayName,
         text,
       };
-      await addWallMessage(user.wingId, msgData);
+      await addWallMessage(effectiveWingId, msgData);
       await fetch("/api/notifications/wall-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,12 +83,12 @@ export default function MemberPage() {
   }
 
   async function handleDeleteMessage(msgId: string) {
-    if (!user?.wingId) return;
+    if (!effectiveWingId) return;
     const prev = wallMsgs;
     setWallMsgs((list) => list.filter((m) => m.id !== msgId));
     setConfirmDelete(null);
     try {
-      await deleteWallMessage(user.wingId, msgId);
+      await deleteWallMessage(effectiveWingId, msgId);
     } catch {
       setWallMsgs(prev);
       toast.error(lang === "he" ? "שגיאה במחיקה" : "Failed to delete");
@@ -280,5 +284,13 @@ export default function MemberPage() {
 
       <div className="pb-4" />
     </div>
+  );
+}
+
+export default function MemberPage() {
+  return (
+    <Suspense fallback={<div className="p-4" />}>
+      <MemberPageInner />
+    </Suspense>
   );
 }

@@ -14,7 +14,7 @@ function toMs(ts: Timestamp | null | undefined): number | null {
   return s ? s * 1000 : null;
 }
 
-const PAYWALL_EXEMPT = ["/subscription", "/onboarding", "/login", "/register"];
+const PAYWALL_EXEMPT = ["/subscription", "/onboarding", "/login", "/register", "/coach"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { firebaseUser, user, loading } = useAuth();
@@ -38,19 +38,27 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Profile incomplete → onboarding
+    const isBusiness = user?.accountType === "business";
+
+    // Profile incomplete → onboarding (business/coach accounts don't track
+    // personally, so they skip the personal onboarding gate).
     const profileIncomplete = !user?.profile?.age || user.profile.age === 0;
-    if (profileIncomplete && pathname !== "/onboarding") {
+    if (!isBusiness && profileIncomplete && pathname !== "/onboarding") {
       router.replace("/onboarding");
       return;
     }
 
-    // Trial expired → paywall (unless already on an exempt page)
+    // Trial expired → paywall (unless already on an exempt page).
+    // Business accounts are governed by their coach plan, not the personal paywall.
     const exempt = PAYWALL_EXEMPT.some((p) => pathname.startsWith(p));
-    if (!exempt && user) {
+    if (!exempt && !isBusiness && user) {
       const email = firebaseUser.email ?? user.email ?? "";
       const createdAtMs = toMs(user.createdAt ?? null);
-      if (isTrialExpired(email, user.subscription?.plan, createdAtMs)) {
+      if (isTrialExpired(email, user.subscription?.plan, createdAtMs, {
+        trialStartsAt: user.trialStartsAt ?? null,
+        courseAccess: user.courseAccess ?? null,
+        coachAccess: user.coachAccess ?? null,
+      })) {
         router.replace("/subscription?expired=1");
       }
     }

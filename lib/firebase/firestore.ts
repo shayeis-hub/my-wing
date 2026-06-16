@@ -971,6 +971,61 @@ export async function deleteWallMessage(wingId: string, msgId: string): Promise<
   await deleteDoc(doc(db, "wings", wingId, "wallMessages", msgId));
 }
 
+// ── Coach (business) dashboard ──────────────────────────────────────────────────
+
+export interface CoachInvite {
+  id: string;
+  code: string;
+  coachId: string;
+  type: "private" | "group";
+  label: string | null;
+  active: boolean;
+  usedCount: number;
+}
+
+export interface CoachClient {
+  uid: string;
+  displayName: string;
+  photoURL?: string;
+  wingId: string;
+  wingName: string;
+  isPrivate: boolean;
+}
+
+/** All wings owned by the coach. */
+export async function getCoachWings(coachId: string): Promise<Wing[]> {
+  const snap = await getDocs(query(collection(db, "wings"), where("ownerId", "==", coachId)));
+  return snap.docs.map((d) => normalizeWing(d.data(), d.id));
+}
+
+/** All clients across the coach's wings (excludes the coach). */
+export async function getCoachClients(coachId: string): Promise<CoachClient[]> {
+  const wings = await getCoachWings(coachId);
+  const clients: CoachClient[] = [];
+  for (const w of wings) {
+    for (const m of w.members) {
+      if (m.uid === coachId) continue;
+      clients.push({
+        uid: m.uid,
+        displayName: m.displayName,
+        photoURL: m.photoURL,
+        wingId: w.id,
+        wingName: w.name,
+        isPrivate: (w as Wing & { isPrivateCoachWing?: boolean }).isPrivateCoachWing === true,
+      });
+    }
+  }
+  return clients;
+}
+
+/** Active private invite codes created by the coach. */
+export async function getCoachInvites(coachId: string): Promise<CoachInvite[]> {
+  const snap = await getDocs(query(collection(db, "coachInvites"), where("coachId", "==", coachId)));
+  return snap.docs
+    .map((d) => ({ ...(d.data() as Omit<CoachInvite, "id">), id: d.id }))
+    .filter((i) => i.active);
+}
+
 export async function getWallMessages(wingId: string, targetUserId: string, limitN = 10): Promise<WallMessage[]> {
   const snap = await getDocs(
     query(collection(db, "wings", wingId, "wallMessages"), where("targetUserId", "==", targetUserId), limit(30))

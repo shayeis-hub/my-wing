@@ -12,8 +12,29 @@ export interface User {
   timezone?: string;
   subscription?: Subscription;
   courseAccess?: { expiresAt: string; wingId: string };
+  /** "business" unlocks the coach management dashboard. Defaults to personal. */
+  accountType?: "personal" | "business";
+  /** Coach (business) subscription state — present on business accounts. */
+  coach?: CoachAccount;
+  /** Granted to a coach's client; full access while the coach's plan is active. */
+  coachAccess?: { coachId: string; wingId: string; active: boolean };
+  /**
+   * Overrides createdAt as the trial clock start. Defaults to createdAt.
+   * Set to "now" when a coach stops paying, so the client's 14-day trial begins then.
+   */
+  trialStartsAt?: string;
   trophies?: Trophy[];
   createdAt: Timestamp;
+}
+
+export type CoachPlan = "basic" | "extended" | "unlimited";
+
+export interface CoachAccount {
+  plan: CoachPlan;
+  /** Max clients allowed by the plan. null = unlimited. */
+  maxClients: number | null;
+  active: boolean;
+  paypalSubscriptionId?: string;
 }
 
 export interface UserProfile {

@@ -14,7 +14,7 @@ import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib
 import { WeightChart } from "@/components/dashboard/WeightChart";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Camera, Footprints, Users, Trophy, TrendingDown, ChevronDown } from "lucide-react";
+import { Camera, Footprints, Users, Trophy, TrendingDown, ChevronDown, Crown } from "lucide-react";
 import Link from "next/link";
 import type { WeightLog } from "@/types";
 
@@ -151,6 +151,15 @@ export default function ProfilePage() {
         />
         {uploading && <p className="text-sm text-wing-muted animate-pulse">{t("profile_uploading")}</p>}
       </div>
+
+      {/* Coach dashboard — business accounts only */}
+      {user?.accountType === "business" && (
+        <Link href="/coach">
+          <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
+            <Crown size={16} /> {lang === "he" ? "ניהול לקוחות" : "Client management"}
+          </Button>
+        </Link>
+      )}
 
       {/* Wing */}
       <Link href="/wing">
