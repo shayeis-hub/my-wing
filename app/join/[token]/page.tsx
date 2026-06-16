@@ -31,17 +31,15 @@ export default function JoinPage() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
+  // Auto-join as soon as the user is authenticated
   useEffect(() => {
-    if (!loading && firebaseUser && user?.wingId) {
-      router.replace("/wing");
-    }
-  }, [loading, firebaseUser, user, router]);
+    if (loading || !firebaseUser || !user) return;
+    if (done || joining) return;
+    doJoin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, firebaseUser, user]);
 
-  async function handleJoin() {
-    if (!firebaseUser || !user) {
-      router.push(`/login?redirect=/join/${token}`);
-      return;
-    }
+  async function doJoin() {
     setJoining(true);
     try {
       const res = await fetch("/api/wing/join", {
@@ -49,25 +47,36 @@ export default function JoinPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token,
-          userId: firebaseUser.uid,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
+          userId: firebaseUser!.uid,
+          displayName: user!.displayName,
+          photoURL: user!.photoURL,
         }),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (data?.error === "Already a member") {
+          router.replace("/dashboard");
+          return;
+        }
+        throw new Error(data?.error ?? "join failed");
+      }
       setDone(true);
-      setTimeout(() => router.replace("/dashboard"), 2000);
-    } catch {
+      setTimeout(() => router.replace("/dashboard"), 1500);
+    } catch (err) {
+      console.error("Join error:", err);
       setError("קישור לא תקין או שפג תוקפו.");
     } finally {
       setJoining(false);
     }
   }
 
-  if (loading) {
+  if (loading || (firebaseUser && user && !done && !error)) {
     return (
       <div className="min-h-screen bg-wing-bg flex items-center justify-center">
-        <div className="animate-bounce"><WingLogo /></div>
+        <div className="text-center space-y-4">
+          <div className="flex justify-center animate-bounce"><WingLogo /></div>
+          <p className="text-sm text-wing-muted">מצטרף/ת למבנה...</p>
+        </div>
       </div>
     );
   }
@@ -95,7 +104,8 @@ export default function JoinPage() {
               חזור לדף הבית
             </Link>
           </div>
-        ) : !firebaseUser ? (
+        ) : (
+          // Not logged in — prompt to register or log in
           <div className="space-y-3">
             <p className="text-slate-600 text-sm">
               כדי להצטרף, עליך להתחבר או להירשם תחילה
@@ -111,10 +121,6 @@ export default function JoinPage() {
               </Button>
             </Link>
           </div>
-        ) : (
-          <Button size="lg" className="w-full" onClick={handleJoin} loading={joining}>
-            הצטרף למבנה
-          </Button>
         )}
       </div>
     </div>
