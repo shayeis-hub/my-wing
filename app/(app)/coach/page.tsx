@@ -466,22 +466,47 @@ export default function CoachPage() {
         ) : (
           <div className="space-y-2">
             {clients.map((c) => (
-              <button
-                key={`${c.wingId}_${c.uid}`}
-                onClick={() => {
-                  // View this client's data in their specific wing context
-                  router.push(`/member/${c.uid}?wing=${c.wingId}`);
-                }}
-                className="w-full flex items-center gap-3 bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5 active:scale-[0.99] transition-transform text-start"
-              >
-                <Avatar name={c.displayName} photoURL={c.photoURL} size={36} />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-wing-ink text-sm truncate">{c.displayName}</p>
-                  <p className="text-[11px] text-wing-muted truncate">
-                    {c.isPrivate ? (lang === "he" ? "פרטי" : "Private") : c.wingName}
-                  </p>
-                </div>
-              </button>
+              <div key={`${c.wingId}_${c.uid}`} className="flex items-center gap-2 bg-wing-elevated border border-wing-border rounded-2xl px-3 py-2.5">
+                <button
+                  className="flex items-center gap-3 flex-1 min-w-0 text-start"
+                  onClick={() => router.push(`/member/${c.uid}?wing=${c.wingId}`)}
+                >
+                  <Avatar name={c.displayName} photoURL={c.photoURL} size={36} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-wing-ink text-sm truncate">{c.displayName}</p>
+                    <p className="text-[11px] text-wing-muted truncate">
+                      {c.isPrivate ? (lang === "he" ? "פרטי" : "Private") : c.wingName}
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={async () => {
+                    const confirmed = window.confirm(
+                      lang === "he"
+                        ? `להסיר את ${c.displayName}? הם יתחילו תקופת ניסיון אישית של 14 יום.`
+                        : `Remove ${c.displayName}? They'll start a 14-day personal trial.`
+                    );
+                    if (!confirmed) return;
+                    try {
+                      const token = (await firebaseUser?.getIdToken()) ?? "";
+                      const res = await fetch("/api/coach/remove-client", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ clientId: c.uid, wingId: c.wingId }),
+                      });
+                      if (!res.ok) throw new Error();
+                      setClients((prev) => prev.filter((x) => !(x.uid === c.uid && x.wingId === c.wingId)));
+                      toast.success(lang === "he" ? `${c.displayName} הוסר/ה` : `${c.displayName} removed`);
+                    } catch {
+                      toast.error(lang === "he" ? "שגיאה בהסרה" : "Failed to remove");
+                    }
+                  }}
+                  className="text-wing-subtle hover:text-red-500 transition-colors shrink-0 p-1"
+                  title={lang === "he" ? "הסר לקוח" : "Remove client"}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
             ))}
           </div>
         )}
