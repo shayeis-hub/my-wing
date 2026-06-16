@@ -56,6 +56,8 @@ export async function POST(req: NextRequest) {
     );
 
     // Store the pending coach subscription (inactive until the webhook activates it).
+    // Clear any leftover free-trial expiresAt — paid plans renew, they don't expire
+    // on a fixed date. Without this, a stale expiry from the free trial survives the merge.
     await db.collection("users").doc(uid).set(
       {
         accountType: "business",
@@ -64,6 +66,7 @@ export async function POST(req: NextRequest) {
           maxClients: COACH_PLANS[plan].maxClients,
           active: false,
           paypalSubscriptionId: subscriptionId,
+          expiresAt: admin.firestore.FieldValue.delete(),
         },
       },
       { merge: true }

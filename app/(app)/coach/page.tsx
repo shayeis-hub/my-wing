@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
@@ -80,6 +80,32 @@ export default function CoachPage() {
   useEffect(() => {
     if (isActive) reload();
   }, [isActive, reload]);
+
+  // Safety net: if a paid PayPal subscription exists but the plan isn't active
+  // (webhook never fired), reconcile the status directly from PayPal once.
+  const syncedRef = useRef(false);
+  const [syncing, setSyncing] = useState(false);
+  useEffect(() => {
+    if (!firebaseUser || syncedRef.current) return;
+    if (isActive) return;
+    if (coach?.plan === "free" || !coach?.paypalSubscriptionId) return;
+    syncedRef.current = true;
+    setSyncing(true);
+    (async () => {
+      try {
+        const token = (await firebaseUser.getIdToken()) ?? "";
+        await fetch("/api/coach/sync-status", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // onSnapshot in useAuth will pick up the updated coach.active automatically.
+      } catch (err) {
+        console.error("Coach sync:", err);
+      } finally {
+        setSyncing(false);
+      }
+    })();
+  }, [firebaseUser, isActive, coach?.plan, coach?.paypalSubscriptionId]);
 
   // Toast on return from PayPal approval (webhook activates the plan shortly after).
   useEffect(() => {
@@ -190,6 +216,19 @@ export default function CoachPage() {
     setTimeout(() => setCopied(null), 1500);
   }
 
+  // While reconciling a pending PayPal subscription, show a loader instead of
+  // flashing the plan-selection screen at a coach who already paid.
+  if (!isActive && syncing) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center" dir="rtl">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 mx-auto rounded-full border-4 border-wing-border border-t-wing-heat animate-spin" />
+          <p className="text-sm text-wing-muted">מאמת את המנוי שלך…</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Plan selection (no active plan) ─────────────────────────────────────────
   if (!isActive) {
     return (
@@ -201,10 +240,6 @@ export default function CoachPage() {
           </h1>
           <p className="text-sm text-wing-muted mt-1.5">
             בחר/י מסלול כדי לפתוח את דף ניהול הלקוחות
-          </p>
-          {/* TEMP DEBUG — remove after diagnosis */}
-          <p className="text-[10px] text-wing-subtle mt-2 font-mono break-all">
-            accountType={user?.accountType ?? "—"} · coach={JSON.stringify(user?.coach ?? null)}
           </p>
         </div>
 
