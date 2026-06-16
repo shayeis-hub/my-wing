@@ -58,6 +58,14 @@ export default function JoinPage() {
           router.replace("/dashboard");
           return;
         }
+        if (data?.error === "COACH_LIMIT_REACHED") {
+          setError("הדיאטנ/ית הגיעה למגבלת הלקוחות — פנה/י אליה ישירות.");
+          return;
+        }
+        if (data?.error === "Coach plan inactive") {
+          setError("המסלול של הדיאטנ/ית אינו פעיל כרגע — פנה/י אליה ישירות.");
+          return;
+        }
         throw new Error(data?.error ?? "join failed");
       }
       setDone(true);

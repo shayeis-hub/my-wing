@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
-import { isCoachActive } from "@/lib/subscription";
+import { isCoachActive, canCoachAddClient, type CoachPlanId } from "@/lib/subscription";
+
+async function countCoachClients(db: admin.firestore.Firestore, coachId: string): Promise<number> {
+  const snap = await db.collection("wings").where("ownerId", "==", coachId).get();
+  const clients = new Set<string>();
+  snap.docs.forEach((d) => {
+    const ids: string[] = Array.isArray(d.data().memberIds) ? d.data().memberIds : [];
+    ids.filter((id) => id !== coachId).forEach((id) => clients.add(id));
+  });
+  return clients.size;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +61,13 @@ export async function POST(req: NextRequest) {
       wingIds: admin.firestore.FieldValue.arrayUnion(wingRef.id),
     });
     return NextResponse.json({ ok: true, type, wingId: wingRef.id, token: inviteToken });
+  }
+
+  // For private invites, enforce the plan's client limit at creation time
+  const coachPlan = (coachData.coach?.plan ?? "basic") as CoachPlanId;
+  const clientCount = await countCoachClients(db, uid);
+  if (!canCoachAddClient(coachPlan, clientCount)) {
+    return NextResponse.json({ error: "COACH_LIMIT_REACHED" }, { status: 403 });
   }
 
   // Private invite code (resolved by /api/wing/join → creates a 2-person wing)

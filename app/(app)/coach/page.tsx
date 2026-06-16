@@ -141,7 +141,12 @@ export default function CoachPage() {
       reload().catch(console.error);
     } catch (err) {
       console.error("handleCreatePrivate:", err);
-      toast.error(lang === "he" ? "שגיאה ביצירה" : "Failed");
+      const msg = err instanceof Error ? err.message : "";
+      toast.error(
+        msg === "COACH_LIMIT_REACHED"
+          ? (lang === "he" ? "הגעת למגבלת הלקוחות במסלול הנוכחי — שדרג/י כדי להוסיף עוד" : "Client limit reached — upgrade to add more")
+          : (lang === "he" ? "שגיאה ביצירה" : "Failed")
+      );
     } finally {
       setBusy(false);
     }
