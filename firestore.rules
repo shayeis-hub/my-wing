@@ -72,10 +72,11 @@ service cloud.firestore {
       }
     }
 
-    // Wings: members can read; only owner can update metadata
+    // Wings: members can read; owner can also list their wings by ownerId query
     match /wings/{wingId} {
       allow read: if request.auth != null &&
-        request.auth.uid in resource.data.memberIds;
+        (request.auth.uid in resource.data.memberIds ||
+         request.auth.uid == resource.data.ownerId);
       allow create: if request.auth != null;
       // Members may update the wing doc from the client ONLY for non-privileged
       // fields (challenges + member-list sync/photo). Privileged fields

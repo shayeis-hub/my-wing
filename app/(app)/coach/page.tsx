@@ -130,11 +130,15 @@ export default function CoachPage() {
     try {
       const res = await authedFetch("/api/coach/invite", "POST", { type: "private" });
       const data = await res.json();
-      if (!res.ok) throw new Error();
-      await reload();
+      if (!res.ok) {
+        console.error("Create private invite error:", data);
+        throw new Error(data?.error ?? "Failed");
+      }
       copyLink(data.token);
       toast.success(lang === "he" ? "קישור פרטי נוצר והועתק" : "Private link created & copied");
-    } catch {
+      reload().catch(console.error);
+    } catch (err) {
+      console.error("handleCreatePrivate:", err);
       toast.error(lang === "he" ? "שגיאה ביצירה" : "Failed");
     } finally {
       setBusy(false);
@@ -148,10 +152,15 @@ export default function CoachPage() {
     try {
       const res = await authedFetch("/api/coach/invite", "POST", { type: "group", label: name });
       const data = await res.json();
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        console.error("Create group invite error:", data);
+        throw new Error(data?.error ?? "Failed");
+      }
       copyLink(data.token);
       toast.success(lang === "he" ? "קבוצה נוצרה וקישור הועתק" : "Group created & link copied");
-    } catch {
+      reload().catch(console.error);
+    } catch (err) {
+      console.error("handleCreateGroup:", err);
       toast.error(lang === "he" ? "שגיאה ביצירה" : "Failed");
     } finally {
       setBusy(false);
