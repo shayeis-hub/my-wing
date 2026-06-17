@@ -32,6 +32,8 @@ export default function ChallengesPage() {
   const [description, setDescription] = useState("");
   const [type, setType] = useState<Challenge["type"]>("steps");
   const [targetValue, setTargetValue] = useState("");
+  const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [endDate, setEndDate] = useState(format(addDays(new Date(), 7), "yyyy-MM-dd"));
   const [saving, setSaving] = useState(false);
   const [pastChallenges, setPastChallenges] = useState<Challenge[]>([]);
   const [loadingPast, setLoadingPast] = useState(false);
@@ -88,24 +90,29 @@ export default function ChallengesPage() {
   }, [wing?.activeChallenge?.id, user?.wingId]);
 
   async function handleCreate() {
-    if (!user?.wingId || !title || !targetValue) return;
+    if (!user?.wingId || !title || !targetValue || !startDate || !endDate) return;
+    if (endDate < startDate) {
+      toast.error(lang === "he" ? "תאריך הסיום חייב להיות אחרי תאריך ההתחלה" : "End date must be after start date");
+      return;
+    }
     setSaving(true);
     try {
-      const today = format(new Date(), "yyyy-MM-dd");
       await saveChallenge(user.wingId, {
         wingId: user.wingId,
         title,
         description,
         type,
         targetValue: +targetValue,
-        startDate: today,
-        endDate: format(addDays(new Date(), 7), "yyyy-MM-dd"),
+        startDate,
+        endDate,
         progress: {},
         status: "active",
       });
       toast.success(t("challenge_created") as string);
       setShowCreate(false);
       setTitle(""); setDescription(""); setTargetValue("");
+      setStartDate(format(new Date(), "yyyy-MM-dd"));
+      setEndDate(format(addDays(new Date(), 7), "yyyy-MM-dd"));
     } catch {
       toast.error(t("challenge_error") as string);
     } finally {
@@ -195,6 +202,23 @@ export default function ChallengesPage() {
           <Input label={t("challenge_name_label") as string} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("challenge_name_ph") as string} />
           <Input label={t("challenge_desc_label") as string} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("challenge_desc_ph") as string} />
           <Input label={lang === "he" ? "יעד יומי" : "Daily target"} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder="6000" dir="ltr" />
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              label={lang === "he" ? "תאריך התחלה" : "Start date"}
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              dir="ltr"
+            />
+            <Input
+              label={lang === "he" ? "תאריך סיום" : "End date"}
+              type="date"
+              value={endDate}
+              min={startDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              dir="ltr"
+            />
+          </div>
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => setShowCreate(false)} className="flex-1">
               {t("cancel") as string}
