@@ -179,6 +179,28 @@ export async function getSubscription(subscriptionId: string) {
   return paypal(`/v1/billing/subscriptions/${subscriptionId}`);
 }
 
+// ── Billing plan housekeeping ─────────────────────────────────────────────────
+
+/** Lists ALL billing plans across pages (PayPal caps page_size at 20). */
+export async function listBillingPlans(): Promise<Array<{ id: string; name: string; status: string }>> {
+  const all: Array<{ id: string; name: string; status: string }> = [];
+  let page = 1;
+  // Guard against runaway loops; 20/page × 25 pages = 500 plans is plenty.
+  for (let i = 0; i < 25; i++) {
+    const res = await paypal(`/v1/billing/plans?page_size=20&page=${page}&total_required=true`);
+    const plans = (res?.plans ?? []) as Array<{ id: string; name: string; status: string }>;
+    all.push(...plans);
+    const totalPages = (res?.total_pages as number) ?? 1;
+    if (plans.length === 0 || page >= totalPages) break;
+    page++;
+  }
+  return all;
+}
+
+export async function deactivateBillingPlan(id: string): Promise<void> {
+  await paypal(`/v1/billing/plans/${id}/deactivate`, { method: "POST" });
+}
+
 export async function cancelSubscription(subscriptionId: string, reason = "User requested cancellation"): Promise<void> {
   await paypal(`/v1/billing/subscriptions/${subscriptionId}/cancel`, {
     method: "POST",
