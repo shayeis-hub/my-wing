@@ -110,23 +110,14 @@ function MealsPageInner() {
 
   // Smart default meal type based on what's already been logged today.
   // Snack is never auto-selected — only the user can pick it manually.
+  // Smart default by time of day: breakfast until 12:00, lunch 12:01–17:30,
+  // dinner after. Snack is never auto-selected — only chosen manually.
   function getSmartMealType(): typeof mealTypes[number] {
-    const today = format(new Date(), "yyyy-MM-dd");
-    const todayTypes = new Set(
-      meals
-        .filter((m) => {
-          if (m.userId !== firebaseUser?.uid) return false;
-          const dateKey = m.mealDate ?? (() => {
-            const d = m.createdAt?.toDate?.();
-            return d ? format(d, "yyyy-MM-dd") : null;
-          })();
-          return dateKey === today;
-        })
-        .map((m) => m.mealType)
-    );
-    if (!todayTypes.has("breakfast")) return "breakfast";
-    if (!todayTypes.has("lunch")) return "lunch";
-    return "dinner";
+    const now = new Date();
+    const mins = now.getHours() * 60 + now.getMinutes();
+    if (mins <= 12 * 60) return "breakfast";       // until 12:00
+    if (mins <= 17 * 60 + 30) return "lunch";      // 12:01–17:30
+    return "dinner";                               // after 17:30
   }
 
   // Reset time/date to now when opening a new meal entry
