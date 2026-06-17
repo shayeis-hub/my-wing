@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
-import { createSubscription } from "@/lib/paypal";
+import { createSubscription, getSubscription, cancelSubscription } from "@/lib/paypal";
 import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +47,24 @@ export async function POST(req: NextRequest) {
     const userData = userDoc.data() ?? {};
     const email: string = userData.email ?? "";
     const displayName: string = userData.displayName ?? "";
+
+    // CRITICAL: never stack subscriptions. If the user already has a PayPal
+    // subscription that's still billable, cancel it before creating a new one —
+    // otherwise an old subscription keeps charging after the user "cancels" the
+    // newest (the only one we track), which is exactly the billing bug we hit.
+    const existingSubId: string | undefined = userData.subscription?.paypalSubscriptionId;
+    if (existingSubId) {
+      try {
+        const existing = await getSubscription(existingSubId);
+        const status = (existing as { status?: string }).status;
+        if (status === "ACTIVE" || status === "SUSPENDED") {
+          await cancelSubscription(existingSubId, "Replaced by a new subscription");
+          console.log(`Cancelled prior subscription ${existingSubId} before new checkout for ${userId}`);
+        }
+      } catch (e) {
+        console.error(`Failed to check/cancel prior subscription ${existingSubId}:`, e);
+      }
+    }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://wingpact.app";
     const returnUrl = `${baseUrl}/subscription?success=1&userId=${userId}`;

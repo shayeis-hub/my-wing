@@ -40,8 +40,24 @@ export async function POST(req: NextRequest) {
 
     const expiresAt = nextBillingTime ?? new Date().toISOString();
 
-    // Cancel with PayPal
+    // Cancel with PayPal, then VERIFY it actually took effect. PayPal returns 204
+    // on the cancel call; we re-fetch to confirm the status is CANCELLED rather
+    // than trusting the call blindly (a silent failure here = the user keeps
+    // getting billed while the app says "cancelled").
     await cancelSubscription(subscriptionId);
+    try {
+      const after = await getSubscription(subscriptionId);
+      const afterStatus = (after as { status?: string }).status;
+      if (afterStatus !== "CANCELLED" && afterStatus !== "EXPIRED") {
+        console.error(`Cancel did NOT take for ${subscriptionId} — status still ${afterStatus}`);
+        return NextResponse.json(
+          { error: "Cancellation could not be confirmed. Please try again or contact support." },
+          { status: 502 }
+        );
+      }
+    } catch (e) {
+      console.error(`Failed to verify cancellation for ${subscriptionId}:`, e);
+    }
 
     // Keep plan as "premium" until expiresAt — do NOT downgrade immediately.
     // The daily cron job and login check will downgrade once the date passes.
