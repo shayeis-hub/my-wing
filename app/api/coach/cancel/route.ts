@@ -39,6 +39,23 @@ export async function POST(req: NextRequest) {
 
     await cancelSubscription(subscriptionId);
 
+    // Verify the cancellation actually took effect at PayPal — don't trust the
+    // call blindly (silent failure = coach keeps getting billed while we say
+    // "cancelled"). Same safeguard as the personal cancel flow.
+    try {
+      const after = await getSubscription(subscriptionId);
+      const afterStatus = (after as { status?: string }).status;
+      if (afterStatus !== "CANCELLED" && afterStatus !== "EXPIRED") {
+        console.error(`Coach cancel did NOT take for ${subscriptionId} — status still ${afterStatus}`);
+        return NextResponse.json(
+          { error: "Cancellation could not be confirmed. Please try again or contact support." },
+          { status: 502 }
+        );
+      }
+    } catch (e) {
+      console.error(`Failed to verify coach cancellation for ${subscriptionId}:`, e);
+    }
+
     // Preserve active + plan — only mark pending and set expiry.
     // The webhook (BILLING.SUBSCRIPTION.EXPIRED) will call churnCoachClients when the period ends.
     await db.collection("users").doc(uid).update({
