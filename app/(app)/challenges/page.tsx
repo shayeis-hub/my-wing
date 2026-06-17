@@ -49,6 +49,37 @@ export default function ChallengesPage() {
     { value: "other",      label: lang === "he" ? "אחר" : "Other",        Icon: Target     },
   ];
 
+  // Example placeholders tailored to the selected challenge type.
+  const examples: Record<Challenge["type"], { name: string; desc: string; target: string }> = {
+    steps: {
+      name:   lang === "he" ? "אתגר הצעדים השבועי" : "Weekly steps challenge",
+      desc:   lang === "he" ? "מי צובר/ת הכי הרבה צעדים?" : "Who racks up the most steps?",
+      target: "8000",
+    },
+    water: {
+      name:   lang === "he" ? "אתגר שתיית מים" : "Hydration challenge",
+      desc:   lang === "he" ? "להגיע ליעד כוסות המים בכל יום" : "Hit your water goal every day",
+      target: "8",
+    },
+    vegetables: {
+      name:   lang === "he" ? "אתגר הירקות" : "Veggie challenge",
+      desc:   lang === "he" ? "כמה מנות ירק נצליח לאכול?" : "How many veggie servings can we eat?",
+      target: "5",
+    },
+    no_sugar: {
+      name:   lang === "he" ? "אתגר ללא סוכר" : "No-sugar challenge",
+      desc:   lang === "he" ? "יום נקי מסוכר = נקודה" : "A sugar-free day = a point",
+      target: "1",
+    },
+    calories: { name: "", desc: "", target: "1500" }, // legacy
+    other: {
+      name:   lang === "he" ? "תנו שם לאתגר" : "Name your challenge",
+      desc:   lang === "he" ? "תארו את האתגר בקצרה" : "Briefly describe the challenge",
+      target: "10",
+    },
+  };
+  const ex = examples[type];
+
   useEffect(() => {
     if (!user?.wingId) return;
     setLoadingPast(true);
@@ -205,8 +236,8 @@ export default function ChallengesPage() {
               </button>
             ))}
           </div>
-          <Input label={t("challenge_name_label") as string} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("challenge_name_ph") as string} />
-          <Input label={t("challenge_desc_label") as string} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("challenge_desc_ph") as string} />
+          <Input label={t("challenge_name_label") as string} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={ex.name} />
+          <Input label={t("challenge_desc_label") as string} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={ex.desc} />
           {type === "other" && (
             <Input
               label={lang === "he" ? "יחידת מדידה" : "Unit"}
@@ -215,7 +246,7 @@ export default function ChallengesPage() {
               placeholder={lang === "he" ? "ק\"מ, דקות, חזרות…" : "km, minutes, reps…"}
             />
           )}
-          <Input label={lang === "he" ? "יעד יומי" : "Daily target"} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder="6000" dir="ltr" />
+          <Input label={lang === "he" ? "יעד יומי" : "Daily target"} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder={ex.target} dir="ltr" />
           <div className="grid grid-cols-2 gap-2">
             <Input
               label={lang === "he" ? "תאריך התחלה" : "Start date"}
