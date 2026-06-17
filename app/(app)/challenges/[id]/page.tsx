@@ -22,6 +22,12 @@ import type { Challenge } from "@/types";
 
 type ProgressMap = Record<string, number>;
 
+// Auto-tracked types pull from check-in/steps data and have per-day values;
+// manual types (no_sugar/other) carry a single running number.
+function isAutoTracked(type: Challenge["type"]): boolean {
+  return type === "steps" || type === "water" || type === "vegetables";
+}
+
 const RANK_STYLES = [
   { bg: "bg-yellow-100", text: "text-yellow-700", border: "border-yellow-200" },
   { bg: "bg-slate-100",  text: "text-slate-500",  border: "border-slate-200"  },
@@ -77,28 +83,38 @@ export default function ChallengeDetailPage() {
       const c = await getChallenge(user.wingId, id as string);
       if (!c) { router.replace("/challenges"); return; }
       setChallenge(c);
-      await computeProgress(c);
+      // Live auto-tracked challenges show TODAY's result (easier daily tracking);
+      // finished/ended ones show the cumulative total (used for winners).
+      const today = format(new Date(), "yyyy-MM-dd");
+      const live = c.status !== "finished" && c.endDate >= today;
+      const mode: "today" | "total" = live && isAutoTracked(c.type) ? "today" : "total";
+      setProgress(await computeProgress(c, mode));
     } finally {
       setLoading(false);
     }
   }
 
-  async function computeProgress(c: Challenge) {
-    if (!user?.wingId) return;
+  // Aggregates progress per member over a date window. "today" → just today's
+  // entries; "total" → the full challenge range (used for winners on finish).
+  async function computeProgress(c: Challenge, mode: "today" | "total"): Promise<ProgressMap> {
+    if (!user?.wingId) return {};
     let map: ProgressMap = {};
+    const today = format(new Date(), "yyyy-MM-dd");
+    const from = mode === "today" ? today : c.startDate;
+    const to   = mode === "today" ? today : c.endDate;
     if (c.type === "steps") {
-      const entries = await getWingStepsRange(user.wingId, c.startDate, c.endDate);
+      const entries = await getWingStepsRange(user.wingId, from, to);
       for (const e of entries) map[e.userId] = (map[e.userId] ?? 0) + e.steps;
     } else if (c.type === "water" || c.type === "vegetables") {
-      const checkins = await getWingCheckinsRange(user.wingId, c.startDate, c.endDate);
+      const checkins = await getWingCheckinsRange(user.wingId, from, to);
       for (const ci of checkins) {
         const val = c.type === "water" ? (ci.waterGlasses ?? 0) : (ci.vegetablesServings ?? 0);
         map[ci.userId] = (map[ci.userId] ?? 0) + val;
       }
     } else {
-      map = { ...c.progress };
+      map = { ...c.progress }; // manual types keep a single running number
     }
-    setProgress(map);
+    return map;
   }
 
   async function handleSaveProgress() {
@@ -122,7 +138,11 @@ export default function ChallengeDetailPage() {
     if (!user?.wingId || !challenge || !wing) return;
     setFinishing(true);
     try {
-      await finishChallenge(user.wingId, { ...challenge, progress }, wing.members);
+      // Winners are always decided by the cumulative total — recompute the full
+      // range here, since the live view may currently hold only today's values.
+      const fullProgress = await computeProgress(challenge, "total");
+      await finishChallenge(user.wingId, { ...challenge, progress: fullProgress }, wing.members);
+      setProgress(fullProgress);
       setChallenge((prev) => prev ? { ...prev, status: "finished" } : prev);
       setShowFinishConfirm(false);
       toast.success(t("challenge_finished_toast") as string);
@@ -157,6 +177,11 @@ export default function ChallengeDetailPage() {
   // Daily target: total progress needed = targetValue (per day) × number of days
   const totalDays = Math.max(1, differenceInDays(parseISO(challenge.endDate), parseISO(challenge.startDate)) + 1);
   const totalTarget = challenge.targetValue * totalDays;
+
+  // While an auto-tracked challenge is live, the leaderboard shows today's result
+  // (ranked by today); the cumulative total is reserved for the winners screen.
+  const showingToday = !isFinished && !hasEnded && isAutoTracked(challenge.type);
+  const displayTarget = showingToday ? challenge.targetValue : totalTarget;
 
   const sortedMembers = [...(wing?.members ?? [])].sort(
     (a, b) => (progress[b.uid] ?? 0) - (progress[a.uid] ?? 0)
@@ -266,10 +291,19 @@ export default function ChallengeDetailPage() {
 
       {/* Leaderboard */}
       <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 space-y-3">
-        <h2 className="font-bold text-wing-ink flex items-center gap-2">
-          <Trophy size={16} className="text-wing-muted" />
-          {t("challenge_leaderboard") as string}
-        </h2>
+        <div>
+          <h2 className="font-bold text-wing-ink flex items-center gap-2">
+            <Trophy size={16} className="text-wing-muted" />
+            {t("challenge_leaderboard") as string}
+          </h2>
+          {showingToday && (
+            <p className="text-[11px] text-wing-muted mt-1">
+              {lang === "he"
+                ? "מציג את תוצאת היום · המנצחים ייקבעו לפי הסכום הכולל"
+                : "Showing today's result · winners decided by the cumulative total"}
+            </p>
+          )}
+        </div>
 
         {sortedMembers.length === 0 ? (
           <p className="text-sm text-wing-muted text-center py-4">{t("challenge_no_data") as string}</p>
@@ -277,7 +311,7 @@ export default function ChallengeDetailPage() {
           <div className="space-y-2">
             {sortedMembers.map((member, idx) => {
               const val  = progress[member.uid] ?? 0;
-              const pct  = Math.min(100, totalTarget > 0 ? (val / totalTarget) * 100 : 0);
+              const pct  = Math.min(100, displayTarget > 0 ? (val / displayTarget) * 100 : 0);
               const isMe = member.uid === firebaseUser?.uid;
               const rs   = idx < 3 ? RANK_STYLES[idx] : null;
 
