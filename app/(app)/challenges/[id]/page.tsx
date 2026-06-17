@@ -16,7 +16,7 @@ import {
 } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import { format, differenceInDays, parseISO } from "date-fns";
-import { ArrowRight, ArrowLeft, Trophy, Flag, Footprints, Droplets, Salad, Ban, Flame } from "lucide-react";
+import { ArrowRight, ArrowLeft, Trophy, Flag, Footprints, Droplets, Salad, Ban, Flame, Target } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Challenge } from "@/types";
 
@@ -33,7 +33,8 @@ const CHALLENGE_ICONS: Record<Challenge["type"], LucideIcon> = {
   water:      Droplets,
   vegetables: Salad,
   no_sugar:   Ban,
-  calories:   Flame,
+  calories:   Flame,  // legacy
+  other:      Target,
 };
 
 type TKey = Parameters<ReturnType<typeof import("@/lib/i18n")["useLanguage"]>["t"]>[0];
@@ -147,8 +148,10 @@ export default function ChallengeDetailPage() {
   const hasEnded   = challenge.endDate < today;
   const endsToday  = challenge.endDate === today;
   const daysLeft   = differenceInDays(parseISO(challenge.endDate), new Date());
-  const isManual   = challenge.type === "no_sugar" || challenge.type === "calories";
-  const unit       = t(unitKey(challenge.type)) as string;
+  const isManual   = challenge.type === "no_sugar" || challenge.type === "calories" || challenge.type === "other";
+  const unit       = challenge.type === "other"
+    ? (challenge.unit || (lang === "he" ? "יחידות" : "units"))
+    : (t(unitKey(challenge.type)) as string);
   const ChallengeIcon = CHALLENGE_ICONS[challenge.type];
 
   // Daily target: total progress needed = targetValue (per day) × number of days

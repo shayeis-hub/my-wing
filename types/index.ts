@@ -214,11 +214,15 @@ export interface Challenge {
   wingId: string;
   title: string;
   description: string;
-  type: "steps" | "no_sugar" | "water" | "vegetables" | "calories";
+  // "calories" is legacy (no longer offered on creation); "other" is a free-form
+  // manual challenge in any domain the admin chooses.
+  type: "steps" | "no_sugar" | "water" | "vegetables" | "calories" | "other";
+  /** Custom unit label for "other" challenges (e.g. "ק"מ", "דקות"). */
+  unit?: string;
   targetValue: number;   // daily target (per day)
   startDate: string;
   endDate: string;
-  progress: Record<string, number>; // userId → cumulative value (manual for no_sugar/calories)
+  progress: Record<string, number>; // userId → cumulative value (manual for no_sugar/other)
   status?: "active" | "finished";
   winners?: string[]; // [gold_uid, silver_uid, bronze_uid]
   createdAt: Timestamp;

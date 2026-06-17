@@ -17,7 +17,7 @@ import {
 import toast from "react-hot-toast";
 import { format, addDays } from "date-fns";
 import { useRouter } from "next/navigation";
-import { Trophy, ChevronRight, ChevronLeft, Footprints, Droplets, Salad, Ban, Flame, Award } from "lucide-react";
+import { Trophy, ChevronRight, ChevronLeft, Footprints, Droplets, Salad, Ban, Target, Award } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { isWingAdmin } from "@/lib/wing/roles";
 import type { Challenge } from "@/types";
@@ -32,6 +32,7 @@ export default function ChallengesPage() {
   const [description, setDescription] = useState("");
   const [type, setType] = useState<Challenge["type"]>("steps");
   const [targetValue, setTargetValue] = useState("");
+  const [unit, setUnit] = useState("");
   const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(addDays(new Date(), 7), "yyyy-MM-dd"));
   const [saving, setSaving] = useState(false);
@@ -41,11 +42,11 @@ export default function ChallengesPage() {
   const canManage = isWingAdmin(wing, user?.uid);
 
   const challengeTypes: { value: Challenge["type"]; label: string; Icon: LucideIcon }[] = [
-    { value: "steps",      label: t("ct_steps") as string, Icon: Footprints },
-    { value: "water",      label: t("ct_water") as string, Icon: Droplets   },
-    { value: "vegetables", label: t("ct_veg")   as string, Icon: Salad      },
-    { value: "no_sugar",   label: t("ct_sugar") as string, Icon: Ban        },
-    { value: "calories",   label: t("ct_cal")   as string, Icon: Flame      },
+    { value: "steps",      label: t("ct_steps") as string,                Icon: Footprints },
+    { value: "water",      label: t("ct_water") as string,                Icon: Droplets   },
+    { value: "vegetables", label: t("ct_veg")   as string,                Icon: Salad      },
+    { value: "no_sugar",   label: t("ct_sugar") as string,                Icon: Ban        },
+    { value: "other",      label: lang === "he" ? "אחר" : "Other",        Icon: Target     },
   ];
 
   useEffect(() => {
@@ -102,6 +103,7 @@ export default function ChallengesPage() {
         title,
         description,
         type,
+        ...(type === "other" && unit.trim() ? { unit: unit.trim() } : {}),
         targetValue: +targetValue,
         startDate,
         endDate,
@@ -110,7 +112,7 @@ export default function ChallengesPage() {
       });
       toast.success(t("challenge_created") as string);
       setShowCreate(false);
-      setTitle(""); setDescription(""); setTargetValue("");
+      setTitle(""); setDescription(""); setTargetValue(""); setUnit("");
       setStartDate(format(new Date(), "yyyy-MM-dd"));
       setEndDate(format(addDays(new Date(), 7), "yyyy-MM-dd"));
     } catch {
@@ -162,7 +164,11 @@ export default function ChallengesPage() {
             <div className="bg-white/70 rounded-2xl px-4 py-2 text-sm text-wing-heat font-medium inline-flex gap-2">
               <Trophy size={14} className="mt-0.5" />
               {lang === "he" ? "יעד יומי" : "Daily goal"}: {wing.activeChallenge.targetValue.toLocaleString()}{" "}
-              {wing.activeChallenge.type === "steps" ? t("challenge_steps_unit") as string : ""}
+              {wing.activeChallenge.type === "steps"
+                ? (t("challenge_steps_unit") as string)
+                : wing.activeChallenge.type === "other"
+                ? (wing.activeChallenge.unit ?? "")
+                : ""}
             </div>
             <p className="text-xs text-wing-heat font-medium">
               {lang === "he" ? (gender === "female" ? "לחצי לצפייה בלוח התוצאות ←" : "לחץ לצפייה בלוח התוצאות ←") : "Tap to view leaderboard →"}
@@ -201,6 +207,14 @@ export default function ChallengesPage() {
           </div>
           <Input label={t("challenge_name_label") as string} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("challenge_name_ph") as string} />
           <Input label={t("challenge_desc_label") as string} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("challenge_desc_ph") as string} />
+          {type === "other" && (
+            <Input
+              label={lang === "he" ? "יחידת מדידה" : "Unit"}
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              placeholder={lang === "he" ? "ק\"מ, דקות, חזרות…" : "km, minutes, reps…"}
+            />
+          )}
           <Input label={lang === "he" ? "יעד יומי" : "Daily target"} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder="6000" dir="ltr" />
           <div className="grid grid-cols-2 gap-2">
             <Input
