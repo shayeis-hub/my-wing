@@ -58,13 +58,13 @@ export default function ChallengesPage() {
     },
     water: {
       name:   lang === "he" ? "אתגר שתיית מים" : "Hydration challenge",
-      desc:   lang === "he" ? "להגיע ליעד כוסות המים בכל יום" : "Hit your water goal every day",
-      target: "8",
+      desc:   lang === "he" ? "לכמה ליטר מים תגיעו ביום?" : "How many liters of water a day?",
+      target: "2.5",
     },
     vegetables: {
       name:   lang === "he" ? "אתגר הירקות" : "Veggie challenge",
-      desc:   lang === "he" ? "כמה מנות ירק נצליח לאכול?" : "How many veggie servings can we eat?",
-      target: "5",
+      desc:   lang === "he" ? "בכמה ארוחות אכלנו ירקות?" : "In how many meals did we eat veggies?",
+      target: "2",
     },
     no_sugar: {
       name:   lang === "he" ? "אתגר ללא סוכר" : "No-sugar challenge",
@@ -246,7 +246,7 @@ export default function ChallengesPage() {
               placeholder={lang === "he" ? "ק\"מ, דקות, חזרות…" : "km, minutes, reps…"}
             />
           )}
-          <Input label={lang === "he" ? "יעד יומי" : "Daily target"} type="number" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder={ex.target} dir="ltr" />
+          <Input label={lang === "he" ? "יעד יומי" : "Daily target"} type="number" step="any" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} placeholder={ex.target} dir="ltr" />
           <div className="grid grid-cols-2 gap-2">
             <Input
               label={lang === "he" ? "תאריך התחלה" : "Start date"}
