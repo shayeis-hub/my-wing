@@ -13,7 +13,7 @@ export async function analyzeMealImage(
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
   const promptText = isHe
-    ? `${hint ? `המשתמש מציין שהארוחה היא: "${hint}". השתמש במידע זה לצד התמונה לניתוח מדויק יותר.\n\n` : ""}המשתמש נמצא בתהליך ירידה במשקל. אנא נתח את הצלחת בתמונה הזו ותן לי:
+    ? `${hint ? `המשתמש מתקן או מוסיף מידע על הארוחה: "${hint}". תן עדיפות לתיקון הזה על פני מה שנראה בתמונה, ועדכן את כל הערכים התזונתיים (כולל הקלוריות) בהתאם.\n\n` : ""}המשתמש נמצא בתהליך ירידה במשקל. אנא נתח את הצלחת בתמונה הזו ותן לי:
 1. תיאור קצר של הארוחה בעברית
 2. רשימת רכיבים עם משקל משוער בגרמים לכל אחד
 3. ערכים תזונתיים: קלוריות, חלבון, פחמימות, שומן, סיבים
@@ -35,7 +35,7 @@ export async function analyzeMealImage(
   "tips": "טיפ אופציונלי",
   "containsVegetables": false
 }`
-    : `${hint ? `The user notes that the meal is: "${hint}". Use this alongside the image for a more accurate analysis.\n\n` : ""}The user is on a weight loss journey. Please analyze the plate in this image and provide:
+    : `${hint ? `The user is correcting or adding information about the meal: "${hint}". Prioritize this correction over what's visible in the image, and update all nutritional values (including calories) accordingly.\n\n` : ""}The user is on a weight loss journey. Please analyze the plate in this image and provide:
 1. A short description of the meal in English
 2. A list of ingredients with estimated weight in grams each
 3. Nutritional values: calories, protein, carbs, fat, fiber
@@ -94,7 +94,7 @@ export async function analyzeMealImages(
   const count = images.length;
 
   const promptText = isHe
-    ? `${hint ? `המשתמש מציין שהארוחה היא: "${hint}".\n\n` : ""}לפניך ${count} תמונות של אותה ארוחה מזוויות/מנות שונות. נתח את כולן יחד כארוחה אחת שלמה — סכום כל המנות — ותן ערכים תזונתיים כוללים.
+    ? `${hint ? `המשתמש מתקן או מוסיף מידע על הארוחה: "${hint}". תן עדיפות לתיקון הזה ועדכן את כל הערכים (כולל הקלוריות) בהתאם.\n\n` : ""}לפניך ${count} תמונות של אותה ארוחה מזוויות/מנות שונות. נתח את כולן יחד כארוחה אחת שלמה — סכום כל המנות — ותן ערכים תזונתיים כוללים.
 
 ענה אך ורק ב-JSON תקני, ללא טקסט נוסף:
 {
@@ -105,7 +105,7 @@ export async function analyzeMealImages(
   "tips": "טיפ אופציונלי",
   "containsVegetables": false
 }`
-    : `${hint ? `The user notes: "${hint}".\n\n` : ""}You have ${count} photos of the same meal from different angles/portions. Analyze them together as one complete meal — sum of all portions — and return total nutritional values.
+    : `${hint ? `The user is correcting or adding info about the meal: "${hint}". Prioritize this correction and update all values (including calories) accordingly.\n\n` : ""}You have ${count} photos of the same meal from different angles/portions. Analyze them together as one complete meal — sum of all portions — and return total nutritional values.
 
 Reply ONLY with valid JSON:
 {

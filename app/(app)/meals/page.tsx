@@ -210,12 +210,20 @@ function MealsPageInner() {
     if (!pendingAnalysis || !hint.trim()) return;
     setReanalyzing(true);
     try {
-      const base64 = pendingAnalysis.imageDataUrls[0].split(",")[1];
-      const mediaType = pendingAnalysis.imageDataUrls[0].startsWith("data:image/png") ? "image/png" : "image/jpeg";
+      const urls = pendingAnalysis.imageDataUrls;
+      const toImg = (url: string) => ({
+        base64: url.split(",")[1],
+        mediaType: (url.startsWith("data:image/png") ? "image/png" : "image/jpeg") as "image/jpeg" | "image/png",
+      });
+      // Re-analyze ALL photos together (not just the first) so combined meals
+      // stay combined. Single-image meals use the single-image path.
+      const body = urls.length > 1
+        ? { base64Images: urls.map(toImg), hint: hint.trim(), lang }
+        : { base64Image: toImg(urls[0]).base64, mediaType: toImg(urls[0]).mediaType, hint: hint.trim(), lang };
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64Image: base64, mediaType, hint: hint.trim(), lang }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error();
       const analysis: MealAnalysis = await res.json();
