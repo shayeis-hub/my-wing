@@ -8,7 +8,25 @@
  *   PAYPAL_PLAN_USD_YEARLY
  */
 import { NextRequest, NextResponse } from "next/server";
-import { createBillingPlan } from "@/lib/paypal";
+import { createBillingPlan, listBillingPlans, deactivateBillingPlan } from "@/lib/paypal";
+
+// Self-clean: deactivate older ACTIVE plans of the same family so repeated setup
+// runs never accumulate orphans again. Matches by plan-name prefix.
+async function deactivateOldPlans(namePrefix: string, keepIds: string[]): Promise<number> {
+  const keep = new Set(keepIds);
+  let n = 0;
+  try {
+    const all = await listBillingPlans();
+    for (const p of all) {
+      if (p.status === "ACTIVE" && p.name?.startsWith(namePrefix) && !keep.has(p.id)) {
+        try { await deactivateBillingPlan(p.id); n++; } catch (e) { console.error("deactivate", p.id, e); }
+      }
+    }
+  } catch (e) {
+    console.error("self-clean failed:", e);
+  }
+  return n;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -67,11 +85,15 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
+  // Deactivate any older personal plans so they don't pile up over time.
+  const deactivated = await deactivateOldPlans("Wingpact Premium", [ilsMonthly, ilsYearly, usdMonthly, usdYearly]);
+
   return NextResponse.json({
     message: "Plans created — add these as Vercel env vars:",
     PAYPAL_PLAN_ILS_MONTHLY: ilsMonthly,
     PAYPAL_PLAN_ILS_YEARLY:  ilsYearly,
     PAYPAL_PLAN_USD_MONTHLY: usdMonthly,
     PAYPAL_PLAN_USD_YEARLY:  usdYearly,
+    oldPlansDeactivated: deactivated,
   });
 }

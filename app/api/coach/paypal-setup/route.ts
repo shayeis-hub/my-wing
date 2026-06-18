@@ -7,10 +7,27 @@
  *   PAYPAL_COACH_PLAN_UNLIMITED  (₪499/mo, unlimited clients)
  */
 import { NextRequest, NextResponse } from "next/server";
-import { createBillingPlan } from "@/lib/paypal";
+import { createBillingPlan, listBillingPlans, deactivateBillingPlan } from "@/lib/paypal";
 import { COACH_PLANS } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
+
+// Deactivate older ACTIVE coach plans so repeated setup runs never accumulate.
+async function deactivateOldCoachPlans(keepIds: string[]): Promise<number> {
+  const keep = new Set(keepIds);
+  let n = 0;
+  try {
+    const all = await listBillingPlans();
+    for (const p of all) {
+      if (p.status === "ACTIVE" && p.name?.startsWith("Wingpact Coach") && !keep.has(p.id)) {
+        try { await deactivateBillingPlan(p.id); n++; } catch (e) { console.error("deactivate", p.id, e); }
+      }
+    }
+  } catch (e) {
+    console.error("coach self-clean failed:", e);
+  }
+  return n;
+}
 
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get("secret");
@@ -57,10 +74,14 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
+  // Deactivate any older coach plans so they don't pile up over time.
+  const deactivated = await deactivateOldCoachPlans([basic, extended, unlimited]);
+
   return NextResponse.json({
     message: "Coach plans created — add these as Vercel env vars:",
     PAYPAL_COACH_PLAN_BASIC: basic,
     PAYPAL_COACH_PLAN_EXTENDED: extended,
     PAYPAL_COACH_PLAN_UNLIMITED: unlimited,
+    oldPlansDeactivated: deactivated,
   });
 }
