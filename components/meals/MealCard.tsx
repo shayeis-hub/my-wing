@@ -458,7 +458,7 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
                 <div className="flex gap-3 text-sm text-wing-muted">
                   {meal.analysis.fiber > 0 && (
                     <span className="bg-green-50 text-green-700 px-3 py-1.5 rounded-xl">
-                      {t("meal_fiber") as string}: {meal.analysis.fiber}g
+                      {t("meal_fiber") as string}: <span dir="ltr" className="tabular-nums">{meal.analysis.fiber}g</span>
                     </span>
                   )}
                   <span className="bg-wing-elevated text-wing-muted px-3 py-1.5 rounded-xl">
@@ -472,9 +472,11 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
                     <p className="font-semibold text-wing-ink mb-2">{t("meal_items_title") as string}</p>
                     <div className="space-y-1.5">
                       {meal.analysis.items.map((item, i) => (
-                        <div key={i} className="flex justify-between text-sm text-wing-muted bg-wing-elevated px-3 py-2 rounded-xl">
-                          <span>{item.name}</span>
-                          <span className="text-wing-subtle">{item.estimatedGrams}g · {item.calories} קק&quot;ל</span>
+                        <div key={i} className="flex items-center justify-between gap-3 text-sm bg-wing-elevated px-3 py-2 rounded-xl">
+                          <span className="text-wing-ink min-w-0 truncate">{item.name}</span>
+                          <span dir="ltr" className="text-wing-subtle shrink-0 tabular-nums whitespace-nowrap">
+                            {item.estimatedGrams}g · {item.calories} קק&quot;ל
+                          </span>
                         </div>
                       ))}
                     </div>

@@ -488,10 +488,10 @@ function MealsPageInner() {
               </div>
             ) : (
               <div className="flex gap-3 text-xs text-wing-muted flex-wrap">
-                <span className="flex items-center gap-1"><Flame size={11} />{pendingAnalysis.analysis.calories} {t("kcal")}</span>
-                <span className="flex items-center gap-1"><Beef size={11} />{pendingAnalysis.analysis.protein}g {t("ob_protein")}</span>
-                <span className="flex items-center gap-1"><Wheat size={11} />{pendingAnalysis.analysis.carbs}g {t("ob_carbs")}</span>
-                <span className="flex items-center gap-1"><Droplets size={11} />{pendingAnalysis.analysis.fat}g {t("ob_fat")}</span>
+                <span className="flex items-center gap-1"><Flame size={11} /><span dir="ltr" className="tabular-nums">{pendingAnalysis.analysis.calories}</span> {t("kcal")}</span>
+                <span className="flex items-center gap-1"><Beef size={11} /><span dir="ltr" className="tabular-nums">{pendingAnalysis.analysis.protein}g</span> {t("ob_protein")}</span>
+                <span className="flex items-center gap-1"><Wheat size={11} /><span dir="ltr" className="tabular-nums">{pendingAnalysis.analysis.carbs}g</span> {t("ob_carbs")}</span>
+                <span className="flex items-center gap-1"><Droplets size={11} /><span dir="ltr" className="tabular-nums">{pendingAnalysis.analysis.fat}g</span> {t("ob_fat")}</span>
               </div>
             )}
 
