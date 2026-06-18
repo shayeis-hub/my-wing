@@ -474,8 +474,13 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
                       {meal.analysis.items.map((item, i) => (
                         <div key={i} className="flex items-center justify-between gap-3 text-sm bg-wing-elevated px-3 py-2 rounded-xl">
                           <span className="text-wing-ink min-w-0 truncate">{item.name}</span>
-                          <span dir="ltr" className="text-wing-subtle shrink-0 tabular-nums whitespace-nowrap">
-                            {item.estimatedGrams}g · {item.calories} קק&quot;ל
+                          <span className="shrink-0 flex items-baseline gap-2 tabular-nums whitespace-nowrap">
+                            <span className="font-bold text-wing-heat">
+                              {item.calories} {lang === "he" ? "קק״ל" : "kcal"}
+                            </span>
+                            <span className="text-xs text-wing-subtle">
+                              {item.estimatedGrams} {lang === "he" ? "ג׳" : "g"}
+                            </span>
                           </span>
                         </div>
                       ))}
