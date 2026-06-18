@@ -235,6 +235,12 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
   const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
   const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
+  // Calorie budget = resting burn (BMR) + calories burned in today's workout.
+  // Steps are intentionally excluded — pace/intensity is unknown, so we can't
+  // estimate their burn reliably.
+  const workoutCals = todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0;
+  const calorieGoal = bmr + workoutCals;
+  const caloriesRemaining = calorieGoal - todayCalories;
 
   const otherMembers = (wing?.members ?? []).filter((m) => m.uid !== firebaseUser?.uid);
   const hasCheckedInToday = !!todayCheckin;
@@ -361,23 +367,37 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
               <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#c79a00]">{t("dashboard_calories_today")}</span>
               <span className="text-xs text-wing-ink/60">{(t("dashboard_meals_count") as (n: number) => string)(myTodayMeals.length)}</span>
             </div>
-            <div className="flex items-end gap-2 mb-3 flex-wrap">
+            <div className="flex items-end gap-2 mb-1 flex-wrap">
               <span
                 className="font-black tabular text-wing-ink"
                 style={{ fontSize: 52, letterSpacing: "-0.05em", fontFeatureSettings: '"tnum"', lineHeight: 1 }}
               >
                 {todayCalories}
               </span>
-              <span className="text-sm text-wing-ink/60 mb-2">
-                / {bmr} {t("kcal")} {lang === "he" ? "צרכת / יעד" : "consumed / goal"}
+              <span dir="ltr" className="text-sm text-wing-ink/60 mb-2 tabular-nums">
+                {lang === "he" ? `מתוך ${calorieGoal} ${t("kcal")}` : `of ${calorieGoal} ${t("kcal")}`}
               </span>
             </div>
+            {/* How the budget is built — so the numbers aren't a mystery */}
+            <p className="text-[11px] text-wing-ink/55 mb-2">
+              {lang === "he" ? "יעד = מנוחה " : "Budget = resting "}
+              <span dir="ltr" className="tabular-nums">{bmr}</span>
+              {workoutCals > 0 && (
+                <>{lang === "he" ? " + אימון " : " + workout "}<span dir="ltr" className="tabular-nums">{workoutCals}</span></>
+              )}
+            </p>
             <ProgressBar
               value={todayCalories}
-              max={bmr}
+              max={calorieGoal}
               height="sm"
-              color={todayCalories > bmr ? "bg-red-500" : "bg-[#1a1814]"}
+              color={todayCalories > calorieGoal ? "bg-red-500" : "bg-[#1a1814]"}
             />
+            {/* Plain-language remaining / over */}
+            <p className="text-[11px] font-medium text-wing-ink/70 mt-1.5">
+              {caloriesRemaining >= 0
+                ? (lang === "he" ? `נותרו ${caloriesRemaining} ${t("kcal")} להיום` : `${caloriesRemaining} ${t("kcal")} left today`)
+                : (lang === "he" ? `חריגה של ${-caloriesRemaining} ${t("kcal")} מהיעד` : `${-caloriesRemaining} ${t("kcal")} over budget`)}
+            </p>
 
             {/* Quick Log mini stats: Water / Veggies / Steps */}
             <div className="mt-3 grid grid-cols-3 gap-2">
