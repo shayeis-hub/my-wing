@@ -3,6 +3,7 @@ import type { MealAnalysis } from "@/types";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  maxRetries: 4,
 });
 
 export async function analyzeMealImage(

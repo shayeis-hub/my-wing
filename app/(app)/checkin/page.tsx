@@ -336,7 +336,15 @@ function CheckinPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wingId: user.wingId, userId: firebaseUser.uid, date: today, checkin: myCheckin, userProfile: user.profile, lang }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        if (res.status === 503 || body?.error === "OVERLOADED") {
+          toast.error(t("checkin_summary_busy"), { duration: 5000 });
+        } else {
+          toast.error(t("checkin_summary_error"));
+        }
+        return;
+      }
       const summary = await res.json();
       setDaySummary(summary);
       toast.success(t("checkin_summary_created"));

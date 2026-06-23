@@ -60,6 +60,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   } catch (err) {
     console.error("close-day error:", err);
+    const status = (err as { status?: number })?.status;
+    if (status === 529 || status === 503) {
+      return NextResponse.json({ error: "OVERLOADED" }, { status: 503 });
+    }
     return NextResponse.json({ error: "Failed to generate summary" }, { status: 500 });
   }
 }
