@@ -725,7 +725,7 @@ function CheckinPageInner() {
             <span className="font-black text-wing-ink text-lg">{t("checkin_day_summary")}</span>
           </div>
           <p className="text-sm text-wing-ink/80 leading-relaxed">{daySummary.summary}</p>
-          {daySummary.insights.length > 0 && (
+          {Array.isArray(daySummary.insights) && daySummary.insights.length > 0 && (
             <ul className="space-y-1.5">
               {daySummary.insights.map((insight, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-wing-ink/70">

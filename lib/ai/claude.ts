@@ -303,7 +303,13 @@ Give a personal summary, insights, and a tip for tomorrow.`;
   if (!toolUse || toolUse.type !== "tool_use") {
     throw new Error("Claude did not call submit_day_summary tool");
   }
-  return toolUse.input as { summary: string; insights: string[]; tip: string };
+  const input = toolUse.input as { summary: string; insights: unknown; tip: string };
+  const insights = Array.isArray(input.insights)
+    ? input.insights
+    : typeof input.insights === "string"
+    ? [input.insights]
+    : [];
+  return { summary: input.summary, insights, tip: input.tip };
 }
 
 export async function generateDailySummary(
