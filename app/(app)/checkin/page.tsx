@@ -609,7 +609,8 @@ function CheckinPageInner() {
                 <button
                   onClick={addWorkout}
                   disabled={!wfDuration || parseInt(wfDuration) <= 0}
-                  className="w-full py-2.5 rounded-[14px] bg-wing-ink text-white font-semibold text-sm disabled:opacity-40 transition-all active:scale-[0.98]"
+                  className="w-full py-2.5 rounded-[14px] font-bold text-wing-ink text-sm disabled:opacity-40 transition-all active:scale-[0.98]"
+                  style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
                 >
                   {lang === "he" ? "+ הוסף אימון" : "+ Add workout"}
                 </button>
@@ -620,7 +621,8 @@ function CheckinPageInner() {
             {!wfOpen && workouts.length > 0 && (
               <button
                 onClick={() => setWfOpen(true)}
-                className="w-full py-2 rounded-[14px] border-2 border-dashed border-wing-border text-sm text-wing-muted hover:border-wing-ink hover:text-wing-ink transition-all"
+                className="w-full py-2.5 rounded-[14px] font-bold text-wing-ink text-sm transition-all active:scale-[0.98]"
+                style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
               >
                 {lang === "he" ? "+ הוסף עוד אימון" : "+ Add another workout"}
               </button>
