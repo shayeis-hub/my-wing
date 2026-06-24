@@ -301,6 +301,7 @@ function CheckinPageInner() {
       caloriesBurned,
     }]);
     setWfDuration("");
+    setWfOpen(false);
   }
 
   function removeWorkout(idx: number) {
@@ -524,7 +525,10 @@ function CheckinPageInner() {
               {workouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0)} {lang === "he" ? "קק\"ל" : "kcal"}
             </span>
           ) : (
-            <span className="text-[10px] text-wing-subtle">{lang === "he" ? "לחץ להוסיף" : "Tap to add"}</span>
+            <span className="text-xs font-semibold text-wing-ink/60 flex items-center gap-1">
+              <span className="text-base leading-none">+</span>
+              {lang === "he" ? "הוסף אימון" : "Add workout"}
+            </span>
           )}
         </button>
       </div>
