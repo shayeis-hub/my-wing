@@ -524,18 +524,17 @@ function CheckinPageInner() {
             </span>
           </button>
         ) : (
-          <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2">
-            <div className="flex items-center gap-1.5">
+          <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-1.5 self-start">
               <Dumbbell size={14} className="text-wing-muted" />
               <span className="text-xs font-semibold text-wing-ink">{t("checkin_workout")}</span>
             </div>
             <button
               onClick={() => setWfOpen(true)}
-              className="w-full py-2 rounded-[14px] bg-wing-ink text-white text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all"
-            >
-              <span className="text-sm leading-none">+</span>
-              {lang === "he" ? "הוסף אימון" : "Add workout"}
-            </button>
+              className="w-9 h-9 rounded-full text-lg font-bold text-wing-ink transition-all active:scale-95"
+              style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+            >+</button>
+            <span className="text-[10px] text-wing-subtle">{lang === "he" ? "הוסף אימון" : "Add workout"}</span>
           </div>
         )}
       </div>
