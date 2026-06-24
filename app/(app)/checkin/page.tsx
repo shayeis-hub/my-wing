@@ -507,30 +507,37 @@ function CheckinPageInner() {
         </div>
 
         {/* Workout */}
-        <button
-          onClick={() => setWfOpen(o => !o)}
-          className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2 text-right w-full"
-        >
-          <div className="flex items-center justify-between w-full">
+        {workouts.length > 0 ? (
+          <button
+            onClick={() => setWfOpen(o => !o)}
+            className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2 text-right w-full"
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-1.5">
+                <Dumbbell size={14} className="text-wing-muted" />
+                <span className="text-xs font-semibold text-wing-ink">{t("checkin_workout")}</span>
+              </div>
+              <span className="text-xs font-bold text-green-700">{workouts.length}×</span>
+            </div>
+            <span className="text-xs text-green-700 font-medium">
+              {workouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0)} {lang === "he" ? "קק\"ל" : "kcal"}
+            </span>
+          </button>
+        ) : (
+          <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2">
             <div className="flex items-center gap-1.5">
               <Dumbbell size={14} className="text-wing-muted" />
               <span className="text-xs font-semibold text-wing-ink">{t("checkin_workout")}</span>
             </div>
-            {workouts.length > 0 && (
-              <span className="text-xs font-bold text-green-700">{workouts.length}×</span>
-            )}
-          </div>
-          {workouts.length > 0 ? (
-            <span className="text-xs text-green-700 font-medium">
-              {workouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0)} {lang === "he" ? "קק\"ל" : "kcal"}
-            </span>
-          ) : (
-            <span className="text-xs font-semibold text-wing-ink/60 flex items-center gap-1">
-              <span className="text-base leading-none">+</span>
+            <button
+              onClick={() => setWfOpen(true)}
+              className="w-full py-2 rounded-[14px] bg-wing-ink text-white text-xs font-bold flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all"
+            >
+              <span className="text-sm leading-none">+</span>
               {lang === "he" ? "הוסף אימון" : "Add workout"}
-            </span>
-          )}
-        </button>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Workout panel — expands when tile clicked or workouts exist */}
