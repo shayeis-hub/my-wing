@@ -238,7 +238,9 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
   // Calorie budget = resting burn (BMR) + calories burned in today's workout.
   // Steps are intentionally excluded — pace/intensity is unknown, so we can't
   // estimate their burn reliably.
-  const workoutCals = todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0;
+  const workoutCals = todayCheckin?.workouts?.length
+    ? todayCheckin.workouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0)
+    : (todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0);
   const calorieGoal = bmr + workoutCals;
   const caloriesRemaining = calorieGoal - todayCalories;
 

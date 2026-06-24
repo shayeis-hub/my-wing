@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
       vegetablesServings: checkin.vegetablesServings ?? 0,
       steps: checkin.steps,
       workout: checkin.workout,
+      workouts: checkin.workouts,
       weightKg: checkin.weightKg,
       targetWeightKg: userProfile?.targetWeightKg,
       mood: checkin.mood ?? 3,

@@ -182,6 +182,7 @@ export interface DailyCheckin {
   notes?: string;
   steps?: number;
   workout?: Workout;
+  workouts?: Workout[];
   weightKg?: number;
   encouragements?: Encouragement[];
   reactions?: Reaction[];

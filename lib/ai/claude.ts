@@ -217,6 +217,7 @@ export async function generatePersonalDaySummary(data: {
   vegetablesServings: number;
   steps?: number;
   workout?: { done: boolean; description?: string; caloriesBurned?: number };
+  workouts?: { done: boolean; description?: string; caloriesBurned?: number }[];
   weightKg?: number;
   targetWeightKg?: number;
   mood: number;
@@ -224,9 +225,16 @@ export async function generatePersonalDaySummary(data: {
   lang?: "he" | "en";
 }): Promise<{ summary: string; insights: string[]; tip: string }> {
   const totalCalories = data.meals.reduce((s, m) => s + m.calories, 0);
-  const totalBurned = (data.steps ? Math.round(data.steps * 0.0004 * (data.weightKg ?? 70)) : 0)
-    + (data.workout?.caloriesBurned ?? 0);
+  const effectiveWorkouts = data.workouts?.length
+    ? data.workouts
+    : data.workout?.done ? [data.workout] : [];
+  const workoutBurned = effectiveWorkouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0);
+  const totalBurned = (data.steps ? Math.round(data.steps * 0.0004 * (data.weightKg ?? 70)) : 0) + workoutBurned;
   const isHe = (data.lang ?? "he") === "he";
+
+  const workoutLine = effectiveWorkouts.length === 0
+    ? (isHe ? "לא" : "no")
+    : effectiveWorkouts.map(w => `${w.description ?? ""}${w.caloriesBurned ? ` (${w.caloriesBurned} ${isHe ? 'קק"ל' : 'kcal'})` : ""}`).join(", ");
 
   const prompt = isHe
     ? `אתה מאמן תזונה וכושר אישי. המשתמש נמצא בתהליך ירידה במשקל. סכם את היום של ${data.userName} בצורה חמה, אישית ומעודדת בעברית, עם התייחסות לירידה במשקל.
@@ -238,7 +246,7 @@ export async function generatePersonalDaySummary(data: {
 - מים: ${data.waterGlasses} ליטר
 - ירקות: ${data.vegetablesServings} מנות
 - צעדים: ${data.steps ?? "לא דווח"}
-- אימון: ${data.workout?.done ? `כן — ${data.workout.description ?? ""}${data.workout.caloriesBurned ? ` (${data.workout.caloriesBurned} קק"ל)` : ""}` : "לא"}
+- אימון: ${workoutLine}
 - משקל: ${data.weightKg ? `${data.weightKg} ק"ג` : "לא נמדד"}${data.targetWeightKg ? ` (יעד: ${data.targetWeightKg} ק"ג)` : ""}
 - מצב רוח: ${data.mood}/5
 ${data.notes ? `- הערה: "${data.notes}"` : ""}
@@ -253,7 +261,7 @@ Day data:
 - Water: ${data.waterGlasses} liters
 - Vegetables: ${data.vegetablesServings} servings
 - Steps: ${data.steps ?? "not reported"}
-- Workout: ${data.workout?.done ? `yes — ${data.workout.description ?? ""}${data.workout.caloriesBurned ? ` (${data.workout.caloriesBurned} kcal)` : ""}` : "no"}
+- Workout: ${workoutLine}
 - Weight: ${data.weightKg ? `${data.weightKg} kg` : "not measured"}${data.targetWeightKg ? ` (target: ${data.targetWeightKg} kg)` : ""}
 - Mood: ${data.mood}/5
 ${data.notes ? `- Note: "${data.notes}"` : ""}
