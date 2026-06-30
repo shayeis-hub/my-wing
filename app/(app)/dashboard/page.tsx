@@ -48,8 +48,6 @@ export default function DashboardPage() {
   const [editingSteps, setEditingSteps] = useState(false);
   const [stepsInput, setStepsInput] = useState("");
   const [includeStepCals, setIncludeStepCals] = useState(false);
-  const [stepsCalInput, setStepsCalInput] = useState("");
-  const [stepsCalInputOpen, setStepsCalInputOpen] = useState(false);
   const healthSyncedRef = useRef(false);
   // On native, the Health Connect prompt must wait until the push-permission
   // dialog is dismissed (Android shows one permission dialog at a time).
@@ -245,10 +243,7 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
     ? todayCheckin.workouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0)
     : (todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0);
   const checkinSteps = todayCheckin?.steps ?? 0;
-  const stepsForCal = includeStepCals
-    ? (checkinSteps || (stepsCalInput ? parseInt(stepsCalInput) : 0))
-    : 0;
-  const stepCals = stepsForCal ? Math.round(stepsForCal * 0.05 * (weightKg / 70)) : 0;
+  const stepCals = includeStepCals && checkinSteps ? Math.round(checkinSteps * 0.05 * (weightKg / 70)) : 0;
   const calorieGoal = bmr + workoutCals + stepCals;
   const caloriesRemaining = calorieGoal - todayCalories;
 
@@ -400,53 +395,20 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
               )}
             </p>
 
-            {/* Steps calories toggle */}
-            {checkinSteps > 0 ? (
+            {/* Steps calories toggle — only when steps were logged today */}
+            {checkinSteps > 0 && (
               <button
                 onClick={() => setIncludeStepCals(v => !v)}
-                className={`mb-2 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all active:scale-95 ${
-                  includeStepCals
-                    ? "text-wing-ink"
-                    : "bg-wing-ink/8 text-wing-ink/60"
+                className={`mb-2 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all active:scale-95 ${
+                  includeStepCals ? "text-wing-ink" : "text-wing-ink"
                 }`}
-                style={includeStepCals ? { background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" } : {}}
+                style={{ background: includeStepCals ? "linear-gradient(135deg, #f5dd4b, #ff6b47)" : "rgba(26,24,20,0.08)" }}
               >
                 <Footprints size={12} />
-                {checkinSteps.toLocaleString()} {lang === "he" ? "צעדים" : "steps"}
-                {" ≈ "}
-                {Math.round(checkinSteps * 0.05 * (weightKg / 70))} {lang === "he" ? "קק\"ל" : "kcal"}
+                {includeStepCals
+                  ? (lang === "he" ? "הסר צעדים מהחישוב" : "Remove steps from budget")
+                  : (lang === "he" ? "הוסף צעדים לחישוב" : "Add steps to budget")}
               </button>
-            ) : (
-              <div className="mb-2">
-                {stepsCalInputOpen ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      value={stepsCalInput}
-                      onChange={e => setStepsCalInput(e.target.value)}
-                      placeholder={lang === "he" ? "מספר צעדים" : "step count"}
-                      className="w-32 px-3 py-1.5 text-xs bg-wing-elevated border border-wing-border rounded-full focus:outline-none focus:ring-1 focus:ring-wing-ink"
-                    />
-                    <button
-                      onClick={() => { if (stepsCalInput && parseInt(stepsCalInput) > 0) { setIncludeStepCals(true); setStepsCalInputOpen(false); } }}
-                      className="text-xs font-bold px-3 py-1.5 rounded-full text-wing-ink"
-                      style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
-                    >
-                      {lang === "he" ? "הוסף" : "Add"}
-                    </button>
-                    <button onClick={() => setStepsCalInputOpen(false)} className="text-xs text-wing-ink/40">✕</button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setStepsCalInputOpen(true)}
-                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-wing-ink/8 text-wing-ink/60 transition-all active:scale-95"
-                  >
-                    <Footprints size={12} />
-                    {lang === "he" ? "הוסף צעדים" : "Add steps"}
-                  </button>
-                )}
-              </div>
             )}
             <ProgressBar
               value={todayCalories}
