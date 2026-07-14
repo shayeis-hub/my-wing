@@ -1,0 +1,138 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
+import { Switch } from "@/components/ui/Switch";
+import { updateNotificationPrefs } from "@/lib/firebase/firestore";
+import type { NotificationPrefs } from "@/types";
+import { Languages, Bell, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import toast from "react-hot-toast";
+
+type PrefKey = keyof NotificationPrefs;
+
+export default function SettingsPage() {
+  const { user, firebaseUser } = useAuth();
+  const { lang, setLang, dir } = useLanguage();
+  const isHe = lang === "he";
+  const isBusiness = user?.accountType === "business";
+
+  // Missing pref = opted in. Start from the stored prefs, defaulting each to true.
+  const stored = user?.notificationPrefs ?? {};
+  const [prefs, setPrefs] = useState<Record<PrefKey, boolean>>({
+    reminders: stored.reminders !== false,
+    personal: stored.personal !== false,
+    feed: stored.feed !== false,
+    meals: stored.meals !== false,
+  });
+
+  async function toggle(key: PrefKey) {
+    if (!firebaseUser) return;
+    const next = { ...prefs, [key]: !prefs[key] };
+    setPrefs(next); // optimistic
+    try {
+      await updateNotificationPrefs(firebaseUser.uid, next);
+    } catch {
+      setPrefs(prefs); // revert
+      toast.error(isHe ? "לא הצליח לשמור" : "Failed to save");
+    }
+  }
+
+  const notifItems: { key: PrefKey; title: string; desc: string }[] = [
+    {
+      key: "reminders",
+      title: isHe ? "תזכורות יומיות" : "Daily reminders",
+      desc: isHe ? "תזכורת לבצע צ'ק-אין אם עוד לא רשמת היום" : "A nudge to check in if you haven't logged today",
+    },
+    {
+      key: "personal",
+      title: isHe ? "הודעה אישית אליי" : "Personal messages",
+      desc: isHe ? "כשמישהו כותב לך על הקיר או מעודד אותך" : "When someone writes on your wall or encourages you",
+    },
+    {
+      key: "feed",
+      title: isHe ? "פוסט חדש בפיד" : "New feed post",
+      desc: isHe ? "כשחבר במבנה מפרסם משהו בפיד" : "When a wing member posts to the feed",
+    },
+    {
+      key: "meals",
+      title: isHe ? "ארוחה במבנה" : "Meal logged",
+      desc: isHe ? "כשחבר מזין ארוחה — הזדמנות לפרגן" : "When a member logs a meal — a chance to cheer them on",
+    },
+  ];
+
+  const ChevronEnd = isHe ? ChevronLeft : ChevronRight;
+
+  return (
+    <div className="p-4 space-y-5" dir={dir}>
+      {/* Header */}
+      <div className="pt-4">
+        <h1 className="text-2xl font-black text-wing-ink tracking-tight">
+          {isHe ? "הגדרות" : "Settings"}
+        </h1>
+      </div>
+
+      {/* Language */}
+      <section className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <Languages size={18} className="text-wing-muted" />
+          <span className="font-bold text-wing-ink">{isHe ? "שפה" : "Language"}</span>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setLang("he")}
+            className={`flex-1 py-2.5 rounded-[14px] text-sm font-bold transition-all ${
+              lang === "he" ? "text-wing-ink" : "bg-wing-elevated border border-wing-border text-wing-muted"
+            }`}
+            style={lang === "he" ? { background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" } : {}}
+          >
+            עברית
+          </button>
+          <button
+            onClick={() => setLang("en")}
+            className={`flex-1 py-2.5 rounded-[14px] text-sm font-bold transition-all ${
+              lang === "en" ? "text-wing-ink" : "bg-wing-elevated border border-wing-border text-wing-muted"
+            }`}
+            style={lang === "en" ? { background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" } : {}}
+          >
+            English
+          </button>
+        </div>
+      </section>
+
+      {/* Notifications */}
+      <section className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Bell size={18} className="text-wing-muted" />
+          <span className="font-bold text-wing-ink">{isHe ? "התראות" : "Notifications"}</span>
+        </div>
+        <div className="space-y-4">
+          {notifItems.map((item) => (
+            <div key={item.key} className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-wing-ink">{item.title}</p>
+                <p className="text-xs text-wing-muted mt-0.5 leading-snug">{item.desc}</p>
+              </div>
+              <Switch checked={prefs[item.key]} onChange={() => toggle(item.key)} label={item.title} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Subscription */}
+      <section className="bg-wing-surface border border-wing-border rounded-[20px] overflow-hidden">
+        <Link
+          href={isBusiness ? "/coach" : "/subscription"}
+          className="flex items-center gap-3 p-5 hover:bg-wing-elevated transition-colors"
+        >
+          <Crown size={18} className="text-yellow-500" />
+          <span className="flex-1 font-bold text-wing-ink">
+            {isBusiness ? (isHe ? "ניהול מנוי עסקי" : "Business plan") : (isHe ? "ניהול מנוי" : "Manage subscription")}
+          </span>
+          <ChevronEnd size={18} className="text-wing-muted" />
+        </Link>
+      </section>
+    </div>
+  );
+}

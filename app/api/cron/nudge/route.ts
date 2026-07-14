@@ -75,6 +75,8 @@ export async function GET(req: Request) {
       const gender: "male" | "female" = data.profile?.gender === "female" ? "female" : "male";
 
       if (!fcmToken || !wingId) { skipped++; return; }
+      // Respect the user's reminder preference (undefined = opted in).
+      if (data.notificationPrefs?.reminders === false) { skipped++; return; }
 
       // Check if user already checked in today
       const checkinSnap = await db

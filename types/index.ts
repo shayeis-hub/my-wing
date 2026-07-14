@@ -30,7 +30,23 @@ export interface User {
    */
   trialStartsAt?: string;
   trophies?: Trophy[];
+  /**
+   * Per-category push notification preferences. Missing/undefined = opted in
+   * (all senders treat only an explicit `false` as "off").
+   */
+  notificationPrefs?: NotificationPrefs;
   createdAt: Timestamp;
+}
+
+export interface NotificationPrefs {
+  /** Daily check-in reminder (nudge cron). */
+  reminders?: boolean;
+  /** Someone posted to the wing feed. */
+  feed?: boolean;
+  /** A personal message / encouragement directed at you. */
+  personal?: boolean;
+  /** A wing member logged a meal. */
+  meals?: boolean;
 }
 
 export type CoachPlan = "free" | "basic" | "extended" | "unlimited";

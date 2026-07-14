@@ -109,6 +109,13 @@ export async function saveUserTimezone(uid: string, timezone: string): Promise<v
   await updateDoc(doc(db, "users", uid), { timezone });
 }
 
+export async function updateNotificationPrefs(
+  uid: string,
+  prefs: import("@/types").NotificationPrefs,
+): Promise<void> {
+  await setDoc(doc(db, "users", uid), { notificationPrefs: prefs }, { merge: true });
+}
+
 export async function updateActiveWing(uid: string, wingId: string): Promise<void> {
   await updateDoc(doc(db, "users", uid), { wingId });
 }

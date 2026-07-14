@@ -25,6 +25,15 @@ import { useSearchParams } from "next/navigation";
 
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
 
+// Notify other wing members that a meal was logged (fire-and-forget).
+function notifyMealLogged(wingId: string, authorId: string, authorName: string) {
+  fetch("/api/notifications/meal-logged", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ wingId, authorId, authorName }),
+  }).catch(() => {});
+}
+
 function MealsPageInner() {
   const { user, firebaseUser } = useAuth();
   const { meals, loading } = useMeals(user?.wingId);
@@ -192,6 +201,7 @@ function MealsPageInner() {
         mealTime: manualTime,
         mealDate: manualDate,
       });
+      notifyMealLogged(user.wingId, firebaseUser.uid, user.displayName);
       toast.success(t("meals_saved"));
       setShowManualForm(false);
       setManualDescription("");
@@ -267,6 +277,7 @@ function MealsPageInner() {
         mealTime,
         mealDate,
       });
+      notifyMealLogged(user.wingId, firebaseUser.uid, user.displayName);
 
       // Auto-increment vegetable count in today's checkin if meal contains vegetables
       if (pendingAnalysis.analysis.containsVegetables && user.wingId) {

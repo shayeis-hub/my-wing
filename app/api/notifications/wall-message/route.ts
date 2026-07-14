@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
     // Send push if the user has an FCM token
     const userSnap = await db.doc(`users/${targetUserId}`).get();
     const token = userSnap.data()?.fcmToken;
-    if (token) {
+    // Respect the recipient's personal-message preference (undefined = opted in).
+    if (token && userSnap.data()?.notificationPrefs?.personal !== false) {
       let authorGender: "male" | "female" = "male";
       if (authorId) {
         try {

@@ -22,6 +22,7 @@ import {
   BookOpen,
   CalendarDays,
   TrendingDown,
+  Settings,
 } from "lucide-react";
 
 interface HamburgerMenuProps {
@@ -199,6 +200,11 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
               </button>
             </div>
           </div>
+
+          {/* Settings */}
+          <Link href="/settings" onClick={onClose}>
+            <MenuItem icon={<Settings size={20} />} label={lang === "he" ? "הגדרות" : "Settings"} />
+          </Link>
 
           {/* User Guide */}
           <a href={`/guides/${lang}.html`} target="_blank" rel="noopener noreferrer" onClick={onClose}>

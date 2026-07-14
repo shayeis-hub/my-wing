@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
 
     const token = userSnap.data()?.fcmToken;
     if (!token) return NextResponse.json({ ok: true });
+    // Respect the recipient's personal-message preference (undefined = opted in).
+    if (userSnap.data()?.notificationPrefs?.personal === false) return NextResponse.json({ ok: true });
 
     // Gender the verb after the author's name ("עודד" / "עודדה").
     let authorGender: "male" | "female" = "male";
