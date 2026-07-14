@@ -26,11 +26,11 @@ import { useSearchParams } from "next/navigation";
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
 
 // Notify other wing members that a meal was logged (fire-and-forget).
-function notifyMealLogged(wingId: string, authorId: string, authorName: string) {
+function notifyMealLogged(wingId: string, authorId: string, authorName: string, mealId: string) {
   fetch("/api/notifications/meal-logged", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ wingId, authorId, authorName }),
+    body: JSON.stringify({ wingId, authorId, authorName, mealId }),
   }).catch(() => {});
 }
 
@@ -183,7 +183,7 @@ function MealsPageInner() {
     if (!user || !firebaseUser || !user.wingId || !manualDescription.trim()) return;
     setSavingManual(true);
     try {
-      await addMeal(user.wingId, {
+      const mealId = await addMeal(user.wingId, {
         wingId: user.wingId,
         userId: firebaseUser.uid,
         userName: user.displayName,
@@ -201,7 +201,7 @@ function MealsPageInner() {
         mealTime: manualTime,
         mealDate: manualDate,
       });
-      notifyMealLogged(user.wingId, firebaseUser.uid, user.displayName);
+      notifyMealLogged(user.wingId, firebaseUser.uid, user.displayName, mealId);
       toast.success(t("meals_saved"));
       setShowManualForm(false);
       setManualDescription("");
@@ -267,7 +267,7 @@ function MealsPageInner() {
         imageURLs.push(await getDownloadURL(imageRef));
       }
 
-      await addMeal(user.wingId, {
+      const mealId = await addMeal(user.wingId, {
         wingId: user.wingId,
         userId: firebaseUser.uid,
         userName: user.displayName,
@@ -277,7 +277,7 @@ function MealsPageInner() {
         mealTime,
         mealDate,
       });
-      notifyMealLogged(user.wingId, firebaseUser.uid, user.displayName);
+      notifyMealLogged(user.wingId, firebaseUser.uid, user.displayName, mealId);
 
       // Auto-increment vegetable count in today's checkin if meal contains vegetables
       if (pendingAnalysis.analysis.containsVegetables && user.wingId) {

@@ -6,7 +6,7 @@ import { admin, getAdminApp } from "@/lib/firebase/admin";
 // Fan-out: a wing member logged a meal → notify the other members who opted in.
 export async function POST(req: NextRequest) {
   try {
-    const { wingId, authorId, authorName } = await req.json();
+    const { wingId, authorId, authorName, mealId } = await req.json();
     if (!wingId || !authorId || !authorName) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
     } catch { /* default masculine */ }
     const logged = authorGender === "female" ? "הזינה" : "הזין";
 
-    const link = `/member/${authorId}`;
+    // Deep-link straight to the meal (scrolls + highlights it, where you can cheer).
+    // Fall back to the member's page if we somehow don't have the meal id.
+    const link = typeof mealId === "string" && mealId ? `/meals?meal=${mealId}` : `/member/${authorId}`;
     let sent = 0;
 
     await Promise.allSettled(
