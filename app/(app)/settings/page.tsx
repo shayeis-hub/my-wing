@@ -3,17 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useWing } from "@/hooks/useWing";
 import { useLanguage } from "@/lib/i18n";
 import { Switch } from "@/components/ui/Switch";
+import { Avatar } from "@/components/ui/Avatar";
 import { updateNotificationPrefs } from "@/lib/firebase/firestore";
 import type { NotificationPrefs } from "@/types";
-import { Languages, Bell, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Languages, Bell, Crown, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import toast from "react-hot-toast";
 
-type PrefKey = keyof NotificationPrefs;
+type PrefKey = "reminders" | "personal" | "feed" | "meals";
 
 export default function SettingsPage() {
   const { user, firebaseUser } = useAuth();
+  const { wing } = useWing(user?.wingId);
   const { lang, setLang, dir } = useLanguage();
   const isHe = lang === "he";
   const isBusiness = user?.accountType === "business";
@@ -26,17 +29,34 @@ export default function SettingsPage() {
     feed: stored.feed !== false,
     meals: stored.meals !== false,
   });
+  // Author uids muted for meal notifications.
+  const [mealsMuted, setMealsMuted] = useState<string[]>(stored.mealsMuted ?? []);
 
-  async function toggle(key: PrefKey) {
+  async function persist(nextPrefs: Record<PrefKey, boolean>, nextMuted: string[]) {
     if (!firebaseUser) return;
-    const next = { ...prefs, [key]: !prefs[key] };
-    setPrefs(next); // optimistic
+    const payload: NotificationPrefs = { ...nextPrefs, mealsMuted: nextMuted };
     try {
-      await updateNotificationPrefs(firebaseUser.uid, next);
+      await updateNotificationPrefs(firebaseUser.uid, payload);
     } catch {
-      setPrefs(prefs); // revert
+      // Revert both on failure.
+      setPrefs(prefs);
+      setMealsMuted(mealsMuted);
       toast.error(isHe ? "לא הצליח לשמור" : "Failed to save");
     }
+  }
+
+  function toggle(key: PrefKey) {
+    const next = { ...prefs, [key]: !prefs[key] };
+    setPrefs(next); // optimistic
+    persist(next, mealsMuted);
+  }
+
+  function toggleMember(uid: string) {
+    const next = mealsMuted.includes(uid)
+      ? mealsMuted.filter((id) => id !== uid)
+      : [...mealsMuted, uid];
+    setMealsMuted(next); // optimistic
+    persist(prefs, next);
   }
 
   const notifItems: { key: PrefKey; title: string; desc: string }[] = [
@@ -62,6 +82,7 @@ export default function SettingsPage() {
     },
   ];
 
+  const members = (wing?.members ?? []).filter((m) => m.uid !== firebaseUser?.uid);
   const ChevronEnd = isHe ? ChevronLeft : ChevronRight;
 
   return (
@@ -109,12 +130,39 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-4">
           {notifItems.map((item) => (
-            <div key={item.key} className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-wing-ink">{item.title}</p>
-                <p className="text-xs text-wing-muted mt-0.5 leading-snug">{item.desc}</p>
+            <div key={item.key}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-wing-ink">{item.title}</p>
+                  <p className="text-xs text-wing-muted mt-0.5 leading-snug">{item.desc}</p>
+                </div>
+                <Switch checked={prefs[item.key]} onChange={() => toggle(item.key)} label={item.title} />
               </div>
-              <Switch checked={prefs[item.key]} onChange={() => toggle(item.key)} label={item.title} />
+
+              {/* Per-member sub-selection for meal notifications */}
+              {item.key === "meals" && prefs.meals && members.length > 0 && (
+                <div className="mt-3 rounded-[14px] bg-wing-elevated border border-wing-border p-3 space-y-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <Users size={13} className="text-wing-muted" />
+                    <span className="text-xs font-semibold text-wing-muted">
+                      {isHe ? "קבל התראות מ:" : "Receive from:"}
+                    </span>
+                  </div>
+                  {members.map((m) => (
+                    <div key={m.uid} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Avatar name={m.displayName} photoURL={m.photoURL} size={28} />
+                        <span className="text-sm text-wing-ink truncate">{m.displayName}</span>
+                      </div>
+                      <Switch
+                        checked={!mealsMuted.includes(m.uid)}
+                        onChange={() => toggleMember(m.uid)}
+                        label={m.displayName}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

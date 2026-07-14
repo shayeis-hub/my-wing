@@ -47,6 +47,11 @@ export interface NotificationPrefs {
   personal?: boolean;
   /** A wing member logged a meal. */
   meals?: boolean;
+  /**
+   * Author uids to NOT receive meal notifications from, even when `meals` is on.
+   * Empty/undefined = receive from every member. Lets a user mute noisy members.
+   */
+  mealsMuted?: string[];
 }
 
 export type CoachPlan = "free" | "basic" | "extended" | "unlimited";

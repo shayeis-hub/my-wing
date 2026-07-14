@@ -40,6 +40,9 @@ export async function POST(req: NextRequest) {
         const token: string | undefined = data?.fcmToken;
         // Missing/undefined pref = opted in; only an explicit false silences it.
         if (!token || data?.notificationPrefs?.meals === false) return;
+        // Per-member mute: skip if this recipient muted the author specifically.
+        const muted: string[] = data?.notificationPrefs?.mealsMuted ?? [];
+        if (muted.includes(authorId)) return;
 
         try {
           await admin.messaging().send({
