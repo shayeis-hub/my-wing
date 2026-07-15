@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
         } catch { /* ignore */ }
       }
       const verb = authorGender === "female" ? "כתבה לך על הקיר" : "כתב לך על הקיר";
-      const link = `/member/${authorId}`;
+      // The message lives on the RECIPIENT's wall (targetUserId), so open their
+      // own member page — not the author's — where the new message is shown.
+      const link = `/member/${targetUserId}`;
 
       await admin.messaging().send({
         token,
