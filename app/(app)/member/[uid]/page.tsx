@@ -35,6 +35,7 @@ function MemberPageInner() {
   const { wing } = useWing(effectiveWingId);
 
   const member = wing?.members.find((m) => m.uid === uid);
+  const isSelf = !!firebaseUser && firebaseUser.uid === uid;
   const today = format(new Date(), "yyyy-MM-dd");
 
   const [checkin, setCheckin] = useState<DailyCheckin | null | undefined>(undefined);
@@ -115,8 +116,12 @@ function MemberPageInner() {
         </button>
         <Avatar name={member?.displayName ?? uid} photoURL={member?.photoURL} size={44} className="shrink-0" />
         <div className="min-w-0">
-          <h1 className="font-bold text-wing-ink text-lg truncate">{member?.displayName ?? "—"}</h1>
-          <p className="text-xs text-wing-muted">{lang === "he" ? "חבר/ת הכנף" : "Wing member"}</p>
+          <h1 className="font-bold text-wing-ink text-lg truncate">
+            {isSelf ? (lang === "he" ? "הקיר שלי" : "My wall") : (member?.displayName ?? "—")}
+          </h1>
+          <p className="text-xs text-wing-muted">
+            {isSelf ? (lang === "he" ? "מה שכתבו לך" : "Messages for you") : (lang === "he" ? "חבר/ת הכנף" : "Wing member")}
+          </p>
         </div>
       </div>
 
@@ -185,10 +190,16 @@ function MemberPageInner() {
       {/* Write on wall */}
       <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 space-y-3">
         <h3 className="font-bold text-wing-ink text-sm">
-          {lang === "he"
-            ? `כתוב/י ל${memberFirstName}`
-            : `Write to ${memberFirstName}`}
+          {isSelf
+            ? (lang === "he" ? "הודעות שקיבלת" : "Messages you received")
+            : (lang === "he" ? `כתוב/י ל${memberFirstName}` : `Write to ${memberFirstName}`)}
         </h3>
+
+        {isSelf && wallMsgs.length === 0 && (
+          <p className="text-sm text-wing-muted text-center py-2">
+            {lang === "he" ? "עדיין לא קיבלת הודעות על הקיר" : "No wall messages yet"}
+          </p>
+        )}
 
         {wallMsgs.length > 0 && (
           <div className="space-y-2 max-h-[228px] overflow-y-auto pr-0.5">
@@ -234,28 +245,30 @@ function MemberPageInner() {
           </div>
         )}
 
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={msgText}
-            onChange={(e) => setMsgText(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleSendMessage(); }}
-            placeholder={
-              lang === "he"
-                ? `עודד/י את ${memberFirstName}, שאל/י מה קורה...`
-                : `Encourage ${memberFirstName}, ask how it's going...`
-            }
-            className="flex-1 text-sm border border-wing-border rounded-2xl px-3 py-2.5 bg-wing-elevated focus:outline-none focus:ring-2 focus:ring-wing-ink text-wing-ink placeholder:text-wing-subtle"
-            dir="rtl"
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={!msgText.trim() || sending}
-            className="px-4 py-2.5 rounded-2xl bg-wing-ink text-wing-elevated disabled:opacity-40 active:scale-95 transition-transform"
-          >
-            <Send size={16} />
-          </button>
-        </div>
+        {!isSelf && (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={msgText}
+              onChange={(e) => setMsgText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSendMessage(); }}
+              placeholder={
+                lang === "he"
+                  ? `עודד/י את ${memberFirstName}, שאל/י מה קורה...`
+                  : `Encourage ${memberFirstName}, ask how it's going...`
+              }
+              className="flex-1 text-sm border border-wing-border rounded-2xl px-3 py-2.5 bg-wing-elevated focus:outline-none focus:ring-2 focus:ring-wing-ink text-wing-ink placeholder:text-wing-subtle"
+              dir="rtl"
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={!msgText.trim() || sending}
+              className="px-4 py-2.5 rounded-2xl bg-wing-ink text-wing-elevated disabled:opacity-40 active:scale-95 transition-transform"
+            >
+              <Send size={16} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Recent meals */}
