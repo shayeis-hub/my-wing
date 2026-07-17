@@ -24,6 +24,7 @@ import { registerNativePush } from "@/lib/push/native";
 import { useRouter } from "next/navigation";
 import { subscribeTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, saveSteps, type GroupEnergy } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
+import { stepsFromWorkouts } from "@/lib/fitness/workout";
 import type { DailyCheckin, WeightLog } from "@/types";
 import { Bell, Footprints, Scale, ChevronLeft, Droplets, Flame, Plus, Minus, Leaf, Check, Pencil, Users, UtensilsCrossed, MessageCircle, Trophy } from "lucide-react";
 import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
@@ -243,7 +244,12 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
     ? todayCheckin.workouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0)
     : (todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0);
   const checkinSteps = todayCheckin?.steps ?? 0;
-  const stepCals = includeStepCals && checkinSteps ? Math.round(checkinSteps * 0.05 * (weightKg / 70)) : 0;
+  // Steps produced by today's running/walking workouts are already counted in
+  // workoutCals — subtract them so we don't double-count. Only the "incidental"
+  // steps (everyday movement) contribute to the step-calorie budget.
+  const workoutSteps = stepsFromWorkouts(todayCheckin?.workouts, todayCheckin?.workout);
+  const incidentalSteps = Math.max(0, checkinSteps - workoutSteps);
+  const stepCals = includeStepCals && incidentalSteps ? Math.round(incidentalSteps * 0.05 * (weightKg / 70)) : 0;
   const calorieGoal = bmr + workoutCals + stepCals;
   const caloriesRemaining = calorieGoal - todayCalories;
 
@@ -395,20 +401,28 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
               )}
             </p>
 
-            {/* Steps calories toggle — only when steps were logged today */}
-            {checkinSteps > 0 && (
-              <button
-                onClick={() => setIncludeStepCals(v => !v)}
-                className={`mb-2 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-all active:scale-95 ${
-                  includeStepCals ? "text-wing-ink" : "text-wing-ink"
-                }`}
-                style={{ background: includeStepCals ? "linear-gradient(135deg, #f5dd4b, #ff6b47)" : "rgba(26,24,20,0.08)" }}
-              >
-                <Footprints size={12} />
-                {includeStepCals
-                  ? (lang === "he" ? "הסר צעדים מהחישוב" : "Remove steps from budget")
-                  : (lang === "he" ? "הוסף צעדים לחישוב" : "Add steps to budget")}
-              </button>
+            {/* Steps calories toggle — only when there are incidental steps left
+                after subtracting steps already produced by foot workouts. */}
+            {incidentalSteps > 0 && (
+              <div className="mb-2 space-y-1">
+                <button
+                  onClick={() => setIncludeStepCals(v => !v)}
+                  className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full text-wing-ink transition-all active:scale-95"
+                  style={{ background: includeStepCals ? "linear-gradient(135deg, #f5dd4b, #ff6b47)" : "rgba(26,24,20,0.08)" }}
+                >
+                  <Footprints size={12} />
+                  {includeStepCals
+                    ? (lang === "he" ? "הסר צעדים מהחישוב" : "Remove steps from budget")
+                    : (lang === "he" ? "הוסף צעדים לחישוב" : "Add steps to budget")}
+                </button>
+                {workoutSteps > 0 && (
+                  <p className="text-[10px] text-wing-ink/50 px-1">
+                    {lang === "he"
+                      ? `צעדי האימון כבר נספרו — סופרים ${incidentalSteps.toLocaleString()} צעדים נוספים`
+                      : `Workout steps already counted — counting ${incidentalSteps.toLocaleString()} extra steps`}
+                  </p>
+                )}
+              </div>
             )}
             <ProgressBar
               value={todayCalories}

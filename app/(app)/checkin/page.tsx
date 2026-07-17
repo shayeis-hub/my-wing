@@ -16,26 +16,11 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import { enUS } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
-import type { DailyCheckin, Encouragement, ReactionType } from "@/types";
+import type { DailyCheckin, Encouragement, ReactionType, Workout } from "@/types";
 import { Droplets, Leaf, Footprints, Dumbbell, Smile, Scale, Pencil, Moon, Lightbulb, Timer } from "lucide-react";
+import { SPORTS, getSport, computeWorkoutCalories, usesDistance, paceFeedback, type Intensity } from "@/lib/fitness/workout";
 
 const MOOD_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
-
-const MET: Record<string, Record<"light" | "moderate" | "intense", number>> = {
-  running:  { light: 8,   moderate: 11,  intense: 14  },
-  walking:  { light: 2.5, moderate: 3.5, intense: 4.5 },
-  cycling:  { light: 4,   moderate: 8,   intense: 12  },
-  weights:  { light: 3,   moderate: 5,   intense: 6   },
-  hiit:     { light: 8,   moderate: 10,  intense: 12  },
-  swimming: { light: 5,   moderate: 7,   intense: 10  },
-  yoga:     { light: 2.5, moderate: 3,   intense: 3.5 },
-  other:    { light: 4,   moderate: 6,   intense: 8   },
-};
-
-function calcWorkoutCalories(type: string, intensity: "light" | "moderate" | "intense", durationMin: number, weightKg: number): number {
-  const met = MET[type]?.[intensity] ?? 5;
-  return Math.round(met * weightKg * (durationMin / 60));
-}
 
 async function sendEncouragementPush(targetUserId: string, authorId: string, authorName: string, text: string, date?: string) {
   await fetch("/api/notifications/encouragement", {
@@ -80,16 +65,6 @@ function CheckinPageInner() {
     { value: 5, color: MOOD_COLORS[4], label: t("mood_5") },
   ];
 
-  const WORKOUT_TYPES: { value: string; label: string }[] = [
-    { value: "running", label: t("wt_running") },
-    { value: "walking", label: t("wt_walking") },
-    { value: "cycling", label: t("wt_cycling") },
-    { value: "weights", label: t("wt_weights") },
-    { value: "hiit", label: t("wt_hiit") },
-    { value: "swimming", label: t("wt_swimming") },
-    { value: "yoga", label: t("wt_yoga") },
-    { value: "other", label: t("wt_other") },
-  ];
   const searchParams = useSearchParams();
   const paramDate = searchParams.get("date");
   const [myCheckin, setMyCheckin] = useState<DailyCheckin | null>(null);
@@ -99,10 +74,11 @@ function CheckinPageInner() {
   const [mood, setMood] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [notes, setNotes] = useState("");
   const [steps, setSteps] = useState("");
-  const [workouts, setWorkouts] = useState<import("@/types").Workout[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [wfType, setWfType] = useState("running");
-  const [wfIntensity, setWfIntensity] = useState<"light" | "moderate" | "intense">("moderate");
+  const [wfIntensity, setWfIntensity] = useState<Intensity>("moderate");
   const [wfDuration, setWfDuration] = useState("");
+  const [wfDistance, setWfDistance] = useState("");
   const [wfOpen, setWfOpen] = useState(false);
   const [weight, setWeight] = useState("");
   const [saving, setSaving] = useState(false);
@@ -289,18 +265,46 @@ function CheckinPageInner() {
     const durationMin = parseInt(wfDuration);
     if (!durationMin || durationMin <= 0) return;
     const weightKg = user?.profile?.weightKg ?? 70;
-    const caloriesBurned = calcWorkoutCalories(wfType, wfIntensity, durationMin, weightKg);
-    const workoutTypeLabel = WORKOUT_TYPES.find(wt => wt.value === wfType)?.label ?? wfType;
-    const intensityLabel = wfIntensity === "light" ? t("checkin_workout_light") : wfIntensity === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense");
+    const sport = getSport(wfType);
+    const distNum = wfDistance ? parseFloat(wfDistance) : undefined;
+    const byDistance = usesDistance(wfType, distNum);
+    const caloriesBurned = computeWorkoutCalories({
+      type: wfType, durationMin, weightKg, intensity: wfIntensity, distance: distNum,
+    });
+
+    // Build a human description: "ריצה · 9 ק"מ · 5:30 דק'/ק"מ · 55 דק'" or
+    // "אימון כוח · בינוני · 45 דק'".
+    const label = sport.he; // display label follows app language below via lang check
+    const enLabel = sport.en;
+    const dispLabel = lang === "he" ? label : enLabel;
+    const parts: string[] = [dispLabel];
+    if (byDistance && distNum) {
+      const distStr = sport.distanceUnit === "m" ? `${distNum} ${lang === "he" ? "מ'" : "m"}` : `${distNum} ${lang === "he" ? "ק\"מ" : "km"}`;
+      parts.push(distStr);
+      const pace = paceFeedback(wfType, distNum, durationMin, lang);
+      if (pace) parts.push(pace);
+    } else {
+      const intensityLabel = wfIntensity === "light" ? t("checkin_workout_light") : wfIntensity === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense");
+      parts.push(intensityLabel as string);
+    }
+    parts.push(`${durationMin} ${t("minutes_short")}`);
+
+    // Store distance in km (swimming metres → km) for the step double-count guard.
+    const distanceKm = byDistance && distNum
+      ? (sport.distanceUnit === "m" ? distNum / 1000 : distNum)
+      : undefined;
+
     setWorkouts(prev => [...prev, {
       done: true,
       type: wfType,
-      intensity: wfIntensity,
+      ...(byDistance ? {} : { intensity: wfIntensity }),
       durationMinutes: durationMin,
-      description: `${workoutTypeLabel} · ${intensityLabel} · ${durationMin} ${t("minutes_short")}`,
+      ...(distanceKm ? { distanceKm } : {}),
+      description: parts.join(" · "),
       caloriesBurned,
     }]);
     setWfDuration("");
+    setWfDistance("");
     setWfOpen(false);
   }
 
@@ -365,6 +369,16 @@ function CheckinPageInner() {
   ].filter(Boolean).length;
   const totalFields = 6;
   const progressPct = Math.round((filledFields / totalFields) * 100);
+
+  // ── Derived values for the workout add-form ──────────────────────────────
+  const wfSport = getSport(wfType);
+  const wfDistNum = wfDistance ? parseFloat(wfDistance) : undefined;
+  const wfDurNum = wfDuration ? parseInt(wfDuration) : 0;
+  const wfByDistance = usesDistance(wfType, wfDistNum);
+  const wfPace = wfByDistance && wfDistNum && wfDurNum > 0 ? paceFeedback(wfType, wfDistNum, wfDurNum, lang) : "";
+  const wfPreviewCals = wfDurNum > 0
+    ? computeWorkoutCalories({ type: wfType, durationMin: wfDurNum, weightKg: user?.profile?.weightKg ?? 70, intensity: wfIntensity, distance: wfDistNum })
+    : 0;
 
   return (
     <div className="p-4 space-y-4">
@@ -560,36 +574,19 @@ function CheckinPageInner() {
                 {workouts.length > 0 && (
                   <p className="text-xs text-wing-muted font-semibold">{lang === "he" ? "הוסף אימון נוסף:" : "Add another workout:"}</p>
                 )}
-                <div className="grid grid-cols-2 gap-2">
-                  {WORKOUT_TYPES.map((wt) => (
-                    <button
-                      key={wt.value}
-                      onClick={() => setWfType(wt.value)}
-                      className={`text-sm px-3 py-2 rounded-[14px] border-2 text-right transition-all ${
-                        wfType === wt.value
-                          ? "border-wing-ink bg-wing-elevated text-wing-ink font-semibold"
-                          : "border-wing-border bg-wing-elevated text-wing-muted"
-                      }`}
-                    >
-                      {wt.label}
-                    </button>
+
+                {/* Sport picker — a dropdown so the list doesn't fill the screen */}
+                <select
+                  value={wfType}
+                  onChange={(e) => { setWfType(e.target.value); setWfDistance(""); }}
+                  className="w-full px-4 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink font-semibold focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                >
+                  {SPORTS.map((s) => (
+                    <option key={s.value} value={s.value}>{lang === "he" ? s.he : s.en}</option>
                   ))}
-                </div>
-                <div className="flex gap-2">
-                  {(["light", "moderate", "intense"] as const).map((lvl) => (
-                    <button
-                      key={lvl}
-                      onClick={() => setWfIntensity(lvl)}
-                      className={`flex-1 text-sm py-2 rounded-[14px] border-2 transition-all ${
-                        wfIntensity === lvl
-                          ? "border-wing-ink bg-wing-elevated text-wing-ink font-semibold"
-                          : "border-wing-border bg-wing-elevated text-wing-muted"
-                      }`}
-                    >
-                      {lvl === "light" ? t("checkin_workout_light") : lvl === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense")}
-                    </button>
-                  ))}
-                </div>
+                </select>
+
+                {/* Duration — always */}
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -601,14 +598,61 @@ function CheckinPageInner() {
                   />
                   <span className="text-sm text-wing-muted shrink-0">{t("checkin_workout_min")}</span>
                 </div>
-                {wfDuration && parseInt(wfDuration) > 0 && (
-                  <p className="text-sm text-green-700 bg-green-50 rounded-[14px] px-4 py-2 text-center font-medium">
-                    {(t("checkin_calories_est") as (n: number) => string)(calcWorkoutCalories(wfType, wfIntensity, parseInt(wfDuration), user?.profile?.weightKg ?? 70))}
+
+                {/* Distance — distance sports only, optional */}
+                {wfSport.model === "distance" && (
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      value={wfDistance}
+                      onChange={(e) => setWfDistance(e.target.value)}
+                      placeholder={lang === "he" ? "מרחק (לא חובה)" : "Distance (optional)"}
+                      inputMode="decimal"
+                      step="any"
+                      className="flex-1 px-4 py-2.5 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                    />
+                    <span className="text-sm text-wing-muted shrink-0">
+                      {wfSport.distanceUnit === "m" ? (lang === "he" ? "מ'" : "m") : (lang === "he" ? "ק\"מ" : "km")}
+                    </span>
+                  </div>
+                )}
+
+                {/* Intensity — only when we're NOT deriving it from distance */}
+                {!wfByDistance && (
+                  <div className="flex gap-2">
+                    {(["light", "moderate", "intense"] as const).map((lvl) => (
+                      <button
+                        key={lvl}
+                        onClick={() => setWfIntensity(lvl)}
+                        className={`flex-1 text-sm py-2 rounded-[14px] border-2 transition-all ${
+                          wfIntensity === lvl
+                            ? "border-wing-ink bg-wing-elevated text-wing-ink font-semibold"
+                            : "border-wing-border bg-wing-elevated text-wing-muted"
+                        }`}
+                      >
+                        {lvl === "light" ? t("checkin_workout_light") : lvl === "moderate" ? t("checkin_workout_moderate") : t("checkin_workout_intense")}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Pace feedback when a distance was entered */}
+                {wfPace && (
+                  <p className="text-xs text-wing-muted text-center">
+                    {lang === "he" ? "קצב" : "Pace"}: <span dir="ltr" className="tabular-nums font-semibold">{wfPace}</span>
                   </p>
                 )}
+
+                {/* Calorie preview */}
+                {wfDurNum > 0 && (
+                  <p className="text-sm text-green-700 bg-green-50 rounded-[14px] px-4 py-2 text-center font-medium">
+                    {(t("checkin_calories_est") as (n: number) => string)(wfPreviewCals)}
+                  </p>
+                )}
+
                 <button
                   onClick={addWorkout}
-                  disabled={!wfDuration || parseInt(wfDuration) <= 0}
+                  disabled={wfDurNum <= 0}
                   className="w-full py-2.5 rounded-[14px] font-bold text-wing-ink text-sm disabled:opacity-40 transition-all active:scale-[0.98]"
                   style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
                 >

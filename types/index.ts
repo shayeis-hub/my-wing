@@ -187,6 +187,8 @@ export interface Workout {
   type?: string;
   intensity?: "light" | "moderate" | "intense";
   durationMinutes?: number;
+  /** Distance in km for distance sports (swimming stored as km too). Optional. */
+  distanceKm?: number;
   description?: string;
   caloriesBurned?: number;
 }
