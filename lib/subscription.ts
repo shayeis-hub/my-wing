@@ -75,6 +75,7 @@ export const GRANDFATHERED_EMAILS = [
   "sivan.ati@gmail.com",
   "shayeis@gmail.com",
   "shay@wingpact.app",
+  "reutnatu@gmail.com",
 ];
 
 // ── Free-plan limits ──────────────────────────────────────────────────────────
