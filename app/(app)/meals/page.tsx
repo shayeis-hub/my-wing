@@ -235,13 +235,17 @@ function MealsPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.detail ?? `HTTP ${res.status}`);
+      }
       const analysis: MealAnalysis = await res.json();
       setPendingAnalysis((prev) => prev ? { ...prev, analysis } : null);
       setHint("");
       toast.success(t("meals_reanalyzed"));
-    } catch {
-      toast.error(t("meals_reanalyze_error"));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      toast.error(`${t("meals_reanalyze_error")}${msg ? ` (${msg})` : ""}`);
     } finally {
       setReanalyzing(false);
     }

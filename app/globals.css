@@ -10,6 +10,7 @@
 
 html {
   direction: rtl;
+  overflow-x: hidden;
 }
 
 body {
@@ -18,6 +19,8 @@ body {
   font-family: 'Heebo', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Hide bottom nav when any modal is open — slides down smoothly */

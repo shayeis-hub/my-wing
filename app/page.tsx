@@ -210,17 +210,20 @@ export default function LandingPage() {
           >
             {lang === "he" ? "EN" : "עב"}
           </button>
-          <Link href="/blog" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
+          {/* Secondary nav links — hidden on narrow screens so the row never
+              overflows the viewport (was causing horizontal scroll on mobile). */}
+          <Link href="/blog" className="hidden sm:inline" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
             {t.nav_blog}
           </Link>
-          <Link href="/calorie-calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
+          <Link href="/calorie-calculator" className="hidden sm:inline" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
             {t.nav_calculator}
           </Link>
-          <Link href="/faq" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
+          <Link href="/faq" className="hidden sm:inline" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}>
             {t.nav_faq}
           </Link>
           <Link
             href="/en/pricing"
+            className="hidden sm:inline"
             style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}
           >
             {t.nav_pricing}

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
+// Anthropic client retries up to 4x on overload (529) with backoff — multi-image
+// analysis + a slow retry chain can exceed Vercel's default 10s timeout.
+export const maxDuration = 60;
 import { analyzeMealImage, analyzeMealImages, analyzeMealText } from "@/lib/ai/claude";
 import { isGrandfathered, isPremium, canAddMealPhoto, FREE_LIMITS, type Plan } from "@/lib/subscription";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
