@@ -222,7 +222,7 @@ export default function LandingPage() {
             {t.nav_faq}
           </Link>
           <Link
-            href="/en/pricing"
+            href={lang === "he" ? "#pricing" : "/en/pricing"}
             className="hidden sm:inline"
             style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none", padding: "0 4px" }}
           >
@@ -321,7 +321,7 @@ export default function LandingPage() {
               : <ArrowRight size={16} strokeWidth={2.5} />}
           </Link>
           <Link
-            href="/en/pricing"
+            href={lang === "he" ? "#pricing" : "/en/pricing"}
             style={{
               fontSize: 16,
               fontWeight: 600,
@@ -432,7 +432,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing teaser ── */}
-      <section style={{ maxWidth: 600, margin: "0 auto", padding: "72px 24px", textAlign: "center" }}>
+      <section id="pricing" style={{ maxWidth: 600, margin: "0 auto", padding: "72px 24px", textAlign: "center" }}>
         <h2 style={{ fontSize: 32, fontWeight: 900, letterSpacing: "-0.035em", marginBottom: 8 }}>{t.pricing_h2}</h2>
         <p style={{ color: "#8a7e68", marginBottom: 40 }}>{t.pricing_sub}</p>
         <div style={{ display: "grid", gap: 16, gridTemplateColumns: "1fr 1fr" }}>
@@ -461,7 +461,7 @@ export default function LandingPage() {
           </div>
         </div>
         <Link
-          href="/en/pricing"
+          href={lang === "he" ? "/faq" : "/en/pricing"}
           style={{ display: "inline-block", marginTop: 20, fontSize: 14, color: "#d4541a", textDecoration: "underline" }}
         >
           {t.pricing_link}
@@ -494,7 +494,7 @@ export default function LandingPage() {
           <Link href="/blog" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_blog}</Link>
           <Link href="/calorie-calculator" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_calculator}</Link>
           <Link href="/faq" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_faq}</Link>
-          <Link href="/en/pricing" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_pricing}</Link>
+          <Link href={lang === "he" ? "#pricing" : "/en/pricing"} style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.nav_pricing}</Link>
           <Link href="/terms" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.footer_terms}</Link>
           <Link href="/privacy" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.footer_privacy}</Link>
           <Link href="/contact" style={{ fontSize: 13, color: "#8a7e68", textDecoration: "none" }}>{t.footer_contact}</Link>
