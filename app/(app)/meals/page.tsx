@@ -227,9 +227,12 @@ function MealsPageInner() {
       });
       // Re-analyze ALL photos together (not just the first) so combined meals
       // stay combined. Single-image meals use the single-image path.
+      // previousAnalysis gives the AI a baseline for relative corrections
+      // ("it was a double portion") — without it, each reanalyze call is
+      // stateless and the correction has nothing to anchor to.
       const body = urls.length > 1
-        ? { base64Images: urls.map(toImg), hint: hint.trim(), lang }
-        : { base64Image: toImg(urls[0]).base64, mediaType: toImg(urls[0]).mediaType, hint: hint.trim(), lang };
+        ? { base64Images: urls.map(toImg), hint: hint.trim(), lang, previousAnalysis: pendingAnalysis.analysis }
+        : { base64Image: toImg(urls[0]).base64, mediaType: toImg(urls[0]).mediaType, hint: hint.trim(), lang, previousAnalysis: pendingAnalysis.analysis };
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

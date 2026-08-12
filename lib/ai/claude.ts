@@ -6,15 +6,37 @@ const client = new Anthropic({
   maxRetries: 4,
 });
 
+// Reanalyze calls are stateless — without this, the model has no memory of
+// what it said last time, so a RELATIVE correction ("it was a double
+// portion", "add a bit more of everything") has nothing to anchor to and the
+// model just re-guesses from the image, often landing close to its original
+// numbers. Including the previous analysis gives it a concrete baseline to
+// apply the correction against.
+function buildCorrectionBlock(hint: string | undefined, previous: MealAnalysis | undefined, isHe: boolean): string {
+  if (!hint) return "";
+  if (!previous) {
+    return isHe
+      ? `המשתמש מתקן או מוסיף מידע על הארוחה: "${hint}". תן עדיפות לתיקון הזה על פני מה שנראה בתמונה, ועדכן את כל הערכים התזונתיים (כולל הקלוריות) בהתאם.\n\n`
+      : `The user is correcting or adding information about the meal: "${hint}". Prioritize this correction over what's visible in the image, and update all nutritional values (including calories) accordingly.\n\n`;
+  }
+  return isHe
+    ? `הניתוח הקודם שלך לארוחה הזו היה: "${previous.description}" — ${previous.calories} קק"ל, ${previous.protein}ג חלבון, ${previous.carbs}ג פחמימות, ${previous.fat}ג שומן.
+המשתמש מתקן אותך: "${hint}". חשוב: זו תיקון יחסי לניתוח הקודם שלך (למשל "מנה כפולה" או "עוד קצת מהכל") — קח את הערכים הקודמים כבסיס והחל עליהם את התיקון, אל תנתח את התמונה מחדש מאפס. עדכן את כל הערכים התזונתיים (כולל הקלוריות) כך שישקפו את התיקון בפועל.\n\n`
+    : `Your previous analysis of this meal was: "${previous.description}" — ${previous.calories} kcal, ${previous.protein}g protein, ${previous.carbs}g carbs, ${previous.fat}g fat.
+The user is correcting you: "${hint}". Important: this is a correction RELATIVE to your previous analysis (e.g. "it was a double portion" or "add a bit more of everything") — use the previous values as your baseline and apply the correction to them, don't re-analyze the image from scratch. Update all nutritional values (including calories) to actually reflect the correction.\n\n`;
+}
+
 export async function analyzeMealImage(
   base64Image: string,
   mediaType: "image/jpeg" | "image/png" | "image/webp",
   hint?: string,
-  lang: "he" | "en" = "he"
+  lang: "he" | "en" = "he",
+  previousAnalysis?: MealAnalysis
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
+  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe);
   const promptText = isHe
-    ? `${hint ? `המשתמש מתקן או מוסיף מידע על הארוחה: "${hint}". תן עדיפות לתיקון הזה על פני מה שנראה בתמונה, ועדכן את כל הערכים התזונתיים (כולל הקלוריות) בהתאם.\n\n` : ""}המשתמש נמצא בתהליך ירידה במשקל. אנא נתח את הצלחת בתמונה הזו ותן לי:
+    ? `${correctionBlock}המשתמש נמצא בתהליך ירידה במשקל. אנא נתח את הצלחת בתמונה הזו ותן לי:
 1. תיאור קצר של הארוחה בעברית
 2. רשימת רכיבים עם משקל משוער בגרמים לכל אחד
 3. ערכים תזונתיים: קלוריות, חלבון, פחמימות, שומן, סיבים
@@ -36,7 +58,7 @@ export async function analyzeMealImage(
   "tips": "טיפ אופציונלי",
   "containsVegetables": false
 }`
-    : `${hint ? `The user is correcting or adding information about the meal: "${hint}". Prioritize this correction over what's visible in the image, and update all nutritional values (including calories) accordingly.\n\n` : ""}The user is on a weight loss journey. Please analyze the plate in this image and provide:
+    : `${correctionBlock}The user is on a weight loss journey. Please analyze the plate in this image and provide:
 1. A short description of the meal in English
 2. A list of ingredients with estimated weight in grams each
 3. Nutritional values: calories, protein, carbs, fat, fiber
@@ -89,13 +111,15 @@ Reply ONLY with valid JSON in the following format, no extra text:
 export async function analyzeMealImages(
   images: { base64: string; mediaType: "image/jpeg" | "image/png" | "image/webp" }[],
   hint?: string,
-  lang: "he" | "en" = "he"
+  lang: "he" | "en" = "he",
+  previousAnalysis?: MealAnalysis
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
   const count = images.length;
+  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe);
 
   const promptText = isHe
-    ? `${hint ? `המשתמש מתקן או מוסיף מידע על הארוחה: "${hint}". תן עדיפות לתיקון הזה ועדכן את כל הערכים (כולל הקלוריות) בהתאם.\n\n` : ""}לפניך ${count} תמונות של אותה ארוחה מזוויות/מנות שונות. נתח את כולן יחד כארוחה אחת שלמה — סכום כל המנות — ותן ערכים תזונתיים כוללים.
+    ? `${correctionBlock}לפניך ${count} תמונות של אותה ארוחה מזוויות/מנות שונות. נתח את כולן יחד כארוחה אחת שלמה — סכום כל המנות — ותן ערכים תזונתיים כוללים.
 
 ענה אך ורק ב-JSON תקני, ללא טקסט נוסף:
 {
@@ -106,7 +130,7 @@ export async function analyzeMealImages(
   "tips": "טיפ אופציונלי",
   "containsVegetables": false
 }`
-    : `${hint ? `The user is correcting or adding info about the meal: "${hint}". Prioritize this correction and update all values (including calories) accordingly.\n\n` : ""}You have ${count} photos of the same meal from different angles/portions. Analyze them together as one complete meal — sum of all portions — and return total nutritional values.
+    : `${correctionBlock}You have ${count} photos of the same meal from different angles/portions. Analyze them together as one complete meal — sum of all portions — and return total nutritional values.
 
 Reply ONLY with valid JSON:
 {

@@ -37,7 +37,7 @@ async function incrementDailyMealCountAdmin(uid: string, date: string): Promise<
 
 export async function POST(req: NextRequest) {
   try {
-    const { base64Image, base64Images, mediaType, hint, textDescription, userId, userEmail, lang } = await req.json();
+    const { base64Image, base64Images, mediaType, hint, previousAnalysis, textDescription, userId, userEmail, lang } = await req.json();
 
     // ── Enforce meal-photo limit (only for image analysis, not text) ──────────
     if (base64Image && userId && userEmail !== undefined) {
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     // ── Multi-image analysis ───────────────────────────────────────────────────
     if (base64Images && Array.isArray(base64Images) && base64Images.length > 0) {
-      const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he");
+      const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis);
       return NextResponse.json(analysis);
     }
 
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image data" }, { status: 400 });
     }
 
-    const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he");
+    const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis);
 
     // ── Increment daily count after successful analysis ────────────────────────
     if (userId && userEmail !== undefined && !isGrandfathered(userEmail)) {
