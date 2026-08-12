@@ -223,6 +223,21 @@ export async function generatePersonalDaySummary(data: {
   mood: number;
   notes?: string;
   lang?: "he" | "en";
+  /**
+   * The user's last few days (oldest→newest, NOT including today), so the AI
+   * can spot genuine trends ("steps up after two weaker days") instead of
+   * only ever describing today in isolation. Days with no check-in are
+   * omitted rather than zero-filled, so gaps don't read as "0 steps".
+   */
+  recentHistory?: {
+    date: string;
+    waterGlasses?: number;
+    vegetablesServings?: number;
+    steps?: number;
+    workoutDone?: boolean;
+    weightKg?: number;
+    mood?: number;
+  }[];
 }): Promise<{ summary: string; insights: string[]; tip: string }> {
   const totalCalories = data.meals.reduce((s, m) => s + m.calories, 0);
   const effectiveWorkouts = data.workouts?.length
@@ -235,6 +250,19 @@ export async function generatePersonalDaySummary(data: {
   const workoutLine = effectiveWorkouts.length === 0
     ? (isHe ? "לא" : "no")
     : effectiveWorkouts.map(w => `${w.description ?? ""}${w.caloriesBurned ? ` (${w.caloriesBurned} ${isHe ? 'קק"ל' : 'kcal'})` : ""}`).join(", ");
+
+  // Compact, human-readable history block — the model does its own trend
+  // spotting from these raw numbers rather than us pre-computing deltas.
+  const history = data.recentHistory ?? [];
+  const historyBlock = history.length === 0 ? "" : (
+    isHe
+      ? `\n\nהיסטוריית הימים האחרונים (מהישן לחדש, לא כולל היום):\n${history.map(h =>
+          `- ${h.date}: ${h.waterGlasses != null ? `${h.waterGlasses} ל' מים` : "אין נתון מים"}, ${h.vegetablesServings != null ? `${h.vegetablesServings} מנות ירקות` : "אין נתון ירקות"}, ${h.steps != null ? `${h.steps} צעדים` : "אין נתון צעדים"}, אימון: ${h.workoutDone ? "כן" : "לא"}${h.weightKg ? `, משקל: ${h.weightKg} ק"ג` : ""}`
+        ).join("\n")}\n\nאם יש מגמה ברורה ומשמעותית בהשוואה לימים האלה (שיפור או נסיגה) — ציין אותה באחת התובנות, בצורה טבעית וספציפית (למשל "צעדים עלו משמעותית אחרי יומיים חלשים"). אל תמציא השוואה אם אין מגמה אמיתית — עדיף תובנה על היום עצמו מאשר השוואה מאולצת.`
+      : `\n\nRecent day history (oldest→newest, NOT including today):\n${history.map(h =>
+          `- ${h.date}: ${h.waterGlasses != null ? `${h.waterGlasses}L water` : "no water data"}, ${h.vegetablesServings != null ? `${h.vegetablesServings} veg servings` : "no veg data"}, ${h.steps != null ? `${h.steps} steps` : "no step data"}, workout: ${h.workoutDone ? "yes" : "no"}${h.weightKg ? `, weight: ${h.weightKg}kg` : ""}`
+        ).join("\n")}\n\nIf there's a clear, meaningful trend compared to these days (improvement or dip), call it out in one insight, naturally and specifically (e.g. "steps jumped after two weaker days"). Don't invent a comparison if there's no real trend — a good insight about today alone beats a forced comparison.`
+  );
 
   const prompt = isHe
     ? `אתה מאמן תזונה וכושר אישי. המשתמש נמצא בתהליך ירידה במשקל. סכם את היום של ${data.userName} בצורה חמה, אישית ומעודדת בעברית, עם התייחסות לירידה במשקל.
@@ -249,7 +277,7 @@ export async function generatePersonalDaySummary(data: {
 - אימון: ${workoutLine}
 - משקל: ${data.weightKg ? `${data.weightKg} ק"ג` : "לא נמדד"}${data.targetWeightKg ? ` (יעד: ${data.targetWeightKg} ק"ג)` : ""}
 - מצב רוח: ${data.mood}/5
-${data.notes ? `- הערה: "${data.notes}"` : ""}
+${data.notes ? `- הערה: "${data.notes}"` : ""}${historyBlock}
 
 תן סיכום אישי, תובנות, וטיפ למחר.`
     : `You are a personal nutrition and fitness coach. The user is on a weight loss journey. Summarize ${data.userName}'s day in a warm, personal and encouraging way in English, with a focus on weight loss progress.
@@ -264,7 +292,7 @@ Day data:
 - Workout: ${workoutLine}
 - Weight: ${data.weightKg ? `${data.weightKg} kg` : "not measured"}${data.targetWeightKg ? ` (target: ${data.targetWeightKg} kg)` : ""}
 - Mood: ${data.mood}/5
-${data.notes ? `- Note: "${data.notes}"` : ""}
+${data.notes ? `- Note: "${data.notes}"` : ""}${historyBlock}
 
 Give a personal summary, insights, and a tip for tomorrow.`;
 

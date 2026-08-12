@@ -36,6 +36,32 @@ export async function POST(req: NextRequest) {
         mealType: m.mealType ?? "snack",
       }));
 
+    // Fetch the last few days' check-ins (not including today) so the summary
+    // can call out real trends instead of describing today in isolation.
+    const HISTORY_DAYS = 6;
+    const baseDate = new Date(`${date}T12:00:00`);
+    const historyDates: string[] = [];
+    for (let i = HISTORY_DAYS; i >= 1; i--) {
+      const d = new Date(baseDate);
+      d.setDate(d.getDate() - i);
+      historyDates.push(d.toISOString().slice(0, 10));
+    }
+    const historySnaps = await Promise.all(
+      historyDates.map((d) => admin.firestore().doc(`wings/${wingId}/checkins/${userId}_${d}`).get())
+    );
+    const recentHistory = historySnaps
+      .map((snap, i) => (snap.exists ? { date: historyDates[i], c: snap.data()! } : null))
+      .filter((x): x is { date: string; c: FirebaseFirestore.DocumentData } => x !== null)
+      .map(({ date: d, c }) => ({
+        date: d,
+        waterGlasses: c.waterGlasses,
+        vegetablesServings: c.vegetablesServings,
+        steps: c.steps,
+        workoutDone: !!(c.workouts?.length ? c.workouts.some((w: { done?: boolean }) => w.done) : c.workout?.done),
+        weightKg: c.weightKg,
+        mood: c.mood,
+      }));
+
     const result = await generatePersonalDaySummary({
       userName: checkin.userName,
       dailyCalorieTarget: userProfile?.dailyCalorieTarget ?? 2000,
@@ -50,6 +76,7 @@ export async function POST(req: NextRequest) {
       mood: checkin.mood ?? 3,
       notes: checkin.notes,
       lang: lang ?? "he",
+      recentHistory,
     });
 
     // Save summary back to the checkin document
