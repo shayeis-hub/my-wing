@@ -22,7 +22,7 @@ import { isNativeApp, readTodayStepsFromHealth } from "@/lib/fitness/healthConne
 import { pushWidgetData } from "@/lib/widget/native";
 import { registerNativePush } from "@/lib/push/native";
 import { useRouter } from "next/navigation";
-import { subscribeTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, saveSteps, type GroupEnergy } from "@/lib/firebase/firestore";
+import { subscribeTodayCheckin, getWeightHistory, saveCheckin, getGroupEnergy, saveSteps, getWingCheckins, type GroupEnergy } from "@/lib/firebase/firestore";
 import { calculateBMR } from "@/lib/utils/calculator";
 import { stepsFromWorkouts } from "@/lib/fitness/workout";
 import type { DailyCheckin, WeightLog } from "@/types";
@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [selectedMemberId] = useState<string | null>(null);
   const [wingSteps, setWingSteps] = useState<StepsEntry[]>([]);
+  const [wingCheckinsToday, setWingCheckinsToday] = useState<DailyCheckin[]>([]);
   const [streak, setStreak] = useState(0);
   const [pulseField, setPulseField] = useState<"water" | "veg" | "steps" | null>(null);
   const [editingSteps, setEditingSteps] = useState(false);
@@ -77,6 +78,7 @@ export default function DashboardPage() {
     const unsub = subscribeTodayCheckin(user.wingId, firebaseUser.uid, today, setTodayCheckin);
     getWeightHistory(user.wingId, firebaseUser.uid).then(setWeightLogs);
     getWingSteps(user.wingId, today).then(setWingSteps);
+    getWingCheckins(user.wingId, today).then(setWingCheckinsToday);
     getUserCheckinDates(user.wingId, firebaseUser.uid).then((dates) => setStreak(calcStreak(dates)));
     getGroupEnergy(user.wingId, wing?.memberIds.length ?? 1).then(setGroupEnergy);
     return unsub;
@@ -235,6 +237,12 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
   });
   const myTodayMeals = todayMeals.filter((m) => m.userId === firebaseUser?.uid);
   const todayCalories = myTodayMeals.reduce((sum, m) => sum + m.analysis.calories, 0);
+  // "Active today" = anyone who checked in OR logged a meal — not just steps,
+  // which was the previous (too narrow) definition.
+  const activeToday = new Set([
+    ...wingCheckinsToday.map((c) => c.userId),
+    ...todayMeals.map((m) => m.userId),
+  ]).size;
   const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
   const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
   // Calorie budget = resting burn (BMR) + calories burned in today's workout.
@@ -302,7 +310,7 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
           </div>
           {wing && (
             <p className="text-sm text-wing-muted mt-0.5">
-              {(t("dashboard_wing_name") as (name: string, total: number, active: number) => string)(wing.name, wing.memberIds.length, wingSteps.length)}
+              {(t("dashboard_wing_name") as (name: string, total: number, active: number) => string)(wing.name, wing.memberIds.length, activeToday)}
             </p>
           )}
         </div>
