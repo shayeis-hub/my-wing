@@ -30,7 +30,7 @@ export function isCoachActive(
 }
 
 // ── Trial ─────────────────────────────────────────────────────────────────────
-export const TRIAL_DAYS = 14;
+export const TRIAL_DAYS = 21;
 
 /** Returns days remaining in trial (0 = expired). Pass the trial start as ms since epoch. */
 export function getTrialDaysLeft(trialStartMs: number | null | undefined): number {

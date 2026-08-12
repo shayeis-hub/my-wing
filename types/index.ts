@@ -26,7 +26,7 @@ export interface User {
   coachAccess?: { coachId: string; wingId: string; active: boolean };
   /**
    * Overrides createdAt as the trial clock start. Defaults to createdAt.
-   * Set to "now" when a coach stops paying, so the client's 14-day trial begins then.
+   * Set to "now" when a coach stops paying, so the client's 21-day trial begins then.
    */
   trialStartsAt?: string;
   trophies?: Trophy[];

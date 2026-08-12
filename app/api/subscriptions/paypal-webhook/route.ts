@@ -37,7 +37,7 @@ async function getUidByCoachSubscription(
 }
 
 // When a coach's plan ends, clients keep their data but restart their personal
-// 14-day trial (per product spec) and lose the coach-granted premium.
+// 21-day trial (per product spec) and lose the coach-granted premium.
 async function churnCoachClients(db: admin.firestore.Firestore, coachId: string) {
   const snap = await db.collection("users").where("coachAccess.coachId", "==", coachId).get();
   if (snap.empty) return;

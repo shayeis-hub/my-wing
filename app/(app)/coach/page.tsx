@@ -341,8 +341,8 @@ export default function CoachPage() {
   async function handleCancel() {
     const confirmed = window.confirm(
       lang === "he"
-        ? "האם לבטל את המנוי? הגישה תישמר עד סוף תקופת התשלום הנוכחית, לאחר מכן הלקוחות שלך יעברו לתקופת ניסיון אישית של 14 יום."
-        : "Cancel subscription? You keep access until the current billing period ends, then clients get a 14-day personal trial."
+        ? "האם לבטל את המנוי? הגישה תישמר עד סוף תקופת התשלום הנוכחית, לאחר מכן הלקוחות שלך יעברו לתקופת ניסיון אישית של 21 יום."
+        : "Cancel subscription? You keep access until the current billing period ends, then clients get a 21-day personal trial."
     );
     if (!confirmed) return;
     setBusy(true);
@@ -535,8 +535,8 @@ export default function CoachPage() {
                   onClick={async () => {
                     const confirmed = window.confirm(
                       lang === "he"
-                        ? `להסיר את ${c.displayName}? הם יתחילו תקופת ניסיון אישית של 14 יום.`
-                        : `Remove ${c.displayName}? They'll start a 14-day personal trial.`
+                        ? `להסיר את ${c.displayName}? הם יתחילו תקופת ניסיון אישית של 21 יום.`
+                        : `Remove ${c.displayName}? They'll start a 21-day personal trial.`
                     );
                     if (!confirmed) return;
                     try {
