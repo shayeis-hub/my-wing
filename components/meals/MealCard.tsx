@@ -62,6 +62,7 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
     mealTime: meal.mealTime ?? "",
   });
   const [savingEdit, setSavingEdit] = useState(false);
+  const [reanalyzing, setReanalyzing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDeleteComment, setConfirmDeleteComment] = useState<number | null>(null);
@@ -125,6 +126,45 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
       toast.error(t("meal_update_error") as string);
     } finally {
       setSavingEdit(false);
+    }
+  }
+
+  // Re-run AI analysis using the edited description as the correction hint.
+  // previousAnalysis gives the model a baseline so relative corrections
+  // ("it was a double portion") actually change the numbers — see the
+  // create-meal reanalyze flow this mirrors.
+  async function handleReanalyzeEdit() {
+    const description = editForm.description.trim();
+    if (!description) return;
+    setReanalyzing(true);
+    try {
+      const body = meal.imageURL
+        ? { imageUrl: meal.imageURL, hint: description, lang, previousAnalysis: meal.analysis }
+        : { textDescription: description, lang };
+      const res = await fetch("/api/ai/analyze-meal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.detail ?? `HTTP ${res.status}`);
+      }
+      const analysis = await res.json();
+      setEditForm((f) => ({
+        ...f,
+        description: analysis.description ?? f.description,
+        calories: analysis.calories ?? f.calories,
+        protein: analysis.protein ?? f.protein,
+        carbs: analysis.carbs ?? f.carbs,
+        fat: analysis.fat ?? f.fat,
+      }));
+      toast.success(t("meals_reanalyzed") as string);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      toast.error(`${t("meals_reanalyze_error") as string}${msg ? ` (${msg})` : ""}`);
+    } finally {
+      setReanalyzing(false);
     }
   }
 
@@ -349,6 +389,14 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
                   placeholder={t("meal_desc_ph") as string}
                   className="w-full border border-wing-border rounded-2xl px-3 py-2.5 text-sm bg-wing-bg focus:outline-none focus:ring-2 focus:ring-wing-ink"
                 />
+                <button
+                  onClick={handleReanalyzeEdit}
+                  disabled={reanalyzing || !editForm.description.trim()}
+                  className="w-full py-2 rounded-2xl text-sm font-semibold text-wing-ink disabled:opacity-40 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
+                  style={{ background: "linear-gradient(135deg, #f5dd4b, #ff6b47)" }}
+                >
+                  {reanalyzing ? (t("meals_analyzing") as string) : (t("meals_reanalyze") as string)}
+                </button>
                 <div className="grid grid-cols-2 gap-2">
                   {([
                     ["calories", t("kcal") as string],

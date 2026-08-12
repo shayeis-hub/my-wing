@@ -35,9 +35,39 @@ async function incrementDailyMealCountAdmin(uid: string, date: string): Promise<
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Fetches an already-uploaded meal photo (Firebase Storage URL) server-side
+// and returns it as base64 — used when reanalyzing a SAVED meal, where the
+// browser only has the URL, not the original file. Server-to-server fetch
+// avoids the CORS restrictions a client-side fetch/canvas would hit.
+async function fetchImageAsBase64(url: string): Promise<{ base64: string; mediaType: "image/jpeg" | "image/png" | "image/webp" } | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") ?? "";
+    const mediaType: "image/jpeg" | "image/png" | "image/webp" =
+      contentType.includes("png") ? "image/png" : contentType.includes("webp") ? "image/webp" : "image/jpeg";
+    const buf = Buffer.from(await res.arrayBuffer());
+    return { base64: buf.toString("base64"), mediaType };
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { base64Image, base64Images, mediaType, hint, previousAnalysis, textDescription, userId, userEmail, lang } = await req.json();
+    const body = await req.json();
+    let { base64Image, mediaType } = body;
+    const { base64Images, hint, previousAnalysis, textDescription, userId, userEmail, lang, imageUrl } = body;
+
+    // Reanalyzing a SAVED meal: the client only has the Storage URL, not the
+    // original file, so fetch and encode it server-side.
+    if (!base64Image && !base64Images && imageUrl) {
+      const fetched = await fetchImageAsBase64(imageUrl);
+      if (fetched) {
+        base64Image = fetched.base64;
+        mediaType = fetched.mediaType;
+      }
+    }
 
     // ── Enforce meal-photo limit (only for image analysis, not text) ──────────
     if (base64Image && userId && userEmail !== undefined) {
@@ -60,7 +90,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Text analysis (manual entry / voice) — no limit ───────────────────────
+    // ── Text analysis (manual entry / voice, or a saved meal with no photo) ───
     if (textDescription) {
       getAdminApp();
       const analysis = await analyzeMealText(textDescription, lang ?? "he");
