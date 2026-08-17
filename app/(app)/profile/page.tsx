@@ -12,6 +12,7 @@ import { updateUserStepsGoal, getWeightHistory, updateActiveWing, getWingsByIds 
 import { compressImageToBlob } from "@/lib/utils/imageCompress";
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib/utils/calculator";
 import { WeightChart } from "@/components/dashboard/WeightChart";
+import { WeightLogTable } from "@/components/dashboard/WeightLogTable";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Camera, Footprints, Users, Trophy, TrendingDown, ChevronDown, Crown } from "lucide-react";
@@ -245,6 +246,16 @@ export default function ProfilePage() {
         </h3>
         <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} />
       </Card>
+
+      {/* Weight log table */}
+      {weightLogs.length > 0 && (
+        <Card>
+          <h3 className="font-semibold text-slate-800 mb-3">
+            {lang === "he" ? "היסטוריית שקילות" : "Weigh-in History"}
+          </h3>
+          <WeightLogTable logs={weightLogs} heightCm={profile?.heightCm} lang={lang} />
+        </Card>
+      )}
 
       {/* Steps goal */}
       <Card>
