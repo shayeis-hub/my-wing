@@ -52,6 +52,9 @@ jobs:
   build:
     runs-on: macos-15
     steps:
+      - name: Select Xcode 26 (App Store Connect requires the iOS 26 SDK)
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
       - name: Checkout
         uses: actions/checkout@v5
 
