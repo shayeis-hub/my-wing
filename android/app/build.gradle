@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+import groovy.json.JsonSlurper
+
+// versionName tracks the web app's package.json version so the two never
+// drift apart again — bump package.json, not this file, to change it.
+def webAppVersion = new JsonSlurper().parse(file('../../package.json'))['version']
+
 android {
     namespace = "app.wingpact.android"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +13,10 @@ android {
         applicationId "app.wingpact.android"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.1"
+        // versionCode must strictly increase on every Play Store upload —
+        // bump it by hand each release; it does not follow package.json.
+        versionCode 5
+        versionName webAppVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
