@@ -53,6 +53,8 @@
 	<string>Wingpact needs access to your photos so you can attach a meal photo from your library.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Wingpact reads your step count from Health to show your daily activity and wing leaderboard.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Wingpact does not write any data to Health.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Wingpact sends you notifications for wing encouragement, SOS alerts, and daily check-in reminders.</string>
 	<key>CFBundleURLTypes</key>
