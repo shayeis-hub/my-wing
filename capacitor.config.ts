@@ -44,7 +44,7 @@ const config: CapacitorConfig = {
       // on it), so the native plugin only fetches the Google credential and we
       // sign into the JS SDK ourselves with signInWithCredential.
       skipNativeAuth: true,
-      providers: ["google.com"],
+      providers: ["google.com", "apple.com"],
     },
   },
 };

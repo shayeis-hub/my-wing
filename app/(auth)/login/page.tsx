@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { Mail } from "lucide-react";
-import { signIn, signInWithGoogle, sendPasswordReset } from "@/lib/firebase/auth";
+import { Capacitor } from "@capacitor/core";
+import { signIn, signInWithGoogle, signInWithApple, sendPasswordReset } from "@/lib/firebase/auth";
 import { useLanguage } from "@/lib/i18n";
 
 function WingLogo() {
@@ -36,6 +37,14 @@ function GoogleIcon() {
   );
 }
 
+function AppleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden fill="white">
+      <path d="M16.365 1.43c0 1.14-.416 2.06-1.246 2.77-.997.85-2.036 1.34-3.19 1.24-.05-1.03.39-2.05 1.23-2.79.88-.79 2.29-1.34 3.2-1.22zM20.6 17.1c-.5 1.16-.75 1.68-1.42 2.7-.93 1.42-2.24 3.19-3.86 3.2-1.44.02-1.81-.94-3.76-.93-1.94.01-2.35.95-3.79.93-1.62-.02-2.86-1.61-3.79-3.03C1.32 16.9.63 12.61 2.28 9.9c1.17-1.92 3.02-3.05 4.76-3.05 1.77 0 2.88.98 4.35.98 1.42 0 2.28-.98 4.35-.98 1.55 0 3.19.85 4.36 2.31-3.83 2.1-3.21 7.57.5 8.94z" />
+    </svg>
+  );
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,6 +55,11 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  // Apple only requires this button on iOS — the underlying plugin has no
+  // native Apple sign-in on Android, so don't risk it on the already-live
+  // Android app for a button nobody needs there.
+  const [showAppleButton] = useState(() => Capacitor.getPlatform() !== "android");
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -86,6 +100,18 @@ function LoginForm() {
       toast.error(t("login_google_error"));
     } finally {
       setGoogleLoading(false);
+    }
+  }
+
+  async function handleApple() {
+    setAppleLoading(true);
+    try {
+      await signInWithApple();
+      router.replace(redirectTo);
+    } catch {
+      toast.error(t("login_apple_error"));
+    } finally {
+      setAppleLoading(false);
     }
   }
 
@@ -223,6 +249,19 @@ function LoginForm() {
         <span className="font-mono text-xs tracking-[0.22em] uppercase text-wing-muted">{t("or")}</span>
         <div className="flex-1 h-px bg-wing-border" />
       </div>
+
+      {/* Apple — shown above Google per Apple's equal-prominence requirement.
+          Not shown on Android, where there's no native Apple sign-in. */}
+      {showAppleButton && (
+        <button
+          onClick={handleApple}
+          disabled={appleLoading}
+          className="w-full bg-black border border-black rounded-[14px] px-4 py-3.5 text-sm font-semibold text-white flex items-center justify-center gap-2 active:scale-[0.97] transition-transform disabled:opacity-60 mb-2.5"
+        >
+          <AppleIcon />
+          {t("login_apple")}
+        </button>
+      )}
 
       {/* Google */}
       <button

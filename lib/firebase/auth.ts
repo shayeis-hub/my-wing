@@ -4,6 +4,7 @@ import {
   signOut as firebaseSignOut,
   updateProfile,
   GoogleAuthProvider,
+  OAuthProvider,
   signInWithPopup,
   signInWithCredential,
   onAuthStateChanged,
@@ -50,6 +51,40 @@ export async function signInWithGoogle() {
   } else {
     // Web: standard popup flow.
     const provider = new GoogleAuthProvider();
+    const credential = await signInWithPopup(auth, provider);
+    firebaseUser = credential.user;
+  }
+
+  const existing = await getDoc(doc(db, "users", firebaseUser.uid));
+  if (!existing.exists()) {
+    await createUserDoc(firebaseUser, firebaseUser.displayName ?? "");
+  }
+  return firebaseUser;
+}
+
+export async function signInWithApple() {
+  let firebaseUser: FirebaseUser;
+
+  if (Capacitor.isNativePlatform()) {
+    // Same native-credential pattern as signInWithGoogle above — Apple's
+    // account picker is shown by the OS, not an embedded web popup.
+    const { FirebaseAuthentication } = await import("@capacitor-firebase/authentication");
+    const result = await FirebaseAuthentication.signInWithApple();
+    const idToken = result.credential?.idToken;
+    if (!idToken) throw new Error("No Apple idToken returned");
+    const provider = new OAuthProvider("apple.com");
+    const cred = provider.credential({ idToken, rawNonce: result.credential?.nonce });
+    const credential = await signInWithCredential(auth, cred);
+    firebaseUser = credential.user;
+    // Apple only ever returns the user's name on their very first
+    // authorization — the Capacitor plugin surfaces it via result.user, not
+    // on the Firebase credential itself, so it has to be applied here.
+    if (!firebaseUser.displayName && result.user?.displayName) {
+      await updateProfile(firebaseUser, { displayName: result.user.displayName });
+    }
+  } else {
+    // Web: standard popup flow.
+    const provider = new OAuthProvider("apple.com");
     const credential = await signInWithPopup(auth, provider);
     firebaseUser = credential.user;
   }
