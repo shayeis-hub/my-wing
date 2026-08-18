@@ -41,3 +41,11 @@ next-env.d.ts
 
 # Release keystore — never commit, stored as GitHub secret only
 android/app/release.keystore
+
+# iOS — local Xcode user state and build output, never commit
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/App/.build/
+ios/App/build/
+ios/DerivedData/
+ios/App/App/GoogleService-Info.plist.bak

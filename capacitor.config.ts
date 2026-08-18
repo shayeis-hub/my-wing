@@ -1,7 +1,12 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId:    "app.wingpact.android",
+  // Capacitor only reads this at `cap add <platform>` time to seed the new
+  // native project's identifier — each platform's own project file
+  // (android/app/build.gradle's applicationId, ios's PRODUCT_BUNDLE_IDENTIFIER)
+  // is the real source of truth afterward, so changing this does not affect
+  // the already-published, already-locked-in Android app.
+  appId:    "app.wingpact.ios",
   appName:  "Wingpact",
   // Load the live site — always up to date, no export needed.
   // Start at /dashboard so the AuthGuard routes to /login when not signed in,
