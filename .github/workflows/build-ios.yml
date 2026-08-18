@@ -62,6 +62,7 @@ jobs:
           cd ios/App
           xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -destination "generic/platform=iOS" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$HOME/private_keys/AuthKey_${ASC_API_KEY_ID}.p8" \
             -authenticationKeyID "$ASC_API_KEY_ID" \
