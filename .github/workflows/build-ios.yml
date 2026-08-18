@@ -17,7 +17,15 @@ name: Build iOS
 #                                  Apple never returns a private key for a
 #                                  certificate created from an externally-
 #                                  generated CSR, so -allowProvisioningUpdates
-#                                  alone cannot sign with it on a fresh runner)
+#                                  alone cannot sign with it on a fresh runner).
+#                                  IMPORTANT: export it with OpenSSL's -legacy
+#                                  flag. OpenSSL 3.x defaults to AES-256 +
+#                                  SHA-256 MAC, which macOS's `security import`
+#                                  cannot read — it fails with the misleading
+#                                  "MAC verification failed (wrong password?)"
+#                                  even when the password is correct. -legacy
+#                                  produces the RC2-40/3DES + SHA-1 MAC format
+#                                  the keychain expects.
 #   IOS_DIST_CERTIFICATE_PASSWORD - the password the .p12 was exported with
 #
 # CODE_SIGN_STYLE is Manual (see project.pbxproj) with
