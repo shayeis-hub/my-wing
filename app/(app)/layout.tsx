@@ -32,6 +32,7 @@ function todayKey(): string {
 // Runs on mount and whenever the app returns to the foreground.
 function WidgetActions() {
   const { user, firebaseUser } = useAuth();
+  const { lang } = useLanguage();
 
   useEffect(() => {
     if (!isNativeApp() || !firebaseUser || !user?.wingId) return;
@@ -70,7 +71,7 @@ function WidgetActions() {
           body: JSON.stringify({ wingId, userId: uid, userName }),
         });
         const toast = (await import("react-hot-toast")).default;
-        toast.success("SOS נשלח לחברי הכנף");
+        toast.success(lang === "he" ? "SOS נשלח לחברי הכנף" : "SOS sent to your wing");
       } catch { /* network error — ignore */ }
     }
 

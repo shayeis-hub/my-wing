@@ -10,26 +10,30 @@ import {
   ReferenceLine,
 } from "recharts";
 import { format, parseISO } from "date-fns";
-import { he } from "date-fns/locale";
+import { he, enUS } from "date-fns/locale";
 import type { WeightLog } from "@/types";
 
 interface WeightChartProps {
   logs: WeightLog[];
   targetWeight?: number;
+  lang?: "he" | "en";
 }
 
-export function WeightChart({ logs, targetWeight }: WeightChartProps) {
+export function WeightChart({ logs, targetWeight, lang = "he" }: WeightChartProps) {
+  const locale = lang === "he" ? he : enUS;
+  const kg = lang === "he" ? "ק\"ג" : "kg";
+
   if (logs.length === 0) {
     return (
       <p className="text-sm text-slate-400 text-center py-4">
-        עדיין אין נתוני משקל — עדכן משקל בצ&apos;ק-אין היומי
+        {lang === "he" ? "עדיין אין נתוני משקל — עדכן משקל בצ'ק-אין היומי" : "No weight data yet — log a weight in the daily check-in"}
       </p>
     );
   }
 
   const data = logs.map((l) => ({
     date: l.date,
-    label: format(parseISO(l.date), "d/M", { locale: he }),
+    label: format(parseISO(l.date), "d/M", { locale }),
     weight: l.weightKg,
   }));
 
@@ -39,18 +43,18 @@ export function WeightChart({ logs, targetWeight }: WeightChartProps) {
   const first = data[0].weight;
   const last = data[data.length - 1].weight;
   const diff = +(last - first).toFixed(1);
-  const diffText = diff < 0 ? `${diff} ק"ג` : diff > 0 ? `+${diff} ק"ג` : "ללא שינוי";
+  const diffText = diff < 0 ? `${diff} ${kg}` : diff > 0 ? `+${diff} ${kg}` : (lang === "he" ? "ללא שינוי" : "No change");
   const diffColor = diff < 0 ? "text-green-500" : diff > 0 ? "text-red-400" : "text-slate-400";
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-sm">
         <span className="text-slate-500">
-          התחלה: <strong className="text-slate-700">{first} ק&quot;ג</strong>
+          {lang === "he" ? "התחלה" : "Start"}: <strong className="text-slate-700">{first} {kg}</strong>
         </span>
         <span className={`font-semibold ${diffColor}`}>{diffText}</span>
         <span className="text-slate-500">
-          עכשיו: <strong className="text-slate-700">{last} ק&quot;ג</strong>
+          {lang === "he" ? "עכשיו" : "Now"}: <strong className="text-slate-700">{last} {kg}</strong>
         </span>
       </div>
 
@@ -69,7 +73,7 @@ export function WeightChart({ logs, targetWeight }: WeightChartProps) {
             tickLine={false}
           />
           <Tooltip
-            formatter={(value) => [`${value} ק"ג`, "משקל"]}
+            formatter={(value) => [`${value} ${kg}`, lang === "he" ? "משקל" : "Weight"]}
             labelFormatter={(label) => label}
             contentStyle={{
               borderRadius: "12px",
@@ -82,7 +86,7 @@ export function WeightChart({ logs, targetWeight }: WeightChartProps) {
               y={targetWeight}
               stroke="#0ea5e9"
               strokeDasharray="4 4"
-              label={{ value: `יעד ${targetWeight}`, fontSize: 10, fill: "#0ea5e9", position: "right" }}
+              label={{ value: `${lang === "he" ? "יעד" : "Target"} ${targetWeight}`, fontSize: 10, fill: "#0ea5e9", position: "right" }}
             />
           )}
           <Line

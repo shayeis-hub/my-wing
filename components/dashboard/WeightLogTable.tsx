@@ -56,11 +56,11 @@ export function WeightLogTable({ logs, heightCm, lang }: WeightLogTableProps) {
       <table className="w-full text-sm min-w-[480px]">
         <thead>
           <tr className="text-wing-subtle text-[11px] uppercase tracking-wide">
-            <th className="text-right font-medium px-2 py-1.5">{lang === "he" ? "תאריך" : "Date"}</th>
-            <th className="text-right font-medium px-2 py-1.5">{lang === "he" ? "משקל" : "Weight"}</th>
-            <th className="text-right font-medium px-2 py-1.5">{lang === "he" ? "משקילה אחרונה" : "vs Last"}</th>
-            <th className="text-right font-medium px-2 py-1.5">{lang === "he" ? "מהתחלה" : "vs Start"}</th>
-            <th className="text-right font-medium px-2 py-1.5">BMI</th>
+            <th className="text-start font-medium px-2 py-1.5">{lang === "he" ? "תאריך" : "Date"}</th>
+            <th className="text-start font-medium px-2 py-1.5">{lang === "he" ? "משקל" : "Weight"}</th>
+            <th className="text-start font-medium px-2 py-1.5">{lang === "he" ? "משקילה אחרונה" : "vs Last"}</th>
+            <th className="text-start font-medium px-2 py-1.5">{lang === "he" ? "מהתחלה" : "vs Start"}</th>
+            <th className="text-start font-medium px-2 py-1.5">BMI</th>
           </tr>
         </thead>
         <tbody>

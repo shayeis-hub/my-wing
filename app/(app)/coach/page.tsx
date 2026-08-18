@@ -21,31 +21,31 @@ import {
 // Display metadata for the paid plans (the free trial is shown separately).
 const PLAN_META: Record<
   "basic" | "extended" | "unlimited",
-  { name: string; tagline: string; clients: string; recommended?: boolean }
+  { name: string; tagline: Record<"he" | "en", string>; clients: Record<"he" | "en", string>; recommended?: boolean }
 > = {
   basic: {
     name: "Starter",
-    tagline: "להתחלה — ליווי קבוצה קטנה או כמה לקוחות פרטיים",
-    clients: "עד 10 לקוחות",
+    tagline: { he: "להתחלה — ליווי קבוצה קטנה או כמה לקוחות פרטיים", en: "To get started — a small group or a few private clients" },
+    clients: { he: "עד 10 לקוחות", en: "Up to 10 clients" },
   },
   extended: {
     name: "Premium",
-    tagline: "לדיאטנ/ית עם מספר קבוצות ולקוחות פרטיים",
-    clients: "עד 30 לקוחות",
+    tagline: { he: "לדיאטנ/ית עם מספר קבוצות ולקוחות פרטיים", en: "For dietitians with several groups and private clients" },
+    clients: { he: "עד 30 לקוחות", en: "Up to 30 clients" },
   },
   unlimited: {
     name: "Business",
-    tagline: "לפרקטיקה גדולה — לקוחות ללא הגבלה",
-    clients: "לקוחות ללא הגבלה",
+    tagline: { he: "לפרקטיקה גדולה — לקוחות ללא הגבלה", en: "For a large practice — unlimited clients" },
+    clients: { he: "לקוחות ללא הגבלה", en: "Unlimited clients" },
     recommended: true,
   },
 };
 
-const PLAN_FEATURES = [
-  "דף ניהול לקוחות מלא",
-  "קישורי הזמנה פרטיים וקבוצתיים",
-  "גישת פרימיום מלאה לכל הלקוחות",
-  "מעקב ארוחות, צ'ק-אפ והודעות לכל לקוח",
+const PLAN_FEATURES: Record<"he" | "en", string>[] = [
+  { he: "דף ניהול לקוחות מלא", en: "Full client-management dashboard" },
+  { he: "קישורי הזמנה פרטיים וקבוצתיים", en: "Private and group invite links" },
+  { he: "גישת פרימיום מלאה לכל הלקוחות", en: "Full premium access for all clients" },
+  { he: "מעקב ארוחות, צ'ק-אפ והודעות לכל לקוח", en: "Meal, check-in and message tracking for every client" },
 ];
 
 export default function CoachPage() {
@@ -230,10 +230,10 @@ export default function CoachPage() {
   // flashing the plan-selection screen at a coach who already paid.
   if (!isActive && syncing) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center" dir="rtl">
+      <div className="min-h-[60vh] flex items-center justify-center" dir={lang === "he" ? "rtl" : "ltr"}>
         <div className="text-center space-y-3">
           <div className="w-8 h-8 mx-auto rounded-full border-4 border-wing-border border-t-wing-heat animate-spin" />
-          <p className="text-sm text-wing-muted">מאמת את המנוי שלך…</p>
+          <p className="text-sm text-wing-muted">{lang === "he" ? "מאמת את המנוי שלך…" : "Verifying your subscription…"}</p>
         </div>
       </div>
     );
@@ -242,14 +242,14 @@ export default function CoachPage() {
   // ── Plan selection (no active plan) ─────────────────────────────────────────
   if (!isActive) {
     return (
-      <div className="p-4 md:py-8 space-y-4 md:space-y-6" dir="rtl">
+      <div className="p-4 md:py-8 space-y-4 md:space-y-6" dir={lang === "he" ? "rtl" : "ltr"}>
         <div className="pt-4 text-center">
           <h1 className="text-2xl font-black text-wing-ink flex items-center justify-center gap-2">
             <Crown size={22} className="text-wing-honey" />
-            מסלולי דיאטנ/ית
+            {lang === "he" ? "מסלולי דיאטנ/ית" : "Dietitian Plans"}
           </h1>
           <p className="text-sm text-wing-muted mt-1.5">
-            בחר/י מסלול כדי לפתוח את דף ניהול הלקוחות
+            {lang === "he" ? "בחר/י מסלול כדי לפתוח את דף ניהול הלקוחות" : "Choose a plan to unlock the client-management dashboard"}
           </p>
         </div>
 
@@ -260,8 +260,8 @@ export default function CoachPage() {
             disabled={busy}
             className="w-full md:max-w-md md:mx-auto md:block bg-wing-elevated border-2 border-dashed border-wing-honey rounded-[20px] px-4 py-3.5 text-center active:scale-[0.98] transition-transform disabled:opacity-50"
           >
-            <span className="block font-bold text-wing-ink">התחלה בהתנסות חינם</span>
-            <span className="block text-xs text-wing-muted mt-0.5">לקוח אחד · 30 יום · ללא תשלום</span>
+            <span className="block font-bold text-wing-ink">{lang === "he" ? "התחלה בהתנסות חינם" : "Start with a free trial"}</span>
+            <span className="block text-xs text-wing-muted mt-0.5">{lang === "he" ? "לקוח אחד · 30 יום · ללא תשלום" : "One client · 30 days · free"}</span>
           </button>
         )}
 
@@ -281,19 +281,19 @@ export default function CoachPage() {
             >
               {recommended && (
                 <span className="absolute -top-2.5 right-5 bg-wing-heat text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                  מומלץ
+                  {lang === "he" ? "מומלץ" : "Recommended"}
                 </span>
               )}
 
               <p className="text-lg font-black text-wing-ink">{meta.name}</p>
-              <p className="text-xs text-wing-muted mt-1 leading-snug">{meta.tagline}</p>
+              <p className="text-xs text-wing-muted mt-1 leading-snug">{meta.tagline[lang]}</p>
 
               <div className="flex items-end gap-1.5 mt-4">
                 <span className="text-[40px] font-black text-wing-ink leading-none tabular">₪{p.priceILS}</span>
-                <span className="text-sm text-wing-subtle mb-1">/ חודש</span>
+                <span className="text-sm text-wing-subtle mb-1">{lang === "he" ? "/ חודש" : "/ month"}</span>
               </div>
 
-              <p className="text-sm font-bold text-wing-heat mt-2">{meta.clients}</p>
+              <p className="text-sm font-bold text-wing-heat mt-2">{meta.clients[lang]}</p>
 
               <button
                 onClick={() => handleActivate(id)}
@@ -302,16 +302,16 @@ export default function CoachPage() {
                   recommended ? "bg-wing-heat text-white" : "border border-wing-heat text-wing-heat"
                 }`}
               >
-                בואו נתחיל
+                {lang === "he" ? "בואו נתחיל" : "Let's get started"}
               </button>
 
               <div className="mt-4 pt-4 border-t border-wing-divider">
-                <p className="text-xs font-bold text-wing-muted mb-2">מה כלול:</p>
+                <p className="text-xs font-bold text-wing-muted mb-2">{lang === "he" ? "מה כלול:" : "What's included:"}</p>
                 <ul className="space-y-1.5">
                   {features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-wing-ink">
+                    <li key={f.he} className="flex items-start gap-2 text-sm text-wing-ink">
                       <Check size={15} className="text-wing-success shrink-0 mt-0.5" />
-                      <span>{f}</span>
+                      <span>{f[lang]}</span>
                     </li>
                   ))}
                 </ul>
@@ -322,7 +322,7 @@ export default function CoachPage() {
         </div>
 
         <p className="text-[11px] text-wing-subtle text-center">
-          התשלום מאובטח דרך PayPal · ניתן לבטל בכל עת
+          {lang === "he" ? "התשלום מאובטח דרך PayPal · ניתן לבטל בכל עת" : "Payment secured by PayPal · Cancel any time"}
         </p>
       </div>
     );
@@ -423,9 +423,9 @@ export default function CoachPage() {
                 >
                   <div className="text-start">
                     <span className="text-sm font-bold text-wing-ink">{PLAN_META[id].name}</span>
-                    <span className="text-xs text-wing-muted mr-2">{PLAN_META[id].clients}</span>
+                    <span className="text-xs text-wing-muted mx-2">{PLAN_META[id].clients[lang]}</span>
                   </div>
-                  <span className="text-sm font-black text-wing-heat">₪{COACH_PLANS[id].priceILS}<span className="text-xs font-normal text-wing-muted">/חו׳</span></span>
+                  <span className="text-sm font-black text-wing-heat">₪{COACH_PLANS[id].priceILS}<span className="text-xs font-normal text-wing-muted">{lang === "he" ? "/חו׳" : "/mo"}</span></span>
                 </button>
               ))}
           </div>

@@ -412,7 +412,7 @@ function CheckinPageInner() {
       </div>
       {isRetro && (
         <span className="inline-block text-xs text-wing-heat font-medium bg-wing-elevated border border-wing-border px-3 py-1 rounded-full">
-          <Pencil size={12} className="inline mr-1" />מילוי רטרואקטיבי
+          <Pencil size={12} className="inline mx-1" />{lang === "he" ? "מילוי רטרואקטיבי" : "Retroactive entry"}
         </span>
       )}
 
@@ -524,7 +524,7 @@ function CheckinPageInner() {
         {workouts.length > 0 ? (
           <button
             onClick={() => setWfOpen(o => !o)}
-            className="bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2 text-right w-full"
+            className={`bg-wing-surface border border-wing-border rounded-[20px] p-4 flex flex-col gap-2 w-full ${lang === "he" ? "text-right" : "text-left"}`}
           >
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-1.5">
@@ -864,7 +864,7 @@ function CheckinPageInner() {
                 </div>
                 {(c.workouts?.length ? c.workouts : c.workout?.done ? [c.workout] : []).map((w, wi) => w.description ? (
                   <p key={wi} className="text-xs text-green-700 bg-green-50 rounded-xl px-3 py-1.5">
-                    <Dumbbell size={12} className="inline mr-1" />{w.description}{w.caloriesBurned ? ` · ${w.caloriesBurned} ${t("kcal")}` : ""}
+                    <Dumbbell size={12} className="inline mx-1" />{w.description}{w.caloriesBurned ? ` · ${w.caloriesBurned} ${t("kcal")}` : ""}
                   </p>
                 ) : null)}
                 {c.notes && (

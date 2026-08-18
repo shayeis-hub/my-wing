@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
@@ -26,6 +27,7 @@ function WingLogo() {
 export default function JoinPage() {
   const { token } = useParams<{ token: string }>();
   const { firebaseUser, user, loading } = useAuth();
+  const { lang } = useLanguage();
   const router = useRouter();
   const [joining, setJoining] = useState(false);
   const [done, setDone] = useState(false);
@@ -59,11 +61,15 @@ export default function JoinPage() {
           return;
         }
         if (data?.error === "COACH_LIMIT_REACHED") {
-          setError("הדיאטנ/ית הגיעה למגבלת הלקוחות — פנה/י אליה ישירות.");
+          setError(lang === "he"
+            ? "הדיאטנ/ית הגיעה למגבלת הלקוחות — פנה/י אליה ישירות."
+            : "The dietitian has reached their client limit — please contact them directly.");
           return;
         }
         if (data?.error === "Coach plan inactive") {
-          setError("המסלול של הדיאטנ/ית אינו פעיל כרגע — פנה/י אליה ישירות.");
+          setError(lang === "he"
+            ? "המסלול של הדיאטנ/ית אינו פעיל כרגע — פנה/י אליה ישירות."
+            : "The dietitian's plan isn't active right now — please contact them directly.");
           return;
         }
         throw new Error(data?.error ?? "join failed");
@@ -72,60 +78,62 @@ export default function JoinPage() {
       setTimeout(() => router.replace("/dashboard"), 1500);
     } catch (err) {
       console.error("Join error:", err);
-      setError("קישור לא תקין או שפג תוקפו.");
+      setError(lang === "he" ? "קישור לא תקין או שפג תוקפו." : "This link is invalid or has expired.");
     } finally {
       setJoining(false);
     }
   }
 
+  const dir = lang === "he" ? "rtl" : "ltr";
+
   if (loading || (firebaseUser && user && !done && !error)) {
     return (
-      <div className="min-h-screen bg-wing-bg flex items-center justify-center">
+      <div className="min-h-screen bg-wing-bg flex items-center justify-center" dir={dir}>
         <div className="text-center space-y-4">
           <div className="flex justify-center animate-bounce"><WingLogo /></div>
-          <p className="text-sm text-wing-muted">מצטרף/ת למבנה...</p>
+          <p className="text-sm text-wing-muted">{lang === "he" ? "מצטרף/ת למבנה..." : "Joining the wing..."}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-wing-bg flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-wing-bg flex flex-col items-center justify-center p-6" dir={dir}>
       <div className="w-full max-w-sm text-center space-y-6">
         <div className="flex justify-center"><WingLogo /></div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">הצטרף למבנה כנף</h1>
+          <h1 className="text-2xl font-bold text-slate-800">{lang === "he" ? "הצטרף למבנה כנף" : "Join a Wing"}</h1>
           <p className="text-slate-500 text-sm mt-2">
-            קיבלת הזמנה להצטרף לקבוצת תמיכה לירידה במשקל
+            {lang === "he" ? "קיבלת הזמנה להצטרף לקבוצת תמיכה לירידה במשקל" : "You've been invited to join a weight-loss support group"}
           </p>
         </div>
 
         {done ? (
           <div className="bg-green-50 text-green-600 rounded-3xl p-6">
-            <p className="font-bold">הצטרפת בהצלחה!</p>
-            <p className="text-sm mt-1">מעביר אותך לדשבורד...</p>
+            <p className="font-bold">{lang === "he" ? "הצטרפת בהצלחה!" : "Successfully joined!"}</p>
+            <p className="text-sm mt-1">{lang === "he" ? "מעביר אותך לדשבורד..." : "Taking you to your dashboard..."}</p>
           </div>
         ) : error ? (
           <div className="bg-red-50 text-red-500 rounded-3xl p-6">
             <p className="font-medium">{error}</p>
             <Link href="/" className="text-sm underline mt-2 block">
-              חזור לדף הבית
+              {lang === "he" ? "חזור לדף הבית" : "Back to home"}
             </Link>
           </div>
         ) : (
           // Not logged in — prompt to register or log in
           <div className="space-y-3">
             <p className="text-slate-600 text-sm">
-              כדי להצטרף, עליך להתחבר או להירשם תחילה
+              {lang === "he" ? "כדי להצטרף, עליך להתחבר או להירשם תחילה" : "To join, you'll need to log in or sign up first"}
             </p>
             <Link href={`/login?redirect=/join/${token}`}>
               <Button size="lg" className="w-full">
-                התחבר והצטרף
+                {lang === "he" ? "התחבר והצטרף" : "Log in & Join"}
               </Button>
             </Link>
             <Link href={`/register?redirect=/join/${token}`}>
               <Button variant="secondary" size="lg" className="w-full">
-                הירשם והצטרף
+                {lang === "he" ? "הירשם והצטרף" : "Sign up & Join"}
               </Button>
             </Link>
           </div>

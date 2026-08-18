@@ -258,7 +258,7 @@ function MemberPageInner() {
                   : `Encourage ${memberFirstName}, ask how it's going...`
               }
               className="flex-1 text-sm border border-wing-border rounded-2xl px-3 py-2.5 bg-wing-elevated focus:outline-none focus:ring-2 focus:ring-wing-ink text-wing-ink placeholder:text-wing-subtle"
-              dir="rtl"
+              dir={lang === "he" ? "rtl" : "ltr"}
             />
             <button
               onClick={handleSendMessage}

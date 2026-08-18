@@ -33,7 +33,7 @@ export default function WeightPage() {
       </div>
 
       <Card>
-        <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} />
+        <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} lang={lang} />
       </Card>
 
       {weightLogs.length > 0 && (
