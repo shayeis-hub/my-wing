@@ -1,0 +1,19 @@
+diff --git a/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/Health.swift b/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/Health.swift
+index 98e57f9..e332f4d 100644
+--- a/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/Health.swift
++++ b/node_modules/@capgo/capacitor-health/ios/Sources/HealthPlugin/Health.swift
+@@ -770,7 +770,13 @@ struct AuthorizationStatusPayload {
+ }
+ 
+ final class Health {
+-    private let healthStore = HKHealthStore()
++    // lazy: constructing HKHealthStore() on hardware that doesn't support
++    // HealthKit (e.g. every iPad model) is documented by Apple to crash
++    // unrecoverably. Deferring creation until first actual use means it's
++    // never touched by callers that check isHealthDataAvailable()/isAvailable()
++    // first and bail out when it's false — which is how this plugin is used
++    // here. Patched via patch-package; see patches/@capgo+capacitor-health+*.patch.
++    private lazy var healthStore = HKHealthStore()
+     private let isoFormatter: ISO8601DateFormatter
+     private let emptyWriteTypesSet = Set<HKSampleType>()
+     
