@@ -5,9 +5,7 @@
 	<key>method</key>
 	<string>app-store-connect</string>
 	<key>teamID</key>
-	<!-- Replace with the real 10-character Apple Developer Team ID from
-	     developer.apple.com → Membership details, once enrollment is approved. -->
-	<string>REPLACE_WITH_APPLE_TEAM_ID</string>
+	<string>D7VVU9T496</string>
 	<key>signingStyle</key>
 	<string>automatic</string>
 	<key>uploadSymbols</key>
