@@ -91,7 +91,19 @@ jobs:
           security list-keychain -d user -s build.keychain login.keychain
           rm "$RUNNER_TEMP/certificate.p12"
 
-      - name: Archive (automatic signing via App Store Connect API key)
+      - name: Resolve version numbers
+        run: |
+          # Marketing version tracks the web app's package.json, exactly like
+          # android/app/build.gradle does, so the three stay in lockstep.
+          APP_VERSION=$(node -p "require('./package.json').version")
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          # App Store Connect rejects a build whose number it has seen before,
+          # so the build number must strictly increase across uploads.
+          # github.run_number is monotonic per workflow and never reused.
+          echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
+          echo "Building $APP_VERSION (${{ github.run_number }})"
+
+      - name: Archive (manual signing, pinned certificate + profile)
         env:
           ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
           ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
@@ -104,6 +116,8 @@ jobs:
             -authenticationKeyPath "$HOME/private_keys/AuthKey_${ASC_API_KEY_ID}.p8" \
             -authenticationKeyID "$ASC_API_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_API_ISSUER_ID" \
+            MARKETING_VERSION="$APP_VERSION" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
             archive
 
       - name: Export IPA
@@ -127,3 +141,21 @@ jobs:
           name: wingpact-ios-release
           path: ${{ runner.temp }}/export/*.ipa
           retention-days: 30
+
+      # Sends the build to App Store Connect, where it appears under TestFlight
+      # after Apple finishes processing it (usually a few minutes). This is the
+      # only route to Apple from this setup — the manual alternative, the
+      # Transporter app, is macOS-only. altool finds the signing key by name in
+      # ~/private_keys, which the earlier step already wrote.
+      - name: Upload to TestFlight
+        env:
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+        run: |
+          IPA=$(ls "$RUNNER_TEMP/export"/*.ipa | head -1)
+          echo "Uploading $(basename "$IPA") — version $APP_VERSION build $BUILD_NUMBER"
+          xcrun altool --upload-app \
+            --file "$IPA" \
+            --type ios \
+            --apiKey "$ASC_API_KEY_ID" \
+            --apiIssuer "$ASC_API_ISSUER_ID"
