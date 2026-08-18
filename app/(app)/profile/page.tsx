@@ -11,11 +11,9 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateUserStepsGoal, getWeightHistory, updateActiveWing, getWingsByIds } from "@/lib/firebase/firestore";
 import { compressImageToBlob } from "@/lib/utils/imageCompress";
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib/utils/calculator";
-import { WeightChart } from "@/components/dashboard/WeightChart";
-import { WeightLogTable } from "@/components/dashboard/WeightLogTable";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Camera, Footprints, Users, Trophy, TrendingDown, ChevronDown, Crown } from "lucide-react";
+import { Camera, Footprints, Users, Trophy, ChevronDown, Crown } from "lucide-react";
 import Link from "next/link";
 import type { WeightLog } from "@/types";
 
@@ -112,12 +110,15 @@ export default function ProfilePage() {
   }
 
   const profile = user?.profile;
-  const bmi = profile?.heightCm && profile?.weightKg
-    ? calculateBMI(profile.weightKg, profile.heightCm)
+  // Prefer the most recent weigh-in over the (possibly stale) onboarding weight,
+  // so BMI/BMR/TDEE react to new weigh-ins instead of staying fixed forever.
+  const currentWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weightKg : profile?.weightKg;
+  const bmi = profile?.heightCm && currentWeight
+    ? calculateBMI(currentWeight, profile.heightCm)
     : null;
   const bmiCategory = bmi ? getBMICategory(bmi) : null;
-  const bmr = profile ? Math.round(calculateBMR(profile)) : null;
-  const tdee = profile ? Math.round(calculateTDEE(profile)) : null;
+  const bmr = profile && currentWeight ? Math.round(calculateBMR({ ...profile, weightKg: currentWeight })) : null;
+  const tdee = profile && currentWeight ? Math.round(calculateTDEE({ ...profile, weightKg: currentWeight })) : null;
 
   return (
     <div className="p-4 space-y-4">
@@ -200,7 +201,7 @@ export default function ProfilePage() {
             {[
               { label: t("profile_age") as string, value: profile.age ? `${profile.age}` : "—" },
               { label: t("profile_height") as string, value: profile.heightCm ? `${profile.heightCm} cm` : "—" },
-              { label: t("profile_weight") as string, value: profile.weightKg ? `${profile.weightKg} ${t("kg_label")}` : "—" },
+              { label: t("profile_weight") as string, value: currentWeight ? `${currentWeight} ${t("kg_label")}` : "—" },
               { label: t("profile_target_weight") as string, value: profile.targetWeightKg ? `${profile.targetWeightKg} ${t("kg_label")}` : "—" },
               { label: t("profile_gender") as string, value: genderLabels[profile.gender] ?? "—" },
               { label: t("profile_activity") as string, value: activityLabels[profile.activityLevel] ?? "—" },
@@ -235,25 +236,6 @@ export default function ProfilePage() {
               <p className="text-sm text-slate-400 mt-0.5">{t("profile_tdee_day")}</p>
             </div>
           </div>
-        </Card>
-      )}
-
-      {/* Weight progress chart */}
-      <Card>
-        <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-1.5">
-          <TrendingDown size={16} className="text-wing-muted" />
-          {lang === "he" ? "גרף ירידה במשקל" : "Weight Progress"}
-        </h3>
-        <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} />
-      </Card>
-
-      {/* Weight log table */}
-      {weightLogs.length > 0 && (
-        <Card>
-          <h3 className="font-semibold text-slate-800 mb-3">
-            {lang === "he" ? "היסטוריית שקילות" : "Weigh-in History"}
-          </h3>
-          <WeightLogTable logs={weightLogs} heightCm={profile?.heightCm} lang={lang} />
         </Card>
       )}
 

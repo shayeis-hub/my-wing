@@ -115,7 +115,7 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           </Link>
 
           {/* Weight progress */}
-          <Link href="/profile" onClick={onClose}>
+          <Link href="/weight" onClick={onClose}>
             <MenuItem
               icon={<TrendingDown size={20} />}
               label={lang === "he" ? "גרף ירידה במשקל" : "Weight Progress"}

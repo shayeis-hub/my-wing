@@ -82,8 +82,10 @@ export default function OnboardingPage() {
   useEffect(() => { setI18nGender(gender); }, [gender, setI18nGender]);
   const [age, setAge] = useState("30");
   const [height, setHeight] = useState("170");
-  const [weight, setWeight] = useState(80);
-  const [targetWeight, setTargetWeight] = useState(70);
+  const [weight, setWeight] = useState("80");
+  const [targetWeight, setTargetWeight] = useState("70");
+  const weightNum = parseFloat(weight) || 0;
+  const targetWeightNum = parseFloat(targetWeight) || 0;
   const [activity, setActivity] = useState<UserProfile["activityLevel"]>("moderate");
 
   // ── Step 0: join or create wing ────────────────────────────────
@@ -136,7 +138,8 @@ export default function OnboardingPage() {
   function handleProfileStep() {
     if (!age || +age < 10 || +age > 100) { toast.error(t("ob_age_invalid") as string); return; }
     if (!height || +height < 100 || +height > 250) { toast.error(t("ob_height_invalid") as string); return; }
-    if (targetWeight >= weight) { toast.error(t("ob_weight_target_invalid") as string); return; }
+    if (!weight || weightNum < 30 || weightNum > 300) { toast.error(t("ob_weight_invalid") as string); return; }
+    if (targetWeightNum >= weightNum) { toast.error(t("ob_weight_target_invalid") as string); return; }
     setStep(2);
   }
 
@@ -149,8 +152,8 @@ export default function OnboardingPage() {
         gender,
         age: +age,
         heightCm: +height,
-        weightKg: weight,
-        targetWeightKg: targetWeight,
+        weightKg: weightNum,
+        targetWeightKg: targetWeightNum,
         activityLevel: activity,
         dailyCalorieTarget: 0,
       };
@@ -168,7 +171,7 @@ export default function OnboardingPage() {
   // ── Derived goals (for step 2) ─────────────────────────────────
   const profileForCalc: UserProfile = {
     gender, age: +age || 30, heightCm: +height || 170,
-    weightKg: weight, targetWeightKg: targetWeight,
+    weightKg: weightNum || 80, targetWeightKg: targetWeightNum || 70,
     activityLevel: activity, dailyCalorieTarget: 0,
   };
   const calories = calculateDailyTarget(profileForCalc);
@@ -177,7 +180,7 @@ export default function OnboardingPage() {
   const proteinG = Math.round((calories * 0.25) / 4);
   const carbsG = Math.round((calories * 0.45) / 4);
   const fatG = Math.round((calories * 0.30) / 9);
-  const weeksToGoal = weight > targetWeight ? Math.round((weight - targetWeight) / 0.5) : 0;
+  const weeksToGoal = weightNum > targetWeightNum ? Math.round((weightNum - targetWeightNum) / 0.5) : 0;
 
   const firstName = user?.displayName?.split(" ")[0] ?? "";
 
@@ -317,49 +320,43 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Current weight slider */}
+              {/* Current weight */}
               <div>
                 <MonoLabel>{t("ob_weight_label")}</MonoLabel>
-                <div className="flex items-baseline gap-2 mb-3">
-                  <span className="font-black text-[48px] text-wing-ink tracking-[-0.05em] tabular leading-none">{weight}</span>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="font-black text-[48px] text-wing-ink tracking-[-0.05em] tabular leading-none">{weight || "—"}</span>
                   <span className="font-mono text-xs text-wing-muted">{t("kg_label")}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-wing-subtle">40</span>
-                  <input
-                    type="range" min={40} max={150} step={0.5} value={weight}
-                    onChange={(e) => {
-                      const w = parseFloat(e.target.value);
-                      setWeight(w);
-                      if (targetWeight >= w) setTargetWeight(Math.max(40, w - 5));
-                    }}
-                    className="wing-slider flex-1"
-                  />
-                  <span className="font-mono text-xs text-wing-subtle">150</span>
-                </div>
+                <input
+                  type="number" value={weight}
+                  onChange={(e) => {
+                    setWeight(e.target.value);
+                    const w = parseFloat(e.target.value);
+                    if (!isNaN(w) && targetWeightNum >= w) setTargetWeight(String(Math.max(30, +(w - 5).toFixed(1))));
+                  }}
+                  min={30} max={300} step={0.1} inputMode="decimal"
+                  className="w-full bg-wing-bg border border-wing-border rounded-xl px-3 py-2 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                />
               </div>
 
               {/* Target weight */}
               <div>
                 <MonoLabel>{t("ob_target_label")}</MonoLabel>
-                <div className="flex items-baseline gap-2 mb-3">
-                  <span className="font-black text-[32px] text-wing-heat tracking-[-0.04em] tabular leading-none">{targetWeight}</span>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="font-black text-[32px] text-wing-heat tracking-[-0.04em] tabular leading-none">{targetWeight || "—"}</span>
                   <span className="font-mono text-xs text-wing-muted">{t("kg_label")}</span>
-                  {weight > targetWeight && (
+                  {targetWeight && weightNum > targetWeightNum && (
                     <span className="font-mono text-xs text-wing-success font-bold mr-auto">
-                      {(t("ob_weight_diff") as (d: number) => string)((weight - targetWeight).toFixed(1) as unknown as number)}
+                      {(t("ob_weight_diff") as (d: number) => string)(+(weightNum - targetWeightNum).toFixed(1))}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-wing-subtle">40</span>
-                  <input
-                    type="range" min={40} max={Math.max(40, weight - 1)} step={0.5} value={targetWeight}
-                    onChange={(e) => setTargetWeight(parseFloat(e.target.value))}
-                    className="wing-slider flex-1"
-                  />
-                  <span className="font-mono text-xs text-wing-subtle">{Math.max(40, weight - 1)}</span>
-                </div>
+                <input
+                  type="number" value={targetWeight}
+                  onChange={(e) => setTargetWeight(e.target.value)}
+                  min={30} max={Math.max(30, +(weightNum - 0.1).toFixed(1))} step={0.1} inputMode="decimal"
+                  className="w-full bg-wing-bg border border-wing-border rounded-xl px-3 py-2 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                />
               </div>
 
               {/* Activity */}

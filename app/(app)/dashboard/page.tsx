@@ -243,7 +243,8 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
     ...wingCheckinsToday.map((c) => c.userId),
     ...todayMeals.map((m) => m.userId),
   ]).size;
-  const weightKg = todayCheckin?.weightKg ?? user?.profile?.weightKg ?? 70;
+  const latestLoggedWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weightKg : undefined;
+  const weightKg = todayCheckin?.weightKg ?? latestLoggedWeight ?? user?.profile?.weightKg ?? 70;
   const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
   // Calorie budget = resting burn (BMR) + calories burned in today's workout.
   // Steps are intentionally excluded — pace/intensity is unknown, so we can't

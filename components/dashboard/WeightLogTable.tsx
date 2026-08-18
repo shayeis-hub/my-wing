@@ -11,6 +11,12 @@ interface WeightLogTableProps {
   lang: "he" | "en";
 }
 
+function bmiColor(bmi: number): string {
+  if (bmi > 30) return "text-red-600";
+  if (bmi >= 25) return "text-amber-600";
+  return "text-green-600";
+}
+
 function DeltaCell({ deltaKg, pct }: { deltaKg: number | null; pct: number | null }) {
   if (deltaKg === null || pct === null) {
     return <span className="text-wing-subtle">—</span>;
@@ -72,7 +78,7 @@ export function WeightLogTable({ logs, heightCm, lang }: WeightLogTableProps) {
               <td className="px-2 py-2">
                 <DeltaCell deltaKg={row.deltaFromStart} pct={row.pctFromStart} />
               </td>
-              <td className="px-2 py-2 text-wing-ink tabular-nums">
+              <td className={`px-2 py-2 font-semibold tabular-nums ${row.bmi !== null ? bmiColor(row.bmi) : "text-wing-ink"}`}>
                 {row.bmi ?? "—"}
               </td>
             </tr>

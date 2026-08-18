@@ -396,6 +396,7 @@ export const T = {
     ob_save_error: g("שגיאה בשמירה, נסה שוב", "שגיאה בשמירה, נסי שוב"),
     ob_age_invalid: "גיל לא תקין",
     ob_height_invalid: "גובה לא תקין",
+    ob_weight_invalid: "משקל לא תקין",
     ob_weight_target_invalid: "משקל היעד חייב להיות נמוך מהמשקל הנוכחי",
 
     // Wing page
@@ -1077,6 +1078,7 @@ export const T = {
     ob_save_error: "Save failed, please try again",
     ob_age_invalid: "Invalid age",
     ob_height_invalid: "Invalid height",
+    ob_weight_invalid: "Invalid weight",
     ob_weight_target_invalid: "Target weight must be lower than current weight",
 
     // Wing page
