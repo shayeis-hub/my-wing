@@ -222,7 +222,7 @@ body {
 
 /* ── TOC ─────────────────────────────────────────── */
 .toc-item {
-  display: flex; align-items: center; padding: 12px 0;
+  display: flex; align-items: center; padding: 8px 0;
   border-bottom: 1px solid var(--border);
 }
 .toc-item .toc-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); min-width: 36px; font-size: 14px; }
@@ -288,7 +288,7 @@ body {
   <!-- Bottom: meta -->
   <div style="display:flex; align-items:flex-end; justify-content:space-between; position:relative;">
     <div>
-      <div class="kicker">Version 1.0 · June 2026</div>
+      <div class="kicker">Version 1.1 · August 2026</div>
       <div style="font-size:14px; color:var(--muted); margin-top:4px;">Android App · Web</div>
     </div>
     <div style="display:flex; gap:12px; align-items:center;">
@@ -298,7 +298,7 @@ body {
       </div>
       <div style="width:1px; height:36px; background:#ede5d0;"></div>
       <div style="text-align:center;">
-        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">6</div>
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">10</div>
         <div class="kicker" style="font-size:9px;">screens</div>
       </div>
       <div style="width:1px; height:36px; background:#ede5d0;"></div>
@@ -403,10 +403,13 @@ body {
         <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">Dashboard + Quick Log</span><span class="toc-desc">p. 3</span></div>
         <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">Meal Photo + AI</span><span class="toc-desc">p. 4</span></div>
         <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">Daily Check-up</span><span class="toc-desc">p. 5</span></div>
-        <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">Feed · Posts &amp; Daily Question</span><span class="toc-desc">p. 6</span></div>
-        <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">Challenges &amp; Trophies</span><span class="toc-desc">p. 7</span></div>
-        <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">Tips &amp; FAQ</span><span class="toc-desc">p. 8</span></div>
-        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">07</span><span class="toc-title">The Mobile App · Widget &amp; Steps</span><span class="toc-desc">p. 9</span></div>
+        <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">Calendar · Your Check-up History</span><span class="toc-desc">p. 6</span></div>
+        <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">BMI · TDEE Calculator</span><span class="toc-desc">p. 7</span></div>
+        <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">Feed · Posts &amp; Daily Question</span><span class="toc-desc">p. 8</span></div>
+        <div class="toc-item"><span class="toc-num">07</span><span class="toc-title">Challenges &amp; Trophies</span><span class="toc-desc">p. 9</span></div>
+        <div class="toc-item"><span class="toc-num">08</span><span class="toc-title">Tips &amp; FAQ</span><span class="toc-desc">p. 10</span></div>
+        <div class="toc-item"><span class="toc-num">09</span><span class="toc-title">The Mobile App · Widget &amp; Steps</span><span class="toc-desc">p. 11</span></div>
+        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">10</span><span class="toc-title">For Dietitians &amp; Coaches · Business Accounts</span><span class="toc-desc">p. 12</span></div>
       </div>
     </div>
   </div>
@@ -876,12 +879,227 @@ body {
 
 
 <!-- ═══════════════════════════════════════════
-     PAGE 6 — FEED
+     PAGE 6 — CALENDAR
 ═══════════════════════════════════════════ -->
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">04 · social feed</div>
+      <div class="kicker" style="margin-bottom:8px;">04 · calendar</div>
+      <h2>Your history,<br><span class="gradient-text">day by day</span></h2>
+    </div>
+    <span class="badge">Calendar</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        The calendar brings every check-up together in one month view — a dot marks any day you logged data. Tap a day to see the full breakdown. Open it from the hamburger menu (☰) → <b>Calendar</b>.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>Navigate between months</b>
+          <p>The arrows on either side of the month name move one month back/forward. You can't advance into a future month.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>Dots mean logged data</b>
+          <p>Any day with a check-up (yours or another wing member's) gets a small dot under the date. No dot — nothing was logged.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>Tap a day for detail</b>
+          <p>A panel opens at the bottom with everything logged that day: water, veggies, steps, workout, mood and notes — yours and your wing members'.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>Swipe between days</b>
+          <p>Inside the panel, swipe left/right to move to the previous/next day without going back to the grid.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body">
+          <b>Encourage right from the panel</b>
+          <p>Spot an old check-up from a wing member? You can send encouragement directly from the panel, no need to leave the calendar.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">Tip · Retroactive Check-up</div>
+        <p>Forgot to log yesterday? Open that day from the calendar and fill in the check-up after the fact — so a one-off slip doesn't cost you your streak.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Calendar mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:#c9bc9c;">‹</span>
+          <div style="font-weight:800; font-size:14px;">August 2026</div>
+          <span style="font-size:13px; color:#8a7e68;">›</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin:0 10px 6px; text-align:center;">
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">S</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">M</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">T</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">W</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">T</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">F</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">S</div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin:0 10px 8px;">
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">1<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">2<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">3</div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">4<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">5<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:#c9bc9c;">6</div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">7<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:white; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:8px;">8<div style="width:3px;height:3px;border-radius:999px;background:rgba(255,255,255,.9);margin-top:1px;"></div></div>
+        </div>
+
+        <!-- Day panel -->
+        <div class="ph-card" style="margin:0 10px 8px;">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Aug 8</span><span style="color:#d4541a;">Today</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:4px;">
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">1.8L</div><div style="font-size:6.5px; color:#8a7e68;">Water</div></div>
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">3</div><div style="font-size:6.5px; color:#8a7e68;">Veggies</div></div>
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">6.2k</div><div style="font-size:6.5px; color:#8a7e68;">Steps</div></div>
+            <div style="text-align:center;"><div style="font-size:13px;">😊</div><div style="font-size:6.5px; color:#8a7e68;">Mood</div></div>
+          </div>
+        </div>
+
+        <div class="ph-nav">
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>Menu</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 21l4-8 4 8M4 9l8-6 8 6"/></svg>Chall.</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Check-up</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Feed</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>Meals</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Home</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 6</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 7 — CALCULATOR
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">05 · calculator</div>
+      <h2>Your exact<br><span class="gradient-text">target</span></h2>
+    </div>
+    <span class="badge">BMI · TDEE Calculator</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        The in-app calculator (Menu → Calculator) computes your BMI, Basal Metabolic Rate (BMR), Total Daily Energy Expenditure (TDEE), and a tailored calorie target — and saves them straight to your profile.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>Pick a gender</b>
+          <p>Feeds the BMR formula, which differs statistically between men and women.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>Enter age, height, weight and target weight</b>
+          <p>Four simple number fields.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>Choose an activity level</b>
+          <p>Five levels — sedentary through very active. The higher the level, the higher your TDEE (and the calorie target derived from it).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>Tap "Calculate"</b>
+          <p>Four results appear instantly: BMI, BMR, TDEE, and a daily target tailored for weight loss. Tap any result's (ⓘ) to see a short explanation of what it means.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body">
+          <b>"Save to Profile"</b>
+          <p>Updates your daily calorie target across the whole app — dashboard, check-up, and everywhere progress is shown against a goal.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">Tip · Recalculate Periodically</div>
+        <p>Your weight changes — your calorie target should change with it. Come back to the calculator every 3–4 weeks and update your current weight so your daily target stays accurate.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Calculator mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px;">
+          <div style="font-weight:800; font-size:14px;">BMI · TDEE Calculator</div>
+        </div>
+        <div class="ph-pill-row" style="margin-bottom:6px;">
+          <div class="ph-pill active" style="flex:1; text-align:center;">Male</div>
+          <div class="ph-pill" style="flex:1; text-align:center;">Female</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:0 12px 6px;">
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">Age</div><div style="font-size:11px; font-weight:700;">34</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">Height</div><div style="font-size:11px; font-weight:700;">178</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">Weight</div><div style="font-size:11px; font-weight:700;">88</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">Target</div><div style="font-size:11px; font-weight:700;">78</div></div>
+        </div>
+        <div style="margin:0 12px 6px; background:white; border:1px solid #ede5d0; border-radius:9px; padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:9px; font-weight:600;">Moderate activity</span>
+          <span style="font-size:7px; color:#8a7e68;">3–4×/week</span>
+        </div>
+        <div class="ph-cta" style="margin-top:2px;">Calculate</div>
+        <div class="ph-stats" style="margin-top:8px;">
+          <div class="ph-stat"><div class="l">BMI</div><div class="v">27.8</div></div>
+          <div class="ph-stat"><div class="l">BMR</div><div class="v">1780</div></div>
+          <div class="ph-stat"><div class="l">TDEE</div><div class="v">2760</div></div>
+        </div>
+        <div style="margin:0 12px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:10px; padding:8px; text-align:center;">
+          <div style="font-size:7px; font-weight:700; color:#5a4220;">DAILY TARGET</div>
+          <div style="font-weight:900; font-size:18px; color:#1a1814;">2,260</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 7</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 8 — FEED
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">06 · social feed</div>
       <h2>Share.<br><span class="gradient-text">Encourage. Connect.</span></h2>
     </div>
     <span class="badge">Feed · Daily Question</span>
@@ -1029,7 +1247,7 @@ body {
       </div>
     </div>
   </div>
-  <div class="page-num">p. 6</div>
+  <div class="page-num">p. 8</div>
 </section>
 
 
@@ -1039,7 +1257,7 @@ body {
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">05 · challenges &amp; trophies</div>
+      <div class="kicker" style="margin-bottom:8px;">07 · challenges &amp; trophies</div>
       <h2>Compete.<br><span class="gradient-text">Win. Repeat.</span></h2>
     </div>
     <span class="badge">Challenges · Trophies</span>
@@ -1160,7 +1378,7 @@ body {
       </div>
     </div>
   </div>
-  <div class="page-num">p. 7</div>
+  <div class="page-num">p. 9</div>
 </section>
 
 
@@ -1170,7 +1388,7 @@ body {
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">06 · tips &amp; questions</div>
+      <div class="kicker" style="margin-bottom:8px;">08 · tips &amp; questions</div>
       <h2>Frequently<br><span class="gradient-text">Asked</span></h2>
     </div>
     <span class="badge">FAQ + Tips</span>
@@ -1249,7 +1467,7 @@ body {
       </div>
     </div>
   </div>
-  <div class="page-num">p. 8</div>
+  <div class="page-num">p. 10</div>
 </section>
 
 
@@ -1259,7 +1477,7 @@ body {
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">07 · the mobile app</div>
+      <div class="kicker" style="margin-bottom:8px;">09 · the mobile app</div>
       <h2>Steps, Widget<br><span class="gradient-text">&amp; Notifications</span></h2>
     </div>
     <span class="badge">Android App</span>
@@ -1332,7 +1550,122 @@ body {
       <p>Pin the widget to your home screen to check steps and add water without opening the app — two seconds a day.</p>
     </div>
   </div>
-  <div class="page-num">p. 9</div>
+  <div class="page-num">p. 11</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 12 — FOR DIETITIANS / COACHES
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">10 · business account</div>
+      <h2>For dietitians<br><span class="gradient-text">and coaches</span></h2>
+    </div>
+    <span class="badge">Business · Coach</span>
+  </div>
+
+  <div style="padding:26px 72px 24px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:12.5px; line-height:1.45; color:#3a3329; margin-bottom:8px;">
+        A dietitian or coach who wants to guide clients gets a dashboard that's completely separate from the personal experience — no personal check-ups, just a client list. Find it at: Menu ← <b>Profile</b> ← <b>"Client management"</b> (crown icon). Note: signing up with Google always creates a <b>personal</b> account — use the email + password form to sign up as business.
+      </p>
+
+      <div class="step" style="margin-bottom:8px;">
+        <div class="num">1</div>
+        <div class="body">
+          <b>Sign up as a business account</b>
+          <p>The sign-up screen has an "Account type" toggle: <b>Personal</b> vs <b>Business / Coach</b>. Choosing "Business" skips the personal height/weight/goals questionnaire and goes straight to plan selection.</p>
+        </div>
+      </div>
+      <div class="step" style="margin-bottom:8px;">
+        <div class="num">2</div>
+        <div class="body">
+          <b>Pick a plan</b>
+          <p>A 30-day free trial with one client, or one of the three paid tiers below. Upgrade or cancel any time from the dashboard.</p>
+        </div>
+      </div>
+      <div class="step" style="margin-bottom:8px;">
+        <div class="num">3</div>
+        <div class="body">
+          <b>Private client or group</b>
+          <p><b>"Private client"</b> — single-use 1:1 link, opens a private two-person wing. <b>"Group"</b> — reusable link, behaves like a normal wing where everyone sees each other.</p>
+        </div>
+      </div>
+      <div class="step" style="margin-bottom:8px;">
+        <div class="num">4</div>
+        <div class="body">
+          <b>Track every client</b>
+          <p>Tapping a client opens their daily check-up, recent meals, and a private message wall between just the two of you.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:4px; overflow:hidden; border:1px solid #ede5d0; border-radius:12px;">
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; background:#fbf4e6; padding:6px 12px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+          <div>Plan</div><div>Clients</div><div>Price</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">Free trial</div><div>1</div><div style="color:var(--green); font-weight:600;">30 days free</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">Starter</div><div>10</div><div>₪89 / mo</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">Premium</div><div>30</div><div>₪249 / mo</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center; background:linear-gradient(135deg,rgba(245,221,75,.12),rgba(255,107,71,.08));">
+          <div style="font-weight:700;">Business <span style="font-family:'JetBrains Mono'; font-size:8px; color:var(--coral);">recommended</span></div><div>Unlimited</div><div>₪499 / mo</div>
+        </div>
+      </div>
+
+      <div class="tip" style="margin-top:12px;">
+        <div class="tip-label">Tip · Private vs. Group</div>
+        <p><b>Private client</b> — a closed 1:1 conversation, like a personal file. <b>Group</b> — a normal wing, good for clients who also want social support. Both types can be mixed under the same plan.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Coach client list mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 6px;">
+          <div style="font-weight:800; font-size:14px;">Client Management</div>
+          <div style="font-size:8px; color:#8a7e68; margin-top:1px;">Premium plan · 12/30 clients</div>
+        </div>
+        <div class="ph-sec" style="margin-bottom:8px;">
+          <div class="ph-sec-btn" style="font-weight:700; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border:none;">+ Private client</div>
+          <div class="ph-sec-btn" style="font-weight:700;">+ Group</div>
+        </div>
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title">My Clients</div>
+          <div style="display:flex; flex-direction:column; gap:7px;">
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div class="ph-av" style="width:24px; height:24px; font-size:9px; background:#d4541a;">M</div>
+              <div style="flex:1;"><div style="font-size:10px; font-weight:700;">Michelle K.</div><div style="font-size:7px; color:#8a7e68;">Private</div></div>
+              <span style="font-size:8px; color:#8a7e68;">›</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div class="ph-av" style="width:24px; height:24px; font-size:9px; background:#1a1814;">R</div>
+              <div style="flex:1;"><div style="font-size:10px; font-weight:700;">Ron L.</div><div style="font-size:7px; color:#8a7e68;">Morning Group</div></div>
+              <span style="font-size:8px; color:#8a7e68;">›</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div class="ph-av" style="width:24px; height:24px; font-size:9px; background:#c79a00;">D</div>
+              <div style="flex:1;"><div style="font-size:10px; font-weight:700;">Dana A.</div><div style="font-size:7px; color:#8a7e68;">Morning Group</div></div>
+              <span style="font-size:8px; color:#8a7e68;">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="ph-card">
+          <div class="ph-card-title">Invite Links</div>
+          <div style="font-size:8.5px; color:#3a3329; display:flex; justify-content:space-between; margin-bottom:3px;"><span>Private client — Noa</span><span style="color:var(--muted);">unused</span></div>
+          <div style="font-size:8.5px; color:#3a3329; display:flex; justify-content:space-between;"><span>Morning Group</span><span style="color:var(--green);">active</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">p. 12</div>
 </section>
 
 
@@ -1371,7 +1704,7 @@ body {
     <div style="display:flex; justify-content:space-between; align-items:flex-end;">
       <div>
         <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.22em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">Wingpact</div>
-        <div style="font-size:13px; color:#7a8492;">Version 1.0 · June 2026</div>
+        <div style="font-size:13px; color:#7a8492;">Version 1.1 · August 2026</div>
       </div>
       <div style="text-align:right;">
         <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.18em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">Support</div>

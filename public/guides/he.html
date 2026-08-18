@@ -241,7 +241,7 @@ body {
 
 /* ── TOC ─────────────────────────────────────────── */
 .toc-item {
-  display: flex; align-items: center; padding: 12px 0;
+  display: flex; align-items: center; padding: 8px 0;
   border-bottom: 1px solid var(--border);
 }
 .toc-item .toc-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); min-width: 36px; font-size: 14px; }
@@ -307,7 +307,7 @@ body {
   <!-- Bottom: meta -->
   <div style="display:flex; align-items:flex-end; justify-content:space-between; position:relative;">
     <div>
-      <div class="kicker">גרסה 1.0 · יוני 2026</div>
+      <div class="kicker">גרסה 1.1 · אוגוסט 2026</div>
       <div style="font-size:14px; color:var(--muted); margin-top:4px;">אפליקציה לאנדרואיד · ווב</div>
     </div>
     <div style="display:flex; gap:12px; align-items:center;">
@@ -317,7 +317,7 @@ body {
       </div>
       <div style="width:1px; height:36px; background:#ede5d0;"></div>
       <div style="text-align:center;">
-        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">7</div>
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">10</div>
         <div class="kicker" style="font-size:9px;">מסכים</div>
       </div>
       <div style="width:1px; height:36px; background:#ede5d0;"></div>
@@ -426,10 +426,13 @@ body {
         <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">לוח הבקרה עם Quick Log</span><span class="toc-desc">עמ׳ 3</span></div>
         <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">הוספת ארוחה (תמונה/קול/ידני)</span><span class="toc-desc">עמ׳ 4</span></div>
         <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">צ'ק אפ יומי · מים, אימון, מצב רוח</span><span class="toc-desc">עמ׳ 5</span></div>
-        <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">פיד · פוסטים ושאלה יומית</span><span class="toc-desc">עמ׳ 6</span></div>
-        <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">אתגרים וגביעים</span><span class="toc-desc">עמ׳ 7</span></div>
-        <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">טיפים ושאלות נפוצות</span><span class="toc-desc">עמ׳ 8</span></div>
-        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">07</span><span class="toc-title">ווידג'ט למסך הבית</span><span class="toc-desc">עמ׳ 9</span></div>
+        <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">לוח שנה · היסטוריית הצ'ק-אפים</span><span class="toc-desc">עמ׳ 6</span></div>
+        <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">מחשבון BMI · TDEE · יעד יומי</span><span class="toc-desc">עמ׳ 7</span></div>
+        <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">פיד · פוסטים ושאלה יומית</span><span class="toc-desc">עמ׳ 8</span></div>
+        <div class="toc-item"><span class="toc-num">07</span><span class="toc-title">אתגרים וגביעים</span><span class="toc-desc">עמ׳ 9</span></div>
+        <div class="toc-item"><span class="toc-num">08</span><span class="toc-title">טיפים ושאלות נפוצות</span><span class="toc-desc">עמ׳ 10</span></div>
+        <div class="toc-item"><span class="toc-num">09</span><span class="toc-title">ווידג'ט למסך הבית</span><span class="toc-desc">עמ׳ 11</span></div>
+        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">10</span><span class="toc-title">לדיאטניות ומאמנים · חשבון עסקי</span><span class="toc-desc">עמ׳ 12</span></div>
       </div>
     </div>
   </div>
@@ -705,12 +708,229 @@ body {
 
 
 <!-- ═══════════════════════════════════════════
-     PAGE 6 — FEED
+     PAGE 6 — CALENDAR
 ═══════════════════════════════════════════ -->
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">04 · פיד חברתי</div>
+      <div class="kicker" style="margin-bottom:8px;">04 · לוח שנה</div>
+      <h2>ההיסטוריה<br><span class="gradient-text">שלך, יום־יום</span></h2>
+    </div>
+    <span class="badge">Calendar</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        לוח השנה מרכז את כל הצ'ק אפים שלך בתצוגת חודש אחת — נקודה על כל יום שבו תיעדת נתונים. לחיצה על יום פותחת את הפירוט המלא. פותחים אותו דרך תפריט ההמבורגר (☰) ← <b>לוח שנה</b>.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>ניווט בין חודשים</b>
+          <p>החצים משני צידי שם החודש בראש המסך עוברים חודש אחורה/קדימה. לא ניתן להתקדם לחודש עתידי.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>נקודות = יום עם נתונים</b>
+          <p>כל יום שבו בוצע צ'ק אפ (שלך או של חברי הכנף) מסומן בנקודה מתחת למספר. יום ללא נקודה — לא תועד.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>לחץ על יום לפירוט</b>
+          <p>נפתח פאנל בתחתית המסך עם כל נתוני אותו יום: מים, ירקות, צעדים, אימון, מצב רוח והערות — גם שלך וגם של שאר חברי הכנף.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>גלישה בין ימים</b>
+          <p>בתוך הפאנל אפשר להחליק (swipe) ימין/שמאל כדי לעבור ליום הקודם/הבא בלי לחזור ללוח.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body">
+          <b>עידוד ישירות מהפאנל</b>
+          <p>רואים צ'ק אפ ישן של חבר בכנף? אפשר לשלוח עידוד ישירות מתוך הפאנל, בלי לצאת ללוח השנה.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">טיפ · צ'ק אפ רטרואקטיבי</div>
+        <p>שכחת לתעד אתמול? דרך לוח השנה אפשר לפתוח יום עבר ולהשלים את הצ'ק אפ בדיעבד — כך שלא תפספסו רצף (סטריק) בגלל שכחה חד-פעמית.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Calendar mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:#8a7e68;">‹</span>
+          <div style="font-weight:800; font-size:14px;">אוגוסט 2026</div>
+          <span style="font-size:13px; color:#c9bc9c;">›</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin:0 10px 6px; text-align:center;">
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">א</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ב</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ג</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ד</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ה</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ו</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ש</div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin:0 10px 8px;">
+          <div></div><div></div>
+          <!-- Aug 2026 starts on a Sat; a couple of offset cells above -->
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">1</div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">2<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">3<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">4</div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">5<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">6<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:#c9bc9c;">7</div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:white; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:8px;">8<div style="width:3px;height:3px;border-radius:999px;background:rgba(255,255,255,.9);margin-top:1px;"></div></div>
+        </div>
+
+        <!-- Day panel -->
+        <div class="ph-card" style="margin:0 10px 8px;">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>8 באוגוסט</span><span style="color:#d4541a;">היום</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:4px;">
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">1.8L</div><div style="font-size:6.5px; color:#8a7e68;">מים</div></div>
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">3</div><div style="font-size:6.5px; color:#8a7e68;">ירקות</div></div>
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">6.2k</div><div style="font-size:6.5px; color:#8a7e68;">צעדים</div></div>
+            <div style="text-align:center;"><div style="font-size:13px;">😊</div><div style="font-size:6.5px; color:#8a7e68;">מצב רוח</div></div>
+          </div>
+        </div>
+
+        <div class="ph-nav">
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 21l4-8 4 8M4 9l8-6 8 6"/></svg>אתגרים</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>צ'ק אפ</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>פיד</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ׳ 6</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 7 — CALCULATOR
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">05 · מחשבון</div>
+      <h2>היעד<br><span class="gradient-text">המדויק שלך</span></h2>
+    </div>
+    <span class="badge">BMI · TDEE Calculator</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        המחשבון הפנימי (בתפריט ← מחשבון) מחשב עבורך BMI, קצב חילוף חומרים בסיסי (BMR), הוצאה קלורית יומית כוללת (TDEE), ויעד קלוריות מותאם — ושומר אותם ישירות לפרופיל שלך.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>בחר/י מגדר</b>
+          <p>משפיע על נוסחת ה-BMR (חילוף החומרים אצל גברים ונשים שונה סטטיסטית).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>הזן/י גיל, גובה, משקל ומשקל יעד</b>
+          <p>ארבעה שדות מספריים פשוטים.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>בחר/י רמת פעילות</b>
+          <p>חמש רמות — מיושבת ועד פעילה מאוד. ככל שהרמה גבוהה יותר, כך ה-TDEE (וממנו יעד הקלוריות) עולה.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>לחץ/י "חשב"</b>
+          <p>ארבע תוצאות מופיעות מיד: BMI, BMR, TDEE, ויעד יומי מותאם לירידה במשקל. לחיצה על כל תוצאה (ⓘ) פותחת הסבר קצר מה היא אומרת.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body">
+          <b>"שמור לפרופיל"</b>
+          <p>מעדכן את יעד הקלוריות היומי בכל האפליקציה — בדאשבורד, בצ'ק אפ, ובכל מקום שמציג התקדמות מול יעד.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">טיפ · עדכון תקופתי</div>
+        <p>המשקל שלך משתנה — והיעד הקלורי צריך להשתנות איתו. מומלץ לחזור למחשבון כל 3–4 שבועות ולעדכן משקל נוכחי, כדי שהיעד היומי יישאר מדויק.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Calculator mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px;">
+          <div style="font-weight:800; font-size:14px;">מחשבון BMI · TDEE</div>
+        </div>
+        <div class="ph-pill-row" style="margin-bottom:6px;">
+          <div class="ph-pill active" style="flex:1; text-align:center;">גבר</div>
+          <div class="ph-pill" style="flex:1; text-align:center;">אישה</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:0 12px 6px;">
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">גיל</div><div style="font-size:11px; font-weight:700;">34</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">גובה</div><div style="font-size:11px; font-weight:700;">178</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">משקל</div><div style="font-size:11px; font-weight:700;">88</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">יעד</div><div style="font-size:11px; font-weight:700;">78</div></div>
+        </div>
+        <div style="margin:0 12px 6px; background:white; border:1px solid #ede5d0; border-radius:9px; padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:9px; font-weight:600;">פעילות בינונית</span>
+          <span style="font-size:7px; color:#8a7e68;">3–4× בשבוע</span>
+        </div>
+        <div class="ph-cta" style="margin-top:2px;">חשב</div>
+        <div class="ph-stats" style="margin-top:8px;">
+          <div class="ph-stat"><div class="l">BMI</div><div class="v">27.8</div></div>
+          <div class="ph-stat"><div class="l">BMR</div><div class="v">1780</div></div>
+          <div class="ph-stat"><div class="l">TDEE</div><div class="v">2760</div></div>
+        </div>
+        <div style="margin:0 12px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:10px; padding:8px; text-align:center;">
+          <div style="font-size:7px; font-weight:700; color:#5a4220;">יעד יומי</div>
+          <div style="font-weight:900; font-size:18px; color:#1a1814;">2,260</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ׳ 7</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 8 — FEED
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">06 · פיד חברתי</div>
       <h2>שתפו.<br><span class="gradient-text">עודדו. התחברו.</span></h2>
     </div>
     <span class="badge">Feed · Daily Prompt</span>
@@ -790,7 +1010,7 @@ body {
       <img src="feed-he.jpg" class="phone-screenshot" alt="Feed">
     </div>
   </div>
-  <div class="page-num">עמ׳ 6</div>
+  <div class="page-num">עמ׳ 8</div>
 </section>
 
 
@@ -800,7 +1020,7 @@ body {
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">05 · אתגרים וגביעים</div>
+      <div class="kicker" style="margin-bottom:8px;">07 · אתגרים וגביעים</div>
       <h2>תתחרו.<br><span class="gradient-text">תנצחו. תהנו.</span></h2>
     </div>
     <span class="badge">Challenges · Trophies</span>
@@ -908,7 +1128,7 @@ body {
       </div>
     </div>
   </div>
-  <div class="page-num">עמ׳ 7</div>
+  <div class="page-num">עמ׳ 9</div>
 </section>
 
 
@@ -918,7 +1138,7 @@ body {
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">06 · טיפים ושאלות</div>
+      <div class="kicker" style="margin-bottom:8px;">08 · טיפים ושאלות</div>
       <h2>שאלות<br><span class="gradient-text">נפוצות</span></h2>
     </div>
     <span class="badge">FAQ + Tips</span>
@@ -947,7 +1167,7 @@ body {
 
       <div class="faq-item">
         <div class="q">כמה אנשים יכולים להיות במבנה?</div>
-        <div class="a">אין מגבלה טכנית על כמות האנשים, אך בצורה אפקטיבית ניתן להצליח עד כ-20 חברים. הניסיון מראה שגם קבוצה של 3–5 חברים יוצרת מחויבות אמיתית.</div>
+        <div class="a">בחשבון חינמי — עד 3 חברים בכנף. עם מנוי Premium אין הגבלה, וניתן להגיע עד כ-20 חברים בנוחות. מהניסיון, גם קבוצה קטנה של 3–5 חברים כבר יוצרת מחויבות אמיתית.</div>
       </div>
 
       <div class="faq-item">
@@ -997,7 +1217,7 @@ body {
       </div>
     </div>
   </div>
-  <div class="page-num">עמ׳ 8</div>
+  <div class="page-num">עמ׳ 10</div>
 </section>
 
 
@@ -1007,7 +1227,7 @@ body {
 <section class="page">
   <div class="feature-header">
     <div>
-      <div class="kicker" style="margin-bottom:8px;">07 · ווידג'ט</div>
+      <div class="kicker" style="margin-bottom:8px;">09 · ווידג'ט</div>
       <h2>מסך הבית<br><span class="gradient-text">שלך</span></h2>
     </div>
     <span class="badge">Widget</span>
@@ -1047,7 +1267,122 @@ body {
       <p>הצמד את הווידג'ט למסך הבית כדי לראות צעדים ולהוסיף מים בלי לפתוח את האפליקציה — שתי שניות ביום.</p>
     </div>
   </div>
-  <div class="page-num">עמ׳ 9</div>
+  <div class="page-num">עמ׳ 11</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 12 — FOR DIETITIANS / COACHES
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">10 · חשבון עסקי</div>
+      <h2>לדיאטניות<br><span class="gradient-text">ולמאמנים</span></h2>
+    </div>
+    <span class="badge">Business · דיאטנ/ית</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:13px; line-height:1.55; color:#3a3329; margin-bottom:18px;">
+        דיאטנ/ית או מאמנ/ת שרוצה ללוות לקוחות מקבל/ת דף ניהול נפרד לגמרי מהחוויה האישית — בלי צ'ק אפים אישיים, עם רשימת לקוחות. נמצא ב: תפריט ← <b>פרופיל</b> ← <b>"ניהול לקוחות"</b> (אייקון כתר). לתשומת לב: הרשמה עם Google תמיד יוצרת חשבון <b>אישי</b> — להרשמה כעסקי יש להשתמש בטופס אימייל+סיסמה.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>הרשמה כחשבון עסקי</b>
+          <p>במסך ההרשמה יש בורר "סוג חשבון": <b>אישי</b> מול <b>עסקי / דיאטנ/ית</b>. בחירה ב"עסקי" מדלגת על שאלון גובה/משקל/יעדים אישי, ומעבירה ישר למסך בחירת מסלול.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>בחירת מסלול</b>
+          <p>התנסות חינם ל-30 יום עם לקוח אחד, או אחד משלושת המסלולים בטבלה למטה. שדרוג/ביטול בכל עת מדף הניהול.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>לקוח פרטי או קבוצה</b>
+          <p><b>"לקוח פרטי"</b> — קישור חד-פעמי ל-1:1, פותח "כנף" פרטית של שניים. <b>"קבוצה"</b> — קישור רב-פעמי, פועל כמו כנף רגילה: כולם רואים את כולם.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>מעקב אחרי כל לקוח</b>
+          <p>לחיצה על לקוח/ה ברשימה פותחת את הצ'ק אפ היומי, הארוחות האחרונות, וקיר הודעות פרטי בינך לבינו/ה בלבד.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:4px; overflow:hidden; border:1px solid #ede5d0; border-radius:12px;">
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; background:#fbf4e6; padding:6px 12px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+          <div>מסלול</div><div>לקוחות</div><div>מחיר</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">התנסות חינם</div><div>1</div><div style="color:var(--green); font-weight:600;">30 יום חינם</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">Starter</div><div>10</div><div>₪89 / חודש</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">Premium</div><div>30</div><div>₪249 / חודש</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center; background:linear-gradient(135deg,rgba(245,221,75,.12),rgba(255,107,71,.08));">
+          <div style="font-weight:700;">Business <span style="font-family:'JetBrains Mono'; font-size:8px; color:var(--coral);">מומלץ</span></div><div>ללא הגבלה</div><div>₪499 / חודש</div>
+        </div>
+      </div>
+
+      <div class="tip" style="margin-top:12px;">
+        <div class="tip-label">טיפ · פרטי מול קבוצה</div>
+        <p><b>לקוח פרטי</b> — שיחה סגורה של 1:1, כמו תיק אישי. <b>קבוצה</b> — כמו כנף רגילה, טוב ללקוחות שרוצים גם תמיכה חברתית. אפשר לשלב את שני הסוגים תחת אותו מסלול.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Coach client list mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 6px;">
+          <div style="font-weight:800; font-size:14px;">ניהול לקוחות</div>
+          <div style="font-size:8px; color:#8a7e68; margin-top:1px;">מסלול Premium · 12/30 לקוחות</div>
+        </div>
+        <div class="ph-sec" style="margin-bottom:8px;">
+          <div class="ph-sec-btn" style="font-weight:700; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border:none;">+ לקוח פרטי</div>
+          <div class="ph-sec-btn" style="font-weight:700;">+ קבוצה</div>
+        </div>
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title">הלקוחות שלי</div>
+          <div style="display:flex; flex-direction:column; gap:7px;">
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div class="ph-av" style="width:24px; height:24px; font-size:9px; background:#d4541a;">מ</div>
+              <div style="flex:1;"><div style="font-size:10px; font-weight:700;">מיכל כהן</div><div style="font-size:7px; color:#8a7e68;">פרטי</div></div>
+              <span style="font-size:8px; color:#8a7e68;">›</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div class="ph-av" style="width:24px; height:24px; font-size:9px; background:#1a1814;">ר</div>
+              <div style="flex:1;"><div style="font-size:10px; font-weight:700;">רון לוי</div><div style="font-size:7px; color:#8a7e68;">קבוצת בוקר</div></div>
+              <span style="font-size:8px; color:#8a7e68;">›</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div class="ph-av" style="width:24px; height:24px; font-size:9px; background:#c79a00;">ד</div>
+              <div style="flex:1;"><div style="font-size:10px; font-weight:700;">דנה עמית</div><div style="font-size:7px; color:#8a7e68;">קבוצת בוקר</div></div>
+              <span style="font-size:8px; color:#8a7e68;">›</span>
+            </div>
+          </div>
+        </div>
+        <div class="ph-card">
+          <div class="ph-card-title">קישורי הזמנה</div>
+          <div style="font-size:8.5px; color:#3a3329; display:flex; justify-content:space-between; margin-bottom:3px;"><span>לקוח פרטי — נועה</span><span style="color:var(--muted);">טרם נוצל</span></div>
+          <div style="font-size:8.5px; color:#3a3329; display:flex; justify-content:space-between;"><span>קבוצת בוקר</span><span style="color:var(--green);">פעיל</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ׳ 12</div>
 </section>
 
 
@@ -1086,7 +1421,7 @@ body {
     <div style="display:flex; justify-content:space-between; align-items:flex-end;">
       <div>
         <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.22em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">Wingpact</div>
-        <div style="font-size:13px; color:#7a8492;">גרסה 1.0 · יוני 2026</div>
+        <div style="font-size:13px; color:#7a8492;">גרסה 1.1 · אוגוסט 2026</div>
       </div>
       <div style="text-align:left;">
         <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.18em; color:#7a8492; text-transform:uppercase; margin-bottom:4px;">שאלות ותמיכה</div>
