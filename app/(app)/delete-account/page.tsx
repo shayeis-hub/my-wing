@@ -20,11 +20,21 @@ export default function DeleteAccountPage() {
     if (!firebaseUser) return;
     setDeleting(true);
     try {
-      // Remove from the wing first (handles owner succession) so we don't leave
+      const token = await firebaseUser.getIdToken();
+
+      // Purge wing-scoped data (checkins, weight logs, steps, meals, posts,
+      // wall messages, authored comments/reactions, dailyUsage) before the
+      // account itself is removed, so nothing personal is left behind.
+      const purgeRes = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!purgeRes.ok) throw new Error("purge-failed");
+
+      // Remove from the wing (handles owner succession) so we don't leave
       // a ghost member behind. Best-effort — don't block deletion if it fails.
       if (user?.wingId) {
         try {
-          const token = await firebaseUser.getIdToken();
           await fetch("/api/wing/leave", {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
