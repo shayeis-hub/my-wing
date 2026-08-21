@@ -354,7 +354,7 @@ function SubscriptionPageInner() {
             >
               <div className="text-start">
                 <p className="font-bold text-wing-ink">{t("upgrade_cta_yearly")}</p>
-                <p className="text-wing-muted text-sm">
+                <p className="text-wing-primary text-base font-bold">
                   {nativeOffering?.annual?.product.priceString ?? t("upgrade_yearly")}
                 </p>
               </div>
@@ -371,7 +371,7 @@ function SubscriptionPageInner() {
             >
               <div className="text-start">
                 <p className="font-medium text-wing-ink">{t("upgrade_cta_monthly")}</p>
-                <p className="text-wing-muted text-sm">
+                <p className="text-wing-ink text-base font-bold">
                   {nativeOffering?.monthly?.product.priceString ?? t("upgrade_monthly")}
                 </p>
               </div>
@@ -432,7 +432,7 @@ function SubscriptionPageInner() {
             >
               <div className="text-start">
                 <p className="font-bold text-wing-ink">{t("upgrade_cta_yearly")}</p>
-                <p className="text-wing-muted text-sm">{t("upgrade_yearly")}</p>
+                <p className="text-wing-primary text-base font-bold">{t("upgrade_yearly")}</p>
               </div>
               <span className="text-xs font-bold text-white bg-wing-primary px-3 py-1 rounded-full">
                 {t("upgrade_yearly_badge")}
@@ -447,7 +447,7 @@ function SubscriptionPageInner() {
             >
               <div className="text-start">
                 <p className="font-medium text-wing-ink">{t("upgrade_cta_monthly")}</p>
-                <p className="text-wing-muted text-sm">{t("upgrade_monthly")}</p>
+                <p className="text-wing-ink text-base font-bold">{t("upgrade_monthly")}</p>
               </div>
             </button>
 
