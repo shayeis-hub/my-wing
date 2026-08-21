@@ -37,12 +37,19 @@ function SubscriptionPageInner() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [nativeOffering, setNativeOffering] = useState<PurchasesOffering | null>(null);
   const [loadingPurchase, setLoadingPurchase] = useState<"monthly" | "yearly" | "restore" | null>(null);
+  // The StoreKit sheet covers the WebView during a purchase, which can leave
+  // useAuth's Firestore listener stale — so the server-side write that grants
+  // premium isn't always pushed to this still-mounted page (leaving and
+  // re-entering the screen remounts the listener, which is why that worked).
+  // Once apple-sync confirms the entitlement is active server-side, reflect it
+  // here immediately rather than waiting on the listener to catch up.
+  const [justPurchased, setJustPurchased] = useState(false);
   const isIOSNative = isNativeApp() && Capacitor.getPlatform() === "ios";
 
   const email = firebaseUser?.email ?? user?.email ?? "";
   const sub: Subscription | undefined = user?.subscription;
   const grandfathered = isGrandfathered(email);
-  const premium = isPremium(email, sub?.plan, sub, user?.courseAccess);
+  const premium = justPurchased || isPremium(email, sub?.plan, sub, user?.courseAccess);
   const isExpiredPaywall = searchParams.get("expired") === "1";
 
   const createdAtMs = toMs(user?.createdAt ?? null);
@@ -86,16 +93,19 @@ function SubscriptionPageInner() {
   // Asks our server to pull server-verified entitlement state from RevenueCat
   // right after a purchase/restore, so the UI doesn't have to wait on the
   // webhook (which usually lands within seconds, but this closes the race).
-  async function syncAppleSubscription() {
-    if (!firebaseUser) return;
+  async function syncAppleSubscription(): Promise<boolean> {
+    if (!firebaseUser) return false;
     try {
       const token = await firebaseUser.getIdToken();
-      await fetch("/api/subscriptions/apple-sync", {
+      const res = await fetch("/api/subscriptions/apple-sync", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      const data = await res.json();
+      return data?.active === true;
     } catch {
       /* the RevenueCat webhook will still land shortly after */
+      return false;
     }
   }
 
@@ -110,7 +120,7 @@ function SubscriptionPageInner() {
       const { Purchases, PURCHASES_ERROR_CODE } = await import("@revenuecat/purchases-capacitor");
       try {
         await Purchases.purchasePackage({ aPackage: pkg });
-        await syncAppleSubscription();
+        if (await syncAppleSubscription()) setJustPurchased(true);
         toast.success(lang === "he" ? "ברוך הבא ל-Premium!" : "Welcome to Premium!");
         router.refresh();
       } catch (err) {
@@ -129,7 +139,7 @@ function SubscriptionPageInner() {
     try {
       const { Purchases } = await import("@revenuecat/purchases-capacitor");
       await Purchases.restorePurchases();
-      await syncAppleSubscription();
+      if (await syncAppleSubscription()) setJustPurchased(true);
       toast.success(lang === "he" ? "הרכישות שוחזרו" : "Purchases restored");
       router.refresh();
     } catch {
