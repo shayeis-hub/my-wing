@@ -25,6 +25,7 @@
     "@capacitor/status-bar": "^8.0.2",
     "@capgo/capacitor-health": "^8.6.2",
     "@paddle/paddle-node-sdk": "^3.8.0",
+    "@revenuecat/purchases-capacitor": "^13.4.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "firebase": "^12.17.1",

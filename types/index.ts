@@ -280,13 +280,24 @@ export interface NutritionTotals {
   fiber: number;
 }
 
+export type SubscriptionProvider = "paddle" | "paypal" | "apple" | "grandfathered";
+
 export interface Subscription {
   plan: "free" | "premium" | "grandfathered";
-  expiresAt?: Timestamp;
+  provider?: SubscriptionProvider;
+  status?: string;
+  currency?: string;
+  expiresAt?: Timestamp | string;
+  cancelPending?: boolean;
+  cancelledAt?: Timestamp | string;
+  updatedAt?: Timestamp | string;
+  lastPaymentAt?: Timestamp | string;
   paddleCustomerId?: string;
   paddleSubscriptionId?: string;
-  provider?: "paddle" | "grandfathered";
-  cancelPending?: boolean;
+  paypalSubscriptionId?: string;
+  appleOriginalTransactionId?: string;
+  appleProductId?: string;
+  revenuecatAppUserId?: string;
 }
 
 export interface DailyUsage {

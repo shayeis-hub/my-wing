@@ -8,10 +8,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { isNativeApp } from "@/lib/platform";
+import { Capacitor } from "@capacitor/core";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { Subscription } from "@/types";
 import type { Timestamp } from "firebase/firestore";
+import type { PurchasesOffering } from "@revenuecat/purchases-capacitor";
 import { Suspense } from "react";
 
 function toMs(ts: Timestamp | string | null | undefined): number | null {
@@ -33,6 +35,9 @@ function SubscriptionPageInner() {
   const [loadingCheckout, setLoadingCheckout] = useState<"monthly" | "yearly" | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [nativeOffering, setNativeOffering] = useState<PurchasesOffering | null>(null);
+  const [loadingPurchase, setLoadingPurchase] = useState<"monthly" | "yearly" | "restore" | null>(null);
+  const isIOSNative = isNativeApp() && Capacitor.getPlatform() === "ios";
 
   const email = firebaseUser?.email ?? user?.email ?? "";
   const sub: Subscription | undefined = user?.subscription;
@@ -59,6 +64,80 @@ function SubscriptionPageInner() {
       toast(lang === "he" ? "ביטלת את תהליך ההרשמה" : "Checkout canceled");
     }
   }, [searchParams, lang]);
+
+  // Fetch RevenueCat's configured offering (monthly/annual packages) once the
+  // native SDK has had a chance to configure (see RevenueCatSync in the app layout).
+  useEffect(() => {
+    if (!isIOSNative) return;
+    let cancelled = false;
+    import("@revenuecat/purchases-capacitor").then(async ({ Purchases }) => {
+      try {
+        const offerings = await Purchases.getOfferings();
+        if (!cancelled) setNativeOffering(offerings.current ?? null);
+      } catch {
+        /* offerings unavailable — purchase buttons render disabled below */
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isIOSNative]);
+
+  // Asks our server to pull server-verified entitlement state from RevenueCat
+  // right after a purchase/restore, so the UI doesn't have to wait on the
+  // webhook (which usually lands within seconds, but this closes the race).
+  async function syncAppleSubscription() {
+    if (!firebaseUser) return;
+    try {
+      const token = await firebaseUser.getIdToken();
+      await fetch("/api/subscriptions/apple-sync", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {
+      /* the RevenueCat webhook will still land shortly after */
+    }
+  }
+
+  async function handleNativePurchase(type: "monthly" | "yearly") {
+    const pkg = type === "yearly" ? nativeOffering?.annual : nativeOffering?.monthly;
+    if (!pkg) {
+      toast.error(lang === "he" ? "המנוי אינו זמין כרגע" : "This plan isn't available right now");
+      return;
+    }
+    setLoadingPurchase(type);
+    try {
+      const { Purchases, PURCHASES_ERROR_CODE } = await import("@revenuecat/purchases-capacitor");
+      try {
+        await Purchases.purchasePackage({ aPackage: pkg });
+        await syncAppleSubscription();
+        toast.success(lang === "he" ? "ברוך הבא ל-Premium!" : "Welcome to Premium!");
+        router.refresh();
+      } catch (err) {
+        const code = (err as { code?: string })?.code;
+        if (code !== PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
+          toast.error(lang === "he" ? "הרכישה נכשלה" : "Purchase failed");
+        }
+      }
+    } finally {
+      setLoadingPurchase(null);
+    }
+  }
+
+  async function handleRestore() {
+    setLoadingPurchase("restore");
+    try {
+      const { Purchases } = await import("@revenuecat/purchases-capacitor");
+      await Purchases.restorePurchases();
+      await syncAppleSubscription();
+      toast.success(lang === "he" ? "הרכישות שוחזרו" : "Purchases restored");
+      router.refresh();
+    } catch {
+      toast.error(lang === "he" ? "שחזור הרכישות נכשל" : "Restore failed");
+    } finally {
+      setLoadingPurchase(null);
+    }
+  }
 
   async function handleUpgrade(type: "monthly" | "yearly") {
     if (!firebaseUser) return;
@@ -263,10 +342,67 @@ function SubscriptionPageInner() {
               </p>
             )}
           </div>
+        ) : isIOSNative ? (
+          <div className="space-y-3">
+            {/* Real Apple In-App Purchase via RevenueCat — required by App Store
+                Guideline 3.1.1 for digital subscriptions consumed in-app. */}
+            {/* Yearly */}
+            <button
+              onClick={() => handleNativePurchase("yearly")}
+              disabled={loadingPurchase !== null || !nativeOffering?.annual}
+              className="w-full flex items-center justify-between px-5 py-4 rounded-2xl border-2 border-wing-primary bg-wing-primary/5 hover:bg-wing-primary/10 transition-colors disabled:opacity-60"
+            >
+              <div className="text-start">
+                <p className="font-bold text-wing-ink">{t("upgrade_cta_yearly")}</p>
+                <p className="text-wing-muted text-sm">
+                  {nativeOffering?.annual?.product.priceString ?? t("upgrade_yearly")}
+                </p>
+              </div>
+              <span className="text-xs font-bold text-white bg-wing-primary px-3 py-1 rounded-full">
+                {t("upgrade_yearly_badge")}
+              </span>
+            </button>
+
+            {/* Monthly */}
+            <button
+              onClick={() => handleNativePurchase("monthly")}
+              disabled={loadingPurchase !== null || !nativeOffering?.monthly}
+              className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl border border-wing-border bg-wing-surface hover:bg-wing-elevated transition-colors disabled:opacity-60"
+            >
+              <div className="text-start">
+                <p className="font-medium text-wing-ink">{t("upgrade_cta_monthly")}</p>
+                <p className="text-wing-muted text-sm">
+                  {nativeOffering?.monthly?.product.priceString ?? t("upgrade_monthly")}
+                </p>
+              </div>
+            </button>
+
+            <p className="text-center text-xs text-wing-subtle">{t("upgrade_cancel_anytime")}</p>
+
+            <button
+              onClick={handleRestore}
+              disabled={loadingPurchase !== null}
+              className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2 disabled:opacity-60"
+            >
+              {t("restore_purchases")}
+            </button>
+
+            {isExpiredPaywall && (
+              <div className="pt-2 border-t border-wing-border space-y-1.5">
+                <button
+                  onClick={() => router.replace("/dashboard")}
+                  className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
+                >
+                  {t("trial_view_only")}
+                </button>
+                <p className="text-center text-xs text-wing-subtle">{t("trial_view_only_note")}</p>
+              </div>
+            )}
+          </div>
         ) : isNativeApp() ? (
           <div className="space-y-3">
-            {/* In-app purchases are routed to the web to comply with store
-                billing policies (no external digital-goods checkout in-app). */}
+            {/* Android — in-app purchases are still routed to the web for now
+                (Play Billing not yet integrated; only iOS required real IAP). */}
             <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center space-y-2">
               <div className="flex justify-center">
                 <Crown size={28} className="text-wing-primary" />
