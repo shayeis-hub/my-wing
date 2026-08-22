@@ -19,6 +19,7 @@ import {
   CalendarDays,
   TrendingDown,
   Settings,
+  Crown,
 } from "lucide-react";
 
 interface HamburgerMenuProps {
@@ -119,6 +120,19 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
             <MenuItem
               icon={<TrendingDown size={20} />}
               label={lang === "he" ? "גרף ירידה במשקל" : "Weight Progress"}
+            />
+          </Link>
+
+          {/* Subscription — also reachable from Settings, but surfaced here so
+              upgrading is two taps instead of three. */}
+          <Link href={user?.accountType === "business" ? "/coach" : "/subscription"} onClick={onClose}>
+            <MenuItem
+              icon={<Crown size={20} className="text-yellow-500" />}
+              label={
+                user?.accountType === "business"
+                  ? lang === "he" ? "ניהול מנוי עסקי" : "Business plan"
+                  : lang === "he" ? "ניהול מנוי" : "Manage subscription"
+              }
             />
           </Link>
 
