@@ -117,6 +117,8 @@ function SubscriptionPageInner() {
       return;
     }
     setLoadingPurchase(type);
+    // TEMP: confirm the handler actually runs before anything async happens.
+    toast(`handler fired, pkg=${pkg.identifier}`, { duration: 5000 });
     try {
       const { Purchases, PURCHASES_ERROR_CODE } = await import("@revenuecat/purchases-capacitor");
       try {
@@ -127,9 +129,18 @@ function SubscriptionPageInner() {
       } catch (err) {
         const code = (err as { code?: string })?.code;
         if (code !== PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
-          toast.error(lang === "he" ? "הרכישה נכשלה" : "Purchase failed");
+          // TEMP: surface the raw RevenueCat error while debugging the Android
+          // purchase flow — replace with the generic message once resolved.
+          const raw = err as { message?: string; underlyingErrorMessage?: string };
+          toast.error(
+            `[${code ?? "no-code"}] ${raw?.underlyingErrorMessage ?? raw?.message ?? String(err)}`,
+            { duration: 15000 }
+          );
         }
       }
+    } catch (outerErr) {
+      // TEMP: import() itself failing would otherwise be swallowed silently.
+      toast.error(`import failed: ${String(outerErr)}`, { duration: 15000 });
     } finally {
       setLoadingPurchase(null);
     }
