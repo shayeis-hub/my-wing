@@ -48,10 +48,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Trial expired → paywall (unless already on an exempt page).
-    // Business accounts are governed by their coach plan, not the personal paywall.
+    // Trial expired → paywall (unless already on an exempt page, or the user
+    // already chose "Continue in view-only mode" — see the subscription
+    // page's trial_view_only button, which sets this before navigating away.
+    // Without this check every navigation bounced straight back here, so
+    // "view-only" never actually let anyone view anything.
     const exempt = PAYWALL_EXEMPT.some((p) => pathname.startsWith(p));
-    if (!exempt && !isBusiness && user) {
+    const viewOnlyAck =
+      typeof window !== "undefined" && sessionStorage.getItem("wingpact_view_only_ack") === "1";
+    if (!exempt && !isBusiness && !viewOnlyAck && user) {
       const email = firebaseUser.email ?? user.email ?? "";
       const createdAtMs = toMs(user.createdAt ?? null);
       if (isTrialExpired(email, user.subscription?.plan, createdAtMs, {

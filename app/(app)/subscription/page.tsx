@@ -424,7 +424,10 @@ function SubscriptionPageInner() {
             {isExpiredPaywall && (
               <div className="pt-2 border-t border-wing-border space-y-1.5">
                 <button
-                  onClick={() => router.replace("/dashboard")}
+                  onClick={() => {
+                    sessionStorage.setItem("wingpact_view_only_ack", "1");
+                    router.replace("/dashboard");
+                  }}
                   className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
                 >
                   {t("trial_view_only")}
@@ -468,7 +471,10 @@ function SubscriptionPageInner() {
             {isExpiredPaywall && (
               <div className="pt-2 border-t border-wing-border space-y-1.5">
                 <button
-                  onClick={() => router.replace("/dashboard")}
+                  onClick={() => {
+                    sessionStorage.setItem("wingpact_view_only_ack", "1");
+                    router.replace("/dashboard");
+                  }}
                   className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
                 >
                   {t("trial_view_only")}
