@@ -15,7 +15,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // versionCode must strictly increase on every Play Store upload —
         // bump it by hand each release; it does not follow package.json.
-        versionCode 5
+        versionCode 6
         versionName webAppVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
