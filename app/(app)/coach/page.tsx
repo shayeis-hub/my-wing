@@ -7,6 +7,8 @@ import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { COACH_PLANS, isCoachActive, type CoachPlanId } from "@/lib/subscription";
+import { isNativeApp } from "@/lib/platform";
+import { Capacitor } from "@capacitor/core";
 import {
   getCoachClients,
   getCoachInvites,
@@ -52,6 +54,10 @@ export default function CoachPage() {
   const { user, firebaseUser } = useAuth();
   const { lang } = useLanguage();
   const router = useRouter();
+  // Coach plans are still PayPal-only (no RevenueCat products exist for them
+  // yet) — block the external-payment redirect on iOS so this screen can't
+  // trip the same App Review guideline the consumer subscription flow did.
+  const isIOSNative = isNativeApp() && Capacitor.getPlatform() === "ios";
 
   const [clients, setClients] = useState<CoachClient[]>([]);
   const [invites, setInvites] = useState<CoachInvite[]>([]);
@@ -134,6 +140,10 @@ export default function CoachPage() {
   }
 
   async function handleActivate(plan: CoachPlanId) {
+    if (plan !== "free" && isIOSNative) {
+      toast(lang === "he" ? "התוכניות בתשלום זמינות כרגע רק דרך האתר" : "Paid plans are currently available on the web only");
+      return;
+    }
     setBusy(true);
     try {
       if (plan === "free") {
@@ -302,7 +312,9 @@ export default function CoachPage() {
                   recommended ? "bg-wing-heat text-white" : "border border-wing-heat text-wing-heat"
                 }`}
               >
-                {lang === "he" ? "בואו נתחיל" : "Let's get started"}
+                {isIOSNative
+                  ? (lang === "he" ? "זמין באתר" : "Available on the web")
+                  : (lang === "he" ? "בואו נתחיל" : "Let's get started")}
               </button>
 
               <div className="mt-4 pt-4 border-t border-wing-divider">
@@ -322,7 +334,9 @@ export default function CoachPage() {
         </div>
 
         <p className="text-[11px] text-wing-subtle text-center">
-          {lang === "he" ? "התשלום מאובטח דרך PayPal · ניתן לבטל בכל עת" : "Payment secured by PayPal · Cancel any time"}
+          {isIOSNative
+            ? (lang === "he" ? "התוכניות בתשלום ניתנות לרכישה דרך wingpact.app" : "Paid plans can be purchased at wingpact.app")
+            : (lang === "he" ? "התשלום מאובטח דרך PayPal · ניתן לבטל בכל עת" : "Payment secured by PayPal · Cancel any time")}
         </p>
       </div>
     );
