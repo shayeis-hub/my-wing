@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { isNativeApp } from "@/lib/platform";
+import { Capacitor } from "@capacitor/core";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { Subscription } from "@/types";
@@ -24,6 +25,17 @@ function toMs(ts: Timestamp | string | null | undefined): number | null {
   if (typeof ts.toDate === "function") return ts.toDate().getTime();
   const s = (ts as unknown as { _seconds?: number })._seconds;
   return s ? s * 1000 : null;
+}
+
+// Apple and Google require subscriptions bought via IAP to be cancelled
+// through the store's own subscription management, not by the merchant —
+// there's no "cancel" API call we're allowed to make on the user's behalf.
+function openStoreSubscriptionManagement(googleProductId?: string) {
+  const url =
+    Capacitor.getPlatform() === "android"
+      ? `https://play.google.com/store/account/subscriptions?sku=${googleProductId ?? ""}&package=app.wingpact.android`
+      : "https://apps.apple.com/account/subscriptions";
+  window.open(url, "_system");
 }
 
 function SubscriptionPageInner() {
@@ -336,13 +348,28 @@ function SubscriptionPageInner() {
           </div>
         ) : premium ? (
           <div className="space-y-3">
-            <Button
-              variant="secondary"
-              className="w-full"
-              onClick={() => setShowCancelConfirm(true)}
-            >
-              {t("upgrade_cancel")}
-            </Button>
+            {!sub?.cancelPending && (
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => {
+                  if (sub?.provider === "google" || sub?.provider === "apple") {
+                    openStoreSubscriptionManagement(sub?.googleProductId);
+                  } else {
+                    setShowCancelConfirm(true);
+                  }
+                }}
+              >
+                {t("upgrade_cancel")}
+              </Button>
+            )}
+            {!sub?.cancelPending && (sub?.provider === "google" || sub?.provider === "apple") && (
+              <p className="text-center text-xs text-wing-subtle">
+                {lang === "he"
+                  ? `הביטול מתבצע דרך ${sub?.provider === "google" ? "Google Play" : "App Store"}`
+                  : `Cancellation is managed through ${sub?.provider === "google" ? "Google Play" : "the App Store"}`}
+              </p>
+            )}
             {sub?.cancelPending && (
               <p className="text-center text-sm text-wing-muted bg-wing-elevated rounded-2xl px-4 py-2.5">
                 {lang === "he"

@@ -16,6 +16,7 @@ interface RevenueCatEntitlement {
 
 interface RevenueCatSubscriptionInfo {
   store: string; // "app_store" | "play_store" | "promotional" | ...
+  unsubscribe_detected_at: string | null; // set once the user turns off auto-renew (cancels), even though the entitlement stays active until expires_date
 }
 
 interface RevenueCatSubscriberResponse {
@@ -64,16 +65,20 @@ export async function POST(req: NextRequest) {
   const db = admin.firestore();
 
   if (isActive) {
-    const store = data.subscriber?.subscriptions?.[entitlement.product_identifier]?.store;
-    const provider = providerForStore(store);
+    const subInfo = data.subscriber?.subscriptions?.[entitlement.product_identifier];
+    const provider = providerForStore(subInfo?.store);
     await db.doc(`users/${uid}`).set(
       {
         subscription: {
           provider,
           plan: "premium",
           status: "active",
-          cancelPending: false,
+          // Still premium until expires_date, but reflect that auto-renew was
+          // turned off (e.g. the user cancelled directly in Play Store /
+          // App Store settings, outside our own "Cancel subscription" flow).
+          cancelPending: !!subInfo?.unsubscribe_detected_at,
           ...(entitlement.expires_date ? { expiresAt: entitlement.expires_date } : {}),
+          ...(subInfo?.unsubscribe_detected_at ? { cancelledAt: subInfo.unsubscribe_detected_at } : {}),
           ...(provider === "google"
             ? { googleProductId: entitlement.product_identifier }
             : { appleProductId: entitlement.product_identifier }),
@@ -83,6 +88,26 @@ export async function POST(req: NextRequest) {
       },
       { merge: true }
     );
+  } else {
+    // Not active per RevenueCat — only downgrade if this user's subscription
+    // is actually native (PayPal subscribers have no RevenueCat record at
+    // all, so they'd always show inactive here and must never be touched).
+    const userSnap = await db.doc(`users/${uid}`).get();
+    const currentSub = userSnap.data()?.subscription;
+    if (currentSub?.provider === "google" || currentSub?.provider === "apple") {
+      await db.doc(`users/${uid}`).set(
+        {
+          subscription: {
+            ...currentSub,
+            plan: "free",
+            status: "expired",
+            cancelPending: false,
+            updatedAt: new Date().toISOString(),
+          },
+        },
+        { merge: true }
+      );
+    }
   }
 
   return NextResponse.json({ ok: true, active: isActive });
