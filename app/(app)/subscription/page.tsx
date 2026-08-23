@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { isNativeApp } from "@/lib/platform";
+import { Capacitor } from "@capacitor/core"; // TEMP debug import — remove with the debug toasts
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { Subscription } from "@/types";
@@ -78,12 +79,22 @@ function SubscriptionPageInner() {
   useEffect(() => {
     if (!isNativeIAP) return;
     let cancelled = false;
+    // TEMP: this effect is under investigation — getOfferings() may be
+    // failing silently on Android, which would explain permanently-disabled
+    // purchase buttons with no visible error. Remove once resolved.
+    toast(`platform=${Capacitor.getPlatform()} fetching offerings…`, { duration: 4000 });
     import("@revenuecat/purchases-capacitor").then(async ({ Purchases }) => {
       try {
         const offerings = await Purchases.getOfferings();
-        if (!cancelled) setNativeOffering(offerings.current ?? null);
-      } catch {
-        /* offerings unavailable — purchase buttons render disabled below */
+        if (!cancelled) {
+          setNativeOffering(offerings.current ?? null);
+          toast(
+            `offerings: current=${offerings.current?.identifier ?? "null"} monthly=${!!offerings.current?.monthly} annual=${!!offerings.current?.annual}`,
+            { duration: 12000 }
+          );
+        }
+      } catch (err) {
+        toast.error(`getOfferings failed: ${String(err)}`, { duration: 15000 });
       }
     });
     return () => {
