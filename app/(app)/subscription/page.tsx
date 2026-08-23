@@ -431,7 +431,7 @@ function SubscriptionPageInner() {
                     sessionStorage.setItem("wingpact_view_only_ack", "1");
                     router.replace("/dashboard");
                   }}
-                  className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
+                  className="w-full py-2.5 rounded-2xl border border-wing-border bg-wing-elevated text-sm font-semibold text-wing-ink hover:bg-wing-border/40 transition-colors"
                 >
                   {t("trial_view_only")}
                 </button>
@@ -478,7 +478,7 @@ function SubscriptionPageInner() {
                     sessionStorage.setItem("wingpact_view_only_ack", "1");
                     router.replace("/dashboard");
                   }}
-                  className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
+                  className="w-full py-2.5 rounded-2xl border border-wing-border bg-wing-elevated text-sm font-semibold text-wing-ink hover:bg-wing-border/40 transition-colors"
                 >
                   {t("trial_view_only")}
                 </button>

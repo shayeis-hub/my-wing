@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { useLanguage } from "@/lib/i18n";
+import { isNativeApp } from "@/lib/platform";
 import { Switch } from "@/components/ui/Switch";
 import { Avatar } from "@/components/ui/Avatar";
 import { updateNotificationPrefs } from "@/lib/firebase/firestore";
@@ -31,6 +32,14 @@ export default function SettingsPage() {
   });
   // Author uids muted for meal notifications.
   const [mealsMuted, setMealsMuted] = useState<string[]>(stored.mealsMuted ?? []);
+
+  const [appVersion, setAppVersion] = useState<{ version: string; build: string } | null>(null);
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    import("@capacitor/app").then(({ App }) => {
+      App.getInfo().then((info) => setAppVersion({ version: info.version, build: info.build }));
+    });
+  }, []);
 
   async function persist(nextPrefs: Record<PrefKey, boolean>, nextMuted: string[]) {
     if (!firebaseUser) return;
@@ -181,6 +190,14 @@ export default function SettingsPage() {
           <ChevronEnd size={18} className="text-wing-muted" />
         </Link>
       </section>
+
+      {appVersion && (
+        <p className="text-center text-xs text-wing-subtle pt-1">
+          {isHe
+            ? `גרסה ${appVersion.version} (${appVersion.build})`
+            : `Version ${appVersion.version} (${appVersion.build})`}
+        </p>
+      )}
     </div>
   );
 }
