@@ -8,7 +8,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { isNativeApp } from "@/lib/platform";
-import { Capacitor } from "@capacitor/core"; // TEMP debug import — remove with the debug toasts
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { Subscription } from "@/types";
@@ -79,22 +78,12 @@ function SubscriptionPageInner() {
   useEffect(() => {
     if (!isNativeIAP) return;
     let cancelled = false;
-    // TEMP: this effect is under investigation — getOfferings() may be
-    // failing silently on Android, which would explain permanently-disabled
-    // purchase buttons with no visible error. Remove once resolved.
-    toast(`platform=${Capacitor.getPlatform()} fetching offerings…`, { duration: 4000 });
     import("@revenuecat/purchases-capacitor").then(async ({ Purchases }) => {
       try {
         const offerings = await Purchases.getOfferings();
-        if (!cancelled) {
-          setNativeOffering(offerings.current ?? null);
-          toast(
-            `offerings: current=${offerings.current?.identifier ?? "null"} monthly=${!!offerings.current?.monthly} annual=${!!offerings.current?.annual}`,
-            { duration: 12000 }
-          );
-        }
+        if (!cancelled) setNativeOffering(offerings.current ?? null);
       } catch (err) {
-        toast.error(`getOfferings failed: ${String(err)}`, { duration: 15000 });
+        console.error("RevenueCat getOfferings failed", err);
       }
     });
     return () => {
@@ -128,30 +117,17 @@ function SubscriptionPageInner() {
       return;
     }
     setLoadingPurchase(type);
-    // TEMP: confirm the handler actually runs before anything async happens.
-    toast(`handler fired, pkg=${pkg.identifier}`, { duration: 5000 });
+    const { Purchases, PURCHASES_ERROR_CODE } = await import("@revenuecat/purchases-capacitor");
     try {
-      const { Purchases, PURCHASES_ERROR_CODE } = await import("@revenuecat/purchases-capacitor");
-      try {
-        await Purchases.purchasePackage({ aPackage: pkg });
-        if (await syncNativeSubscription()) setJustPurchased(true);
-        toast.success(lang === "he" ? "ברוך הבא ל-Premium!" : "Welcome to Premium!");
-        router.refresh();
-      } catch (err) {
-        const code = (err as { code?: string })?.code;
-        if (code !== PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
-          // TEMP: surface the raw RevenueCat error while debugging the Android
-          // purchase flow — replace with the generic message once resolved.
-          const raw = err as { message?: string; underlyingErrorMessage?: string };
-          toast.error(
-            `[${code ?? "no-code"}] ${raw?.underlyingErrorMessage ?? raw?.message ?? String(err)}`,
-            { duration: 15000 }
-          );
-        }
+      await Purchases.purchasePackage({ aPackage: pkg });
+      if (await syncNativeSubscription()) setJustPurchased(true);
+      toast.success(lang === "he" ? "ברוך הבא ל-Premium!" : "Welcome to Premium!");
+      router.refresh();
+    } catch (err) {
+      const code = (err as { code?: string })?.code;
+      if (code !== PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
+        toast.error(lang === "he" ? "הרכישה נכשלה" : "Purchase failed");
       }
-    } catch (outerErr) {
-      // TEMP: import() itself failing would otherwise be swallowed silently.
-      toast.error(`import failed: ${String(outerErr)}`, { duration: 15000 });
     } finally {
       setLoadingPurchase(null);
     }
