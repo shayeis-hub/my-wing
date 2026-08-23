@@ -8,7 +8,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { isNativeApp } from "@/lib/platform";
-import { Capacitor } from "@capacitor/core";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import type { Subscription } from "@/types";
@@ -41,10 +40,12 @@ function SubscriptionPageInner() {
   // useAuth's Firestore listener stale — so the server-side write that grants
   // premium isn't always pushed to this still-mounted page (leaving and
   // re-entering the screen remounts the listener, which is why that worked).
-  // Once apple-sync confirms the entitlement is active server-side, reflect it
+  // Once iap-sync confirms the entitlement is active server-side, reflect it
   // here immediately rather than waiting on the listener to catch up.
   const [justPurchased, setJustPurchased] = useState(false);
-  const isIOSNative = isNativeApp() && Capacitor.getPlatform() === "ios";
+  // RevenueCat/purchases-capacitor abstracts StoreKit vs Play Billing, so the
+  // same purchase UI and API calls serve both native platforms.
+  const isNativeIAP = isNativeApp();
 
   const email = firebaseUser?.email ?? user?.email ?? "";
   const sub: Subscription | undefined = user?.subscription;
@@ -75,7 +76,7 @@ function SubscriptionPageInner() {
   // Fetch RevenueCat's configured offering (monthly/annual packages) once the
   // native SDK has had a chance to configure (see RevenueCatSync in the app layout).
   useEffect(() => {
-    if (!isIOSNative) return;
+    if (!isNativeIAP) return;
     let cancelled = false;
     import("@revenuecat/purchases-capacitor").then(async ({ Purchases }) => {
       try {
@@ -88,16 +89,16 @@ function SubscriptionPageInner() {
     return () => {
       cancelled = true;
     };
-  }, [isIOSNative]);
+  }, [isNativeIAP]);
 
   // Asks our server to pull server-verified entitlement state from RevenueCat
   // right after a purchase/restore, so the UI doesn't have to wait on the
   // webhook (which usually lands within seconds, but this closes the race).
-  async function syncAppleSubscription(): Promise<boolean> {
+  async function syncNativeSubscription(): Promise<boolean> {
     if (!firebaseUser) return false;
     try {
       const token = await firebaseUser.getIdToken();
-      const res = await fetch("/api/subscriptions/apple-sync", {
+      const res = await fetch("/api/subscriptions/iap-sync", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -120,7 +121,7 @@ function SubscriptionPageInner() {
       const { Purchases, PURCHASES_ERROR_CODE } = await import("@revenuecat/purchases-capacitor");
       try {
         await Purchases.purchasePackage({ aPackage: pkg });
-        if (await syncAppleSubscription()) setJustPurchased(true);
+        if (await syncNativeSubscription()) setJustPurchased(true);
         toast.success(lang === "he" ? "ברוך הבא ל-Premium!" : "Welcome to Premium!");
         router.refresh();
       } catch (err) {
@@ -139,7 +140,7 @@ function SubscriptionPageInner() {
     try {
       const { Purchases } = await import("@revenuecat/purchases-capacitor");
       await Purchases.restorePurchases();
-      if (await syncAppleSubscription()) setJustPurchased(true);
+      if (await syncNativeSubscription()) setJustPurchased(true);
       toast.success(lang === "he" ? "הרכישות שוחזרו" : "Purchases restored");
       router.refresh();
     } catch {
@@ -352,10 +353,11 @@ function SubscriptionPageInner() {
               </p>
             )}
           </div>
-        ) : isIOSNative ? (
+        ) : isNativeIAP ? (
           <div className="space-y-3">
-            {/* Real Apple In-App Purchase via RevenueCat — required by App Store
-                Guideline 3.1.1 for digital subscriptions consumed in-app. */}
+            {/* Real In-App Purchase via RevenueCat (StoreKit on iOS, Play
+                Billing on Android) — required by both stores' policies for
+                digital subscriptions consumed in-app. */}
             {/* Yearly */}
             <button
               onClick={() => handleNativePurchase("yearly")}
@@ -397,29 +399,6 @@ function SubscriptionPageInner() {
               {t("restore_purchases")}
             </button>
 
-            {isExpiredPaywall && (
-              <div className="pt-2 border-t border-wing-border space-y-1.5">
-                <button
-                  onClick={() => router.replace("/dashboard")}
-                  className="w-full py-2.5 text-sm text-wing-muted hover:text-wing-ink transition-colors underline underline-offset-2"
-                >
-                  {t("trial_view_only")}
-                </button>
-                <p className="text-center text-xs text-wing-subtle">{t("trial_view_only_note")}</p>
-              </div>
-            )}
-          </div>
-        ) : isNativeApp() ? (
-          <div className="space-y-3">
-            {/* Android — in-app purchases are still routed to the web for now
-                (Play Billing not yet integrated; only iOS required real IAP). */}
-            <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center space-y-2">
-              <div className="flex justify-center">
-                <Crown size={28} className="text-wing-primary" />
-              </div>
-              <p className="font-bold text-wing-ink">{t("upgrade_web_only_title")}</p>
-              <p className="text-sm text-wing-muted leading-relaxed">{t("upgrade_web_only_body")}</p>
-            </div>
             {isExpiredPaywall && (
               <div className="pt-2 border-t border-wing-border space-y-1.5">
                 <button

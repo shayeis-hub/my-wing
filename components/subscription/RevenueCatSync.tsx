@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isNativeApp } from "@/lib/platform";
+import { Capacitor } from "@capacitor/core";
 
 // Links RevenueCat's purchaser identity to our Firebase uid so a purchase
 // made in the app maps 1:1 to the user's Firestore document — no separate
@@ -13,7 +14,10 @@ export function RevenueCatSync() {
 
   useEffect(() => {
     if (!isNativeApp() || !firebaseUser) return;
-    const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_IOS_API_KEY;
+    const apiKey =
+      Capacitor.getPlatform() === "ios"
+        ? process.env.NEXT_PUBLIC_REVENUECAT_IOS_API_KEY
+        : process.env.NEXT_PUBLIC_REVENUECAT_ANDROID_API_KEY;
     if (!apiKey) return;
 
     let cancelled = false;

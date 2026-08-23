@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
+import type { SubscriptionProvider } from "@/types";
 
 export const dynamic = "force-dynamic";
+
+// Verified against a real sandbox-fired test event (2026-08-21): the webhook
+// payload's store field is an uppercase enum ("APP_STORE" / "PLAY_STORE"),
+// unlike the REST subscriber API's lowercase "app_store" / "play_store".
+function providerForStore(store: string | undefined): SubscriptionProvider {
+  return store === "PLAY_STORE" ? "google" : "apple";
+}
 
 // RevenueCat webhook payload shape (https://www.revenuecat.com/docs/integrations/webhooks).
 // NOTE: field names below reflect RevenueCat's documented format as of this
@@ -82,25 +90,30 @@ export async function POST(req: NextRequest) {
     case "RENEWAL":
     case "UNCANCELLATION":
     case "PRODUCT_CHANGE": {
+      const provider = providerForStore(event.store);
       await userRef.set(
         {
           subscription: {
-            provider: "apple",
+            provider,
             plan: "premium",
             status: event.type,
             cancelPending: false,
             ...(expiresAt ? { expiresAt } : {}),
-            ...(event.original_transaction_id
+            ...(provider === "apple" && event.original_transaction_id
               ? { appleOriginalTransactionId: event.original_transaction_id }
               : {}),
-            ...(event.product_id ? { appleProductId: event.product_id } : {}),
+            ...(event.product_id
+              ? provider === "google"
+                ? { googleProductId: event.product_id }
+                : { appleProductId: event.product_id }
+              : {}),
             revenuecatAppUserId: event.app_user_id,
             updatedAt: new Date().toISOString(),
           },
         },
         { merge: true }
       );
-      console.log(`User ${userRef.id} → premium (apple, ${event.type})`);
+      console.log(`User ${userRef.id} → premium (${provider}, ${event.type})`);
       break;
     }
 

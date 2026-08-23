@@ -280,7 +280,7 @@ export interface NutritionTotals {
   fiber: number;
 }
 
-export type SubscriptionProvider = "paddle" | "paypal" | "apple" | "grandfathered";
+export type SubscriptionProvider = "paddle" | "paypal" | "apple" | "google" | "grandfathered";
 
 export interface Subscription {
   plan: "free" | "premium" | "grandfathered";
@@ -297,6 +297,7 @@ export interface Subscription {
   paypalSubscriptionId?: string;
   appleOriginalTransactionId?: string;
   appleProductId?: string;
+  googleProductId?: string;
   revenuecatAppUserId?: string;
 }
 

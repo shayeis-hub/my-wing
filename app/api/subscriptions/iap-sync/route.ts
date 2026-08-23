@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
+import type { SubscriptionProvider } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -13,18 +14,27 @@ interface RevenueCatEntitlement {
   product_identifier: string;
 }
 
+interface RevenueCatSubscriptionInfo {
+  store: string; // "app_store" | "play_store" | "promotional" | ...
+}
+
 interface RevenueCatSubscriberResponse {
   subscriber: {
     entitlements: Record<string, RevenueCatEntitlement>;
+    subscriptions: Record<string, RevenueCatSubscriptionInfo>;
     original_app_user_id: string;
   };
+}
+
+function providerForStore(store: string | undefined): SubscriptionProvider {
+  return store === "play_store" ? "google" : "apple";
 }
 
 // Called right after a purchase/restore resolves client-side, so the UI
 // doesn't have to wait on the RevenueCat webhook (which is usually fast, but
 // not instant) to see Firestore reflect the new entitlement. The webhook
 // remains the source of truth for everything that happens while the app
-// isn't open (renewals, cancellations from iOS Settings, refunds).
+// isn't open (renewals, cancellations from the store's own settings, refunds).
 export async function POST(req: NextRequest) {
   const uid = await getUidFromRequest(req);
   if (!uid) {
@@ -54,15 +64,19 @@ export async function POST(req: NextRequest) {
   const db = admin.firestore();
 
   if (isActive) {
+    const store = data.subscriber?.subscriptions?.[entitlement.product_identifier]?.store;
+    const provider = providerForStore(store);
     await db.doc(`users/${uid}`).set(
       {
         subscription: {
-          provider: "apple",
+          provider,
           plan: "premium",
           status: "active",
           cancelPending: false,
           ...(entitlement.expires_date ? { expiresAt: entitlement.expires_date } : {}),
-          appleProductId: entitlement.product_identifier,
+          ...(provider === "google"
+            ? { googleProductId: entitlement.product_identifier }
+            : { appleProductId: entitlement.product_identifier }),
           revenuecatAppUserId: uid,
           updatedAt: new Date().toISOString(),
         },
