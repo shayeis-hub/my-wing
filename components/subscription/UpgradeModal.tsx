@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, Zap, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
-import { useAuth } from "@/hooks/useAuth";
 import { FREE_LIMITS } from "@/lib/subscription";
-import { isNativeApp } from "@/lib/platform";
 
 interface UpgradeModalProps {
   onClose: () => void;
@@ -29,28 +27,12 @@ const FEATURES = {
   ],
 };
 
+// This upsell pitch is provider-agnostic — the actual purchase flow (native
+// IAP buttons, or "download the app" for web visitors) lives entirely on the
+// subscription page, so this modal just points there instead of duplicating it.
 export function UpgradeModal({ onClose, limitReached = false }: UpgradeModalProps) {
   const { t, lang } = useLanguage();
-  const { firebaseUser } = useAuth();
-  const [loading, setLoading] = useState<"monthly" | "yearly" | null>(null);
-
-  async function handleUpgrade(type: "monthly" | "yearly") {
-    if (!firebaseUser) return;
-    setLoading(type);
-    try {
-      const token = await firebaseUser.getIdToken();
-      const res = await fetch("/api/subscriptions/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ priceType: type }),
-      });
-      if (!res.ok) throw new Error("checkout failed");
-      const { url } = await res.json();
-      window.location.href = url;
-    } catch {
-      setLoading(null);
-    }
-  }
+  const router = useRouter();
 
   const features = lang === "he" ? FEATURES.he : FEATURES.en;
 
@@ -100,54 +82,11 @@ export function UpgradeModal({ onClose, limitReached = false }: UpgradeModalProp
           </div>
         </div>
 
-        {/* Pricing */}
-        {isNativeApp() ? (
-          <div className="px-6 py-5">
-            <div className="bg-wing-elevated border border-wing-border rounded-2xl p-4 text-center space-y-1.5">
-              <p className="font-bold text-wing-ink text-sm">{t("upgrade_web_only_title")}</p>
-              <p className="text-xs text-wing-muted leading-relaxed">{t("upgrade_web_only_body")}</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="px-6 py-5 space-y-3">
-              {/* Yearly — highlighted */}
-              <button
-                onClick={() => handleUpgrade("yearly")}
-                disabled={loading !== null}
-                className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-2 border-wing-primary bg-wing-primary/5 hover:bg-wing-primary/10 transition-colors disabled:opacity-60"
-              >
-                <div className="text-start">
-                  <p className="font-bold text-wing-ink text-sm">{t("upgrade_cta_yearly")}</p>
-                  <p className="text-wing-muted text-xs">{t("upgrade_yearly")}</p>
-                </div>
-                <span className="text-xs font-bold text-white bg-wing-primary px-2.5 py-1 rounded-full">
-                  {t("upgrade_yearly_badge")}
-                </span>
-              </button>
-
-              {/* Monthly */}
-              <button
-                onClick={() => handleUpgrade("monthly")}
-                disabled={loading !== null}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-2xl border border-wing-border bg-wing-elevated hover:bg-wing-surface transition-colors disabled:opacity-60"
-              >
-                <div className="text-start">
-                  <p className="font-medium text-wing-ink text-sm">{t("upgrade_cta_monthly")}</p>
-                  <p className="text-wing-muted text-xs">{t("upgrade_monthly")}</p>
-                </div>
-              </button>
-
-              <p className="text-center text-xs text-wing-subtle">{t("upgrade_cancel_anytime")}</p>
-            </div>
-
-            {loading && (
-              <div className="px-6 pb-5 text-center">
-                <p className="text-xs text-wing-muted animate-pulse">מעביר לדף תשלום...</p>
-              </div>
-            )}
-          </>
-        )}
+        <div className="px-6 py-5">
+          <Button className="w-full" onClick={() => router.push("/subscription")}>
+            {t("upgrade_manage")}
+          </Button>
+        </div>
       </div>
     </div>
   );

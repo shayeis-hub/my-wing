@@ -98,8 +98,8 @@ export default function PricingHePage() {
               <p className="mt-1">כן. ניתן לבטל את המנוי בכל עת דרך דף ניהול המנוי. הגישה לפרמיום תישמר עד סוף תקופת החיוב הנוכחית.</p>
             </div>
             <div>
-              <p className="font-semibold text-slate-800">באילו אמצעי תשלום אפשר לשלם?</p>
-              <p className="mt-1">כל כרטיסי האשראי המרכזיים (ויזה, מאסטרקארד, אמריקן אקספרס). התשלום מעובד באופן מאובטח דרך PayPal.</p>
+              <p className="font-semibold text-slate-800">איך משדרגים?</p>
+              <p className="mt-1">השדרוג נעשה בתוך אפליקציית מבנה כנף (App Store או Google Play), והחיוב מתבצע דרך חשבון Apple/Google שלכם.</p>
             </div>
             <div>
               <p className="font-semibold text-slate-800">המחיר כולל מע״מ?</p>

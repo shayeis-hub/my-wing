@@ -83,14 +83,6 @@ export const FREE_LIMITS = {
   wingMembers: 3,
 } as const;
 
-// ── PayPal billing plan IDs (set in Vercel env vars after running paypal-setup) ──
-export const PAYPAL_PLANS = {
-  monthly_ILS: process.env.PAYPAL_PLAN_ILS_MONTHLY ?? "",
-  yearly_ILS:  process.env.PAYPAL_PLAN_ILS_YEARLY  ?? "",
-  monthly_USD: process.env.PAYPAL_PLAN_USD_MONTHLY ?? "",
-  yearly_USD:  process.env.PAYPAL_PLAN_USD_YEARLY  ?? "",
-} as const;
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 export function isGrandfathered(email?: string | null): boolean {
   if (!email) return false;

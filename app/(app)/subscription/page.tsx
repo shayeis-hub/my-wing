@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Zap, Check, Crown, ArrowLeft, Lock } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Zap, Check, Crown, ArrowLeft, Lock, Smartphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
@@ -40,12 +39,9 @@ function openStoreSubscriptionManagement(googleProductId?: string) {
 
 function SubscriptionPageInner() {
   const { user, firebaseUser } = useAuth();
-  const { t, lang, dir, gender } = useLanguage();
+  const { t, lang, dir } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [loadingCheckout, setLoadingCheckout] = useState<"monthly" | "yearly" | null>(null);
-  const [loadingPortal, setLoadingPortal] = useState(false);
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [nativeOffering, setNativeOffering] = useState<PurchasesOffering | null>(null);
   const [loadingPurchase, setLoadingPurchase] = useState<"monthly" | "yearly" | "restore" | null>(null);
   // The StoreKit sheet covers the WebView during a purchase, which can leave
@@ -157,49 +153,6 @@ function SubscriptionPageInner() {
       toast.error(lang === "he" ? "שחזור הרכישות נכשל" : "Restore failed");
     } finally {
       setLoadingPurchase(null);
-    }
-  }
-
-  async function handleUpgrade(type: "monthly" | "yearly") {
-    if (!firebaseUser) return;
-    setLoadingCheckout(type);
-    try {
-      const token = await firebaseUser.getIdToken();
-      const res = await fetch("/api/subscriptions/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          priceType: type,
-          currency: lang === "he" ? "ILS" : "USD",
-        }),
-      });
-      if (!res.ok) throw new Error();
-      const { url } = await res.json();
-      window.location.href = url;
-    } catch {
-      toast.error(lang === "he" ? "שגיאה ביצירת תשלום" : "Checkout failed");
-      setLoadingCheckout(null);
-    }
-  }
-
-  async function handlePortal() {
-    if (!firebaseUser) return;
-    setLoadingPortal(true);
-    try {
-      const token = await firebaseUser.getIdToken();
-      const res = await fetch("/api/subscriptions/create-portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ action: "cancel" }),
-      });
-      if (!res.ok) throw new Error();
-      toast.success(lang === "he" ? "המנוי בוטל" : "Subscription cancelled");
-      setShowCancelConfirm(false);
-      router.refresh();
-    } catch {
-      toast.error(lang === "he" ? "שגיאה בביטול המנוי" : "Failed to cancel subscription");
-    } finally {
-      setLoadingPortal(false);
     }
   }
 
@@ -349,21 +302,14 @@ function SubscriptionPageInner() {
         ) : premium ? (
           <div className="space-y-3">
             {!sub?.cancelPending && (
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={() => {
-                  if (sub?.provider === "google" || sub?.provider === "apple") {
-                    openStoreSubscriptionManagement(sub?.googleProductId);
-                  } else {
-                    setShowCancelConfirm(true);
-                  }
-                }}
+              <button
+                onClick={() => openStoreSubscriptionManagement(sub?.googleProductId)}
+                className="w-full py-3 rounded-2xl border border-wing-border bg-wing-surface hover:bg-wing-elevated transition-colors text-sm font-semibold text-wing-ink"
               >
                 {t("upgrade_cancel")}
-              </Button>
+              </button>
             )}
-            {!sub?.cancelPending && (sub?.provider === "google" || sub?.provider === "apple") && (
+            {!sub?.cancelPending && (
               <p className="text-center text-xs text-wing-subtle">
                 {lang === "he"
                   ? `הביטול מתבצע דרך ${sub?.provider === "google" ? "Google Play" : "App Store"}`
@@ -441,34 +387,20 @@ function SubscriptionPageInner() {
           </div>
         ) : (
           <div className="space-y-3">
-            {/* Yearly */}
-            <button
-              onClick={() => handleUpgrade("yearly")}
-              disabled={loadingCheckout !== null}
-              className="w-full flex items-center justify-between px-5 py-4 rounded-2xl border-2 border-wing-primary bg-wing-primary/5 hover:bg-wing-primary/10 transition-colors disabled:opacity-60"
-            >
-              <div className="text-start">
-                <p className="font-bold text-wing-ink">{t("upgrade_cta_yearly")}</p>
-                <p className="text-wing-primary text-base font-bold">{t("upgrade_yearly")}</p>
+            {/* Purchases only happen inside the native app now (no web checkout). */}
+            <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center space-y-3">
+              <div className="w-11 h-11 mx-auto rounded-2xl bg-wing-elevated flex items-center justify-center">
+                <Smartphone size={20} className="text-wing-muted" />
               </div>
-              <span className="text-xs font-bold text-white bg-wing-primary px-3 py-1 rounded-full">
-                {t("upgrade_yearly_badge")}
-              </span>
-            </button>
-
-            {/* Monthly */}
-            <button
-              onClick={() => handleUpgrade("monthly")}
-              disabled={loadingCheckout !== null}
-              className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl border border-wing-border bg-wing-surface hover:bg-wing-elevated transition-colors disabled:opacity-60"
-            >
-              <div className="text-start">
-                <p className="font-medium text-wing-ink">{t("upgrade_cta_monthly")}</p>
-                <p className="text-wing-ink text-base font-bold">{t("upgrade_monthly")}</p>
-              </div>
-            </button>
-
-            <p className="text-center text-xs text-wing-subtle">{t("upgrade_cancel_anytime")}</p>
+              <p className="font-bold text-wing-ink">
+                {lang === "he" ? "השדרוג זמין רק דרך האפליקציה" : "Upgrading is only available in the app"}
+              </p>
+              <p className="text-sm text-wing-muted">
+                {lang === "he"
+                  ? "הורידו את מבנה כנף מ-App Store או Google Play כדי לשדרג ל-Premium."
+                  : "Download Wingpact from the App Store or Google Play to upgrade to Premium."}
+              </p>
+            </div>
 
             {/* View only (only when paywall / trial expired) */}
             {isExpiredPaywall && (
@@ -488,45 +420,6 @@ function SubscriptionPageInner() {
           </div>
         )}
       </div>
-
-      {/* Cancel confirmation modal */}
-      {showCancelConfirm && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => !loadingPortal && setShowCancelConfirm(false)}
-        >
-          <div
-            className="bg-wing-surface rounded-[20px] p-6 max-w-sm w-full space-y-4 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="font-black text-wing-ink text-lg">
-              {lang === "he" ? "ביטול מנוי" : "Cancel subscription"}
-            </h3>
-            <p className="text-sm text-wing-muted leading-relaxed">
-              {lang === "he"
-                ? (gender === "female" ? "האם את בטוחה שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית." : "האם אתה בטוח שברצונך לבטל את המנוי? הגישה ל-Premium תסתיים בסוף תקופת החיוב הנוכחית.")
-                : "Are you sure you want to cancel? Premium access will end at the current billing period."}
-            </p>
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="secondary"
-                className="flex-1"
-                onClick={() => setShowCancelConfirm(false)}
-                disabled={loadingPortal}
-              >
-                {lang === "he" ? "חזרה" : "Back"}
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={handlePortal}
-                loading={loadingPortal}
-              >
-                {lang === "he" ? "בטל מנוי" : "Cancel"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

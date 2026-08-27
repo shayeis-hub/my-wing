@@ -7,8 +7,6 @@ import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { COACH_PLANS, isCoachActive, type CoachPlanId } from "@/lib/subscription";
-import { isNativeApp } from "@/lib/platform";
-import { Capacitor } from "@capacitor/core";
 import {
   getCoachClients,
   getCoachInvites,
@@ -54,10 +52,6 @@ export default function CoachPage() {
   const { user, firebaseUser } = useAuth();
   const { lang } = useLanguage();
   const router = useRouter();
-  // Coach plans are still PayPal-only (no RevenueCat products exist for them
-  // yet) — block the external-payment redirect on iOS so this screen can't
-  // trip the same App Review guideline the consumer subscription flow did.
-  const isIOSNative = isNativeApp() && Capacitor.getPlatform() === "ios";
 
   const [clients, setClients] = useState<CoachClient[]>([]);
   const [invites, setInvites] = useState<CoachInvite[]>([]);
@@ -93,22 +87,18 @@ export default function CoachPage() {
     !!coach && coach.active === false && coach.plan !== "free" &&
     !!coach.expiresAt && new Date(coach.expiresAt).getTime() > Date.now();
 
-  // Safety net: reconcile a pending checkout against PayPal, or self-heal a
-  // corrupted trial — both run at most once on load.
-  const pendingCheckoutId = user?.coachCheckout?.paypalSubscriptionId;
+  // Self-heal: repair a trial corrupted by the old checkout bug (runs at most once on load).
   const syncedRef = useRef(false);
   const [syncing, setSyncing] = useState(false);
   useEffect(() => {
     if (!firebaseUser || syncedRef.current) return;
-    if (isActive) return;
-    if (!pendingCheckoutId && !corruptedTrial) return;
+    if (isActive || !corruptedTrial) return;
     syncedRef.current = true;
     setSyncing(true);
     (async () => {
       try {
         const token = (await firebaseUser.getIdToken()) ?? "";
-        const path = corruptedTrial ? "/api/coach/repair-trial" : "/api/coach/sync-status";
-        await fetch(path, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+        await fetch("/api/coach/repair-trial", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
         // onSnapshot in useAuth will pick up the updated coach state automatically.
       } catch (err) {
         console.error("Coach sync:", err);
@@ -116,19 +106,7 @@ export default function CoachPage() {
         setSyncing(false);
       }
     })();
-  }, [firebaseUser, isActive, pendingCheckoutId, corruptedTrial]);
-
-  // Toast on return from PayPal approval (webhook activates the plan shortly after).
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("success") === "1") {
-      toast.success(lang === "he" ? "התשלום התקבל — המסלול יופעל תוך רגע" : "Payment received — activating shortly");
-      window.history.replaceState({}, "", "/coach");
-    } else if (params.get("canceled") === "1") {
-      toast(lang === "he" ? "התשלום בוטל" : "Payment canceled");
-      window.history.replaceState({}, "", "/coach");
-    }
-  }, [lang]);
+  }, [firebaseUser, isActive, corruptedTrial]);
 
   async function authedFetch(path: string, method: string, body: unknown) {
     const token = (await firebaseUser?.getIdToken()) ?? "";
@@ -139,31 +117,27 @@ export default function CoachPage() {
     });
   }
 
-  async function handleActivate(plan: CoachPlanId) {
-    if (plan !== "free" && isIOSNative) {
-      toast(lang === "he" ? "התוכניות בתשלום זמינות כרגע רק דרך האתר" : "Paid plans are currently available on the web only");
-      return;
-    }
+  // Only the free trial activates itself here — paid plans have no self-serve
+  // purchase path right now (PayPal was removed and no replacement exists yet
+  // for coach accounts), so those buttons go through handleContactUpgrade instead.
+  async function handleActivate(plan: "free") {
     setBusy(true);
     try {
-      if (plan === "free") {
-        // Free trial activates immediately — no payment.
-        const res = await authedFetch("/api/coach/activate", "POST", { plan });
-        if (!res.ok) throw new Error();
-        toast.success(lang === "he" ? "ההתנסות הופעלה" : "Trial started");
-      } else {
-        // Paid plans go through PayPal checkout.
-        const res = await authedFetch("/api/coach/checkout", "POST", { plan });
-        const data = await res.json();
-        if (!res.ok || !data.url) throw new Error();
-        window.location.href = data.url; // redirect to PayPal approval
-        return;
-      }
+      const res = await authedFetch("/api/coach/activate", "POST", { plan });
+      if (!res.ok) throw new Error();
+      toast.success(lang === "he" ? "ההתנסות הופעלה" : "Trial started");
     } catch {
       toast.error(lang === "he" ? "שגיאה בהפעלה" : "Activation failed");
     } finally {
       setBusy(false);
     }
+  }
+
+  function handleContactUpgrade(planId: CoachPlanId) {
+    const planName = planId === "free" ? "" : PLAN_META[planId].name;
+    window.location.href = `mailto:contact@wingpact.app?subject=${encodeURIComponent(
+      lang === "he" ? `שדרוג למסלול ${planName}` : `Upgrade to the ${planName} plan`
+    )}`;
   }
 
   async function handleCreatePrivate() {
@@ -236,8 +210,8 @@ export default function CoachPage() {
     setTimeout(() => setCopied(null), 1500);
   }
 
-  // While reconciling a pending PayPal subscription, show a loader instead of
-  // flashing the plan-selection screen at a coach who already paid.
+  // While self-healing a corrupted trial, show a loader instead of flashing
+  // the plan-selection screen at a coach who already has an active trial.
   if (!isActive && syncing) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center" dir={lang === "he" ? "rtl" : "ltr"}>
@@ -306,15 +280,12 @@ export default function CoachPage() {
               <p className="text-sm font-bold text-wing-heat mt-2">{meta.clients[lang]}</p>
 
               <button
-                onClick={() => handleActivate(id)}
-                disabled={busy}
-                className={`w-full mt-4 py-3 rounded-[14px] font-bold text-sm active:scale-[0.98] transition-transform disabled:opacity-50 ${
+                onClick={() => handleContactUpgrade(id)}
+                className={`w-full mt-4 py-3 rounded-[14px] font-bold text-sm active:scale-[0.98] transition-transform ${
                   recommended ? "bg-wing-heat text-white" : "border border-wing-heat text-wing-heat"
                 }`}
               >
-                {isIOSNative
-                  ? (lang === "he" ? "זמין באתר" : "Available on the web")
-                  : (lang === "he" ? "בואו נתחיל" : "Let's get started")}
+                {lang === "he" ? "צרו קשר לשדרוג" : "Contact us to upgrade"}
               </button>
 
               <div className="mt-4 pt-4 border-t border-wing-divider">
@@ -334,9 +305,7 @@ export default function CoachPage() {
         </div>
 
         <p className="text-[11px] text-wing-subtle text-center">
-          {isIOSNative
-            ? (lang === "he" ? "התוכניות בתשלום ניתנות לרכישה דרך wingpact.app" : "Paid plans can be purchased at wingpact.app")
-            : (lang === "he" ? "התשלום מאובטח דרך PayPal · ניתן לבטל בכל עת" : "Payment secured by PayPal · Cancel any time")}
+          {lang === "he" ? "נחזור אליכם תוך יום עסקים אחד" : "We'll get back to you within one business day"}
         </p>
       </div>
     );
@@ -352,32 +321,12 @@ export default function CoachPage() {
     ? new Date(coach.expiresAt).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })
     : null;
 
-  async function handleCancel() {
-    const confirmed = window.confirm(
-      lang === "he"
-        ? "האם לבטל את המנוי? הגישה תישמר עד סוף תקופת התשלום הנוכחית, לאחר מכן הלקוחות שלך יעברו לתקופת ניסיון אישית של 21 יום."
-        : "Cancel subscription? You keep access until the current billing period ends, then clients get a 21-day personal trial."
-    );
-    if (!confirmed) return;
-    setBusy(true);
-    try {
-      const token = (await firebaseUser?.getIdToken()) ?? "";
-      const res = await fetch("/api/coach/cancel", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error);
-      const until = data.expiresAt
-        ? new Date(data.expiresAt).toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" })
-        : "";
-      toast.success(lang === "he" ? `המנוי בוטל · גישה עד ${until}` : `Cancelled · access until ${until}`);
-    } catch (err) {
-      console.error("Cancel coach:", err);
-      toast.error(lang === "he" ? "שגיאה בביטול המנוי" : "Failed to cancel");
-    } finally {
-      setBusy(false);
-    }
+  // No self-serve cancellation exists for coach paid plans right now — direct
+  // to support instead of a broken API call.
+  function handleCancel() {
+    window.location.href = `mailto:contact@wingpact.app?subject=${encodeURIComponent(
+      lang === "he" ? "ביטול מנוי דיאטנ/ית" : "Cancel dietitian subscription"
+    )}`;
   }
 
   return (
@@ -431,9 +380,8 @@ export default function CoachPage() {
               .map((id) => (
                 <button
                   key={id}
-                  onClick={() => handleActivate(id)}
-                  disabled={busy}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-red-200 hover:border-wing-heat active:scale-[0.99] transition-transform disabled:opacity-50"
+                  onClick={() => handleContactUpgrade(id)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-red-200 hover:border-wing-heat active:scale-[0.99] transition-transform"
                 >
                   <div className="text-start">
                     <span className="text-sm font-bold text-wing-ink">{PLAN_META[id].name}</span>
@@ -454,9 +402,8 @@ export default function CoachPage() {
                 : `Free trial · ${trialDaysLeft} days left`}
             </p>
             <button
-              onClick={() => handleActivate("basic")}
-              disabled={busy}
-              className="px-3 py-1.5 rounded-xl bg-wing-honey text-white text-xs font-bold shrink-0 disabled:opacity-50"
+              onClick={() => handleContactUpgrade("basic")}
+              className="px-3 py-1.5 rounded-xl bg-wing-honey text-white text-xs font-bold shrink-0"
             >
               {lang === "he" ? "שדרוג" : "Upgrade"}
             </button>

@@ -98,8 +98,8 @@ export default function PricingEnPage() {
               <p className="mt-1">Yes. You can cancel your subscription at any time from the subscription management page. You'll retain Premium access until the end of the current billing period.</p>
             </div>
             <div>
-              <p className="font-semibold text-slate-800">What payment methods are accepted?</p>
-              <p className="mt-1">All major credit and debit cards (Visa, Mastercard, American Express). Payments are securely processed by Paddle.</p>
+              <p className="font-semibold text-slate-800">How do I upgrade?</p>
+              <p className="mt-1">Upgrading happens inside the Wingpact app (App Store or Google Play), and billing goes through your Apple/Google account.</p>
             </div>
             <div>
               <p className="font-semibold text-slate-800">Is VAT included in the price?</p>
