@@ -8,7 +8,8 @@ import { updateUserProfile } from "@/lib/firebase/auth";
 import { calculateDailyTarget, calculateBMR } from "@/lib/utils/calculator";
 import toast from "react-hot-toast";
 import type { UserProfile } from "@/types";
-import { UserPlus, Plus } from "lucide-react";
+import Link from "next/link";
+import { UserPlus, Plus, BookOpen } from "lucide-react";
 
 // ── Step indicator ──────────────────────────────────────────────────
 function StepBar({ total, current }: { total: number; current: number }) {
@@ -216,6 +217,27 @@ export default function OnboardingPage() {
         {step === 0 && (
           <div>
             <StepBar total={4} current={1} />
+
+            {/* Deliberately placed above everything else, and visually
+                distinct from the wing invite-code field below — a book
+                buyer landing here can otherwise easily try their book code
+                in the wing-code box by mistake, since both are just "enter
+                a code" inputs. This is the earliest point in the whole
+                flow that can reliably reach a fresh signup (there's no way
+                to know someone's a book buyer before they self-identify). */}
+            <Link
+              href="/book/redeem"
+              className="flex items-center gap-3 bg-wing-elevated border-2 border-dashed border-wing-heat rounded-2xl px-4 py-3.5 mb-6"
+            >
+              <div className="w-9 h-9 rounded-xl bg-wing-surface border border-wing-border flex items-center justify-center shrink-0">
+                <BookOpen size={16} className="text-wing-heat" />
+              </div>
+              <div className="flex-1 text-right">
+                <p className="font-bold text-sm text-wing-ink">Got a code from the book?</p>
+                <p className="text-xs text-wing-muted mt-0.5">Enter it here — this is not the wing code below</p>
+              </div>
+            </Link>
+
             <h1 className="text-[24px] font-black text-wing-ink tracking-[-0.025em] leading-tight mb-2 whitespace-pre-line">
               {(t("ob_step0_title") as (n: string) => string)(firstName)}
             </h1>

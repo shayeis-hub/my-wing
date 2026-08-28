@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/Switch";
 import { Avatar } from "@/components/ui/Avatar";
 import { updateNotificationPrefs } from "@/lib/firebase/firestore";
 import type { NotificationPrefs } from "@/types";
-import { Languages, Bell, Crown, ChevronLeft, ChevronRight, Users, UserPlus } from "lucide-react";
+import { Languages, Bell, Crown, ChevronLeft, ChevronRight, Users, UserPlus, BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 
 type PrefKey = "reminders" | "personal" | "feed" | "meals";
@@ -198,6 +198,24 @@ export default function SettingsPage() {
                 </p>
               )}
             </div>
+            <ChevronEnd size={18} className="text-wing-muted" />
+          </Link>
+        </section>
+      )}
+
+      {/* Book code — only for users not already in book mode (existing
+          Wingpact users don't go through onboarding, so this is their only
+          way to redeem a code bought after they already had an account). */}
+      {!isBusiness && !user?.bookAccess?.active && (
+        <section className="bg-wing-surface border border-wing-border rounded-[20px] overflow-hidden">
+          <Link
+            href="/book/redeem"
+            className="flex items-center gap-3 p-5 hover:bg-wing-elevated transition-colors"
+          >
+            <BookOpen size={18} className="text-wing-heat" />
+            <span className="flex-1 font-bold text-wing-ink">
+              {isHe ? "יש לי קוד מהספר" : "I have a code from the book"}
+            </span>
             <ChevronEnd size={18} className="text-wing-muted" />
           </Link>
         </section>
