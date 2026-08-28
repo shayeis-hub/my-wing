@@ -11,6 +11,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateUserStepsGoal, getWeightHistory, updateActiveWing, getWingsByIds } from "@/lib/firebase/firestore";
 import { compressImageToBlob } from "@/lib/utils/imageCompress";
 import { calculateBMI, getBMICategory, calculateBMR, calculateTDEE } from "@/lib/utils/calculator";
+import { formatHeight, formatWeight } from "@/lib/utils/units";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Camera, Footprints, Users, Trophy, ChevronDown, Crown } from "lucide-react";
@@ -21,6 +22,7 @@ import type { WeightLog } from "@/types";
 export default function ProfilePage() {
   const { user, firebaseUser } = useAuth();
   const { t, lang } = useLanguage();
+  const isBookMode = !!user?.bookAccess?.active;
   const activityLabels: Record<string, string> = {
     sedentary: t("activity_sedentary") as string,
     light: t("activity_light") as string,
@@ -200,9 +202,9 @@ export default function ProfilePage() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: t("profile_age") as string, value: profile.age ? `${profile.age}` : "—" },
-              { label: t("profile_height") as string, value: profile.heightCm ? `${profile.heightCm} cm` : "—" },
-              { label: t("profile_weight") as string, value: currentWeight ? `${currentWeight} ${t("kg_label")}` : "—" },
-              { label: t("profile_target_weight") as string, value: profile.targetWeightKg ? `${profile.targetWeightKg} ${t("kg_label")}` : "—" },
+              { label: t("profile_height") as string, value: profile.heightCm ? formatHeight(profile.heightCm, isBookMode) : "—" },
+              { label: t("profile_weight") as string, value: currentWeight ? formatWeight(currentWeight, isBookMode) : "—" },
+              { label: t("profile_target_weight") as string, value: profile.targetWeightKg ? formatWeight(profile.targetWeightKg, isBookMode) : "—" },
               { label: t("profile_gender") as string, value: genderLabels[profile.gender] ?? "—" },
               { label: t("profile_activity") as string, value: activityLabels[profile.activityLevel] ?? "—" },
             ].map(({ label, value }) => (

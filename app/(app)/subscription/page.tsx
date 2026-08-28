@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { isNativeApp } from "@/lib/platform";
+import { getHabitByOrder } from "@/lib/book/habits";
 import { Capacitor } from "@capacitor/core";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
@@ -14,6 +15,8 @@ import type { Subscription } from "@/types";
 import type { Timestamp } from "firebase/firestore";
 import type { PurchasesOffering } from "@revenuecat/purchases-capacitor";
 import { Suspense } from "react";
+
+const HABIT_1_ID = getHabitByOrder(1)!.id;
 
 function toMs(ts: Timestamp | string | null | undefined): number | null {
   if (!ts) return null;
@@ -60,10 +63,20 @@ function SubscriptionPageInner() {
   const grandfathered = isGrandfathered(email);
   const premium = justPurchased || isPremium(email, sub?.plan, sub, user?.courseAccess);
   const isExpiredPaywall = searchParams.get("expired") === "1";
+  // Book-mode users get a separate offering (different price, same
+  // WingPact Premium entitlement) — everything downstream (purchase, restore,
+  // cancel, iap-sync) is already offering-agnostic, so this fork is enough
+  // to reuse the entire native-purchase UI/flow for book mode.
+  const isBookMode = !!user?.bookAccess?.active;
 
   const createdAtMs = toMs(user?.createdAt ?? null);
   const daysLeft = getTrialDaysLeft(createdAtMs);
-  const inTrial = !premium && !grandfathered && daysLeft > 0;
+  // Book mode isn't on a day-count trial at all — free until habit 1 is
+  // marked installed (mirrors lib/subscription.ts's isTrialExpired).
+  const habit1InstalledAt = user?.habitProgress?.[HABIT_1_ID]?.installedAt;
+  const inTrial = isBookMode
+    ? !premium && !grandfathered && !habit1InstalledAt
+    : !premium && !grandfathered && daysLeft > 0;
 
   // Business accounts manage their plan on the coach dashboard, not here.
   useEffect(() => {
@@ -83,11 +96,6 @@ function SubscriptionPageInner() {
 
   // Fetch RevenueCat's configured offering (monthly/annual packages) once the
   // native SDK has had a chance to configure (see RevenueCatSync in the app layout).
-  // Book-mode users get a separate offering (different price, same
-  // WingPact Premium entitlement) — everything downstream (purchase, restore,
-  // cancel, iap-sync) is already offering-agnostic, so this is the only fork
-  // needed to reuse the entire native-purchase UI/flow for book mode.
-  const isBookMode = !!user?.bookAccess?.active;
   useEffect(() => {
     if (!isNativeIAP) return;
     let cancelled = false;
@@ -243,8 +251,14 @@ function SubscriptionPageInner() {
           </div>
         )}
 
-        {/* Trial countdown banner */}
-        {inTrial && !isExpiredPaywall && (
+        {/* Trial banner — book mode isn't on a day clock, so no countdown dots */}
+        {inTrial && !isExpiredPaywall && isBookMode && (
+          <div className="bg-wing-elevated border border-wing-border rounded-[20px] px-4 py-3">
+            <p className="text-sm font-medium text-wing-ink">Free through habit one</p>
+            <p className="text-xs text-wing-muted mt-0.5">Mark it installed on the Habits tab whenever you're ready — no day limit.</p>
+          </div>
+        )}
+        {inTrial && !isExpiredPaywall && !isBookMode && (
           <div className="bg-wing-elevated border border-wing-border rounded-[20px] px-4 py-3 flex items-center justify-between">
             <p className="text-sm font-medium text-wing-ink">
               {(t("trial_days_left") as (n: number) => string)(daysLeft)}
@@ -285,7 +299,7 @@ function SubscriptionPageInner() {
               )}
               {inTrial && (
                 <p className="text-xs text-wing-muted">
-                  {(t("trial_days_left") as (n: number) => string)(daysLeft)}
+                  {isBookMode ? "Free through habit one" : (t("trial_days_left") as (n: number) => string)(daysLeft)}
                 </p>
               )}
             </div>
@@ -351,7 +365,7 @@ function SubscriptionPageInner() {
               <div className="text-start">
                 <p className="font-bold text-wing-ink">{t("upgrade_cta_yearly")}</p>
                 <p className="text-wing-primary text-base font-bold">
-                  {nativeOffering?.annual?.product.priceString ?? t("upgrade_yearly")}
+                  {nativeOffering?.annual?.product.priceString ?? (isBookMode ? "$79 / year" : t("upgrade_yearly"))}
                 </p>
               </div>
               <span className="text-xs font-bold text-white bg-wing-primary px-3 py-1 rounded-full">
@@ -368,7 +382,7 @@ function SubscriptionPageInner() {
               <div className="text-start">
                 <p className="font-medium text-wing-ink">{t("upgrade_cta_monthly")}</p>
                 <p className="text-wing-ink text-base font-bold">
-                  {nativeOffering?.monthly?.product.priceString ?? t("upgrade_monthly")}
+                  {nativeOffering?.monthly?.product.priceString ?? (isBookMode ? "$7.90 / month" : t("upgrade_monthly"))}
                 </p>
               </div>
             </button>

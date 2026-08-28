@@ -18,6 +18,7 @@ import { enUS } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
 import type { DailyCheckin, Encouragement, ReactionType, Workout } from "@/types";
 import { Droplets, Leaf, Footprints, Dumbbell, Smile, Scale, Pencil, Moon, Lightbulb, Timer } from "lucide-react";
+import { kgToLb, lbToKg } from "@/lib/utils/units";
 import { SPORTS, getSport, computeWorkoutCalories, usesDistance, paceFeedback, type Intensity } from "@/lib/fitness/workout";
 
 const MOOD_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
@@ -54,6 +55,10 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 
 function CheckinPageInner() {
   const { user, firebaseUser } = useAuth();
+  // Book mode's profile is collected in imperial units (see
+  // app/(app)/book/onboarding) but storage stays metric everywhere — this
+  // page's weight field just converts at the input/display boundary.
+  const isBookMode = !!user?.bookAccess?.active;
   const { t, lang, gender } = useLanguage();
   const trialLocked = useTrialLock();
 
@@ -125,7 +130,7 @@ function CheckinPageInner() {
         setNotes(c.notes ?? "");
         setSteps(c.steps ? String(c.steps) : stepsFromLeaderboard ? String(stepsFromLeaderboard) : "");
         setWorkouts(c.workouts ?? (c.workout?.done ? [c.workout] : []));
-        setWeight(c.weightKg ? String(c.weightKg) : "");
+        setWeight(c.weightKg ? String(isBookMode ? Math.round(kgToLb(c.weightKg)) : c.weightKg) : "");
         if (c.daySummary) setDaySummary(c.daySummary);
         if (c.eatingWindow) {
           setEwOpen(c.eatingWindow.open);
@@ -178,7 +183,7 @@ function CheckinPageInner() {
     try {
       const trimmedNotes = notes.trim();
       const stepsNum = steps ? parseInt(steps) : undefined;
-      const weightNum = weight ? parseFloat(weight) : undefined;
+      const weightNum = weight ? (isBookMode ? lbToKg(parseFloat(weight)) : parseFloat(weight)) : undefined;
 
       await saveCheckin(user.wingId, {
         wingId: user.wingId,
@@ -225,7 +230,7 @@ function CheckinPageInner() {
     try {
       const trimmedNotes = notes.trim();
       const stepsNum = steps ? parseInt(steps) : undefined;
-      const weightNum = weight ? parseFloat(weight) : undefined;
+      const weightNum = weight ? (isBookMode ? lbToKg(parseFloat(weight)) : parseFloat(weight)) : undefined;
 
       await saveCheckin(user.wingId, {
         wingId: user.wingId,
@@ -776,12 +781,18 @@ function CheckinPageInner() {
             type="number"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            placeholder={user?.profile?.weightKg ? (t("checkin_weight_ph") as (w: number) => string)(user.profile.weightKg) : t("checkin_weight")}
+            placeholder={
+              user?.profile?.weightKg
+                ? isBookMode
+                  ? `Logged: ${Math.round(kgToLb(user.profile.weightKg))} lb`
+                  : (t("checkin_weight_ph") as (w: number) => string)(user.profile.weightKg)
+                : t("checkin_weight")
+            }
             inputMode="decimal"
             step="0.1"
             className="flex-1 px-4 py-3 bg-wing-elevated border border-wing-border rounded-[14px] text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
           />
-          <span className="text-sm text-wing-muted shrink-0">{t("checkin_weight_unit")}</span>
+          <span className="text-sm text-wing-muted shrink-0">{isBookMode ? "lb" : t("checkin_weight_unit")}</span>
         </div>
       </SectionCard>
 
@@ -858,7 +869,7 @@ function CheckinPageInner() {
                     <span className="flex items-center gap-0.5"><Leaf size={11} />{c.vegetablesServings}</span>
                     {c.steps ? <span className="flex items-center gap-0.5"><Footprints size={11} />{c.steps.toLocaleString()}</span> : null}
                     {(c.workouts?.length || c.workout?.done) ? <Dumbbell size={11} /> : null}
-                    {c.weightKg ? <span className="flex items-center gap-0.5"><Scale size={11} />{c.weightKg}</span> : null}
+                    {c.weightKg ? <span className="flex items-center gap-0.5"><Scale size={11} />{isBookMode ? Math.round(kgToLb(c.weightKg)) : c.weightKg}</span> : null}
                     <span className="w-3 h-3 rounded-full inline-block" style={{ background: moods.find((m) => m.value === c.mood)?.color ?? "#eab308" }} />
                   </div>
                 </div>

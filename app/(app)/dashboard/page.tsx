@@ -620,7 +620,7 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
                 <Scale size={15} className="text-wing-muted" />
                 <span className="font-bold text-wing-ink text-sm">{t("dashboard_weight_progress")}</span>
               </div>
-              <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} lang={lang} />
+              <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} lang={lang} imperial={!!user?.bookAccess?.active} />
             </div>
           )}
 

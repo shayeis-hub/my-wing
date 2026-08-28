@@ -12,16 +12,21 @@ import {
 import { format, parseISO } from "date-fns";
 import { he, enUS } from "date-fns/locale";
 import type { WeightLog } from "@/types";
+import { kgToLb } from "@/lib/utils/units";
 
 interface WeightChartProps {
   logs: WeightLog[];
   targetWeight?: number;
   lang?: "he" | "en";
+  /** Book mode's profile is imperial — display converts here, storage stays kg. */
+  imperial?: boolean;
 }
 
-export function WeightChart({ logs, targetWeight, lang = "he" }: WeightChartProps) {
+export function WeightChart({ logs, targetWeight, lang = "he", imperial = false }: WeightChartProps) {
   const locale = lang === "he" ? he : enUS;
-  const kg = lang === "he" ? "ק\"ג" : "kg";
+  const kg = imperial ? "lb" : lang === "he" ? "ק\"ג" : "kg";
+  const toDisplay = (w: number) => (imperial ? +kgToLb(w).toFixed(1) : w);
+  const targetDisplay = targetWeight != null ? toDisplay(targetWeight) : undefined;
 
   if (logs.length === 0) {
     return (
@@ -34,7 +39,7 @@ export function WeightChart({ logs, targetWeight, lang = "he" }: WeightChartProp
   const data = logs.map((l) => ({
     date: l.date,
     label: format(parseISO(l.date), "d/M", { locale }),
-    weight: l.weightKg,
+    weight: toDisplay(l.weightKg),
   }));
 
   const weights = data.map((d) => d.weight);
@@ -81,12 +86,12 @@ export function WeightChart({ logs, targetWeight, lang = "he" }: WeightChartProp
               fontSize: "12px",
             }}
           />
-          {targetWeight && (
+          {targetDisplay != null && (
             <ReferenceLine
-              y={targetWeight}
+              y={targetDisplay}
               stroke="#0ea5e9"
               strokeDasharray="4 4"
-              label={{ value: `${lang === "he" ? "יעד" : "Target"} ${targetWeight}`, fontSize: 10, fill: "#0ea5e9", position: "right" }}
+              label={{ value: `${lang === "he" ? "יעד" : "Target"} ${targetDisplay}`, fontSize: 10, fill: "#0ea5e9", position: "right" }}
             />
           )}
           <Line
