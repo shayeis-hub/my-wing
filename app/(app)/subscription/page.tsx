@@ -289,7 +289,9 @@ function SubscriptionPageInner() {
                   : premium
                   ? t("upgrade_active")
                   : inTrial
-                  ? t("trial_active_sub")
+                  ? isBookMode
+                    ? "Free trial"
+                    : t("trial_active_sub")
                   : t("trial_expired_title")}
               </p>
               {premium && !grandfathered && expiresAt && (
