@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/Switch";
 import { Avatar } from "@/components/ui/Avatar";
 import { updateNotificationPrefs } from "@/lib/firebase/firestore";
 import type { NotificationPrefs } from "@/types";
-import { Languages, Bell, Crown, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Languages, Bell, Crown, ChevronLeft, ChevronRight, Users, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 
 type PrefKey = "reminders" | "personal" | "feed" | "meals";
@@ -176,6 +176,32 @@ export default function SettingsPage() {
           ))}
         </div>
       </section>
+
+      {/* Wing — surfaces "invite people" prominently for anyone still alone
+          in their wing (most likely someone who skipped it during onboarding). */}
+      {!isBusiness && user?.wingId && (
+        <section className="bg-wing-surface border border-wing-border rounded-[20px] overflow-hidden">
+          <Link
+            href="/wing"
+            className="flex items-center gap-3 p-5 hover:bg-wing-elevated transition-colors"
+          >
+            <UserPlus size={18} className="text-wing-heat" />
+            <div className="flex-1">
+              <p className="font-bold text-wing-ink">
+                {members.length === 0
+                  ? (isHe ? "אתה לבד במבנה שלך" : "You're alone in your wing")
+                  : (isHe ? "המבנה שלי" : "My wing")}
+              </p>
+              {members.length === 0 && (
+                <p className="text-xs text-wing-muted mt-0.5">
+                  {isHe ? "הזמינו חברים כדי להתחיל לעודד אחד את השני" : "Invite people to start cheering each other on"}
+                </p>
+              )}
+            </div>
+            <ChevronEnd size={18} className="text-wing-muted" />
+          </Link>
+        </section>
+      )}
 
       {/* Subscription */}
       <section className="bg-wing-surface border border-wing-border rounded-[20px] overflow-hidden">

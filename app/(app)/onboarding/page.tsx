@@ -134,6 +134,30 @@ export default function OnboardingPage() {
     }
   }
 
+  // Requiring a decision here (code vs. a named wing) at the very start of
+  // signup is friction most new users don't want yet. This silently creates
+  // the same kind of private wing as "create new" — just with a default name
+  // and no input required — so every other page that reads user.wingId keeps
+  // working unchanged. The user can invite people into it later from Settings.
+  async function handleSkipWing() {
+    if (!firebaseUser || !user) return;
+    setWingLoading(true);
+    try {
+      const name = (t("ob_create_ph") as (n: string) => string)(firstName);
+      const res = await fetch("/api/wing/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: firebaseUser.uid, ownerName: user.displayName, name }),
+      });
+      if (!res.ok) throw new Error();
+      setStep(1);
+    } catch {
+      toast.error(t("ob_wing_error") as string);
+    } finally {
+      setWingLoading(false);
+    }
+  }
+
   // ── Step 1: validate profile ───────────────────────────────────
   function handleProfileStep() {
     if (!age || +age < 10 || +age > 100) { toast.error(t("ob_age_invalid") as string); return; }
@@ -264,6 +288,15 @@ export default function OnboardingPage() {
             >
               {wingLoading ? t("ob_wing_connecting") : t("ob_wing_next")}
             </button>
+
+            <button
+              onClick={handleSkipWing}
+              disabled={wingLoading}
+              className="w-full mt-3 py-2.5 text-sm font-semibold text-wing-muted hover:text-wing-ink transition-colors disabled:opacity-60"
+            >
+              {t("ob_skip_wing")}
+            </button>
+            <p className="text-center text-xs text-wing-subtle -mt-2">{t("ob_skip_wing_note")}</p>
           </div>
         )}
 
