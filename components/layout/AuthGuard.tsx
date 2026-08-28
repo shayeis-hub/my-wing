@@ -53,9 +53,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     // Profile incomplete → onboarding (business/coach accounts don't track
-    // personally, so they skip the personal onboarding gate).
+    // personally, so they skip the personal onboarding gate). /book is also
+    // exempt — the "got a code from the book?" link on /onboarding sends a
+    // still-profile-incomplete user to /book/redeem, and without this they'd
+    // get bounced straight back here before they could even see that page.
     const profileIncomplete = !user?.profile?.age || user.profile.age === 0;
-    if (!isBusiness && !needsBookOnboarding && profileIncomplete && pathname !== "/onboarding") {
+    if (!isBusiness && !needsBookOnboarding && profileIncomplete && pathname !== "/onboarding" && !pathname.startsWith("/book")) {
       router.replace("/onboarding");
       return;
     }
