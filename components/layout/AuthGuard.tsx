@@ -5,7 +5,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { syncWingMemberUid } from "@/lib/firebase/firestore";
 import { isTrialExpired } from "@/lib/subscription";
+import { getHabitByOrder } from "@/lib/book/habits";
 import type { Timestamp } from "firebase/firestore";
+
+const HABIT_1_ID = getHabitByOrder(1)!.id;
 
 function toMs(ts: Timestamp | null | undefined): number | null {
   if (!ts) return null;
@@ -14,7 +17,7 @@ function toMs(ts: Timestamp | null | undefined): number | null {
   return s ? s * 1000 : null;
 }
 
-const PAYWALL_EXEMPT = ["/subscription", "/onboarding", "/login", "/register", "/coach"];
+const PAYWALL_EXEMPT = ["/subscription", "/onboarding", "/login", "/register", "/coach", "/book"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { firebaseUser, user, loading } = useAuth();
@@ -40,10 +43,19 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const isBusiness = user?.accountType === "business";
 
+    // Book-mode: redeemed the book code but hasn't started habit 1 yet →
+    // its own short onboarding, instead of the regular wing/profile flow.
+    const needsBookOnboarding =
+      user?.bookAccess?.active && !Object.keys(user?.habitProgress ?? {}).length;
+    if (needsBookOnboarding && !pathname.startsWith("/book")) {
+      router.replace("/book/onboarding");
+      return;
+    }
+
     // Profile incomplete → onboarding (business/coach accounts don't track
     // personally, so they skip the personal onboarding gate).
     const profileIncomplete = !user?.profile?.age || user.profile.age === 0;
-    if (!isBusiness && profileIncomplete && pathname !== "/onboarding") {
+    if (!isBusiness && !needsBookOnboarding && profileIncomplete && pathname !== "/onboarding") {
       router.replace("/onboarding");
       return;
     }
@@ -63,6 +75,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         trialStartsAt: user.trialStartsAt ?? null,
         courseAccess: user.courseAccess ?? null,
         coachAccess: user.coachAccess ?? null,
+        bookAccess: user.bookAccess ?? null,
+        habit1InstalledAt: user.habitProgress?.[HABIT_1_ID]?.installedAt ?? null,
       })) {
         router.replace("/subscription?expired=1");
       }

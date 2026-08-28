@@ -62,10 +62,20 @@ export function isTrialExpired(
     trialStartsAt?: string | null;
     courseAccess?: { expiresAt: string } | null;
     coachAccess?: { active?: boolean } | null;
+    bookAccess?: { active?: boolean } | null;
+    /** habitProgress[habit-1-id]?.installedAt, if book mode is active. */
+    habit1InstalledAt?: string | null;
   }
 ): boolean {
   if (isGrandfathered(email)) return false;
   if (isPremium(email, plan, undefined, opts?.courseAccess ?? null, opts?.coachAccess ?? null)) return false;
+
+  // Book mode isn't on a day-count clock at all — free until habit 1 is
+  // marked installed (the book's own rule), then locked unless subscribed.
+  if (opts?.bookAccess?.active) {
+    return !!opts.habit1InstalledAt;
+  }
+
   const startMs = resolveTrialStartMs(opts?.trialStartsAt, createdAtMs);
   return getTrialDaysLeft(startMs) === 0;
 }

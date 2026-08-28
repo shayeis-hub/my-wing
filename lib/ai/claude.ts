@@ -262,6 +262,12 @@ export async function generatePersonalDaySummary(data: {
     weightKg?: number;
     mood?: number;
   }[];
+  /**
+   * Book-mode only: the habit ("One Habit at a Time") the user is currently
+   * working on. When present, the summary/tip should be grounded in this
+   * habit's own rules rather than generic coaching advice.
+   */
+  currentHabit?: { name: string; triggerSentence: string; whyItWorks: string[] };
 }): Promise<{ summary: string; insights: string[]; tip: string }> {
   const totalCalories = data.meals.reduce((s, m) => s + m.calories, 0);
   const effectiveWorkouts = data.workouts?.length
@@ -288,6 +294,12 @@ export async function generatePersonalDaySummary(data: {
         ).join("\n")}\n\nIf there's a clear, meaningful trend compared to these days (improvement or dip), call it out in one insight, naturally and specifically (e.g. "steps jumped after two weaker days"). Don't invent a comparison if there's no real trend — a good insight about today alone beats a forced comparison.`
   );
 
+  const habitBlock = !data.currentHabit ? "" : (
+    isHe
+      ? `\n\nהמשתמש/ת נמצא/ת במסלול "הרגל אחד בכל פעם" ועובד/ת כרגע על ההרגל: "${data.currentHabit.name}" — משפט הטריגר שלו/ה: "${data.currentHabit.triggerSentence}". למה זה עובד: ${data.currentHabit.whyItWorks.join(" ")}\nקשר את הסיכום והטיפ להרגל הזה באופן ספציפי במקום עצה כללית, ואל תזכיר הרגלים אחרים מהשיטה.`
+      : `\n\nThe user is on the "one habit at a time" method and is currently working on: "${data.currentHabit.name}" — trigger sentence: "${data.currentHabit.triggerSentence}". Why it works: ${data.currentHabit.whyItWorks.join(" ")}\nGround the summary and tip in this specific habit rather than generic advice, and don't reference other habits from the method.`
+  );
+
   const prompt = isHe
     ? `אתה מאמן תזונה וכושר אישי. המשתמש נמצא בתהליך ירידה במשקל. סכם את היום של ${data.userName} בצורה חמה, אישית ומעודדת בעברית, עם התייחסות לירידה במשקל.
 
@@ -301,7 +313,7 @@ export async function generatePersonalDaySummary(data: {
 - אימון: ${workoutLine}
 - משקל: ${data.weightKg ? `${data.weightKg} ק"ג` : "לא נמדד"}${data.targetWeightKg ? ` (יעד: ${data.targetWeightKg} ק"ג)` : ""}
 - מצב רוח: ${data.mood}/5
-${data.notes ? `- הערה: "${data.notes}"` : ""}${historyBlock}
+${data.notes ? `- הערה: "${data.notes}"` : ""}${historyBlock}${habitBlock}
 
 תן סיכום אישי, תובנות, וטיפ למחר.`
     : `You are a personal nutrition and fitness coach. The user is on a weight loss journey. Summarize ${data.userName}'s day in a warm, personal and encouraging way in English, with a focus on weight loss progress.
@@ -316,7 +328,7 @@ Day data:
 - Workout: ${workoutLine}
 - Weight: ${data.weightKg ? `${data.weightKg} kg` : "not measured"}${data.targetWeightKg ? ` (target: ${data.targetWeightKg} kg)` : ""}
 - Mood: ${data.mood}/5
-${data.notes ? `- Note: "${data.notes}"` : ""}${historyBlock}
+${data.notes ? `- Note: "${data.notes}"` : ""}${historyBlock}${habitBlock}
 
 Give a personal summary, insights, and a tip for tomorrow.`;
 

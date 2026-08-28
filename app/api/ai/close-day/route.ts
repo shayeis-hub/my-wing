@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { generatePersonalDaySummary } from "@/lib/ai/claude";
+import { getCurrentHabit } from "@/lib/book/habits";
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,6 +63,14 @@ export async function POST(req: NextRequest) {
         mood: c.mood,
       }));
 
+    // Book mode: ground the summary in whichever habit the user is
+    // currently working on, instead of generic coaching.
+    const userSnap = await admin.firestore().doc(`users/${userId}`).get();
+    const userData = userSnap.data();
+    const currentHabit = userData?.bookAccess?.active
+      ? getCurrentHabit(userData.habitProgress)
+      : undefined;
+
     const result = await generatePersonalDaySummary({
       userName: checkin.userName,
       dailyCalorieTarget: userProfile?.dailyCalorieTarget ?? 2000,
@@ -77,6 +86,9 @@ export async function POST(req: NextRequest) {
       notes: checkin.notes,
       lang: lang ?? "he",
       recentHistory,
+      currentHabit: currentHabit
+        ? { name: currentHabit.name, triggerSentence: currentHabit.triggerSentence, whyItWorks: currentHabit.whyItWorks }
+        : undefined,
     });
 
     // Save summary back to the checkin document

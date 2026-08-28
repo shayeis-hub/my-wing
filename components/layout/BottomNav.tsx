@@ -9,24 +9,38 @@ import {
   Activity,
   CheckSquare,
   Trophy,
+  ListChecks,
   Menu,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useLanguage } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
 import { HamburgerMenu } from "./HamburgerMenu";
 
 export function BottomNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const isBookMode = !!user?.bookAccess?.active;
 
-  const navItems = [
-    { href: "/dashboard", icon: Home, label: t("nav_home") },
-    { href: "/meals", icon: UtensilsCrossed, label: t("nav_meals") },
-    { href: "/feed", icon: Activity, label: t("nav_feed") },
-    { href: "/checkin", icon: CheckSquare, label: t("nav_checkin") },
-    { href: "/challenges", icon: Trophy, label: t("nav_challenges") },
-  ];
+  // Book-mode readers get a "Habits" tab instead of feed/challenges — those
+  // assume active wing-mates, which a solo book reader by default won't
+  // have. Nothing is deleted, just not shown here for this segment.
+  const navItems = isBookMode
+    ? [
+        { href: "/dashboard", icon: Home, label: t("nav_home") },
+        { href: "/meals", icon: UtensilsCrossed, label: t("nav_meals") },
+        { href: "/habits", icon: ListChecks, label: "Habits" },
+        { href: "/checkin", icon: CheckSquare, label: t("nav_checkin") },
+      ]
+    : [
+        { href: "/dashboard", icon: Home, label: t("nav_home") },
+        { href: "/meals", icon: UtensilsCrossed, label: t("nav_meals") },
+        { href: "/feed", icon: Activity, label: t("nav_feed") },
+        { href: "/checkin", icon: CheckSquare, label: t("nav_checkin") },
+        { href: "/challenges", icon: Trophy, label: t("nav_challenges") },
+      ];
 
   return (
     <>

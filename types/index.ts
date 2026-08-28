@@ -25,6 +25,19 @@ export interface User {
   /** Granted to a coach's client; full access while the coach's plan is active. */
   coachAccess?: { coachId: string; wingId: string; active: boolean };
   /**
+   * Book-mode entitlement (companion app for "One Habit at a Time").
+   * `grantedBy` is set when this account is riding along on an inviter's
+   * book-premium subscription (up to 2 riders per inviter) rather than
+   * having redeemed the code itself — revoked when the inviter's sub ends.
+   */
+  bookAccess?: { active: boolean; redeemedAt: string; grantedBy?: string };
+  /**
+   * Per-habit progress for book mode, keyed by habit id (see lib/book/habits.ts).
+   * A map rather than an array so a single habit's installedAt can be set
+   * with a plain dot-notation Firestore update, not a read-modify-write.
+   */
+  habitProgress?: Record<string, { startedAt: string; installedAt?: string }>;
+  /**
    * Overrides createdAt as the trial clock start. Defaults to createdAt.
    * Set to "now" when a coach stops paying, so the client's 21-day trial begins then.
    */

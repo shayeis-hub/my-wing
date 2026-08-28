@@ -83,13 +83,19 @@ function SubscriptionPageInner() {
 
   // Fetch RevenueCat's configured offering (monthly/annual packages) once the
   // native SDK has had a chance to configure (see RevenueCatSync in the app layout).
+  // Book-mode users get a separate offering (different price, same
+  // WingPact Premium entitlement) — everything downstream (purchase, restore,
+  // cancel, iap-sync) is already offering-agnostic, so this is the only fork
+  // needed to reuse the entire native-purchase UI/flow for book mode.
+  const isBookMode = !!user?.bookAccess?.active;
   useEffect(() => {
     if (!isNativeIAP) return;
     let cancelled = false;
     import("@revenuecat/purchases-capacitor").then(async ({ Purchases }) => {
       try {
         const offerings = await Purchases.getOfferings();
-        if (!cancelled) setNativeOffering(offerings.current ?? null);
+        const offering = isBookMode ? offerings.all["book"] ?? null : offerings.current ?? null;
+        if (!cancelled) setNativeOffering(offering);
       } catch (err) {
         console.error("RevenueCat getOfferings failed", err);
       }
@@ -97,7 +103,7 @@ function SubscriptionPageInner() {
     return () => {
       cancelled = true;
     };
-  }, [isNativeIAP]);
+  }, [isNativeIAP, isBookMode]);
 
   // Asks our server to pull server-verified entitlement state from RevenueCat
   // right after a purchase/restore, so the UI doesn't have to wait on the
@@ -156,7 +162,14 @@ function SubscriptionPageInner() {
     }
   }
 
-  const FEATURES = lang === "he"
+  const FEATURES = isBookMode
+    ? [
+        "Continue past habit one, all the way to habit eight",
+        "Unlimited meal photo analysis",
+        "AI guidance grounded in the book's own rules",
+        "No ads",
+      ]
+    : lang === "he"
     ? [
         "ניתוח תמונות ארוחות ללא הגבלה",
         "עד 20 חברים במבנה",
