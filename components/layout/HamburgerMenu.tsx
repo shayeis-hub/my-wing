@@ -141,8 +141,15 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
             <MenuItem icon={<Settings size={20} />} label={lang === "he" ? "הגדרות" : "Settings"} />
           </Link>
 
-          {/* User Guide */}
-          <a href={`/guides/${lang}.html`} target="_blank" rel="noopener noreferrer" onClick={onClose}>
+          {/* User Guide — book-mode users get a guide adapted for their
+              flow (redeem code, Habits tab, imperial units) instead of the
+              general one, since Feed/Challenges/Coach sections don't apply. */}
+          <a
+            href={user?.bookAccess?.active ? "/guides/en-book.html" : `/guides/${lang}.html`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+          >
             <MenuItem icon={<BookOpen size={20} />} label={t("menu_guide")} />
           </a>
 
