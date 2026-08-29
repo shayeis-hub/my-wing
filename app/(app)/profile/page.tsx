@@ -118,7 +118,7 @@ export default function ProfilePage() {
   const bmi = profile?.heightCm && currentWeight
     ? calculateBMI(currentWeight, profile.heightCm)
     : null;
-  const bmiCategory = bmi ? getBMICategory(bmi) : null;
+  const bmiCategory = bmi ? getBMICategory(bmi, lang) : null;
   const bmr = profile && currentWeight ? Math.round(calculateBMR({ ...profile, weightKg: currentWeight })) : null;
   const tdee = profile && currentWeight ? Math.round(calculateTDEE({ ...profile, weightKg: currentWeight })) : null;
 

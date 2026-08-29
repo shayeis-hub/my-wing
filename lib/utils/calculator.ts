@@ -31,9 +31,13 @@ export function calculateBMI(weightKg: number, heightCm: number): number {
   return Math.round((weightKg / (heightM * heightM)) * 10) / 10;
 }
 
-export function getBMICategory(bmi: number): { label: string; color: string } {
-  if (bmi < 18.5) return { label: "תת משקל", color: "text-blue-500" };
-  if (bmi < 25) return { label: "משקל תקין", color: "text-green-500" };
-  if (bmi < 30) return { label: "עודף משקל", color: "text-yellow-500" };
-  return { label: "השמנת יתר", color: "text-red-500" };
+export function getBMICategory(bmi: number, lang: "he" | "en" = "he"): { label: string; color: string } {
+  const labels =
+    lang === "en"
+      ? { under: "Underweight", normal: "Normal weight", over: "Overweight", obese: "Obesity" }
+      : { under: "תת משקל", normal: "משקל תקין", over: "עודף משקל", obese: "השמנת יתר" };
+  if (bmi < 18.5) return { label: labels.under, color: "text-blue-500" };
+  if (bmi < 25) return { label: labels.normal, color: "text-green-500" };
+  if (bmi < 30) return { label: labels.over, color: "text-yellow-500" };
+  return { label: labels.obese, color: "text-red-500" };
 }

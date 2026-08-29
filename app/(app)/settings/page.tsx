@@ -195,6 +195,10 @@ export default function SettingsPage() {
               {members.length === 0 && (
                 <p className="text-xs text-wing-muted mt-0.5">
                   {isHe ? "הזמינו חברים כדי להתחיל לעודד אחד את השני" : "Invite people to start cheering each other on"}
+                  {user?.bookAccess?.active &&
+                    (isHe
+                      ? " — אפשר להזמין עד 2 חברים שיצטרפו אליך ללא עלות נוספת."
+                      : " — you can invite up to 2 friends to join you at no extra cost.")}
                 </p>
               )}
             </div>

@@ -29,7 +29,7 @@ function InfoModal({ topic, onClose, t }: { topic: string; onClose: () => void; 
 
 export default function CalculatorPage() {
   const { user, firebaseUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const activityOptions: { value: UserProfile["activityLevel"]; label: string; desc: string }[] = [
     { value: "sedentary", label: t("activity_sedentary") as string, desc: t("activity_desc_sedentary") as string },
@@ -70,7 +70,7 @@ export default function CalculatorPage() {
       gender, activityLevel: activity, dailyCalorieTarget: 2000,
     };
     const bmi = calculateBMI(+weight, +height);
-    const bmiCategory = getBMICategory(bmi);
+    const bmiCategory = getBMICategory(bmi, lang);
     const bmr = Math.round(calculateBMR(profile));
     const tdee = calculateTDEE(profile);
     const dailyTarget = calculateDailyTarget(profile);
