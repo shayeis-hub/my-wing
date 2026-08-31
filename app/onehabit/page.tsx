@@ -141,8 +141,8 @@ export default function OneHabitLanding() {
       {/* More screenshots */}
       <section className="bg-wing-surface border-y border-wing-border py-16">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-wing-heat mb-3 text-center">The rest of the app</div>
-          <h2 className="font-black text-3xl text-center mb-10">Everything else you&apos;d expect, none of the noise</h2>
+          <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-wing-heat mb-3 text-center">Day to day</div>
+          <h2 className="font-black text-3xl text-center mb-10">Simple tools, built around the habit</h2>
           <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
             <div className="rounded-2xl border-[5px] border-wing-ink overflow-hidden shadow-xl">
               <Image src="/onehabit/dashboard.jpg" alt="Home dashboard" width={720} height={1559} className="w-full h-auto" />
@@ -155,9 +155,8 @@ export default function OneHabitLanding() {
             </div>
           </div>
           <p className="text-center text-sm text-wing-muted mt-8 max-w-md mx-auto">
-            Daily check-ins, a photo of your plate for instant AI analysis, and up to
-            2 friends riding free on your subscription &mdash; no social feed, no
-            challenges to manage. Just the habit.
+            A 2-minute daily check-in, a photo of your plate for instant AI analysis,
+            and up to 2 friends riding free on your subscription once you&apos;re in.
           </p>
         </div>
       </section>
