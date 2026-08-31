@@ -60,6 +60,12 @@ export default function JoinPage() {
           router.replace("/dashboard");
           return;
         }
+        if (data?.error === "BOOK_WING_LIMIT_REACHED") {
+          setError(lang === "he"
+            ? "המבנה הזה כבר מלא — עד 2 חברים בלבד יכולים להצטרף במצב-ספר."
+            : "This wing is already full — only 2 friends can join in Book Mode.");
+          return;
+        }
         if (data?.error === "COACH_LIMIT_REACHED") {
           setError(lang === "he"
             ? "הדיאטנ/ית הגיעה למגבלת הלקוחות — פנה/י אליה ישירות."

@@ -13,13 +13,20 @@ import { admin, getAdminApp } from "@/lib/firebase/admin";
 
 type SubDoc = { plan: Plan; cancelPending?: boolean; expiresAt?: { _seconds?: number } | null };
 type CourseAccess = { expiresAt: string; wingId: string };
-type UserDoc = { subscription?: SubDoc; courseAccess?: CourseAccess };
+type BookAccess = { active?: boolean; grantedBy?: string };
+type UserDoc = { subscription?: SubDoc; courseAccess?: CourseAccess; bookAccess?: BookAccess };
 
-async function getUserPlanAdmin(uid: string): Promise<{ sub: SubDoc | null; courseAccess: CourseAccess | null }> {
+async function getUserPlanAdmin(
+  uid: string
+): Promise<{ sub: SubDoc | null; courseAccess: CourseAccess | null; bookAccess: BookAccess | null }> {
   const snap = await admin.firestore().doc(`users/${uid}`).get();
-  if (!snap.exists) return { sub: null, courseAccess: null };
+  if (!snap.exists) return { sub: null, courseAccess: null, bookAccess: null };
   const data = snap.data() as UserDoc;
-  return { sub: data.subscription ?? null, courseAccess: data.courseAccess ?? null };
+  return {
+    sub: data.subscription ?? null,
+    courseAccess: data.courseAccess ?? null,
+    bookAccess: data.bookAccess ?? null,
+  };
 }
 
 async function getDailyMealCountAdmin(uid: string, date: string): Promise<number> {
@@ -75,12 +82,12 @@ export async function POST(req: NextRequest) {
       // Grandfathered users always pass
       if (!isGrandfathered(userEmail)) {
         const today = format(new Date(), "yyyy-MM-dd");
-        const { sub, courseAccess } = await getUserPlanAdmin(userId);
+        const { sub, courseAccess, bookAccess } = await getUserPlanAdmin(userId);
         const plan = sub?.plan ?? "free";
 
-        if (!isPremium(userEmail, plan, sub, courseAccess)) {
+        if (!isPremium(userEmail, plan, sub, courseAccess, undefined, bookAccess)) {
           const todayCount = await getDailyMealCountAdmin(userId, today);
-          if (!canAddMealPhoto(userEmail, plan, todayCount)) {
+          if (!canAddMealPhoto(userEmail, plan, todayCount, bookAccess)) {
             return NextResponse.json(
               { error: "MEAL_LIMIT_REACHED", limit: FREE_LIMITS.mealPhotosPerDay },
               { status: 403 }
@@ -112,9 +119,9 @@ export async function POST(req: NextRequest) {
     // ── Increment daily count after successful analysis ────────────────────────
     if (userId && userEmail !== undefined && !isGrandfathered(userEmail)) {
       const today = format(new Date(), "yyyy-MM-dd");
-      const { sub, courseAccess } = await getUserPlanAdmin(userId);
+      const { sub, courseAccess, bookAccess } = await getUserPlanAdmin(userId);
       const plan = sub?.plan ?? "free";
-      if (!isPremium(userEmail, plan, sub, courseAccess)) {
+      if (!isPremium(userEmail, plan, sub, courseAccess, undefined, bookAccess)) {
         await incrementDailyMealCountAdmin(userId, today);
       }
     }

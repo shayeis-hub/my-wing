@@ -148,6 +148,19 @@ export async function POST(req: NextRequest) {
         { merge: true }
       );
       console.log(`User ${userRef.id} → free (expiration)`);
+
+      // Book mode's "2 free friends" ride on the inviter's subscription —
+      // once it truly ends (not just cancelPending, which keeps access
+      // until expiresAt), revoke everyone riding on this account.
+      const riders = await db.collection("users").where("bookAccess.grantedBy", "==", userRef.id).get();
+      if (!riders.empty) {
+        const batch = db.batch();
+        riders.docs.forEach((riderDoc) => {
+          batch.set(riderDoc.ref, { bookAccess: { active: false } }, { merge: true });
+        });
+        await batch.commit();
+        console.log(`Revoked book access for ${riders.size} friend(s) riding on ${userRef.id}`);
+      }
       break;
     }
 

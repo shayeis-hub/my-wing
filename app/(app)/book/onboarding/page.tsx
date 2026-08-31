@@ -79,6 +79,7 @@ export default function BookOnboardingPage() {
             ownerId: firebaseUser.uid,
             ownerName: user.displayName,
             name: `${firstName}'s Circle`,
+            isBookWing: true,
           }),
         });
         if (!res.ok) throw new Error("wing-create-failed");

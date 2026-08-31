@@ -12,7 +12,7 @@ function nanoid(len: number) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { ownerId, ownerName, name } = await req.json();
+    const { ownerId, ownerName, name, isBookWing } = await req.json();
     if (!ownerId || !ownerName || !name) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
       members: [{ uid: ownerId, displayName: ownerName }],
       inviteToken,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      // Caps this wing at owner + 2 free-riding friends (see /api/wing/join) —
+      // set once at creation, from book onboarding's silent wing creation.
+      ...(isBookWing ? { isBookWing: true } : {}),
     };
 
     await wingRef.set(wingData);

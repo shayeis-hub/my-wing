@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
-import { canAddWingMember, canCoachAddClient, isCoachActive, FREE_LIMITS } from "@/lib/subscription";
+import { canAddWingMember, canCoachAddClient, isCoachActive, isPremium, FREE_LIMITS, BOOK_WING_MAX_MEMBERS } from "@/lib/subscription";
 import type { CoachPlanId } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
@@ -49,9 +49,23 @@ export async function POST(req: NextRequest) {
       const ownerEmail: string = ownerData.email ?? "";
       const ownerPlan = ownerData.subscription?.plan ?? "free";
       const isCoach = ownerData.accountType === "business" && isCoachActive(ownerData.coach);
+      const isBookWing = wingData.isBookWing === true;
 
-      // Limit check — coach plan limit for business owners, free limit otherwise
-      if (isCoach) {
+      // Limit check — book wings cap at owner + 2 free-riding friends (fixed,
+      // regardless of plan), coach wings use the coach plan's client limit,
+      // everyone else uses the free-plan member limit (premium = unlimited).
+      if (isBookWing) {
+        if (memberIds.length >= BOOK_WING_MAX_MEMBERS) {
+          return NextResponse.json(
+            {
+              error: "BOOK_WING_LIMIT_REACHED",
+              limit: BOOK_WING_MAX_MEMBERS,
+              message: `This wing is limited to ${BOOK_WING_MAX_MEMBERS} members`,
+            },
+            { status: 403 }
+          );
+        }
+      } else if (isCoach) {
         const coachPlan = (ownerData.coach?.plan ?? "basic") as CoachPlanId;
         const clientCount = await countCoachClients(db, ownerId);
         if (!canCoachAddClient(coachPlan, clientCount)) {
@@ -83,6 +97,29 @@ export async function POST(req: NextRequest) {
       if (isCoach) {
         // Client gets full access while the coach's plan is active
         userUpdate.coachAccess = { coachId: ownerId, wingId: wingDoc.id, active: true };
+      }
+      if (isBookWing) {
+        // Only a genuinely paying book-mode owner (not someone still on
+        // their own free habit-1 trial) can grant free rides — isPremium()
+        // on the owner's own record requires a real subscription.plan here,
+        // since self-redeemed bookAccess alone doesn't satisfy it.
+        const ownerIsPaying = isPremium(
+          ownerEmail,
+          ownerPlan,
+          ownerData.subscription,
+          ownerData.courseAccess,
+          ownerData.coachAccess,
+          ownerData.bookAccess
+        );
+        const joinerDoc = await db.collection("users").doc(userId).get();
+        const joinerAlreadyHasBookAccess = !!joinerDoc.data()?.bookAccess?.active;
+        if (ownerIsPaying && !joinerAlreadyHasBookAccess) {
+          userUpdate.bookAccess = {
+            active: true,
+            grantedBy: ownerId,
+            redeemedAt: new Date().toISOString(),
+          };
+        }
       }
       await db.collection("users").doc(userId).update(userUpdate);
 

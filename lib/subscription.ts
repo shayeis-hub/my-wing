@@ -62,13 +62,13 @@ export function isTrialExpired(
     trialStartsAt?: string | null;
     courseAccess?: { expiresAt: string } | null;
     coachAccess?: { active?: boolean } | null;
-    bookAccess?: { active?: boolean } | null;
+    bookAccess?: { active?: boolean; grantedBy?: string } | null;
     /** habitProgress[habit-1-id]?.installedAt, if book mode is active. */
     habit1InstalledAt?: string | null;
   }
 ): boolean {
   if (isGrandfathered(email)) return false;
-  if (isPremium(email, plan, undefined, opts?.courseAccess ?? null, opts?.coachAccess ?? null)) return false;
+  if (isPremium(email, plan, undefined, opts?.courseAccess ?? null, opts?.coachAccess ?? null, opts?.bookAccess ?? null)) return false;
 
   // Book mode isn't on a day-count clock at all — free until habit 1 is
   // marked installed (the book's own rule), then locked unless subscribed.
@@ -109,12 +109,17 @@ export function isPremium(
     expiresAt?: string | { toDate?: () => Date; _seconds?: number } | null;
   } | null,
   courseAccess?: { expiresAt: string } | null,
-  coachAccess?: { active?: boolean } | null
+  coachAccess?: { active?: boolean } | null,
+  bookAccess?: { active?: boolean; grantedBy?: string } | null
 ): boolean {
   if (isGrandfathered(email)) return true;
   if (courseAccess?.expiresAt && new Date(courseAccess.expiresAt) > new Date()) return true;
   // A coach's client has full access while the coach's plan is active.
   if (coachAccess?.active) return true;
+  // A friend riding free on a book-mode subscriber's wing (grantedBy set —
+  // NOT a self-redeemed book code, which stays on the habit-1-gated trial
+  // logic below) has full access while the inviter's subscription is active.
+  if (bookAccess?.active && bookAccess?.grantedBy) return true;
   if (plan !== "premium" && plan !== "grandfathered") return false;
   // If cancellation is pending, check whether the paid period has already ended
   if (subscription?.cancelPending && subscription.expiresAt) {
@@ -137,11 +142,18 @@ export function isPremium(
 export function canAddMealPhoto(
   email: string | null | undefined,
   plan: Plan,
-  todayCount: number
+  todayCount: number,
+  bookAccess?: { active?: boolean; grantedBy?: string } | null
 ): boolean {
-  if (isPremium(email, plan)) return true;
+  if (isPremium(email, plan, undefined, undefined, undefined, bookAccess)) return true;
   return todayCount < FREE_LIMITS.mealPhotosPerDay;
 }
+
+// A book-mode wing (created silently during book onboarding) is capped at
+// the owner + 2 free-riding friends — 3 total, regardless of the owner's
+// subscription tier. Not the regular 20-cap for premium wings; the book
+// pricing/mechanic was designed around exactly 2 free friends, no more.
+export const BOOK_WING_MAX_MEMBERS = 3;
 
 export function canAddWingMember(
   ownerEmail: string | null | undefined,
