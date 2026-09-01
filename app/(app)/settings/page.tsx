@@ -68,6 +68,9 @@ export default function SettingsPage() {
     persist(prefs, next);
   }
 
+  // Book mode hides the feed entirely (see BottomNav) — the "new feed post"
+  // notification toggle would be dead/confusing there, so it's dropped from
+  // the list rather than just left unreachable.
   const notifItems: { key: PrefKey; title: string; desc: string }[] = [
     {
       key: "reminders",
@@ -79,11 +82,15 @@ export default function SettingsPage() {
       title: isHe ? "הודעה אישית אליי" : "Personal messages",
       desc: isHe ? "כשמישהו כותב לך על הקיר או מעודד אותך" : "When someone writes on your wall or encourages you",
     },
-    {
-      key: "feed",
-      title: isHe ? "פוסט חדש בפיד" : "New feed post",
-      desc: isHe ? "כשחבר במבנה מפרסם משהו בפיד" : "When a wing member posts to the feed",
-    },
+    ...(user?.bookAccess?.active
+      ? []
+      : [
+          {
+            key: "feed" as PrefKey,
+            title: isHe ? "פוסט חדש בפיד" : "New feed post",
+            desc: isHe ? "כשחבר במבנה מפרסם משהו בפיד" : "When a wing member posts to the feed",
+          },
+        ]),
     {
       key: "meals",
       title: isHe ? "ארוחה במבנה" : "Meal logged",
