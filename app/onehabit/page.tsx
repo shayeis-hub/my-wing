@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 };
 
 const APP_STORE_URL = "https://apps.apple.com/app/id6802739488";
+// Deterministic from the package name — already correct, just 404s until
+// the app leaves closed testing. Not linked yet on purpose (see
+// AndroidComingSoon below); swap that render call for <GooglePlayBadge />
+// once Shai says it's actually live.
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=app.wingpact.android";
 
 function AppleBadge() {
   return (
@@ -23,6 +28,27 @@ function AppleBadge() {
           Download on the
         </span>
         <span className="block text-lg -mt-0.5">App Store</span>
+      </span>
+    </a>
+  );
+}
+
+// Ready to go — swap the AndroidComingSoon render call below for this once
+// the app is actually out of closed testing and publicly listed.
+function GooglePlayBadge() {
+  return (
+    <a
+      href={PLAY_STORE_URL}
+      className="inline-flex items-center gap-2.5 bg-wing-ink text-wing-bg rounded-2xl px-5 py-3 font-bold hover:opacity-90 transition-opacity"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.463 11.463 0 00-9.14 0L5.45 5.67a.637.637 0 00-.87-.2c-.28.16-.38.53-.22.83L6.2 9.48A10.81 10.81 0 001 18h22a10.81 10.81 0 00-5.4-8.52ZM7 15.25a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5Zm10 0a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5Z" />
+      </svg>
+      <span className="text-left leading-tight">
+        <span className="block text-[10px] font-medium tracking-wider uppercase opacity-70">
+          Get it on
+        </span>
+        <span className="block text-lg -mt-0.5">Google Play</span>
       </span>
     </a>
   );
