@@ -99,10 +99,15 @@ export async function POST(req: NextRequest) {
         userUpdate.coachAccess = { coachId: ownerId, wingId: wingDoc.id, active: true };
       }
       if (isBookWing) {
-        // Only a genuinely paying book-mode owner (not someone still on
-        // their own free habit-1 trial) can grant free rides — isPremium()
-        // on the owner's own record requires a real subscription.plan here,
-        // since self-redeemed bookAccess alone doesn't satisfy it.
+        // Joining gets you into Book Mode immediately regardless of the
+        // owner's payment status — same free-through-habit-1 trial as
+        // anyone who redeemed a code themselves (isTrialExpired handles
+        // that). sponsorPaying just tracks whether the OWNER currently pays
+        // — isPremium() only bypasses the post-habit-1 paywall for a rider
+        // when this is true, so a non-paying owner's friends still hit the
+        // normal paywall after habit 1, same as anyone else — no free ride
+        // without a paying sponsor. The webhook keeps this in sync going
+        // forward (INITIAL_PURCHASE/RENEWAL → true, EXPIRATION → false).
         const ownerIsPaying = isPremium(
           ownerEmail,
           ownerPlan,
@@ -113,10 +118,11 @@ export async function POST(req: NextRequest) {
         );
         const joinerDoc = await db.collection("users").doc(userId).get();
         const joinerAlreadyHasBookAccess = !!joinerDoc.data()?.bookAccess?.active;
-        if (ownerIsPaying && !joinerAlreadyHasBookAccess) {
+        if (!joinerAlreadyHasBookAccess) {
           userUpdate.bookAccess = {
             active: true,
             grantedBy: ownerId,
+            sponsorPaying: ownerIsPaying,
             redeemedAt: new Date().toISOString(),
           };
         }

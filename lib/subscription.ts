@@ -62,7 +62,7 @@ export function isTrialExpired(
     trialStartsAt?: string | null;
     courseAccess?: { expiresAt: string } | null;
     coachAccess?: { active?: boolean } | null;
-    bookAccess?: { active?: boolean; grantedBy?: string } | null;
+    bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null;
     /** habitProgress[habit-1-id]?.installedAt, if book mode is active. */
     habit1InstalledAt?: string | null;
   }
@@ -110,7 +110,7 @@ export function isPremium(
   } | null,
   courseAccess?: { expiresAt: string } | null,
   coachAccess?: { active?: boolean } | null,
-  bookAccess?: { active?: boolean; grantedBy?: string } | null
+  bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null
 ): boolean {
   if (isGrandfathered(email)) return true;
   if (courseAccess?.expiresAt && new Date(courseAccess.expiresAt) > new Date()) return true;
@@ -118,8 +118,11 @@ export function isPremium(
   if (coachAccess?.active) return true;
   // A friend riding free on a book-mode subscriber's wing (grantedBy set —
   // NOT a self-redeemed book code, which stays on the habit-1-gated trial
-  // logic below) has full access while the inviter's subscription is active.
-  if (bookAccess?.active && bookAccess?.grantedBy) return true;
+  // logic below) gets the post-habit-1 paywall bypassed only while the
+  // inviter is a genuinely paying subscriber (sponsorPaying, kept in sync
+  // by the webhook) — otherwise they fall back to the same free-through-
+  // habit-1 trial as anyone else, no free ride without a paying sponsor.
+  if (bookAccess?.active && bookAccess?.grantedBy && bookAccess?.sponsorPaying) return true;
   if (plan !== "premium" && plan !== "grandfathered") return false;
   // If cancellation is pending, check whether the paid period has already ended
   if (subscription?.cancelPending && subscription.expiresAt) {
@@ -143,7 +146,7 @@ export function canAddMealPhoto(
   email: string | null | undefined,
   plan: Plan,
   todayCount: number,
-  bookAccess?: { active?: boolean; grantedBy?: string } | null
+  bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null
 ): boolean {
   if (isPremium(email, plan, undefined, undefined, undefined, bookAccess)) return true;
   return todayCount < FREE_LIMITS.mealPhotosPerDay;

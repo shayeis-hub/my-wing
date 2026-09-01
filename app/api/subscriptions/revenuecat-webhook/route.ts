@@ -114,6 +114,23 @@ export async function POST(req: NextRequest) {
         { merge: true }
       );
       console.log(`User ${userRef.id} → premium (${provider}, ${event.type})`);
+
+      // Book mode's "2 free friends" auto-unlock past habit 1 the moment
+      // their sponsor becomes (or resumes being) a paying subscriber — no
+      // action needed from anyone, they may already be sitting on habit 1
+      // waiting for this.
+      const newlyPayingRiders = await db
+        .collection("users")
+        .where("bookAccess.grantedBy", "==", userRef.id)
+        .get();
+      if (!newlyPayingRiders.empty) {
+        const batch = db.batch();
+        newlyPayingRiders.docs.forEach((riderDoc) => {
+          batch.set(riderDoc.ref, { bookAccess: { sponsorPaying: true } }, { merge: true });
+        });
+        await batch.commit();
+        console.log(`Unlocked book access for ${newlyPayingRiders.size} friend(s) riding on ${userRef.id}`);
+      }
       break;
     }
 
@@ -151,15 +168,18 @@ export async function POST(req: NextRequest) {
 
       // Book mode's "2 free friends" ride on the inviter's subscription —
       // once it truly ends (not just cancelPending, which keeps access
-      // until expiresAt), revoke everyone riding on this account.
+      // until expiresAt), they lose the post-habit-1 bypass. They stay in
+      // Book Mode (bookAccess.active untouched) and keep their habit
+      // progress — just fall back to the same paywall anyone else without
+      // a paying sponsor would hit, rather than being kicked out entirely.
       const riders = await db.collection("users").where("bookAccess.grantedBy", "==", userRef.id).get();
       if (!riders.empty) {
         const batch = db.batch();
         riders.docs.forEach((riderDoc) => {
-          batch.set(riderDoc.ref, { bookAccess: { active: false } }, { merge: true });
+          batch.set(riderDoc.ref, { bookAccess: { sponsorPaying: false } }, { merge: true });
         });
         await batch.commit();
-        console.log(`Revoked book access for ${riders.size} friend(s) riding on ${userRef.id}`);
+        console.log(`Sponsor stopped paying — ${riders.size} friend(s) riding on ${userRef.id} lost the free-ride bypass`);
       }
       break;
     }
