@@ -55,8 +55,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Already a member" }, { status: 409 });
       }
 
-      const ownerDoc = await db.collection("users").doc(ownerId).get();
-      const ownerData = ownerDoc.data() ?? {};
+      // Public fitDad pool wings have no real owner (ownerId: "" — see
+      // app/api/admin/fitdad/wings) — Firestore throws on .doc("") rather
+      // than just not-finding it, so this has to be skipped entirely rather
+      // than relying on a not-found fallback.
+      const ownerDoc = ownerId ? await db.collection("users").doc(ownerId).get() : null;
+      const ownerData = ownerDoc?.data() ?? {};
       const ownerEmail: string = ownerData.email ?? "";
       const ownerPlan = ownerData.subscription?.plan ?? "free";
       const isCoach = ownerData.accountType === "business" && isCoachActive(ownerData.coach);
