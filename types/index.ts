@@ -38,6 +38,21 @@ export interface User {
    */
   habitProgress?: Record<string, { startedAt: string; installedAt?: string }>;
   /**
+   * "Aba Chatuv" cohort entitlement — accounts provisioned manually by an ops
+   * team (see app/api/admin/fitdad), paid for externally (no in-app IAP).
+   * `createdBy` is a free-text name/id of whoever entered this account, for a
+   * lightweight audit trail (there's no per-person admin login, just a shared
+   * secret — see app/admin/fitdad).
+   */
+  fitDadAccess?: { active: boolean; expiresAt: string; plan: "3m" | "6m" | "12m"; createdBy?: string };
+  /**
+   * True until the user changes their password. Set on fitDad accounts,
+   * whose initial password is their own phone number (see
+   * app/api/admin/fitdad/create-user) — a predictable secret, so forcing a
+   * change on first login isn't cosmetic.
+   */
+  mustChangePassword?: boolean;
+  /**
    * Overrides createdAt as the trial clock start. Defaults to createdAt.
    * Set to "now" when a coach stops paying, so the client's 21-day trial begins then.
    */
@@ -103,6 +118,18 @@ export interface Wing {
   inviteToken: string;
   createdAt: Timestamp;
   activeChallenge?: Challenge;
+  /**
+   * Anything other than "public" is treated as private — the default for
+   * every existing/other wing, so this field being absent changes nothing.
+   * Only "Aba Chatuv" public pool wings (see app/api/admin/fitdad/wings)
+   * set this to "public" so they're joinable from a list instead of by
+   * invite link.
+   */
+  visibility?: "private" | "public";
+  /** Tags a wing as belonging to the "Aba Chatuv" cohort (both its private and public wings) — same pattern as isBookWing. */
+  isFitDadWing?: boolean;
+  /** Enforced member cap — only set on fitDad wings today (see FIT_DAD_WING_MAX_MEMBERS in lib/subscription.ts). */
+  capacity?: number;
 }
 
 export interface WingMember {

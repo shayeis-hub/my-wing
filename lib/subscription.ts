@@ -73,6 +73,13 @@ export interface AccessGrants {
   courseAccess?: { expiresAt: string } | null;
   coachAccess?: { active?: boolean } | null;
   bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null;
+  /** "Aba Chatuv" cohort — externally-paid, fixed-duration access. No IAP involved; see types/index.ts's User.fitDadAccess. */
+  fitDadAccess?: { active?: boolean; expiresAt?: string } | null;
+}
+
+/** True if an ISO expiry timestamp is set and still in the future. Shared by courseAccess and fitDadAccess, which both grant access until a fixed date rather than via a recurring subscription. */
+function isExpiryActive(expiresAt: string | null | undefined): boolean {
+  return !!expiresAt && new Date(expiresAt) > new Date();
 }
 
 export function isTrialExpired(
@@ -129,9 +136,15 @@ export function isPremium(
   grants?: AccessGrants | null
 ): boolean {
   if (isGrandfathered(email)) return true;
-  if (grants?.courseAccess?.expiresAt && new Date(grants.courseAccess.expiresAt) > new Date()) return true;
+  if (isExpiryActive(grants?.courseAccess?.expiresAt)) return true;
   // A coach's client has full access while the coach's plan is active.
   if (grants?.coachAccess?.active) return true;
+  // "Aba Chatuv" cohort — active while their externally-paid 3/6/12-month
+  // plan hasn't expired. Once it does, isPremium() correctly returns false
+  // for them (no `plan:"premium"` subscription of their own) — the
+  // subscription page shows a dedicated "renew via WhatsApp" screen instead
+  // of the normal IAP paywall, since they have no in-app way to pay.
+  if (grants?.fitDadAccess?.active && isExpiryActive(grants?.fitDadAccess?.expiresAt)) return true;
   // A friend riding free on a book-mode subscriber's wing (grantedBy set —
   // NOT a self-redeemed book code, which stays on the habit-1-gated trial
   // logic below) gets the post-habit-1 paywall bypassed only while the
@@ -173,6 +186,11 @@ export function canAddMealPhoto(
 // subscription tier. Not the regular 20-cap for premium wings; the book
 // pricing/mechanic was designed around exactly 2 free friends, no more.
 export const BOOK_WING_MAX_MEMBERS = 3;
+
+// "Aba Chatuv" wings (private or public pool) enforce this cap regardless of
+// anyone's plan — the first real enforced numeric cap on a non-book/coach
+// wing (canAddWingMember below never actually limits premium users today).
+export const FIT_DAD_WING_MAX_MEMBERS = 20;
 
 export function canAddWingMember(
   ownerEmail: string | null | undefined,

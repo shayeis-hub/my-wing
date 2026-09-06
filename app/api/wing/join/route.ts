@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
-import { canAddWingMember, canCoachAddClient, isCoachActive, isPremium, FREE_LIMITS, BOOK_WING_MAX_MEMBERS } from "@/lib/subscription";
+import { canAddWingMember, canCoachAddClient, isCoachActive, isPremium, FREE_LIMITS, BOOK_WING_MAX_MEMBERS, FIT_DAD_WING_MAX_MEMBERS } from "@/lib/subscription";
 import type { CoachPlanId } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
@@ -50,10 +50,13 @@ export async function POST(req: NextRequest) {
       const ownerPlan = ownerData.subscription?.plan ?? "free";
       const isCoach = ownerData.accountType === "business" && isCoachActive(ownerData.coach);
       const isBookWing = wingData.isBookWing === true;
+      const isFitDadWing = wingData.isFitDadWing === true;
 
       // Limit check — book wings cap at owner + 2 free-riding friends (fixed,
-      // regardless of plan), coach wings use the coach plan's client limit,
-      // everyone else uses the free-plan member limit (premium = unlimited).
+      // regardless of plan), fitDad wings (private or public pool) cap at
+      // FIT_DAD_WING_MAX_MEMBERS, coach wings use the coach plan's client
+      // limit, everyone else uses the free-plan member limit (premium =
+      // unlimited).
       if (isBookWing) {
         if (memberIds.length >= BOOK_WING_MAX_MEMBERS) {
           return NextResponse.json(
@@ -61,6 +64,18 @@ export async function POST(req: NextRequest) {
               error: "BOOK_WING_LIMIT_REACHED",
               limit: BOOK_WING_MAX_MEMBERS,
               message: `This wing is limited to ${BOOK_WING_MAX_MEMBERS} members`,
+            },
+            { status: 403 }
+          );
+        }
+      } else if (isFitDadWing) {
+        const capacity: number = typeof wingData.capacity === "number" ? wingData.capacity : FIT_DAD_WING_MAX_MEMBERS;
+        if (memberIds.length >= capacity) {
+          return NextResponse.json(
+            {
+              error: "FIT_DAD_WING_LIMIT_REACHED",
+              limit: capacity,
+              message: `This wing is limited to ${capacity} members`,
             },
             { status: 403 }
           );

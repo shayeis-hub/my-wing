@@ -66,6 +66,12 @@ export default function JoinPage() {
             : "This wing is already full — only 2 friends can join in Book Mode.");
           return;
         }
+        if (data?.error === "FIT_DAD_WING_LIMIT_REACHED") {
+          setError(lang === "he"
+            ? "המבנה הזה כבר מלא — נסה/י לבחור מבנה אחר."
+            : "This wing is already full — please pick a different one.");
+          return;
+        }
         if (data?.error === "COACH_LIMIT_REACHED") {
           setError(lang === "he"
             ? "הדיאטנ/ית הגיעה למגבלת הלקוחות — פנה/י אליה ישירות."
