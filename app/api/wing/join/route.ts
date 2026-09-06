@@ -108,14 +108,7 @@ export async function POST(req: NextRequest) {
         // normal paywall after habit 1, same as anyone else — no free ride
         // without a paying sponsor. The webhook keeps this in sync going
         // forward (INITIAL_PURCHASE/RENEWAL → true, EXPIRATION → false).
-        const ownerIsPaying = isPremium(
-          ownerEmail,
-          ownerPlan,
-          ownerData.subscription,
-          ownerData.courseAccess,
-          ownerData.coachAccess,
-          ownerData.bookAccess
-        );
+        const ownerIsPaying = isPremium(ownerEmail, ownerPlan, ownerData.subscription, ownerData);
         const joinerDoc = await db.collection("users").doc(userId).get();
         const joinerAlreadyHasBookAccess = !!joinerDoc.data()?.bookAccess?.active;
         if (!joinerAlreadyHasBookAccess) {

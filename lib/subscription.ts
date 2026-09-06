@@ -54,21 +54,39 @@ export function resolveTrialStartMs(
   return createdAtMs ?? null;
 }
 
+/**
+ * All the special-access grants that can bypass the normal paywall, bundled
+ * into one object instead of threaded through as separate positional
+ * parameters. Any object that structurally carries these fields (the full
+ * `User` doc, a Firestore `.data()` snapshot, etc.) can be passed directly —
+ * that's the point: adding a new grant type (e.g. a future partner-program
+ * access) means adding one field here and one check in isPremium, with zero
+ * changes at call sites that already pass the whole user/doc object.
+ *
+ * Replaces what used to be 3 separate optional positional params on
+ * isPremium/isTrialExpired/canAddMealPhoto — that shape made it easy to
+ * silently forget one (found 2026-09-06: several isPremium call sites were
+ * passing `undefined` for coachAccess, so a coach's client saw ads, hit the
+ * meal-photo limit, and saw the wrong subscription-page state).
+ */
+export interface AccessGrants {
+  courseAccess?: { expiresAt: string } | null;
+  coachAccess?: { active?: boolean } | null;
+  bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null;
+}
+
 export function isTrialExpired(
   email:        string | null | undefined,
   plan:         Plan   | undefined,
   createdAtMs:  number | null | undefined,
-  opts?: {
+  opts?: AccessGrants & {
     trialStartsAt?: string | null;
-    courseAccess?: { expiresAt: string } | null;
-    coachAccess?: { active?: boolean } | null;
-    bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null;
     /** habitProgress[habit-1-id]?.installedAt, if book mode is active. */
     habit1InstalledAt?: string | null;
   }
 ): boolean {
   if (isGrandfathered(email)) return false;
-  if (isPremium(email, plan, undefined, opts?.courseAccess ?? null, opts?.coachAccess ?? null, opts?.bookAccess ?? null)) return false;
+  if (isPremium(email, plan, undefined, opts ?? null)) return false;
 
   // Book mode isn't on a day-count clock at all — free until habit 1 is
   // marked installed (the book's own rule), then locked unless subscribed.
@@ -108,21 +126,19 @@ export function isPremium(
     cancelPending?: boolean;
     expiresAt?: string | { toDate?: () => Date; _seconds?: number } | null;
   } | null,
-  courseAccess?: { expiresAt: string } | null,
-  coachAccess?: { active?: boolean } | null,
-  bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null
+  grants?: AccessGrants | null
 ): boolean {
   if (isGrandfathered(email)) return true;
-  if (courseAccess?.expiresAt && new Date(courseAccess.expiresAt) > new Date()) return true;
+  if (grants?.courseAccess?.expiresAt && new Date(grants.courseAccess.expiresAt) > new Date()) return true;
   // A coach's client has full access while the coach's plan is active.
-  if (coachAccess?.active) return true;
+  if (grants?.coachAccess?.active) return true;
   // A friend riding free on a book-mode subscriber's wing (grantedBy set —
   // NOT a self-redeemed book code, which stays on the habit-1-gated trial
   // logic below) gets the post-habit-1 paywall bypassed only while the
   // inviter is a genuinely paying subscriber (sponsorPaying, kept in sync
   // by the webhook) — otherwise they fall back to the same free-through-
   // habit-1 trial as anyone else, no free ride without a paying sponsor.
-  if (bookAccess?.active && bookAccess?.grantedBy && bookAccess?.sponsorPaying) return true;
+  if (grants?.bookAccess?.active && grants?.bookAccess?.grantedBy && grants?.bookAccess?.sponsorPaying) return true;
   if (plan !== "premium" && plan !== "grandfathered") return false;
   // If cancellation is pending, check whether the paid period has already ended
   if (subscription?.cancelPending && subscription.expiresAt) {
@@ -146,9 +162,9 @@ export function canAddMealPhoto(
   email: string | null | undefined,
   plan: Plan,
   todayCount: number,
-  bookAccess?: { active?: boolean; grantedBy?: string; sponsorPaying?: boolean } | null
+  grants?: AccessGrants | null
 ): boolean {
-  if (isPremium(email, plan, undefined, undefined, undefined, bookAccess)) return true;
+  if (isPremium(email, plan, undefined, grants)) return true;
   return todayCount < FREE_LIMITS.mealPhotosPerDay;
 }
 

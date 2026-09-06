@@ -61,7 +61,7 @@ function SubscriptionPageInner() {
   const email = firebaseUser?.email ?? user?.email ?? "";
   const sub: Subscription | undefined = user?.subscription;
   const grandfathered = isGrandfathered(email);
-  const premium = justPurchased || isPremium(email, sub?.plan, sub, user?.courseAccess, undefined, user?.bookAccess);
+  const premium = justPurchased || isPremium(email, sub?.plan, sub, user);
   const isExpiredPaywall = searchParams.get("expired") === "1";
   // Book-mode users get a separate offering (different price, same
   // WingPact Premium entitlement) — everything downstream (purchase, restore,
