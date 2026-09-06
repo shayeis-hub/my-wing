@@ -55,7 +55,7 @@ function MonoLabel({ children }: { children: React.ReactNode }) {
 // ── Main component ──────────────────────────────────────────────────
 export default function OnboardingPage() {
   const { user, firebaseUser } = useAuth();
-  const { t, setGender: setI18nGender } = useLanguage();
+  const { t, lang, setGender: setI18nGender } = useLanguage();
   const router = useRouter();
 
   const activityLevels: { value: UserProfile["activityLevel"]; label: string }[] = [
@@ -69,12 +69,29 @@ export default function OnboardingPage() {
   // Steps: 0 = join wing, 1 = profile, 2 = goals
   const [step, setStep] = useState(() => (user?.wingId ? 1 : 0));
   const [saving, setSaving] = useState(false);
+  const isFitDadMode = !!user?.fitDadAccess;
 
   // Step 0 — wing
   const [joinOption, setJoinOption] = useState<"code" | "create">("code");
   const [joinCode, setJoinCode] = useState("");
   const [wingName, setWingName] = useState("");
   const [wingLoading, setWingLoading] = useState(false);
+
+  // Step 0 (fitDad only) — public pool vs. a private group of their own.
+  const [fitDadChoice, setFitDadChoice] = useState<"public" | "private">("public");
+  const [publicFitDadWings, setPublicFitDadWings] = useState<{ id: string; name: string; memberCount: number; capacity: number }[]>([]);
+  const [selectedPublicWingId, setSelectedPublicWingId] = useState("");
+
+  useEffect(() => {
+    if (!isFitDadMode || step !== 0) return;
+    fetch("/api/wing/fitdad-public")
+      .then((r) => r.json())
+      .then((data) => {
+        setPublicFitDadWings(data.wings ?? []);
+        if (data.wings?.length) setSelectedPublicWingId(data.wings[0].id);
+      })
+      .catch(() => setPublicFitDadWings([]));
+  }, [isFitDadMode, step]);
 
   // Step 1 — profile
   const [gender, setGender] = useState<UserProfile["gender"]>("male");
@@ -159,6 +176,51 @@ export default function OnboardingPage() {
     }
   }
 
+  // ── Step 0 (fitDad only): join the public pool or open a private group ──
+  async function handleFitDadWingStep() {
+    if (!firebaseUser || !user) return;
+    if (fitDadChoice === "public" && !selectedPublicWingId) {
+      toast.error(lang === "he" ? "בחר/י מבנה מהרשימה" : "Pick a group from the list");
+      return;
+    }
+    setWingLoading(true);
+    try {
+      if (fitDadChoice === "public") {
+        const res = await fetch("/api/wing/join", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            wingId: selectedPublicWingId,
+            userId: firebaseUser.uid,
+            displayName: user.displayName,
+            photoURL: user.photoURL ?? null,
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error === "FIT_DAD_WING_LIMIT_REACHED" ? "full" : "join-failed");
+        }
+      } else {
+        const name = wingName.trim() || (t("ob_create_ph") as (n: string) => string)(firstName);
+        const res = await fetch("/api/wing/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ownerId: firebaseUser.uid, ownerName: user.displayName, name, isFitDadWing: true }),
+        });
+        if (!res.ok) throw new Error("create-failed");
+      }
+      setStep(1);
+    } catch (e) {
+      toast.error(
+        e instanceof Error && e.message === "full"
+          ? (lang === "he" ? "המבנה הזה התמלא — בחר/י אחר" : "That group just filled up — pick another")
+          : (lang === "he" ? "משהו השתבש, נסה/י שוב" : "Something went wrong, please try again")
+      );
+    } finally {
+      setWingLoading(false);
+    }
+  }
+
   // ── Step 1: validate profile ───────────────────────────────────
   function handleProfileStep() {
     if (!age || +age < 10 || +age > 100) { toast.error(t("ob_age_invalid") as string); return; }
@@ -214,7 +276,89 @@ export default function OnboardingPage() {
       <div className="w-full max-w-[340px]">
 
         {/* ── Step 0: Join Wing ─────────────────────────────────── */}
-        {step === 0 && (
+        {step === 0 && isFitDadMode && (
+          <div>
+            <StepBar total={4} current={1} />
+
+            <h1 className="text-[24px] font-black text-wing-ink tracking-[-0.025em] leading-tight mb-2">
+              {lang === "he" ? "לאיזו קבוצה תרצה להצטרף?" : "Which group would you like to join?"}
+            </h1>
+            <p className="text-sm text-wing-muted leading-relaxed mb-6">
+              {lang === "he"
+                ? "אפשר להצטרף לאחת מהקבוצות הפתוחות, או לפתוח קבוצה פרטית ולהזמין חברים בעצמך."
+                : "Join one of the open groups, or start a private group and invite your own friends."}
+            </p>
+
+            <div className="flex flex-col gap-3 mb-6">
+              {/* Public pool */}
+              <button
+                onClick={() => setFitDadChoice("public")}
+                className={`bg-wing-surface rounded-2xl p-4 text-right transition-all border-2 ${
+                  fitDadChoice === "public" ? "border-wing-ink" : "border-wing-border"
+                }`}
+              >
+                <p className="font-bold text-[15px] text-wing-ink">
+                  {lang === "he" ? "הצטרפות לקבוצה קיימת" : "Join an existing group"}
+                </p>
+                <p className="text-xs text-wing-muted mt-0.5">
+                  {lang === "he" ? "מוצג מספר החברים הנוכחי בכל קבוצה" : "Current member count shown for each"}
+                </p>
+                {fitDadChoice === "public" && (
+                  publicFitDadWings.length ? (
+                    <select
+                      value={selectedPublicWingId}
+                      onChange={(e) => setSelectedPublicWingId(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full mt-3 bg-wing-bg border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                    >
+                      {publicFitDadWings.map((w) => (
+                        <option key={w.id} value={w.id}>{w.name} ({w.memberCount}/{w.capacity})</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-xs text-wing-subtle mt-3">
+                      {lang === "he" ? "אין כרגע קבוצות פתוחות — אפשר לפתוח קבוצה פרטית." : "No open groups right now — you can start a private one."}
+                    </p>
+                  )
+                )}
+              </button>
+
+              {/* Private group */}
+              <button
+                onClick={() => setFitDadChoice("private")}
+                className={`bg-wing-surface rounded-2xl p-4 text-right transition-all border-2 ${
+                  fitDadChoice === "private" ? "border-wing-ink" : "border-wing-border"
+                }`}
+              >
+                <p className="font-bold text-[15px] text-wing-ink">
+                  {lang === "he" ? "פתיחת קבוצה פרטית משלי" : "Start my own private group"}
+                </p>
+                <p className="text-xs text-wing-muted mt-0.5">
+                  {lang === "he" ? "רק מי שתזמין/י יוכל להצטרף" : "Only people you invite can join"}
+                </p>
+                {fitDadChoice === "private" && (
+                  <input
+                    placeholder={(t("ob_create_ph") as (n: string) => string)(firstName)}
+                    value={wingName}
+                    onChange={(e) => setWingName(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full mt-3 bg-wing-bg border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink"
+                  />
+                )}
+              </button>
+            </div>
+
+            <button
+              onClick={handleFitDadWingStep}
+              disabled={wingLoading || (fitDadChoice === "public" && !publicFitDadWings.length)}
+              className="w-full bg-sunrise text-wing-ink font-extrabold text-sm py-3.5 rounded-[14px] active:scale-[0.97] transition-transform disabled:opacity-60"
+            >
+              {wingLoading ? t("ob_wing_connecting") : t("ob_wing_next")}
+            </button>
+          </div>
+        )}
+
+        {step === 0 && !isFitDadMode && (
           <div>
             <StepBar total={4} current={1} />
 

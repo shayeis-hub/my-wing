@@ -3,6 +3,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   updateProfile,
+  updatePassword as firebaseUpdatePassword,
   GoogleAuthProvider,
   OAuthProvider,
   signInWithPopup,
@@ -102,6 +103,19 @@ export async function signOut() {
 
 export async function sendPasswordReset(email: string) {
   await firebaseSendPasswordResetEmail(auth, email);
+}
+
+/**
+ * Sets a new password for the currently signed-in user and clears
+ * mustChangePassword — used by the forced first-login change for fitDad
+ * accounts (see app/(app)/change-password), whose initial password is their
+ * own phone number. Firebase may reject this with `auth/requires-recent-
+ * login` if the sign-in is old; that's surfaced to the caller as-is since a
+ * fitDad account just logged in moments before hitting this gate.
+ */
+export async function changePassword(user: FirebaseUser, newPassword: string) {
+  await firebaseUpdatePassword(user, newPassword);
+  await updateDoc(doc(db, "users", user.uid), { mustChangePassword: false });
 }
 
 async function createUserDoc(

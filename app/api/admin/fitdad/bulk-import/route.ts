@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     // Commit — sequential, not Promise.all: each createUser is independent
     // but running dozens in parallel risks tripping Firebase Auth rate
     // limits, and a per-row failure shouldn't abort the rest of the batch.
-    const results: { row: FitDadRowInput; uid?: string; wingId?: string; error?: string }[] = [];
+    const results: { row: FitDadRowInput; uid?: string; wingId?: string | null; error?: string }[] = [];
     for (const row of rows) {
       try {
         const { uid, wingId } = await provisionFitDadUser(row, createdBy!.trim());

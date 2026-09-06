@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { FIT_DAD_WING_MAX_MEMBERS } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ function nanoid(len: number) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { ownerId, ownerName, name, isBookWing } = await req.json();
+    const { ownerId, ownerName, name, isBookWing, isFitDadWing } = await req.json();
     if (!ownerId || !ownerName || !name) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -33,6 +34,10 @@ export async function POST(req: NextRequest) {
       // Caps this wing at owner + 2 free-riding friends (see /api/wing/join) —
       // set once at creation, from book onboarding's silent wing creation.
       ...(isBookWing ? { isBookWing: true } : {}),
+      // A fitDad customer's own private group, opened from onboarding's
+      // public/private choice — capped at FIT_DAD_WING_MAX_MEMBERS (see
+      // /api/wing/join), same enforcement as the admin-provisioned kind.
+      ...(isFitDadWing ? { isFitDadWing: true, visibility: "private" as const, capacity: FIT_DAD_WING_MAX_MEMBERS } : {}),
     };
 
     await wingRef.set(wingData);

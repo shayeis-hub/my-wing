@@ -22,8 +22,8 @@ async function countCoachClients(
 
 export async function POST(req: NextRequest) {
   try {
-    const { token, userId, displayName, photoURL } = await req.json();
-    if (!token || !userId) {
+    const { token, wingId: directWingId, userId, displayName, photoURL } = await req.json();
+    if ((!token && !directWingId) || !userId) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
@@ -31,12 +31,23 @@ export async function POST(req: NextRequest) {
     const db = admin.firestore();
     const member = { uid: userId, displayName, ...(photoURL ? { photoURL } : {}) };
 
-    // ── 1. Try a normal wing invite token (group / regular wing) ────────────────
-    const wingSnap = await db.collection("wings").where("inviteToken", "==", token).limit(1).get();
+    // ── 1. Try a normal wing invite token, OR a direct wing id ──────────────────
+    // Public fitDad pool wings (app/api/admin/fitdad/wings) are joined by
+    // picking from a list, not a link, so they carry no usable inviteToken —
+    // hence the wingId alternative. It's restricted to visibility:"public"
+    // wings only: allowing it for any wing would let someone join a private
+    // wing just by guessing its id, bypassing the invite-token system.
+    let wingDoc: FirebaseFirestore.DocumentSnapshot | null = null;
+    if (directWingId) {
+      const snap = await db.collection("wings").doc(directWingId).get();
+      if (snap.exists && snap.data()?.visibility === "public") wingDoc = snap;
+    } else {
+      const wingSnap = await db.collection("wings").where("inviteToken", "==", token).limit(1).get();
+      if (!wingSnap.empty) wingDoc = wingSnap.docs[0];
+    }
 
-    if (!wingSnap.empty) {
-      const wingDoc = wingSnap.docs[0];
-      const wingData = wingDoc.data();
+    if (wingDoc) {
+      const wingData = wingDoc.data()!;
       const ownerId: string = wingData.ownerId ?? wingData.createdBy ?? "";
       const memberIds: string[] = Array.isArray(wingData.memberIds) ? wingData.memberIds : [];
 
@@ -142,9 +153,11 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 2. Try a private coach invite code → create a fresh 2-person wing ────────
-    const inviteRef = db.collection("coachInvites").doc(token);
-    const inviteSnap = await inviteRef.get();
-    if (inviteSnap.exists && inviteSnap.data()?.active && inviteSnap.data()?.type === "private") {
+    // (only meaningful for token-based lookups — a directWingId call that
+    // didn't match a public wing above has nothing left to try.)
+    const inviteRef = token ? db.collection("coachInvites").doc(token) : null;
+    const inviteSnap = inviteRef ? await inviteRef.get() : null;
+    if (inviteSnap?.exists && inviteSnap.data()?.active && inviteSnap.data()?.type === "private") {
       const invite = inviteSnap.data()!;
       const coachId: string = invite.coachId;
 
@@ -193,7 +206,8 @@ export async function POST(req: NextRequest) {
       });
 
       // Private invites are single-use — deactivate after first join
-      await inviteRef.update({
+      // (inviteRef can't be null here — reaching this branch required it)
+      await inviteRef!.update({
         usedCount: admin.firestore.FieldValue.increment(1),
         active: false,
       });

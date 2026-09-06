@@ -261,7 +261,7 @@ function CreateTab({ secret, createdBy, wings, onCreated }: { secret: string; cr
       </Field>
       <Field label="מבנה כנף">
         <select style={inputStyle} value={wingId} onChange={(e) => setWingId(e.target.value)}>
-          <option value="">קבוצה פרטית חדשה</option>
+          <option value="">הלקוח יבחר בעצמו באונבורדינג</option>
           {availableWings.map((w) => (
             <option key={w.id} value={w.id}>{w.name} ({w.visibility === "public" ? "ציבורי" : "פרטי"}, {w.memberCount}/{w.capacity})</option>
           ))}
@@ -352,7 +352,7 @@ function ImportTab({ secret, createdBy, wings, onImported }: { secret: string; c
     <div>
       <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: 8 }}>ייבוא קובץ (CSV)</h2>
       <p style={{ fontSize: 13, color: MUTED, marginBottom: 16 }}>
-        עמודות בסדר הזה (שורה ראשונה = כותרות, מדולגת): שם מלא, אימייל, טלפון, מסלול (3m/6m/12m), מבנה כנף (ריק = פרטי חדש, אחרת ה-ID מלשונית &quot;מבנים ציבוריים&quot;).
+        עמודות בסדר הזה (שורה ראשונה = כותרות, מדולגת): שם מלא, אימייל, טלפון, מסלול (3m/6m/12m), מבנה כנף (ריק = הלקוח יבחר בעצמו באונבורדינג — ציבורי/פרטי; אחרת ה-ID מלשונית &quot;מבנים ציבוריים&quot; כדי לשבץ מראש).
         אפשר לפתוח/לשמור כ-CSV מכל תוכנת אקסל.
       </p>
       <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={handleFile} style={{ marginBottom: 16 }} />

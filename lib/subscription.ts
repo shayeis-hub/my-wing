@@ -95,6 +95,15 @@ export function isTrialExpired(
   if (isGrandfathered(email)) return false;
   if (isPremium(email, plan, undefined, opts ?? null)) return false;
 
+  // "Aba Chatuv" accounts never fall back to the regular day-count trial —
+  // once fitDadAccess exists at all, access is binary: either isPremium()
+  // above returned true (plan still active) or it didn't, meaning the plan
+  // has lapsed (or was manually deactivated) and the paywall applies now,
+  // regardless of how recently the account itself was created. Without this,
+  // a fitDad account created less than 21 days ago would incorrectly get a
+  // few free days on the generic trial clock even after its real plan ended.
+  if (opts?.fitDadAccess) return true;
+
   // Book mode isn't on a day-count clock at all — free until habit 1 is
   // marked installed (the book's own rule), then locked unless subscribed.
   if (opts?.bookAccess?.active) {

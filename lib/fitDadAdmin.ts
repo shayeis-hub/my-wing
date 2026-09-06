@@ -83,25 +83,24 @@ export async function validateFitDadRow(row: FitDadRowInput): Promise<FitDadRowE
   return null;
 }
 
-function nanoid(len: number) {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < len; i++) result += chars[Math.floor(Math.random() * chars.length)];
-  return result;
-}
-
 /**
  * Creates the Firebase Auth account (password = phone, see normalizePhone),
  * the Firestore user doc (empty profile stub → the regular onboarding flow
- * picks it up, per step 3 of the plan), and either a fresh private wing or
- * a join into an existing fitDad wing. Re-validates (the preview call and
- * the actual write are two separate requests — the row could have changed
- * or someone else could have filled the target wing in between).
+ * picks it up, per step 3 of the plan). By default NO wing is assigned —
+ * the customer picks public pool vs. their own private group themselves,
+ * during their own onboarding (that's the whole point of step 3; the admin
+ * panel doesn't get to make that call for them). Passing `row.wingId` is an
+ * explicit override for when ops already knows where someone belongs (e.g.
+ * seating two friends who signed up together into the same wing) — it joins
+ * that wing immediately instead, skipping the onboarding choice for them.
+ * Re-validates (the preview call and the actual write are two separate
+ * requests — the row could have changed, or someone could have filled the
+ * target wing, in between).
  */
 export async function provisionFitDadUser(
   row: FitDadRowInput,
   createdBy: string
-): Promise<{ uid: string; wingId: string; password: string }> {
+): Promise<{ uid: string; wingId: string | null; password: string }> {
   const validationError = await validateFitDadRow(row);
   if (validationError) throw Object.assign(new Error(validationError), { code: validationError });
 
@@ -117,34 +116,19 @@ export async function provisionFitDadUser(
   const userRecord = await auth.createUser({ email, password, displayName: name });
   const uid = userRecord.uid;
 
-  let wingId: string;
+  let wingId: string | null = null;
   if (row.wingId) {
     wingId = row.wingId;
     await db.collection("wings").doc(wingId).update({
       memberIds: admin.firestore.FieldValue.arrayUnion(uid),
       members: admin.firestore.FieldValue.arrayUnion({ uid, displayName: name }),
     });
-  } else {
-    const wingRef = db.collection("wings").doc();
-    await wingRef.set({
-      name,
-      ownerId: uid,
-      memberIds: [uid],
-      members: [{ uid, displayName: name }],
-      inviteToken: nanoid(10),
-      isFitDadWing: true,
-      visibility: "private",
-      capacity: FIT_DAD_WING_MAX_MEMBERS,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    wingId = wingRef.id;
   }
 
   await db.collection("users").doc(uid).set({
     email,
     displayName: name,
-    wingId,
-    wingIds: [wingId],
+    ...(wingId ? { wingId, wingIds: [wingId] } : {}),
     profile: {
       age: 0, heightCm: 0, weightKg: 0, targetWeightKg: 0,
       gender: "male", activityLevel: "sedentary", dailyCalorieTarget: 0,

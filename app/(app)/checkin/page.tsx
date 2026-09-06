@@ -686,7 +686,11 @@ function CheckinPageInner() {
           <div className="flex items-center gap-2">
             <Timer size={16} className="text-wing-muted" />
             <div>
-              <span className="font-semibold text-wing-ink">{t("checkin_ew")}</span>
+              {/* "Aba Chatuv" branding calls this "eating window" instead of
+                  "intermittent fasting" — same feature, cohort-specific term. */}
+              <span className="font-semibold text-wing-ink">
+                {user?.fitDadAccess ? (lang === "he" ? "חלון אכילה" : "Eating window") : t("checkin_ew")}
+              </span>
               <p className="text-[10px] text-wing-muted leading-tight">
                 {lang === "he" ? "מומלץ 8–10 שעות ביום (8/16 או 10/14)" : "Recommended 8–10 hrs/day (8/16 or 10/14)"}
               </p>

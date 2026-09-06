@@ -43,6 +43,19 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const isBusiness = user?.accountType === "business";
 
+    // fitDad accounts: initial password is the customer's own phone number
+    // (predictable — anyone in their wing could plausibly know it), so this
+    // gate blocks everything else until they set a real one. Checked before
+    // every other redirect, including profile-incomplete/book-onboarding —
+    // and returns unconditionally while the flag is set (not just when
+    // redirecting) so a freshly-provisioned fitDad account's zeroed-out
+    // profile doesn't also trigger the profile-incomplete redirect while
+    // they're still stuck on this page.
+    if (user?.mustChangePassword) {
+      if (pathname !== "/change-password") router.replace("/change-password");
+      return;
+    }
+
     // Book-mode: redeemed the book code but hasn't started habit 1 yet →
     // its own short onboarding, instead of the regular wing/profile flow.
     const needsBookOnboarding =
@@ -79,6 +92,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         courseAccess: user.courseAccess ?? null,
         coachAccess: user.coachAccess ?? null,
         bookAccess: user.bookAccess ?? null,
+        fitDadAccess: user.fitDadAccess ?? null,
         habit1InstalledAt: user.habitProgress?.[HABIT_1_ID]?.installedAt ?? null,
       })) {
         router.replace("/subscription?expired=1");

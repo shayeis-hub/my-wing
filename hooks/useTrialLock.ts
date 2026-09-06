@@ -17,5 +17,11 @@ export function useTrialLock(): boolean {
   const { user, firebaseUser } = useAuth();
   const email = firebaseUser?.email ?? user?.email ?? "";
   const createdAtMs = toMs(user?.createdAt ?? null);
-  return isTrialExpired(email, user?.subscription?.plan, createdAtMs);
+  return isTrialExpired(email, user?.subscription?.plan, createdAtMs, {
+    trialStartsAt: user?.trialStartsAt ?? null,
+    courseAccess: user?.courseAccess ?? null,
+    coachAccess: user?.coachAccess ?? null,
+    bookAccess: user?.bookAccess ?? null,
+    fitDadAccess: user?.fitDadAccess ?? null,
+  });
 }

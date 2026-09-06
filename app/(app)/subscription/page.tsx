@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Zap, Check, Crown, ArrowLeft, Lock, Smartphone } from "lucide-react";
+import { Zap, Check, Crown, ArrowLeft, Lock, Smartphone, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
@@ -40,6 +40,13 @@ function openStoreSubscriptionManagement(googleProductId?: string) {
   window.open(url, "_system");
 }
 
+// "Aba Chatuv" cohort — paid externally, no in-app purchase path at all, so
+// upgrading/renewing is always a WhatsApp conversation, not a store sheet.
+const ABA_CHATUV_WHATSAPP_NUMBER = "972586600303";
+function abaChatuvWhatsappUrl(message: string): string {
+  return `https://wa.me/${ABA_CHATUV_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
 function SubscriptionPageInner() {
   const { user, firebaseUser } = useAuth();
   const { t, lang, dir } = useLanguage();
@@ -68,6 +75,10 @@ function SubscriptionPageInner() {
   // cancel, iap-sync) is already offering-agnostic, so this fork is enough
   // to reuse the entire native-purchase UI/flow for book mode.
   const isBookMode = !!user?.bookAccess?.active;
+  // Presence of fitDadAccess at all (not just .active) — once granted, this
+  // account never falls back to the regular IAP flow or day-count trial,
+  // even after the plan lapses (see the matching branch in isTrialExpired).
+  const isFitDadMode = !!user?.fitDadAccess;
 
   const createdAtMs = toMs(user?.createdAt ?? null);
   const daysLeft = getTrialDaysLeft(createdAtMs);
@@ -76,6 +87,12 @@ function SubscriptionPageInner() {
   const habit1InstalledAt = user?.habitProgress?.[HABIT_1_ID]?.installedAt;
   const inTrial = isBookMode
     ? !premium && !grandfathered && !habit1InstalledAt
+    // fitDad accounts are never "in trial" — always either active (premium
+    // via fitDadAccess) or expired/inactive, no in-between day-count trial.
+    // Without this, an account created less than 21 days ago would
+    // incorrectly show "trial — N days left" over its real paid plan.
+    : isFitDadMode
+    ? false
     : !premium && !grandfathered && daysLeft > 0;
 
   // Business accounts manage their plan on the coach dashboard, not here.
@@ -97,7 +114,8 @@ function SubscriptionPageInner() {
   // Fetch RevenueCat's configured offering (monthly/annual packages) once the
   // native SDK has had a chance to configure (see RevenueCatSync in the app layout).
   useEffect(() => {
-    if (!isNativeIAP) return;
+    // fitDad has no in-app purchase path at all, so there's no offering to fetch.
+    if (!isNativeIAP || isFitDadMode) return;
     let cancelled = false;
     import("@revenuecat/purchases-capacitor").then(async ({ Purchases }) => {
       try {
@@ -111,7 +129,7 @@ function SubscriptionPageInner() {
     return () => {
       cancelled = true;
     };
-  }, [isNativeIAP, isBookMode]);
+  }, [isNativeIAP, isBookMode, isFitDadMode]);
 
   // Asks our server to pull server-verified entitlement state from RevenueCat
   // right after a purchase/restore, so the UI doesn't have to wait on the
@@ -197,6 +215,11 @@ function SubscriptionPageInner() {
     ? Math.max(0, Math.ceil((expiresAtMs - Date.now()) / 86_400_000))
     : null;
 
+  // fitDad's expiry lives on user.fitDadAccess, not subscription — the
+  // countdown above is store-subscription-shaped and doesn't apply here.
+  const fitDadExpiresAtMs = toMs(user?.fitDadAccess?.expiresAt ?? null);
+  const fitDadExpiresAt = fitDadExpiresAtMs ? format(new Date(fitDadExpiresAtMs), "dd/MM/yyyy") : null;
+
   return (
     <div className="min-h-screen bg-wing-bg" dir={dir}>
       {/* Header — hide back button when in paywall mode */}
@@ -236,8 +259,8 @@ function SubscriptionPageInner() {
           </div>
         )}
 
-        {/* Paywall banner — trial expired */}
-        {isExpiredPaywall && !premium && !grandfathered && (
+        {/* Paywall banner — trial expired (fitDad gets its own dedicated card below instead) */}
+        {isExpiredPaywall && !premium && !grandfathered && !isFitDadMode && (
           <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-wing-elevated flex items-center justify-center shrink-0">
@@ -292,9 +315,16 @@ function SubscriptionPageInner() {
                   ? isBookMode
                     ? "Free trial"
                     : t("trial_active_sub")
+                  : isFitDadMode
+                  ? (lang === "he" ? "המסלול הסתיים" : "Your plan has ended")
                   : t("trial_expired_title")}
               </p>
-              {premium && !grandfathered && expiresAt && (
+              {premium && !grandfathered && isFitDadMode && fitDadExpiresAt && (
+                <p className="text-xs text-white/80">
+                  {lang === "he" ? `בתוקף עד ${fitDadExpiresAt}` : `Active until ${fitDadExpiresAt}`}
+                </p>
+              )}
+              {premium && !grandfathered && !isFitDadMode && expiresAt && (
                 <p className="text-xs text-white/80">
                   {(t("upgrade_renews") as (d: string) => string)(expiresAt)}
                 </p>
@@ -327,6 +357,49 @@ function SubscriptionPageInner() {
         {grandfathered ? (
           <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 text-center">
             <p className="text-sm font-semibold text-wing-ink">{t("founders_message")}</p>
+          </div>
+        ) : isFitDadMode ? (
+          // "Aba Chatuv" — paid externally, no in-app purchase path at all.
+          // Renewing (or, if the plan lapsed, resuming) is always a WhatsApp
+          // conversation, never a store sheet — this replaces both the
+          // premium-cancel branch and the IAP/download branches below for
+          // this cohort entirely.
+          <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center space-y-3">
+            <div className="w-11 h-11 mx-auto rounded-2xl bg-green-100 flex items-center justify-center">
+              <MessageCircle size={20} className="text-green-600" />
+            </div>
+            {premium ? (
+              <>
+                <p className="font-bold text-wing-ink">
+                  {lang === "he" ? "המנוי שלך דרך אבא חטוב" : "Your plan via Aba Chatuv"}
+                </p>
+                <p className="text-sm text-wing-muted">
+                  {lang === "he"
+                    ? `בתוקף עד ${fitDadExpiresAt ?? "—"}. רוצה לחדש מוקדם או לשדרג?`
+                    : `Active until ${fitDadExpiresAt ?? "—"}. Want to renew early or upgrade?`}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-bold text-wing-ink">
+                  {lang === "he" ? "המסלול שלך הסתיים" : "Your plan has ended"}
+                </p>
+                <p className="text-sm text-wing-muted">
+                  {lang === "he"
+                    ? "לחידוש המנוי, דבר/י איתנו בוואטסאפ."
+                    : "To renew, message us on WhatsApp."}
+                </p>
+              </>
+            )}
+            <a
+              href={abaChatuvWhatsappUrl(lang === "he" ? "רוצה להירשם לאפליקציית מבנה כנף פרימיום" : "I'd like to sign up for Wingpact premium")}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-green-600 hover:bg-green-700 transition-colors text-sm font-bold text-white"
+            >
+              <MessageCircle size={16} />
+              {lang === "he" ? "פנייה בוואטסאפ" : "Message us on WhatsApp"}
+            </a>
           </div>
         ) : premium ? (
           <div className="space-y-3">
