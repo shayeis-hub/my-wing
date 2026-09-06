@@ -9,6 +9,9 @@ const BORDER = "#ede7d8";
 const TEXT = "#1a1814";
 const MUTED = "#8a7e6a";
 const GRADIENT = "linear-gradient(90deg,#f5dd4b,#ff6b47)";
+// Match the rest of the app (app/globals.css loads Heebo globally on body) —
+// this page's inline fontFamily was overriding it with the plain system font.
+const FONT = "'Heebo', system-ui, -apple-system, sans-serif";
 
 type Plan = "3m" | "6m" | "12m";
 const PLAN_LABELS: Record<Plan, string> = { "3m": "3 חודשים", "6m": "חצי שנה", "12m": "שנה" };
@@ -130,7 +133,7 @@ export default function FitDadAdminPage() {
   // ── Login screen ────────────────────────────────────────────────────────────
   if (!savedSecret) {
     return (
-      <div style={{ minHeight: "100vh", background: BG, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
+      <div style={{ minHeight: "100vh", background: BG, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT }}>
         <div style={{ background: "white", borderRadius: 24, padding: 40, width: 340, boxShadow: "0 4px 24px rgba(0,0,0,0.06)", border: `1px solid ${BORDER}`, textAlign: "center" }}>
           <div style={{ width: 56, height: 56, background: GRADIENT, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
             <Lock size={24} color={TEXT} />
@@ -154,7 +157,7 @@ export default function FitDadAdminPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: "system-ui, -apple-system, sans-serif", color: TEXT }} dir="rtl">
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, color: TEXT }} dir="rtl">
       {/* Header */}
       <div style={{ background: "white", borderBottom: `1px solid ${BORDER}`, padding: "0 24px" }}>
         <div style={{ maxWidth: 960, margin: "0 auto", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
