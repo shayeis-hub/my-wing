@@ -217,7 +217,7 @@ export default function SettingsPage() {
       {/* Book code — only for users not already in book mode (existing
           Wingpact users don't go through onboarding, so this is their only
           way to redeem a code bought after they already had an account). */}
-      {!isBusiness && !user?.bookAccess?.active && (
+      {!isBusiness && !user?.bookAccess?.active && !user?.fitDadAccess && (
         <section className="bg-wing-surface border border-wing-border rounded-[20px] overflow-hidden">
           <Link
             href="/book/redeem"
