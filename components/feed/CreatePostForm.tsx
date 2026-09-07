@@ -8,6 +8,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
 import { nanoid } from "@/lib/utils/nanoid";
 import { compressImageToDataUrl } from "@/lib/utils/imageCompress";
+import toast from "react-hot-toast";
 import type { WingPost } from "@/types";
 
 interface CreatePostFormProps {
@@ -26,8 +27,14 @@ export function CreatePostForm({ wingId, userId, userName, userPhotoURL, onPostC
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
-    const dataUrl = await compressImageToDataUrl(file);
-    setImageDataUrl(dataUrl);
+    try {
+      const dataUrl = await compressImageToDataUrl(file);
+      setImageDataUrl(dataUrl);
+    } catch (err) {
+      // Previously an unhandled rejection — an unreadable photo (e.g. HEIC
+      // that failed to convert) just silently did nothing.
+      toast.error(err instanceof Error ? err.message : (lang === "he" ? "לא ניתן לקרוא את התמונה" : "Couldn't read that image"));
+    }
   }
 
   async function handleSubmit() {

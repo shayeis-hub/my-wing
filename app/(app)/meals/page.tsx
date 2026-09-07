@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { he } from "date-fns/locale";
 import type { MealAnalysis } from "@/types";
 import { nanoid } from "@/lib/utils/nanoid";
+import { dataUrlMediaType } from "@/lib/utils/imageCompress";
 import { AdBanner } from "@/components/ads/AdBanner";
 import { useTrialLock } from "@/hooks/useTrialLock";
 import { useSearchParams } from "next/navigation";
@@ -154,7 +155,7 @@ function MealsPageInner() {
       try {
         const images = newUrls.map((url) => ({
           base64: url.split(",")[1],
-          mediaType: (url.startsWith("data:image/png") ? "image/png" : "image/jpeg") as "image/jpeg" | "image/png",
+          mediaType: dataUrlMediaType(url),
         }));
         const res = await fetch("/api/ai/analyze-meal", {
           method: "POST",

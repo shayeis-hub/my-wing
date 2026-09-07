@@ -5,7 +5,7 @@ import { Camera, Upload, X, Loader2, PencilLine, Mic, MicOff } from "lucide-reac
 import { Button } from "@/components/ui/Button";
 import type { MealAnalysis } from "@/types";
 import { useLanguage } from "@/lib/i18n";
-import { compressImageToDataUrl } from "@/lib/utils/imageCompress";
+import { compressImageToDataUrl, dataUrlMediaType } from "@/lib/utils/imageCompress";
 
 interface MealCameraProps {
   onAnalysis: (analysis: MealAnalysis, imageDataUrl: string) => void;
@@ -72,7 +72,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     setError(null);
     try {
       const base64 = dataUrl.split(",")[1];
-      const mediaType = dataUrl.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+      const mediaType = dataUrlMediaType(dataUrl);
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,8 +128,16 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
   }
 
   async function handleFile(file: File) {
-    const dataUrl = await compressImageToDataUrl(file);
-    setPreview(dataUrl);
+    setError(null);
+    try {
+      const dataUrl = await compressImageToDataUrl(file);
+      setPreview(dataUrl);
+    } catch (err) {
+      // Previously an unhandled rejection — nothing happened visibly when
+      // this failed (e.g. an unreadable HEIC photo), which is worse than a
+      // clear message: the user just saw the button do nothing.
+      setError(err instanceof Error ? err.message : (t("meals_analysis_error") as string));
+    }
   }
 
   return (
@@ -235,6 +243,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
         ) : (
           /* Choose mode */
           <div className="space-y-3">
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
             <button
               onClick={() => cameraRef.current?.click()}
               className="w-full flex items-center justify-center gap-3 h-16 border-2 border-dashed border-wing-border rounded-2xl bg-wing-elevated hover:bg-wing-elevated transition-colors"
