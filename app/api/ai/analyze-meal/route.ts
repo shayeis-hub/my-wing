@@ -15,7 +15,8 @@ type SubDoc = { plan: Plan; cancelPending?: boolean; expiresAt?: { _seconds?: nu
 type CourseAccess = { expiresAt: string; wingId: string };
 type CoachAccess = { active?: boolean };
 type BookAccess = { active?: boolean; grantedBy?: string };
-type UserDoc = { subscription?: SubDoc; courseAccess?: CourseAccess; coachAccess?: CoachAccess; bookAccess?: BookAccess };
+type FitDadAccess = { active?: boolean; expiresAt?: string };
+type UserDoc = { subscription?: SubDoc; courseAccess?: CourseAccess; coachAccess?: CoachAccess; bookAccess?: BookAccess; fitDadAccess?: FitDadAccess };
 
 async function getUserPlanAdmin(
   uid: string
@@ -31,6 +32,7 @@ async function getUserPlanAdmin(
       courseAccess: data.courseAccess ?? null,
       coachAccess: data.coachAccess ?? null,
       bookAccess: data.bookAccess ?? null,
+      fitDadAccess: data.fitDadAccess ?? null,
     },
   };
 }
