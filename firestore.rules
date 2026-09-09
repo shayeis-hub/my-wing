@@ -40,19 +40,40 @@ service cloud.firestore {
     }
 
     match /cohorts/{cohortId} {
+      // Cohort metadata itself (name/dates etc.) — treated as non-sensitive
+      // course catalog info, any signed-in user may read it.
       allow read: if request.auth != null;
       allow write: if false;
 
+      // Member rosters ARE personal data — any authenticated user could
+      // previously read every cohort's full member list (found via QA,
+      // 2026-09, as a residual gap in the original fix, which only closed
+      // unauthenticated access). This app's own code never writes here at
+      // all (a separate "Wing Course" app, sharing this Firebase project,
+      // presumably owns this collection — its exact document shape wasn't
+      // available to verify), so this guesses the two most common shapes
+      // (doc id = uid, or a uid/email field on the document) — degrades
+      // safely if wrong: `.get(key, sentinel)` just won't match rather than
+      // erroring, so an incorrect guess only stays as restrictive as
+      // admin-only, never re-opens the leak.
       match /members/{memberId} {
-        allow read: if request.auth != null;
+        allow read: if request.auth != null &&
+          (isAdmin() ||
+           request.auth.uid == memberId ||
+           resource.data.get('uid', null) == request.auth.uid ||
+           resource.data.get('email', null) == request.auth.token.email);
         allow write: if false;
       }
     }
 
-    // Enrollment lookup — keyed by email, so read is even more sensitive
-    // than the above; same reasoning.
+    // Enrollment lookup — the collection's own naming convention (and the
+    // path variable itself) confirms the document id IS the enrollee's
+    // email, so this scoping is exact, not a guess. Read used to be open to
+    // any signed-in user (found via QA, 2026-09, as a residual gap — the
+    // original fix only closed unauthenticated access).
     match /enrollmentsByEmail/{email} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null &&
+        (isAdmin() || request.auth.token.email == email);
       allow write: if false;
     }
 
@@ -145,26 +166,37 @@ service cloud.firestore {
       allow delete: if request.auth != null &&
         request.auth.uid == resource.data.ownerId;
 
-      // Meals: member can CRUD own meals, read group meals, any member can add comments
+      // Meals: owner can CRUD their own meal; any other member may only touch
+      // comments/reactions (encouragement), never rewrite the meal's content
+      // or attribute a meal to someone else — create/update used to only
+      // check wing membership, with no check that the acting user matched
+      // the meal's own userId (found via QA, 2026-09).
       match /meals/{mealId} {
         allow read: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow create: if request.auth != null &&
+          request.auth.uid == request.resource.data.userId &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow update: if request.auth != null &&
-          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds &&
+          (request.auth.uid == resource.data.userId ||
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions']));
         allow delete: if request.auth != null &&
           request.auth.uid == resource.data.userId;
       }
 
-      // Check-ins: same rules as meals
+      // Check-ins: same reasoning as meals (encouragements is this
+      // collection's equivalent of comments).
       match /checkins/{checkinId} {
         allow read: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow create: if request.auth != null &&
+          request.auth.uid == request.resource.data.userId &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow update: if request.auth != null &&
-          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds &&
+          (request.auth.uid == resource.data.userId ||
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['encouragements', 'reactions']));
         allow delete: if request.auth != null &&
           request.auth.uid == resource.data.userId;
       }
@@ -189,10 +221,23 @@ service cloud.firestore {
           request.auth.uid == resource.data.userId;
       }
 
-      // Challenges: all members can read and write
+      // Challenges: any member can read/propose one, and update only their
+      // OWN entry in `progress` (self-reported daily values). status/winners
+      // are set exclusively by app/api/wing/finish-challenge (Admin SDK) —
+      // the old combined "any member, any field" rule let a member rewrite
+      // ANY other member's progress value, or the doc's title/dates/status
+      // outright (found via QA, 2026-09). No legitimate client code deletes
+      // a challenge, so that's now server-only too.
       match /challenges/{challengeId} {
-        allow read, write: if request.auth != null &&
+        allow read: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow create: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow update: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['progress']) &&
+          request.resource.data.progress.diff(resource.data.get('progress', {})).affectedKeys().hasOnly([request.auth.uid]);
+        allow delete: if false;
       }
 
       // Daily Prompts: members can read and update (for responses/reactions); only members can create
@@ -218,7 +263,10 @@ service cloud.firestore {
            request.auth.uid == resource.data.targetUserId);
       }
 
-      // Wing posts: members can read, create their own; any member can update (comments/reactions); only author can delete
+      // Wing posts: members can read, create their own; any member can add
+      // comments/reactions, but only the author may change anything else
+      // (text/imageURL etc.) — update used to allow any member to rewrite
+      // the entire post (found via QA, 2026-09).
       match /posts/{postId} {
         allow read: if request.auth != null &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
@@ -226,7 +274,9 @@ service cloud.firestore {
           request.auth.uid == request.resource.data.userId &&
           request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
         allow update: if request.auth != null &&
-          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds &&
+          (request.auth.uid == resource.data.userId ||
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions']));
         allow delete: if request.auth != null &&
           request.auth.uid == resource.data.userId;
       }

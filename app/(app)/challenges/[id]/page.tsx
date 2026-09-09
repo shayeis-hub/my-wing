@@ -141,7 +141,7 @@ export default function ChallengeDetailPage() {
       // Winners are always decided by the cumulative total — recompute the full
       // range here, since the live view may currently hold only today's values.
       const fullProgress = await computeProgress(challenge, "total");
-      const { winners } = await finishChallenge(user.wingId, { ...challenge, progress: fullProgress });
+      const { winners } = await finishChallenge(user.wingId, challenge.id);
       setProgress(fullProgress);
       setChallenge((prev) => prev ? { ...prev, status: "finished", winners } : prev);
       setShowFinishConfirm(false);
@@ -254,6 +254,14 @@ export default function ChallengeDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* No participants at all (found via QA, 2026-09 — a finished
+          challenge with zero eligible winners used to just render nothing here) */}
+      {isFinished && (!challenge.winners || challenge.winners.length === 0) && (
+        <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 text-center text-sm text-wing-muted">
+          {t("challenge_no_participants") as string}
+        </div>
+      )}
 
       {/* Winner podium (if finished) */}
       {isFinished && challenge.winners && challenge.winners.length > 0 && (

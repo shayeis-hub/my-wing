@@ -671,14 +671,18 @@ export async function updateChallengeProgress(
 // via QA, 2026-09 — see the server route for the full explanation.
 export async function finishChallenge(
   wingId: string,
-  challenge: Challenge
+  challengeId: string
 ): Promise<{ winners: string[] }> {
+  // Progress is no longer sent — the server recomputes it independently
+  // from real steps/checkins data (or the stored progress map for manual
+  // challenge types), since trusting a client-supplied value let any
+  // member fabricate a win (found via QA, 2026-09). See the server route.
   const token = await auth.currentUser?.getIdToken();
   if (!token) throw new Error("Not signed in");
   const res = await fetch("/api/wing/finish-challenge", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ wingId, challengeId: challenge.id, progress: challenge.progress }),
+    body: JSON.stringify({ wingId, challengeId }),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);

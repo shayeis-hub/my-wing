@@ -184,10 +184,14 @@ export function canAddMealPhoto(
   email: string | null | undefined,
   plan: Plan,
   todayCount: number,
-  grants?: AccessGrants | null
+  grants?: AccessGrants | null,
+  // How many photos THIS request would add — was always implicitly 1, so a
+  // multi-image submission only checked "is there room for one more" rather
+  // than "is there room for all of these" (found via QA, 2026-09).
+  amount = 1
 ): boolean {
   if (isPremium(email, plan, undefined, grants)) return true;
-  return todayCount < FREE_LIMITS.mealPhotosPerDay;
+  return todayCount + amount <= FREE_LIMITS.mealPhotosPerDay;
 }
 
 // A book-mode wing (created silently during book onboarding) is capped at

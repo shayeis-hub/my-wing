@@ -10,8 +10,6 @@ import { Input } from "@/components/ui/Input";
 import {
   saveChallenge,
   getWingChallenges,
-  getWingStepsRange,
-  getWingCheckinsRange,
   finishChallenge,
 } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
@@ -101,20 +99,10 @@ export default function ChallengesPage() {
 
     async function autoFinish() {
       if (!user?.wingId || !wing?.members || !ac) return;
-      let progress: Record<string, number> = { ...ac.progress };
-      if (ac.type === "steps") {
-        const entries = await getWingStepsRange(user.wingId, ac.startDate, ac.endDate);
-        progress = {};
-        for (const e of entries) progress[e.userId] = (progress[e.userId] ?? 0) + e.steps;
-      } else if (ac.type === "water" || ac.type === "vegetables") {
-        const checkins = await getWingCheckinsRange(user.wingId, ac.startDate, ac.endDate);
-        progress = {};
-        for (const ci of checkins) {
-          const val = ac.type === "water" ? (ci.waterGlasses ?? 0) : (ci.vegetablesServings ?? 0);
-          progress[ci.userId] = (progress[ci.userId] ?? 0) + val;
-        }
-      }
-      await finishChallenge(user.wingId, { ...ac, progress });
+      // Progress is computed server-side now (see finishChallenge/the
+      // finish-challenge route) — this used to recompute it here just to
+      // send it along, which the server no longer trusts anyway.
+      await finishChallenge(user.wingId, ac.id);
     }
 
     autoFinish().catch(console.error);

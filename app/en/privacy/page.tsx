@@ -12,7 +12,7 @@ export default function PrivacyEnPage() {
 
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Privacy Policy</h1>
-          <p className="text-sm text-slate-500 mt-1">Last updated: May 2026</p>
+          <p className="text-sm text-slate-500 mt-1">Last updated: September 2026</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm p-6 space-y-5 text-sm text-slate-700 leading-relaxed">
@@ -48,7 +48,8 @@ export default function PrivacyEnPage() {
             <ul className="list-disc list-inside space-y-1 text-slate-600">
               <li><strong>Google Firebase</strong> – authentication, database (Firestore), file storage, and push notifications. Data is stored on Google Cloud servers.</li>
               <li><strong>Anthropic Claude API</strong> – processes meal photos to generate nutritional estimates. Images are not retained after processing.</li>
-              <li><strong>Paddle</strong> – handles all payment processing and subscription billing as Merchant of Record. We do not store payment card data.</li>
+              <li><strong>Apple App Store / Google Play</strong> – in-app purchases and subscriptions are billed and processed entirely by Apple and Google as the merchants of record. We never see or store your payment card details. RevenueCat is used to manage and verify subscription entitlements on our behalf.</li>
+              <li><strong>Google AdSense</strong> – on the web version of the App only (never in the native iOS/Android apps), free-tier users may be shown ads served by Google AdSense, which may use cookies or similar technologies for ad delivery and personalization. See Google's own privacy policy for details on how it handles this data.</li>
             </ul>
           </section>
 
@@ -64,7 +65,7 @@ export default function PrivacyEnPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">7. Cookies</h2>
-            <p>The App uses browser local storage to save your language preference and session data. We do not use advertising cookies.</p>
+            <p>The App uses browser local storage to save your language preference and session data. On the web version, free-tier users may also be served ads by Google AdSense, which can set advertising cookies — see section 4 above. No advertising cookies are used in the native iOS/Android apps.</p>
           </section>
 
           <section className="space-y-2">

@@ -10,7 +10,7 @@ export default function PrivacyPage() {
 
         <div>
           <h1 className="text-2xl font-bold text-slate-800">מדיניות פרטיות</h1>
-          <p className="text-sm text-slate-500 mt-1">עדכון אחרון: מאי 2026</p>
+          <p className="text-sm text-slate-500 mt-1">עדכון אחרון: ספטמבר 2026</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm p-6 space-y-5 text-sm text-slate-700 leading-relaxed">
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
 
           <section className="space-y-2">
             <h2 className="font-bold text-slate-800 text-base">4. אחסון ואבטחה</h2>
-            <p>כל הנתונים מאוחסנים בשירותי Firebase של Google (Firestore, Storage, Authentication) בהתאם לתקני האבטחה של Google Cloud. תמונות ארוחות מועברות ל-API של Anthropic לצורך ניתוח ונמחקות לאחר עיבוד.</p>
+            <p>כל הנתונים מאוחסנים בשירותי Firebase של Google (Firestore, Storage, Authentication) בהתאם לתקני האבטחה של Google Cloud. תמונות ארוחות מועברות ל-API של Anthropic לצורך ניתוח ונמחקות לאחר עיבוד. רכישות מנוי בתוך האפליקציה מתבצעות ומחויבות ישירות דרך Apple App Store או Google Play — אנחנו לא רואים ולא שומרים פרטי אמצעי תשלום. בגרסת האתר (לא באפליקציה עצמה), משתמשים במסלול החינמי עשויים לראות פרסומות של Google AdSense, שעשויות להשתמש בעוגיות פרסום.</p>
           </section>
 
           <section className="space-y-2">

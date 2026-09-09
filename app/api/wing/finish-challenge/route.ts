@@ -20,14 +20,54 @@ export const dynamic = "force-dynamic";
  * via QA, 2026-09). A single Admin-SDK batch fixes both problems: it can
  * legitimately write to other users' docs, and it's atomic (all of it
  * commits together, or none of it does).
+ *
+ * `progress` is no longer taken from the request body — any member could
+ * finish an active challenge early and submit a fabricated progress object
+ * to win their own gold medal (found via QA, 2026-09). Recomputed
+ * server-side instead, mirroring app/(app)/challenges/[id]/page.tsx's own
+ * computeProgress(challenge, "total"): auto-tracked types (steps/water/
+ * vegetables) are summed fresh from the real steps/checkins subcollections
+ * over the challenge's date range — challenge.progress is never actually
+ * kept in sync for those types, it's only ever computed on demand, so
+ * trusting the stored field for them would silently zero everyone out.
+ * Manual types (no_sugar/other/legacy calories) DO keep a real running
+ * total in challenge.progress (written by updateChallengeProgress, which
+ * firestore.rules restricts to each member writing only their own entry),
+ * so that's used as-is for those.
  */
+async function computeProgressServer(
+  db: admin.firestore.Firestore,
+  wingId: string,
+  challenge: FirebaseFirestore.DocumentData
+): Promise<Record<string, number>> {
+  const map: Record<string, number> = {};
+  if (challenge.type === "steps") {
+    const snap = await db.collection("wings").doc(wingId).collection("steps")
+      .where("date", ">=", challenge.startDate).where("date", "<=", challenge.endDate).get();
+    snap.docs.forEach((d) => {
+      const data = d.data();
+      map[data.userId] = (map[data.userId] ?? 0) + (data.steps ?? 0);
+    });
+  } else if (challenge.type === "water" || challenge.type === "vegetables") {
+    const snap = await db.collection("wings").doc(wingId).collection("checkins")
+      .where("date", ">=", challenge.startDate).where("date", "<=", challenge.endDate).get();
+    snap.docs.forEach((d) => {
+      const data = d.data();
+      const val = challenge.type === "water" ? (data.waterGlasses ?? 0) : (data.vegetablesServings ?? 0);
+      map[data.userId] = (map[data.userId] ?? 0) + val;
+    });
+  } else {
+    Object.assign(map, challenge.progress ?? {}); // manual types keep a single running number
+  }
+  return map;
+}
 export async function POST(req: NextRequest) {
   const uid = await getUidFromRequest(req);
   if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const { wingId, challengeId, progress } = await req.json();
-    if (!wingId || !challengeId || typeof progress !== "object" || progress === null) {
+    const { wingId, challengeId } = await req.json();
+    if (!wingId || !challengeId) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
@@ -50,13 +90,24 @@ export async function POST(req: NextRequest) {
     if (challenge.status === "finished") {
       return NextResponse.json({ error: "Already finished" }, { status: 409 }); // idempotency guard
     }
+    const progress = await computeProgressServer(db, wingId, challenge);
 
     const members: { uid: string; [k: string]: unknown }[] = Array.isArray(wingData.members) ? wingData.members : [];
-    const sorted = [...members].sort(
-      (a, b) => (progress[b.uid] ?? 0) - (progress[a.uid] ?? 0)
-    );
+    // Zero-progress members are excluded from medal contention entirely —
+    // not just skipped in place — so the client's winners[0]/[1]/[2]
+    // positional gold/silver/bronze display always matches the actual medal
+    // saved to that member's trophies. The old version kept zero-progress
+    // members in their raw rank position and just skipped awarding THEM a
+    // trophy, which could silver-medal the real top scorer while the UI
+    // (indexed by position) showed them gold, or show a lone zero-progress
+    // member as "1st place" with no trophy ever actually saved (found via
+    // QA, 2026-09 — a 1-step-goal challenge nobody walked).
+    const eligible = members
+      .filter((m) => progress[m.uid])
+      .sort((a, b) => progress[b.uid] - progress[a.uid])
+      .slice(0, 3);
     const medals = ["gold", "silver", "bronze"] as const;
-    const winners = sorted.slice(0, 3).map((m) => m.uid);
+    const winners = eligible.map((m) => m.uid);
 
     const batch = db.batch();
     batch.update(challengeRef, { status: "finished", winners });
@@ -65,9 +116,8 @@ export async function POST(req: NextRequest) {
     if (wingData.activeChallenge?.id === challengeId) {
       batch.update(wingRef, { activeChallenge: null });
     }
-    for (let i = 0; i < Math.min(3, sorted.length); i++) {
-      const member = sorted[i];
-      if (!progress[member.uid]) continue; // skip if no progress at all
+    for (let i = 0; i < eligible.length; i++) {
+      const member = eligible[i];
       const trophy = {
         challengeId,
         challengeTitle: challenge.title,

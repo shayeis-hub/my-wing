@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 // analysis + a slow retry chain can exceed Vercel's default 10s timeout.
 export const maxDuration = 60;
 import { analyzeMealImage, analyzeMealImages, analyzeMealText } from "@/lib/ai/claude";
-import { isGrandfathered, isPremium, canAddMealPhoto, FREE_LIMITS, type Plan, type AccessGrants } from "@/lib/subscription";
+import { isGrandfathered, isPremium, FREE_LIMITS, type Plan, type AccessGrants } from "@/lib/subscription";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 
@@ -39,16 +39,37 @@ async function getUserPlanAdmin(
   };
 }
 
-async function getDailyMealCountAdmin(uid: string, date: string): Promise<number> {
-  const snap = await admin.firestore().doc(`users/${uid}/dailyUsage/${date}`).get();
-  if (!snap.exists) return 0;
-  return (snap.data() as { mealPhotos?: number }).mealPhotos ?? 0;
+// Reserves `amount` toward today's photo quota atomically (read-check-write
+// in one transaction) — the old check-then-increment-later pattern had a
+// TOCTOU race: two concurrent requests could each read the same "under
+// limit" count and both proceed, together exceeding it (found via QA,
+// 2026-09). Returns false (writes nothing) if the reservation wouldn't fit.
+// Also now counts a multi-image submission's actual size, not a flat 1 —
+// same finding: a 5-photo batch used to cost exactly as much quota as one.
+async function reserveMealQuota(uid: string, date: string, amount: number): Promise<boolean> {
+  const ref = admin.firestore().doc(`users/${uid}/dailyUsage/${date}`);
+  return admin.firestore().runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const current = (snap.data() as { mealPhotos?: number } | undefined)?.mealPhotos ?? 0;
+    if (current + amount > FREE_LIMITS.mealPhotosPerDay) return false;
+    tx.set(ref, { mealPhotos: admin.firestore.FieldValue.increment(amount), date }, { merge: true });
+    return true;
+  });
 }
 
-async function incrementDailyMealCountAdmin(uid: string, date: string): Promise<void> {
-  const ref = admin.firestore().doc(`users/${uid}/dailyUsage/${date}`);
-  await ref.set({ mealPhotos: admin.firestore.FieldValue.increment(1), date }, { merge: true });
+// Gives back a reservation if the analysis call itself failed after — a
+// user shouldn't lose quota for a request that never actually produced a result.
+async function releaseMealQuota(uid: string, date: string, amount: number): Promise<void> {
+  await admin.firestore().doc(`users/${uid}/dailyUsage/${date}`)
+    .set({ mealPhotos: admin.firestore.FieldValue.increment(-amount) }, { merge: true })
+    .catch(() => { /* best-effort — a failed release just costs the user one grace photo, not worth failing the request over */ });
 }
+
+// Server-side cap matching the client's own multi-image limit
+// (app/(app)/meals/page.tsx caps at 5) — without this, one request could
+// claim to submit an unbounded number of images while the old flat "-1
+// per request" quota cost made that nearly free.
+const MAX_IMAGES_PER_REQUEST = 5;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -104,14 +125,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Enforce meal-photo limit (only for image analysis, not text) ──────────
-    // Applies to BOTH single-image and multi-image analysis — the
-    // multi-image path used to skip this check entirely (found via QA,
-    // 2026-09), so submitting several photos at once bypassed the quota.
-    const isImageAnalysis = !!base64Image || (Array.isArray(base64Images) && base64Images.length > 0);
-    if (isImageAnalysis && !grandfathered && !premium) {
-      const todayCount = await getDailyMealCountAdmin(uid, today);
-      if (!canAddMealPhoto(userEmail, plan, todayCount, grants)) {
+    if (Array.isArray(base64Images) && base64Images.length > MAX_IMAGES_PER_REQUEST) {
+      return NextResponse.json({ error: "TOO_MANY_IMAGES", limit: MAX_IMAGES_PER_REQUEST }, { status: 400 });
+    }
+
+    // ── Reserve the meal-photo quota atomically, up front (only for image
+    // analysis, not text) — applies to BOTH single-image and multi-image
+    // analysis, counting the real number of images either way (both were
+    // findings via QA, 2026-09: the multi-image path skipped this check
+    // entirely, and even single-image had a check-then-increment-later gap
+    // two concurrent requests could both slip through). Reserving before
+    // the (slow, costly) AI call means a request that turns out to fail
+    // never should have held the quota — released in the catch below.
+    const imageCount = base64Image ? 1 : (Array.isArray(base64Images) ? base64Images.length : 0);
+    const needsQuota = imageCount > 0 && !grandfathered && !premium;
+    if (needsQuota) {
+      const reserved = await reserveMealQuota(uid, today, imageCount);
+      if (!reserved) {
         return NextResponse.json(
           { error: "MEAL_LIMIT_REACHED", limit: FREE_LIMITS.mealPhotosPerDay },
           { status: 403 }
@@ -119,31 +149,30 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Text analysis (manual entry / voice, or a saved meal with no photo) ───
-    if (textDescription) {
-      const analysis = await analyzeMealText(textDescription, lang ?? "he");
+    try {
+      // ── Text analysis (manual entry / voice, or a saved meal with no photo)
+      if (textDescription) {
+        const analysis = await analyzeMealText(textDescription, lang ?? "he");
+        return NextResponse.json(analysis);
+      }
+
+      // ── Multi-image analysis ─────────────────────────────────────────────
+      if (base64Images && Array.isArray(base64Images) && base64Images.length > 0) {
+        const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis);
+        return NextResponse.json(analysis);
+      }
+
+      if (!base64Image || !mediaType) {
+        if (needsQuota) await releaseMealQuota(uid, today, imageCount); // reserved but never actually used
+        return NextResponse.json({ error: "Missing image data" }, { status: 400 });
+      }
+
+      const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis);
       return NextResponse.json(analysis);
+    } catch (err) {
+      if (needsQuota) await releaseMealQuota(uid, today, imageCount);
+      throw err;
     }
-
-    // ── Multi-image analysis ───────────────────────────────────────────────────
-    if (base64Images && Array.isArray(base64Images) && base64Images.length > 0) {
-      const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis);
-      if (!grandfathered && !premium) await incrementDailyMealCountAdmin(uid, today);
-      return NextResponse.json(analysis);
-    }
-
-    if (!base64Image || !mediaType) {
-      return NextResponse.json({ error: "Missing image data" }, { status: 400 });
-    }
-
-    const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis);
-
-    // ── Increment daily count after successful analysis ────────────────────────
-    if (!grandfathered && !premium) {
-      await incrementDailyMealCountAdmin(uid, today);
-    }
-
-    return NextResponse.json(analysis);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("Meal analysis error:", msg);
