@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { changePassword } from "@/lib/firebase/auth";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 // Forced first-login password change for fitDad accounts — see
 // components/layout/AuthGuard.tsx's mustChangePassword redirect. Their
@@ -70,18 +71,16 @@ export default function ChangePasswordPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="password"
+          <PasswordInput
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             placeholder={lang === "he" ? "סיסמה חדשה" : "New password"}
             className="w-full px-4 py-3 rounded-2xl border border-wing-border bg-wing-bg text-wing-ink outline-none focus:border-wing-primary"
             autoFocus
           />
-          <input
-            type="password"
+          <PasswordInput
             value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
+            onChange={setConfirm}
             placeholder={lang === "he" ? "אימות סיסמה" : "Confirm password"}
             className="w-full px-4 py-3 rounded-2xl border border-wing-border bg-wing-bg text-wing-ink outline-none focus:border-wing-primary"
           />

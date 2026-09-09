@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Capacitor } from "@capacitor/core";
 import { signUp, signInWithGoogle, signInWithApple } from "@/lib/firebase/auth";
 import { useLanguage } from "@/lib/i18n";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 function WingLogo() {
   return (
@@ -189,13 +190,11 @@ function RegisterForm() {
           dir="ltr"
           className="w-full bg-wing-surface border border-wing-border rounded-[14px] px-4 py-3.5 text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
         />
-        <input
-          type="password"
+        <PasswordInput
           placeholder={t("register_password")}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
           required
-          dir="ltr"
           className="w-full bg-wing-surface border border-wing-border rounded-[14px] px-4 py-3.5 text-sm text-wing-ink placeholder:text-wing-subtle focus:outline-none focus:ring-2 focus:ring-wing-ink transition-all"
         />
         <button
