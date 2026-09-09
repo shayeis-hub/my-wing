@@ -8,6 +8,7 @@ import { useLanguage } from "@/lib/i18n";
 import { isGrandfathered, isPremium, getTrialDaysLeft, TRIAL_DAYS } from "@/lib/subscription";
 import { isNativeApp } from "@/lib/platform";
 import { getHabitByOrder } from "@/lib/book/habits";
+import { acknowledgeViewOnly } from "@/lib/firebase/auth";
 import { Capacitor } from "@capacitor/core";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
@@ -171,6 +172,12 @@ function SubscriptionPageInner() {
     } finally {
       setLoadingPurchase(null);
     }
+  }
+
+  function acceptViewOnly() {
+    sessionStorage.setItem("wingpact_view_only_ack", "1");
+    if (firebaseUser) acknowledgeViewOnly(firebaseUser.uid).catch(() => {});
+    router.replace("/dashboard");
   }
 
   async function handleRestore() {
@@ -475,10 +482,7 @@ function SubscriptionPageInner() {
             {isExpiredPaywall && (
               <div className="pt-2 border-t border-wing-border space-y-1.5">
                 <button
-                  onClick={() => {
-                    sessionStorage.setItem("wingpact_view_only_ack", "1");
-                    router.replace("/dashboard");
-                  }}
+                  onClick={acceptViewOnly}
                   className="w-full py-2.5 rounded-2xl border border-wing-border bg-wing-elevated text-sm font-semibold text-wing-ink hover:bg-wing-border/40 transition-colors"
                 >
                   {t("trial_view_only")}
@@ -508,10 +512,7 @@ function SubscriptionPageInner() {
             {isExpiredPaywall && (
               <div className="pt-2 border-t border-wing-border space-y-1.5">
                 <button
-                  onClick={() => {
-                    sessionStorage.setItem("wingpact_view_only_ack", "1");
-                    router.replace("/dashboard");
-                  }}
+                  onClick={acceptViewOnly}
                   className="w-full py-2.5 rounded-2xl border border-wing-border bg-wing-elevated text-sm font-semibold text-wing-ink hover:bg-wing-border/40 transition-colors"
                 >
                   {t("trial_view_only")}

@@ -85,12 +85,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // Trial expired → paywall (unless already on an exempt page, or the user
     // already chose "Continue in view-only mode" — see the subscription
-    // page's trial_view_only button, which sets this before navigating away.
-    // Without this check every navigation bounced straight back here, so
-    // "view-only" never actually let anyone view anything.
+    // page's trial_view_only button. Persisted on the user doc (not just
+    // sessionStorage) so the free-forever tier promised on the pricing page
+    // doesn't re-show this same interstitial every single app launch (found
+    // via QA, 2026-09) — sessionStorage is still checked too, so there's no
+    // flash of the redirect while the Firestore write from a same-session
+    // click is still in flight.
     const exempt = PAYWALL_EXEMPT.some((p) => pathname.startsWith(p));
     const viewOnlyAck =
-      typeof window !== "undefined" && sessionStorage.getItem("wingpact_view_only_ack") === "1";
+      !!user?.viewOnlyAck ||
+      (typeof window !== "undefined" && sessionStorage.getItem("wingpact_view_only_ack") === "1");
     if (!exempt && !isBusiness && !viewOnlyAck && user) {
       const email = firebaseUser.email ?? user.email ?? "";
       const createdAtMs = toMs(user.createdAt ?? null);

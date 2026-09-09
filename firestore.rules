@@ -91,7 +91,7 @@ service cloud.firestore {
          (request.auth.uid == userId &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(
             ['fcmToken', 'photoURL', 'displayName', 'profile', 'timezone',
-             'notificationPrefs', 'wingId', 'mustChangePassword']
+             'notificationPrefs', 'wingId', 'mustChangePassword', 'viewOnlyAck']
           ) &&
           // .get(key, default) everywhere below — most accounts never have
           // wingId changed here / mustChangePassword set at all, and a bare

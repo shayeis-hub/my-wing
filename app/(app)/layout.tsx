@@ -38,7 +38,8 @@ function WidgetActions() {
   useEffect(() => {
     if (!isNativeApp() || !firebaseUser || !user?.wingId) return;
     const wingId = user.wingId;
-    const uid = firebaseUser.uid;
+    const authUser = firebaseUser; // captured so TS narrows it inside the nested functions below (sendSos)
+    const uid = authUser.uid;
     const userName = user.displayName;
 
     async function applyWaterDelta(delta: number) {
@@ -53,8 +54,8 @@ function WidgetActions() {
         date: today,
         waterGlasses: next,
         vegetablesServings: tc?.vegetablesServings ?? 0,
-        mood: tc?.mood ?? 3,
         workout: tc?.workout ?? { done: false },
+        ...(tc?.mood != null ? { mood: tc.mood } : {}),
         ...(tc?.steps ? { steps: tc.steps } : {}),
         ...(tc?.weightKg ? { weightKg: tc.weightKg } : {}),
         ...(tc?.notes ? { notes: tc.notes } : {}),
@@ -66,9 +67,10 @@ function WidgetActions() {
 
     async function sendSos() {
       try {
+        const idToken = await authUser.getIdToken();
         await fetch("/api/notifications/sos", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
           body: JSON.stringify({ wingId, userId: uid, userName }),
         });
         const toast = (await import("react-hot-toast")).default;

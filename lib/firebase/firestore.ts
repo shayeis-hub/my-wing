@@ -917,13 +917,20 @@ export async function getGroupEnergy(wingId: string, memberCount: number): Promi
 // ── Member profile ────────────────────────────────────────────────────────────
 
 export async function getMemberRecentMeals(wingId: string, userId: string, limitN = 10): Promise<Meal[]> {
+  // orderBy + limit(limitN) directly, instead of an unordered limit(50) cut
+  // then sorted/re-cut in JS — the old version could silently drop the
+  // actual most-recent meals if this user had logged more than 50 total
+  // (found via QA, 2026-09). Already covered by the existing
+  // userId+createdAt composite index in firestore.indexes.json.
   const snap = await getDocs(
-    query(collection(db, "wings", wingId, "meals"), where("userId", "==", userId), limit(50))
+    query(
+      collection(db, "wings", wingId, "meals"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc"),
+      limit(limitN)
+    )
   );
-  return snap.docs
-    .map((d) => ({ ...(d.data() as Omit<Meal, "id">), id: d.id }))
-    .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
-    .slice(0, limitN);
+  return snap.docs.map((d) => ({ ...(d.data() as Omit<Meal, "id">), id: d.id }));
 }
 
 export interface WallMessage {
@@ -1004,11 +1011,16 @@ export async function getCoachInvites(coachId: string): Promise<CoachInvite[]> {
 }
 
 export async function getWallMessages(wingId: string, targetUserId: string, limitN = 10): Promise<WallMessage[]> {
+  // orderBy + limit(limitN) directly — see getMemberRecentMeals above for
+  // why (found via QA, 2026-09). Needs the new targetUserId+createdAt
+  // composite index added to firestore.indexes.json.
   const snap = await getDocs(
-    query(collection(db, "wings", wingId, "wallMessages"), where("targetUserId", "==", targetUserId), limit(30))
+    query(
+      collection(db, "wings", wingId, "wallMessages"),
+      where("targetUserId", "==", targetUserId),
+      orderBy("createdAt", "desc"),
+      limit(limitN)
+    )
   );
-  return snap.docs
-    .map((d) => ({ ...(d.data() as Omit<WallMessage, "id">), id: d.id }))
-    .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
-    .slice(0, limitN);
+  return snap.docs.map((d) => ({ ...(d.data() as Omit<WallMessage, "id">), id: d.id }));
 }

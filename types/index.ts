@@ -10,6 +10,13 @@ export interface User {
   profile: UserProfile;
   fcmToken?: string;
   timezone?: string;
+  /**
+   * Set once the user picks "continue in view-only mode" on the expired-
+   * trial paywall — persisted (not just sessionStorage) so the free-forever
+   * tier promised on the pricing page (QA-11, 2026-09) doesn't re-nag with
+   * the same paywall interstitial every single app launch.
+   */
+  viewOnlyAck?: boolean;
   subscription?: Subscription;
   courseAccess?: { expiresAt: string; wingId: string };
   /** "business" unlocks the coach management dashboard. Defaults to personal. */
@@ -241,7 +248,10 @@ export interface DailyCheckin {
   date: string;
   waterGlasses: number;
   vegetablesServings: number;
-  mood: 1 | 2 | 3 | 4 | 5;
+  /** Absent = not reported. Was non-optional with checkin/page.tsx defaulting
+   *  the picker to 3 and always sending it — the AI day-summary then
+   *  attributed a mood the user never actually chose (found via QA, 2026-09). */
+  mood?: 1 | 2 | 3 | 4 | 5;
   notes?: string;
   steps?: number;
   workout?: Workout;

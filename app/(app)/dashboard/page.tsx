@@ -144,8 +144,8 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
       date: today,
       waterGlasses: todayCheckin?.waterGlasses ?? 0,
       vegetablesServings: todayCheckin?.vegetablesServings ?? 0,
-      mood: todayCheckin?.mood ?? 3,
       workout: todayCheckin?.workout ?? { done: false },
+      ...(todayCheckin?.mood != null ? { mood: todayCheckin.mood } : {}),
       ...(todayCheckin?.steps ? { steps: todayCheckin.steps } : {}),
       ...(todayCheckin?.weightKg ? { weightKg: todayCheckin.weightKg } : {}),
       ...(todayCheckin?.notes ? { notes: todayCheckin.notes } : {}),
@@ -246,9 +246,18 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
   const latestLoggedWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weightKg : undefined;
   const weightKg = todayCheckin?.weightKg ?? latestLoggedWeight ?? user?.profile?.weightKg ?? 70;
   const bmr = user?.profile ? Math.round(calculateBMR({ ...user.profile, weightKg })) : 1800;
-  // Calorie budget = resting burn (BMR) + calories burned in today's workout.
-  // Steps are intentionally excluded — pace/intensity is unknown, so we can't
-  // estimate their burn reliably.
+  // Baseline is the activity-level-aware target already computed and shown
+  // to the user at onboarding (calculateDailyTarget — BMR × activity
+  // multiplier, minus a deficit for weight loss), not raw BMR. Using BMR
+  // alone here silently showed a much lower number than what onboarding
+  // promised, with nothing explaining the discrepancy (found via QA,
+  // 2026-09) — e.g. 1,806 here vs. 2,299 promised at signup for the same
+  // profile. Falls back to BMR only for legacy accounts predating this
+  // saved field.
+  const baseTarget = user?.profile?.dailyCalorieTarget || bmr;
+  // Calorie budget = baseline + calories burned in today's workout. Steps
+  // are intentionally excluded from the base — pace/intensity is unknown,
+  // so we can't estimate their burn reliably.
   const workoutCals = todayCheckin?.workouts?.length
     ? todayCheckin.workouts.reduce((s, w) => s + (w.caloriesBurned ?? 0), 0)
     : (todayCheckin?.workout?.done ? (todayCheckin.workout.caloriesBurned ?? 0) : 0);
@@ -259,7 +268,7 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
   const workoutSteps = stepsFromWorkouts(todayCheckin?.workouts, todayCheckin?.workout);
   const incidentalSteps = Math.max(0, checkinSteps - workoutSteps);
   const stepCals = includeStepCals && incidentalSteps ? Math.round(incidentalSteps * 0.05 * (weightKg / 70)) : 0;
-  const calorieGoal = bmr + workoutCals + stepCals;
+  const calorieGoal = baseTarget + workoutCals + stepCals;
   const caloriesRemaining = calorieGoal - todayCalories;
 
   const otherMembers = (wing?.members ?? []).filter((m) => m.uid !== firebaseUser?.uid);

@@ -118,6 +118,16 @@ export async function changePassword(user: FirebaseUser, newPassword: string) {
   await updateDoc(doc(db, "users", user.uid), { mustChangePassword: false });
 }
 
+/**
+ * Persists "continue in view-only mode" so the expired-trial paywall
+ * interstitial doesn't reappear on every app launch — was sessionStorage
+ * only, which meant re-showing it every single session despite the pricing
+ * page promising a free-forever tier (found via QA, 2026-09).
+ */
+export async function acknowledgeViewOnly(uid: string) {
+  await updateDoc(doc(db, "users", uid), { viewOnlyAck: true });
+}
+
 async function createUserDoc(
   user: FirebaseUser,
   displayName: string,

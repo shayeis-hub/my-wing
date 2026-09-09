@@ -76,7 +76,10 @@ function CheckinPageInner() {
   const [groupCheckins, setGroupCheckins] = useState<DailyCheckin[]>([]);
   const [water, setWater] = useState(0);
   const [vegetables, setVegetables] = useState(0);
-  const [mood, setMood] = useState<1 | 2 | 3 | 4 | 5>(3);
+  // null = not chosen yet — was defaulted to 3, indistinguishable from a
+  // real selection, which the AI day-summary then treated as a genuine
+  // mood report (found via QA, 2026-09; see types/index.ts's DailyCheckin.mood).
+  const [mood, setMood] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
   const [notes, setNotes] = useState("");
   const [steps, setSteps] = useState("");
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -126,7 +129,7 @@ function CheckinPageInner() {
         setMyCheckin(c);
         setWater(c.waterGlasses ?? 0);
         setVegetables(c.vegetablesServings ?? 0);
-        setMood(c.mood ?? 3);
+        setMood(c.mood ?? null);
         setNotes(c.notes ?? "");
         setSteps(c.steps ? String(c.steps) : stepsFromLeaderboard ? String(stepsFromLeaderboard) : "");
         setWorkouts(c.workouts ?? (c.workout?.done ? [c.workout] : []));
@@ -192,7 +195,7 @@ function CheckinPageInner() {
         date: selectedDate,
         waterGlasses: water,
         vegetablesServings: vegetables,
-        mood,
+        ...(mood !== null ? { mood } : {}),
         ...(trimmedNotes ? { notes: trimmedNotes } : {}),
         ...(stepsNum ? { steps: stepsNum } : {}),
         ...(weightNum ? { weightKg: weightNum } : {}),
@@ -239,7 +242,7 @@ function CheckinPageInner() {
         date: selectedDate,
         waterGlasses: water,
         vegetablesServings: vegetables,
-        mood,
+        ...(mood !== null ? { mood } : {}),
         ...(trimmedNotes ? { notes: trimmedNotes } : {}),
         ...(stepsNum ? { steps: stepsNum } : {}),
         ...(weightNum ? { weightKg: weightNum } : {}),
@@ -365,7 +368,8 @@ function CheckinPageInner() {
 
   // Progress: count filled fields out of 6
   const filledFields = [
-    mood !== 3,          // mood changed from default
+    mood !== null,       // mood actually chosen (was `!== 3`, which never
+                         // counted a genuine choice of "3" as filled)
     water > 0,
     vegetables > 0,
     !!steps,

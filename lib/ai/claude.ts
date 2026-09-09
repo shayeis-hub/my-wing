@@ -244,7 +244,11 @@ export async function generatePersonalDaySummary(data: {
   workouts?: { done: boolean; description?: string; caloriesBurned?: number }[];
   weightKg?: number;
   targetWeightKg?: number;
-  mood: number;
+  // Optional — absent means the user never chose one (checkin/page.tsx used
+  // to default the picker to 3 and always send it, so the summary below
+  // fabricated a mood attribution the user never actually gave; found via
+  // QA, 2026-09).
+  mood?: number;
   notes?: string;
   lang?: "he" | "en";
   /**
@@ -312,7 +316,7 @@ export async function generatePersonalDaySummary(data: {
 - צעדים: ${data.steps ?? "לא דווח"}
 - אימון: ${workoutLine}
 - משקל: ${data.weightKg ? `${data.weightKg} ק"ג` : "לא נמדד"}${data.targetWeightKg ? ` (יעד: ${data.targetWeightKg} ק"ג)` : ""}
-- מצב רוח: ${data.mood}/5
+- מצב רוח: ${data.mood != null ? `${data.mood}/5` : "לא דווח"}
 ${data.notes ? `- הערה: "${data.notes}"` : ""}${historyBlock}${habitBlock}
 
 תן סיכום אישי, תובנות, וטיפ למחר.`
@@ -327,7 +331,7 @@ Day data:
 - Steps: ${data.steps ?? "not reported"}
 - Workout: ${workoutLine}
 - Weight: ${data.weightKg ? `${data.weightKg} kg` : "not measured"}${data.targetWeightKg ? ` (target: ${data.targetWeightKg} kg)` : ""}
-- Mood: ${data.mood}/5
+- Mood: ${data.mood != null ? `${data.mood}/5` : "not reported"}
 ${data.notes ? `- Note: "${data.notes}"` : ""}${historyBlock}${habitBlock}
 
 Give a personal summary, insights, and a tip for tomorrow.`;

@@ -64,14 +64,18 @@ function MemberPageInner() {
         authorName: user!.displayName,
         text,
       };
-      await addWallMessage(effectiveWingId, msgData);
+      // Capture the real Firestore doc id — a locally-fabricated one here
+      // meant a subsequent delete (before the next refetch) tried to delete
+      // a doc that didn't exist, silently leaving the real message behind
+      // (found via QA, 2026-09).
+      const newId = await addWallMessage(effectiveWingId, msgData);
       await fetch("/api/notifications/wall-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...msgData, message: text }),
       });
       setWallMsgs((prev) => [
-        { ...msgData, id: String(Date.now()), createdAt: null as unknown as WallMessage["createdAt"] },
+        { ...msgData, id: newId, createdAt: null as unknown as WallMessage["createdAt"] },
         ...prev,
       ]);
       setMsgText("");

@@ -287,8 +287,12 @@ function LoginForm() {
       {/* Legal */}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-8">
         {[
-          { href: "/privacy", key: "link_privacy" as const },
-          { href: "/terms", key: "link_terms" as const },
+          // Privacy/terms have separate English pages, same as refund below —
+          // these two hardcoded the Hebrew path regardless of UI language
+          // (found via QA, 2026-09): switching to EN and clicking PRIVACY
+          // opened /privacy, which is in Hebrew.
+          { href: lang === "en" ? "/en/privacy" : "/privacy", key: "link_privacy" as const },
+          { href: lang === "en" ? "/en/terms" : "/terms", key: "link_terms" as const },
           { href: lang === "en" ? "/en/refund" : "/refund", key: "link_refund" as const },
           { href: "/contact", key: "link_contact" as const },
           { href: "/delete-account", key: "link_delete" as const },

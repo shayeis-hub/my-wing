@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       workouts: checkin.workouts,
       weightKg: checkin.weightKg,
       targetWeightKg: userProfile?.targetWeightKg,
-      mood: checkin.mood ?? 3,
+      mood: checkin.mood,
       notes: checkin.notes,
       lang: lang ?? "he",
       recentHistory,

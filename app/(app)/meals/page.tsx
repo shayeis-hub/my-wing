@@ -301,7 +301,7 @@ function MealsPageInner() {
             date: todayStr,
             waterGlasses: existing?.waterGlasses ?? 0,
             vegetablesServings: (existing?.vegetablesServings ?? 0) + 1,
-            mood: existing?.mood ?? 3,
+            ...(existing?.mood != null ? { mood: existing.mood } : {}),
             ...(existing?.steps ? { steps: existing.steps } : {}),
             ...(existing?.notes ? { notes: existing.notes } : {}),
             ...(existing?.weightKg ? { weightKg: existing.weightKg } : {}),
