@@ -147,10 +147,11 @@ export default function WingPage() {
     if (!wingName.trim() || !firebaseUser || !user) return;
     setCreating(true);
     try {
+      const idToken = await firebaseUser.getIdToken();
       const res = await fetch("/api/wing/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ownerId: firebaseUser.uid, ownerName: user.displayName, name: wingName.trim() }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ ownerName: user.displayName, name: wingName.trim() }),
       });
       if (!res.ok) throw new Error();
       toast.success((t("wing_created") as (name: string) => string)(wingName));
@@ -166,10 +167,11 @@ export default function WingPage() {
     if (!joinToken.trim() || !firebaseUser || !user) return;
     setJoining(true);
     try {
+      const idToken = await firebaseUser.getIdToken();
       const res = await fetch("/api/wing/join", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: joinToken.trim(), userId: firebaseUser.uid, displayName: user.displayName, photoURL: user.photoURL }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ token: joinToken.trim(), displayName: user.displayName, photoURL: user.photoURL }),
       });
       if (!res.ok) throw new Error("token-invalid");
       toast.success(t("wing_joined") as string);

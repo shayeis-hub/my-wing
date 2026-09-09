@@ -118,13 +118,13 @@ export default function OnboardingPage() {
 
     setWingLoading(true);
     try {
+      const idToken = await firebaseUser.getIdToken();
       if (joinOption === "code") {
         const res = await fetch("/api/wing/join", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
           body: JSON.stringify({
             token: joinCode.trim(),
-            userId: firebaseUser.uid,
             displayName: user.displayName,
             photoURL: user.photoURL ?? null,
           }),
@@ -135,8 +135,8 @@ export default function OnboardingPage() {
         const name = wingName.trim() || (t("ob_create_ph") as (n: string) => string)(firstName);
         const res = await fetch("/api/wing/create", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ownerId: firebaseUser.uid, ownerName: user.displayName, name }),
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ ownerName: user.displayName, name }),
         });
         if (!res.ok) throw new Error("create-failed");
       }
@@ -162,10 +162,11 @@ export default function OnboardingPage() {
     setWingLoading(true);
     try {
       const name = (t("ob_create_ph") as (n: string) => string)(firstName);
+      const idToken = await firebaseUser.getIdToken();
       const res = await fetch("/api/wing/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ownerId: firebaseUser.uid, ownerName: user.displayName, name }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ ownerName: user.displayName, name }),
       });
       if (!res.ok) throw new Error();
       setStep(1);
@@ -185,13 +186,13 @@ export default function OnboardingPage() {
     }
     setWingLoading(true);
     try {
+      const idToken = await firebaseUser.getIdToken();
       if (fitDadChoice === "public") {
         const res = await fetch("/api/wing/join", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
           body: JSON.stringify({
             wingId: selectedPublicWingId,
-            userId: firebaseUser.uid,
             displayName: user.displayName,
             photoURL: user.photoURL ?? null,
           }),
@@ -204,8 +205,8 @@ export default function OnboardingPage() {
         const name = wingName.trim() || (t("ob_create_ph") as (n: string) => string)(firstName);
         const res = await fetch("/api/wing/create", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ownerId: firebaseUser.uid, ownerName: user.displayName, name, isFitDadWing: true }),
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ ownerName: user.displayName, name, isFitDadWing: true }),
         });
         if (!res.ok) throw new Error("create-failed");
       }

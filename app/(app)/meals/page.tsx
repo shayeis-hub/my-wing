@@ -157,9 +157,10 @@ function MealsPageInner() {
           base64: url.split(",")[1],
           mediaType: dataUrlMediaType(url),
         }));
+        const idToken = await firebaseUser?.getIdToken();
         const res = await fetch("/api/ai/analyze-meal", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
           body: JSON.stringify({ base64Images: images, lang, userId: firebaseUser?.uid, userEmail: firebaseUser?.email ?? null }),
         });
         if (!res.ok) {
@@ -234,9 +235,10 @@ function MealsPageInner() {
       const body = urls.length > 1
         ? { base64Images: urls.map(toImg), hint: hint.trim(), lang, previousAnalysis: pendingAnalysis.analysis }
         : { base64Image: toImg(urls[0]).base64, mediaType: toImg(urls[0]).mediaType, hint: hint.trim(), lang, previousAnalysis: pendingAnalysis.analysis };
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
         body: JSON.stringify(body),
       });
       if (!res.ok) {

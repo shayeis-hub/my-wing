@@ -141,9 +141,9 @@ export default function ChallengeDetailPage() {
       // Winners are always decided by the cumulative total — recompute the full
       // range here, since the live view may currently hold only today's values.
       const fullProgress = await computeProgress(challenge, "total");
-      await finishChallenge(user.wingId, { ...challenge, progress: fullProgress }, wing.members);
+      const { winners } = await finishChallenge(user.wingId, { ...challenge, progress: fullProgress });
       setProgress(fullProgress);
-      setChallenge((prev) => prev ? { ...prev, status: "finished" } : prev);
+      setChallenge((prev) => prev ? { ...prev, status: "finished", winners } : prev);
       setShowFinishConfirm(false);
       toast.success(t("challenge_finished_toast") as string);
     } catch {

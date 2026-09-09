@@ -44,12 +44,12 @@ export default function JoinPage() {
   async function doJoin() {
     setJoining(true);
     try {
+      const idToken = await firebaseUser!.getIdToken();
       const res = await fetch("/api/wing/join", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({
           token,
-          userId: firebaseUser!.uid,
           displayName: user!.displayName,
           photoURL: user!.photoURL,
         }),

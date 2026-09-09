@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { canAddWingMember, canCoachAddClient, isCoachActive, isPremium, FREE_LIMITS, BOOK_WING_MAX_MEMBERS, FIT_DAD_WING_MAX_MEMBERS } from "@/lib/subscription";
 import type { CoachPlanId } from "@/lib/subscription";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +22,19 @@ async function countCoachClients(
 }
 
 export async function POST(req: NextRequest) {
+  // `userId` used to be trusted straight from the request body — anyone
+  // could join (or add someone else to) a wing while impersonating any uid
+  // they chose, and change another user's wingId/bookAccess/coachAccess in
+  // the process (found via QA, 2026-09). The verified token's uid is now
+  // the only source of truth for who's joining; a legacy `userId` in the
+  // body is ignored.
+  const uid = await getUidFromRequest(req);
+  if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
-    const { token, wingId: directWingId, userId, displayName, photoURL } = await req.json();
-    if ((!token && !directWingId) || !userId) {
+    const { token, wingId: directWingId, displayName, photoURL } = await req.json();
+    const userId = uid;
+    if (!token && !directWingId) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 

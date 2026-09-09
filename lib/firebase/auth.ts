@@ -164,12 +164,15 @@ export async function updateUserPhotoURL(
   await setDoc(doc(db, "users", uid), { photoURL }, { merge: true });
   await updateProfile(auth.currentUser!, { photoURL });
   if (wingId) {
-    const wingSnap = await getDoc(doc(db, "wings", wingId));
-    if (wingSnap.exists()) {
-      const members = (wingSnap.data().members ?? []) as { uid: string; [k: string]: unknown }[];
-      const updated = members.map((m) => m.uid === uid ? { ...m, photoURL } : m);
-      await updateDoc(doc(db, "wings", wingId), { members: updated });
-    }
+    // Via a server route (see app/api/wing/sync-member), not a direct client
+    // write to the wing doc — firestore.rules no longer lets a member touch
+    // members/memberIds directly (see wings/{wingId} rule for why).
+    const token = await auth.currentUser!.getIdToken();
+    await fetch("/api/wing/sync-member", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ wingId, photoURL }),
+    }).catch(() => {});
   }
 }
 

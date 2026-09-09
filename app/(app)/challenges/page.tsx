@@ -114,7 +114,7 @@ export default function ChallengesPage() {
           progress[ci.userId] = (progress[ci.userId] ?? 0) + val;
         }
       }
-      await finishChallenge(user.wingId, { ...ac, progress }, wing.members);
+      await finishChallenge(user.wingId, { ...ac, progress });
     }
 
     autoFinish().catch(console.error);

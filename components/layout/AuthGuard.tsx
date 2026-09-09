@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { syncWingMemberUid } from "@/lib/firebase/firestore";
 import { isTrialExpired } from "@/lib/subscription";
 import { getHabitByOrder } from "@/lib/book/habits";
 import type { Timestamp } from "firebase/firestore";
@@ -25,11 +24,19 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const syncedRef = useRef(false);
 
-  // Sync wing member uid once
+  // Sync wing member uid once — via a server route now (see
+  // app/api/wing/sync-member), not a direct client write to the wing doc,
+  // since firestore.rules no longer lets a member touch memberIds directly.
   useEffect(() => {
     if (!firebaseUser || !user?.wingId || !user?.displayName || syncedRef.current) return;
     syncedRef.current = true;
-    syncWingMemberUid(user.wingId, firebaseUser.uid, user.displayName).catch(() => {});
+    firebaseUser.getIdToken().then((token) =>
+      fetch("/api/wing/sync-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ wingId: user.wingId }),
+      })
+    ).catch(() => {});
   }, [firebaseUser, user]);
 
   useEffect(() => {

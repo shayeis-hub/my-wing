@@ -13,6 +13,7 @@ import { he, enUS } from "date-fns/locale";
 import toast from "react-hot-toast";
 import { X, Pencil, Trash2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MealCardProps {
   meal: Meal;
@@ -24,6 +25,7 @@ interface MealCardProps {
 
 export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin = false, hero = false }: MealCardProps) {
   const { t, lang } = useLanguage();
+  const { firebaseUser } = useAuth();
 
   const mealTypeLabels: Record<Meal["mealType"], string> = {
     breakfast: t("meal_type_breakfast") as string,
@@ -141,9 +143,10 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
       const body = meal.imageURL
         ? { imageUrl: meal.imageURL, hint: description, lang, previousAnalysis: meal.analysis }
         : { textDescription: description, lang };
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
         body: JSON.stringify(body),
       });
       if (!res.ok) {

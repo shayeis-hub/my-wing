@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { FIT_DAD_WING_MAX_MEMBERS } from "@/lib/subscription";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -12,9 +13,18 @@ function nanoid(len: number) {
 }
 
 export async function POST(req: NextRequest) {
+  // The caller always creates a wing for THEMSELVES — ownerId used to be
+  // trusted straight from the request body, which let anyone create a wing
+  // "owned by" an arbitrary other uid (found via QA, 2026-09). The verified
+  // token's uid is now the only source of truth for who the owner is; a
+  // legacy `ownerId` in the body is ignored.
+  const uid = await getUidFromRequest(req);
+  if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
-    const { ownerId, ownerName, name, isBookWing, isFitDadWing } = await req.json();
-    if (!ownerId || !ownerName || !name) {
+    const { ownerName, name, isBookWing, isFitDadWing } = await req.json();
+    const ownerId = uid;
+    if (!ownerName || !name) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 

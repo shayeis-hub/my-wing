@@ -2,10 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 export async function POST(req: NextRequest) {
+  // `userId`/`userName` used to be trusted straight from the request body —
+  // anyone who knew (or guessed) a wingId could blast that wing's members
+  // with a fake SOS push claiming to be sent by anyone, with no check that
+  // the sender was even a member (found via QA, 2026-09). The verified
+  // token's uid and the sender's OWN displayName (looked up server-side,
+  // below) are now the only sources of truth for who's sending.
+  const uid = await getUidFromRequest(req);
+  if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
-    const { wingId, userId, userName } = await req.json();
+    const { wingId } = await req.json();
+    const userId = uid;
 
     getAdminApp();
 
@@ -21,16 +32,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Wing not found" }, { status: 404 });
     }
 
-    const memberIds: string[] = ((wingSnap.data()?.memberIds ?? []) as string[]).filter(
-      (id) => id !== userId
-    );
+    const allMemberIds: string[] = (wingSnap.data()?.memberIds ?? []) as string[];
+    if (!allMemberIds.includes(userId)) {
+      return NextResponse.json({ error: "Not a member of this wing" }, { status: 403 });
+    }
+    const memberIds = allMemberIds.filter((id) => id !== userId);
 
-    // Gender the sender's wording ("זקוק" / "זקוקה").
+    // Sender's real name and gendered wording ("זקוק" / "זקוקה") — looked up
+    // server-side rather than trusted from the body.
+    let userName = "מישהו מהכנף";
     let senderGender: "male" | "female" = "male";
     try {
       const senderSnap = await admin.firestore().doc(`users/${userId}`).get();
-      if (senderSnap.data()?.profile?.gender === "female") senderGender = "female";
-    } catch { /* gender lookup failed — default masculine */ }
+      const senderData = senderSnap.data();
+      if (senderData?.displayName) userName = senderData.displayName;
+      if (senderData?.profile?.gender === "female") senderGender = "female";
+    } catch { /* lookup failed — fall back to generic name/masculine wording */ }
     const needsWord = senderGender === "female" ? "זקוקה" : "זקוק";
 
     const tokens: string[] = [];

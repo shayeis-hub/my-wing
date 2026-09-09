@@ -72,11 +72,11 @@ export default function BookOnboardingPage() {
       // onboarding's "Continue alone for now" — a book-mode reader starts
       // solo by default, and this keeps every wingId-keyed page working.
       if (!user.wingId) {
+        const idToken = await firebaseUser.getIdToken();
         const res = await fetch("/api/wing/create", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
           body: JSON.stringify({
-            ownerId: firebaseUser.uid,
             ownerName: user.displayName,
             name: `${firstName}'s Circle`,
             isBookWing: true,

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import type { MealAnalysis } from "@/types";
 import { useLanguage } from "@/lib/i18n";
 import { compressImageToDataUrl, dataUrlMediaType } from "@/lib/utils/imageCompress";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MealCameraProps {
   onAnalysis: (analysis: MealAnalysis, imageDataUrl: string) => void;
@@ -18,6 +19,7 @@ interface MealCameraProps {
 type Mode = "choose" | "text" | "voice";
 
 export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userEmail }: MealCameraProps) {
+  const { firebaseUser } = useAuth();
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -73,9 +75,10 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     try {
       const base64 = dataUrl.split(",")[1];
       const mediaType = dataUrlMediaType(dataUrl);
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
         body: JSON.stringify({
           base64Image: base64,
           mediaType,
@@ -108,9 +111,10 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     setAnalyzing(true);
     setError(null);
     try {
+      const idToken = await firebaseUser?.getIdToken();
       const res = await fetch("/api/ai/analyze-meal", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
         body: JSON.stringify({ textDescription: trimmed, lang, userId, userEmail: userEmail ?? null }),
       });
       if (!res.ok) {

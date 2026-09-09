@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SOSButtonProps {
   wingId: string;
@@ -16,14 +17,19 @@ export function SOSButton({ wingId, userId, userName }: SOSButtonProps) {
   const [cooldown, setCooldown] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const { t, lang, gender } = useLanguage();
+  const { firebaseUser } = useAuth();
 
   async function handleSOS() {
-    if (sending || cooldown) return;
+    if (sending || cooldown || !firebaseUser) return;
     setSending(true);
     try {
+      const idToken = await firebaseUser.getIdToken();
       const res = await fetch("/api/notifications/sos", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        // userId/userName are no longer trusted by the server (it derives
+        // both from the verified token now) — kept in the body for now to
+        // avoid touching this component's props/callers, but unused server-side.
         body: JSON.stringify({ wingId, userId, userName }),
       });
       const data = await res.json().catch(() => ({}));

@@ -8,6 +8,7 @@ export const maxDuration = 60;
 import { analyzeMealImage, analyzeMealImages, analyzeMealText } from "@/lib/ai/claude";
 import { isGrandfathered, isPremium, canAddMealPhoto, FREE_LIMITS, type Plan, type AccessGrants } from "@/lib/subscription";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { getUidFromRequest } from "@/lib/server/auth";
 
 // ── Admin-SDK helpers (server-safe, no client SDK) ────────────────────────────
 
@@ -16,15 +17,16 @@ type CourseAccess = { expiresAt: string; wingId: string };
 type CoachAccess = { active?: boolean };
 type BookAccess = { active?: boolean; grantedBy?: string };
 type FitDadAccess = { active?: boolean; expiresAt?: string };
-type UserDoc = { subscription?: SubDoc; courseAccess?: CourseAccess; coachAccess?: CoachAccess; bookAccess?: BookAccess; fitDadAccess?: FitDadAccess };
+type UserDoc = { email?: string; subscription?: SubDoc; courseAccess?: CourseAccess; coachAccess?: CoachAccess; bookAccess?: BookAccess; fitDadAccess?: FitDadAccess };
 
 async function getUserPlanAdmin(
   uid: string
-): Promise<{ sub: SubDoc | null; grants: AccessGrants }> {
+): Promise<{ email: string; sub: SubDoc | null; grants: AccessGrants }> {
   const snap = await admin.firestore().doc(`users/${uid}`).get();
-  if (!snap.exists) return { sub: null, grants: {} };
+  if (!snap.exists) return { email: "", sub: null, grants: {} };
   const data = snap.data() as UserDoc;
   return {
+    email: data.email ?? "",
     sub: data.subscription ?? null,
     // Bundled so a future access type doesn't need a new destructured field
     // at every call site below — see lib/subscription.ts's AccessGrants doc.
@@ -69,10 +71,28 @@ async function fetchImageAsBase64(url: string): Promise<{ base64: string; mediaT
 }
 
 export async function POST(req: NextRequest) {
+  // `userId`/`userEmail` used to be trusted straight from the request body —
+  // an unauthenticated caller could run meal analysis for free (this calls
+  // the Claude API — a real per-request cost), and/or dodge the daily-photo
+  // quota entirely by sending someone else's userId (or none) so the limit
+  // check ran against a different account than the one actually asking for
+  // analysis (found via QA, 2026-09). The verified token's uid — and the
+  // email/plan/grants looked up from ITS OWN Firestore doc, below — are now
+  // the only sources of truth.
+  const uid = await getUidFromRequest(req);
+  if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     const body = await req.json();
     let { base64Image, mediaType } = body;
-    const { base64Images, hint, previousAnalysis, textDescription, userId, userEmail, lang, imageUrl } = body;
+    const { base64Images, hint, previousAnalysis, textDescription, lang, imageUrl } = body;
+
+    getAdminApp();
+    const { email: userEmail, sub, grants } = await getUserPlanAdmin(uid);
+    const plan = sub?.plan ?? "free";
+    const today = format(new Date(), "yyyy-MM-dd");
+    const grandfathered = isGrandfathered(userEmail);
+    const premium = isPremium(userEmail, plan, sub, grants);
 
     // Reanalyzing a SAVED meal: the client only has the Storage URL, not the
     // original file, so fetch and encode it server-side.
@@ -85,29 +105,22 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Enforce meal-photo limit (only for image analysis, not text) ──────────
-    if (base64Image && userId && userEmail !== undefined) {
-      getAdminApp();
-      // Grandfathered users always pass
-      if (!isGrandfathered(userEmail)) {
-        const today = format(new Date(), "yyyy-MM-dd");
-        const { sub, grants } = await getUserPlanAdmin(userId);
-        const plan = sub?.plan ?? "free";
-
-        if (!isPremium(userEmail, plan, sub, grants)) {
-          const todayCount = await getDailyMealCountAdmin(userId, today);
-          if (!canAddMealPhoto(userEmail, plan, todayCount, grants)) {
-            return NextResponse.json(
-              { error: "MEAL_LIMIT_REACHED", limit: FREE_LIMITS.mealPhotosPerDay },
-              { status: 403 }
-            );
-          }
-        }
+    // Applies to BOTH single-image and multi-image analysis — the
+    // multi-image path used to skip this check entirely (found via QA,
+    // 2026-09), so submitting several photos at once bypassed the quota.
+    const isImageAnalysis = !!base64Image || (Array.isArray(base64Images) && base64Images.length > 0);
+    if (isImageAnalysis && !grandfathered && !premium) {
+      const todayCount = await getDailyMealCountAdmin(uid, today);
+      if (!canAddMealPhoto(userEmail, plan, todayCount, grants)) {
+        return NextResponse.json(
+          { error: "MEAL_LIMIT_REACHED", limit: FREE_LIMITS.mealPhotosPerDay },
+          { status: 403 }
+        );
       }
     }
 
     // ── Text analysis (manual entry / voice, or a saved meal with no photo) ───
     if (textDescription) {
-      getAdminApp();
       const analysis = await analyzeMealText(textDescription, lang ?? "he");
       return NextResponse.json(analysis);
     }
@@ -115,6 +128,7 @@ export async function POST(req: NextRequest) {
     // ── Multi-image analysis ───────────────────────────────────────────────────
     if (base64Images && Array.isArray(base64Images) && base64Images.length > 0) {
       const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis);
+      if (!grandfathered && !premium) await incrementDailyMealCountAdmin(uid, today);
       return NextResponse.json(analysis);
     }
 
@@ -125,13 +139,8 @@ export async function POST(req: NextRequest) {
     const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis);
 
     // ── Increment daily count after successful analysis ────────────────────────
-    if (userId && userEmail !== undefined && !isGrandfathered(userEmail)) {
-      const today = format(new Date(), "yyyy-MM-dd");
-      const { sub, grants } = await getUserPlanAdmin(userId);
-      const plan = sub?.plan ?? "free";
-      if (!isPremium(userEmail, plan, sub, grants)) {
-        await incrementDailyMealCountAdmin(userId, today);
-      }
+    if (!grandfathered && !premium) {
+      await incrementDailyMealCountAdmin(uid, today);
     }
 
     return NextResponse.json(analysis);

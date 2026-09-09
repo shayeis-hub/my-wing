@@ -18,7 +18,7 @@ import {
   onSnapshot,
   type Unsubscribe,
 } from "firebase/firestore";
-import { db } from "./config";
+import { db, auth } from "./config";
 import type {
   Wing,
   Meal,
@@ -140,27 +140,10 @@ export async function regenerateInviteToken(wingId: string): Promise<string> {
   return token;
 }
 
-export async function syncWingMemberUid(
-  wingId: string,
-  uid: string,
-  displayName: string
-): Promise<void> {
-  const wingSnap = await getDoc(doc(db, "wings", wingId));
-  if (!wingSnap.exists()) return;
-  const data = wingSnap.data();
-  const members = (data.members ?? []) as WingMember[];
-  if (members.some((m) => m.uid === uid)) return; // already correct
-
-  const idx = members.findIndex((m) => m.displayName === displayName);
-  if (idx === -1) return;
-
-  const oldUid = members[idx].uid;
-  const updated = members.map((m, i) => (i === idx ? { ...m, uid } : m));
-  const memberIds = ((data.memberIds ?? []) as string[]).map((id) =>
-    id === oldUid ? uid : id
-  );
-  await updateDoc(doc(db, "wings", wingId), { members: updated, memberIds });
-}
+// Moved to app/api/wing/sync-member (server route, Admin SDK) — firestore.rules
+// no longer lets a client write members/memberIds directly on a wing doc
+// (see wings/{wingId}'s update rule). See components/layout/AuthGuard.tsx
+// for the new call site.
 
 export async function getWing(wingId: string): Promise<Wing | null> {
   const snap = await getDoc(doc(db, "wings", wingId));
@@ -680,43 +663,30 @@ export async function updateChallengeProgress(
   });
 }
 
+// Moved to app/api/wing/finish-challenge (server route, Admin SDK, one
+// atomic batch) — this used to be 2+N sequential client writes, and the
+// trophy write for any winner other than whoever clicked "finish" was
+// silently rejected by firestore.rules (a client can only write its own
+// user doc), AFTER the challenge had already been marked finished. Found
+// via QA, 2026-09 — see the server route for the full explanation.
 export async function finishChallenge(
   wingId: string,
-  challenge: Challenge,
-  members: WingMember[]
-): Promise<void> {
-  // Sort members by progress descending
-  const sorted = [...members].sort(
-    (a, b) => (challenge.progress[b.uid] ?? 0) - (challenge.progress[a.uid] ?? 0)
-  );
-  const medals: Array<"gold" | "silver" | "bronze"> = ["gold", "silver", "bronze"];
-  const winners = sorted.slice(0, 3).map((m) => m.uid);
-
-  // Mark challenge as finished
-  await updateDoc(doc(db, "wings", wingId, "challenges", challenge.id), {
-    status: "finished",
-    winners,
+  challenge: Challenge
+): Promise<{ winners: string[] }> {
+  const token = await auth.currentUser?.getIdToken();
+  if (!token) throw new Error("Not signed in");
+  const res = await fetch("/api/wing/finish-challenge", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ wingId, challengeId: challenge.id, progress: challenge.progress }),
   });
-
-  // Clear active challenge on wing
-  await updateDoc(doc(db, "wings", wingId), { activeChallenge: null });
-
-  // Award trophies to top 3
-  for (let i = 0; i < Math.min(3, sorted.length); i++) {
-    const member = sorted[i];
-    if (!challenge.progress[member.uid]) continue; // skip if no progress at all
-    const trophy: Trophy = {
-      challengeId: challenge.id,
-      challengeTitle: challenge.title,
-      challengeType: challenge.type,
-      medal: medals[i],
-      endDate: challenge.endDate,
-      wingId,
-    };
-    await updateDoc(doc(db, "users", member.uid), {
-      trophies: arrayUnion(trophy),
-    });
-  }
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+  // Callers use this to show the finish result immediately instead of
+  // waiting on a refetch (see app/(app)/challenges/[id]/page.tsx — the
+  // winner used to only appear after a manual page refresh; found via QA,
+  // 2026-09).
+  return { winners: body.winners ?? [] };
 }
 
 // ── Subscription & daily usage ────────────────────────────────────────────────

@@ -10,36 +10,50 @@ service cloud.firestore {
 
     // ── Course platform ────────────────────────────────────────────────────────
 
-    // Courses: open read/write (admin protected at app level via secret key)
+    // Courses / cohorts / enrollments: read requires login (was `if true` —
+    // fully open, unauthenticated read AND write, on collections that
+    // include personal enrollment data keyed by email — found via QA,
+    // 2026-09). Nothing in this app's own client code writes to these
+    // directly (only app/api/course/enroll, via the Admin SDK, which
+    // bypasses these rules regardless) — write stays server-only. If a
+    // separate app (the "Wing Course" platform, sharing this Firebase
+    // project) writes to these client-side, it needs updating to go
+    // through its own server route instead.
     match /courses/{courseId} {
-      allow read, write: if true;
+      allow read: if request.auth != null;
+      allow write: if false;
     }
 
-    // Course content: open read/write (admin protected at app level via secret key)
     match /courseWeeks/{weekId} {
-      allow read, write: if true;
+      allow read: if request.auth != null;
+      allow write: if false;
 
       match /days/{dayId} {
-        allow read, write: if true;
+        allow read: if request.auth != null;
+        allow write: if false;
 
         match /items/{itemId} {
-          allow read, write: if true;
+          allow read: if request.auth != null;
+          allow write: if false;
         }
       }
     }
 
-    // Cohorts: open read/write (admin protected at app level)
     match /cohorts/{cohortId} {
-      allow read, write: if true;
+      allow read: if request.auth != null;
+      allow write: if false;
 
       match /members/{memberId} {
-        allow read, write: if true;
+        allow read: if request.auth != null;
+        allow write: if false;
       }
     }
 
-    // Enrollment lookup
+    // Enrollment lookup — keyed by email, so read is even more sensitive
+    // than the above; same reasoning.
     match /enrollmentsByEmail/{email} {
-      allow read, write: if true;
+      allow read: if request.auth != null;
+      allow write: if false;
     }
 
     // Coach invite codes — coach reads own; all writes via Admin SDK (server)
@@ -52,8 +66,44 @@ service cloud.firestore {
 
     // Users: owner or admin
     match /users/{userId} {
-      allow read, write: if request.auth != null &&
+      allow read: if request.auth != null &&
         (request.auth.uid == userId || isAdmin());
+
+      // New account signup — anything except `role` (never client-settable;
+      // absent/unset means "not admin" per isAdmin() above — found via QA,
+      // 2026-09, that a client could otherwise self-grant admin at signup).
+      allow create: if request.auth != null &&
+        ((request.auth.uid == userId && !('role' in request.resource.data)) || isAdmin());
+
+      // Updating your own doc is restricted to a whitelist of fields the
+      // client legitimately writes directly (push token, avatar, profile
+      // stats, timezone, notification prefs, switching to a wing you
+      // already belong to, clearing the forced-password-change flag).
+      // Privileged fields — role, subscription, courseAccess, coachAccess,
+      // bookAccess, fitDadAccess, coach, coachCheckout, trophies,
+      // trialStartsAt, wingIds, habitProgress — are changed exclusively via
+      // server API routes using the Admin SDK, which bypasses these rules.
+      // Without this, any signed-in user could grant themselves
+      // premium/admin by writing those fields on their own doc directly
+      // (found via QA, 2026-09).
+      allow update: if request.auth != null &&
+        (isAdmin() ||
+         (request.auth.uid == userId &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+            ['fcmToken', 'photoURL', 'displayName', 'profile', 'timezone',
+             'notificationPrefs', 'wingId', 'mustChangePassword']
+          ) &&
+          // .get(key, default) everywhere below — most accounts never have
+          // wingId changed here / mustChangePassword set at all, and a bare
+          // `.field` access on a key absent from the doc throws (denying
+          // the whole update) rather than returning null in rules.
+          (request.resource.data.get('wingId', null) == resource.data.get('wingId', null) ||
+           request.resource.data.get('wingId', null) in resource.data.get('wingIds', [])) &&
+          // mustChangePassword may only ever be cleared to false by the
+          // client (never set to true) — see components/layout/AuthGuard.tsx.
+          request.resource.data.get('mustChangePassword', false) == false));
+
+      allow delete: if isAdmin();
 
       // Daily usage counters — only the owner can read/write
       match /dailyUsage/{date} {
@@ -78,16 +128,20 @@ service cloud.firestore {
         (request.auth.uid in resource.data.memberIds ||
          request.auth.uid == resource.data.ownerId);
       allow create: if request.auth != null;
-      // Members may update the wing doc from the client ONLY for non-privileged
-      // fields (challenges + member-list sync/photo). Privileged fields
-      // (ownerId, adminIds, name, inviteToken) are changed exclusively via
-      // server API routes using the Admin SDK, which bypasses these rules.
-      // This blocks a member from escalating themselves to owner/admin or
-      // tampering with the wing name directly from the client.
+      // Members may update the wing doc from the client ONLY for
+      // activeChallenge. Privileged fields (ownerId, adminIds, name,
+      // inviteToken, and — as of 2026-09, found via QA — members/memberIds)
+      // are changed exclusively via server API routes using the Admin SDK,
+      // which bypasses these rules. This blocks a member from escalating
+      // themselves to owner/admin, tampering with the wing name, OR adding/
+      // removing arbitrary member uids directly (which also bypassed every
+      // wing-size cap, since those are only enforced in the API routes, not
+      // here). Member-list bookkeeping fixups (uid sync, avatar sync) now go
+      // through app/api/wing/sync-member instead.
       allow update: if request.auth != null
         && request.auth.uid in resource.data.memberIds
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['activeChallenge', 'members', 'memberIds']);
+             .hasOnly(['activeChallenge']);
       allow delete: if request.auth != null &&
         request.auth.uid == resource.data.ownerId;
 
