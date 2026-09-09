@@ -52,10 +52,21 @@
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- CAMERA is for the <input type="file" capture="environment"> meal-photo
+         capture flow. READ_MEDIA_IMAGES/READ_EXTERNAL_STORAGE/
+         WRITE_EXTERNAL_STORAGE were removed 2026-09-09: the app never reads
+         or writes the shared media store directly (no @capacitor/camera or
+         @capacitor/filesystem plugin is installed) — every photo comes
+         through a plain WebView <input type="file">, which on Android
+         launches the system photo picker via an intent and returns a
+         content:// URI the app can read without holding any storage
+         permission itself. Declaring these anyway is exactly what triggers
+         Google Play's "Photo and Video Permissions" policy — which requires
+         a completed Permissions Declaration Form justifying the access —
+         and got this app flagged/enforced (Sep 8, 2026). Since the app has
+         no real use for them, removing them is the actual fix, not a form
+         to fill out. -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Health Connect: only steps are used. Remove all other permissions the
