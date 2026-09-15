@@ -103,7 +103,7 @@ export function MealCamera({ onAnalysis, onCancel, onLimitReached, userId, userE
     } finally {
       setAnalyzing(false);
     }
-  }, [onAnalysis, onLimitReached, userId, userEmail, t, lang]);
+  }, [onAnalysis, onLimitReached, userId, userEmail, t, lang, firebaseUser]);
 
   async function processText(overrideText?: string) {
     const trimmed = (overrideText ?? textInput).trim();
