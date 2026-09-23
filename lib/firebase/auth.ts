@@ -98,6 +98,18 @@ export async function signInWithApple() {
 }
 
 export async function signOut() {
+  // Clear the push token from this account before switching away — otherwise
+  // a device that later logs into a different account leaves the old
+  // account's user doc holding the same fcmToken, and the nudge cron ends up
+  // pushing to both accounts (same physical device, multiple notifications).
+  const uid = auth.currentUser?.uid;
+  if (uid) {
+    try {
+      await updateDoc(doc(db, "users", uid), { fcmToken: null });
+    } catch {
+      /* best-effort — don't block sign-out on this */
+    }
+  }
   await firebaseSignOut(auth);
 }
 
