@@ -82,7 +82,7 @@ export default function OneHabitLandingHe() {
         </div>
         <div className="flex justify-center">
           <div dir="ltr" className="rounded-[2rem] border-[6px] border-wing-ink overflow-hidden shadow-2xl max-w-[280px]">
-            <Image src="/onehabit/habits.jpg" alt="לשונית ההרגלים, הרגל 1: מים לפני האוכל" width={720} height={1559} className="w-full h-auto" />
+            <Image src="/onehabit/he/habits.jpg" alt="לשונית ההרגלים, הרגל 1: מים לפני האוכל" width={720} height={1559} className="w-full h-auto" />
           </div>
         </div>
       </section>
@@ -92,15 +92,12 @@ export default function OneHabitLandingHe() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-sm font-bold text-wing-heat mb-3 text-center">יום-יום</div>
           <h2 className="font-black text-3xl text-center mb-10">כלים פשוטים, סביב ההרגל</h2>
-          <div dir="ltr" className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
+          <div dir="ltr" className="grid grid-cols-2 gap-6 max-w-md mx-auto">
             <div className="rounded-2xl border-[5px] border-wing-ink overflow-hidden shadow-xl">
-              <Image src="/onehabit/dashboard.jpg" alt="מסך הבית" width={720} height={1559} className="w-full h-auto" />
+              <Image src="/onehabit/he/dashboard.jpg" alt="מסך הבית" width={720} height={1405} className="w-full h-auto" />
             </div>
             <div className="rounded-2xl border-[5px] border-wing-ink overflow-hidden shadow-xl mt-8">
-              <Image src="/onehabit/meals.jpg" alt="תיעוד ארוחה בתמונה" width={720} height={1559} className="w-full h-auto" />
-            </div>
-            <div className="rounded-2xl border-[5px] border-wing-ink overflow-hidden shadow-xl">
-              <Image src="/onehabit/wing.jpg" alt="המבנה שלכם, עד 2 חברים בחינם" width={720} height={1559} className="w-full h-auto" />
+              <Image src="/onehabit/he/meals.jpg" alt="ניתוח ארוחה בתמונה עם טיפ להרגל" width={720} height={1410} className="w-full h-auto" />
             </div>
           </div>
           <p className="text-center text-sm text-wing-muted mt-8 max-w-md mx-auto">
@@ -160,7 +157,7 @@ export default function OneHabitLandingHe() {
           <p className="text-center text-xs text-wing-muted mt-6">המחיר בישראל. במדינות אחרות המחיר מוצג בחנות, לפי המטבע המקומי.</p>
           <div className="flex justify-center mt-10">
             <div dir="ltr" className="rounded-2xl border-[5px] border-wing-ink overflow-hidden shadow-xl max-w-[220px]">
-              <Image src="/onehabit/subscription.jpg" alt="מסך המנוי של מצב הספר" width={720} height={1559} className="w-full h-auto" />
+              <Image src="/onehabit/he/subscription.jpg" alt="מסך המנוי של מצב הספר" width={720} height={1559} className="w-full h-auto" />
             </div>
           </div>
         </div>

@@ -242,6 +242,7 @@ body {
 h1, h2 { line-height: 1.08 !important; }
 [style*="letter-spacing:-"] { letter-spacing: 0 !important; }
 .ph-av .you { letter-spacing: 0; }
+.phone-screenshot { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
 </style>
 </head>
 <body>
@@ -551,82 +552,7 @@ h1, h2 { line-height: 1.08 !important; }
 
     <!-- Phone mockup — Dashboard -->
     <div class="phone">
-      <div class="phone-screen" style="background:#fbf4e6;">
-        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
-
-        <!-- Date + greeting -->
-        <div style="padding:2px 12px 5px; text-align:right;">
-          <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.14em; text-transform:uppercase;">יום רביעי, 27 במאי</div>
-          <div style="font-weight:800; font-size:16px; letter-spacing:-.025em; margin-top:1px;">שלום, שי</div>
-          <div style="font-size:7px; color:#8a7e68; margin-top:1px;">הרגל 1 · מים לפני האוכל</div>
-        </div>
-
-        <!-- Hero calorie card -->
-        <div class="ph-hero" style="margin:0 12px 7px; padding:10px 12px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div style="font-size:8px; color:#5a4220;">0 ארוחות</div>
-            <div style="font-family:'JetBrains Mono'; font-size:7px; letter-spacing:.16em; text-transform:uppercase; color:#5a4220; font-weight:700;">קלוריות היום</div>
-          </div>
-          <div style="display:flex; align-items:baseline; justify-content:flex-end; gap:4px; margin-top:2px;">
-            <div style="font-size:8px; color:#5a4220;">מתוך 2033 קק"ל</div>
-            <div style="font-weight:900; font-size:32px; letter-spacing:-.04em; line-height:1; color:#1a1814;">0</div>
-          </div>
-          <div class="ph-bar" style="margin-top:6px;"><div style="width:0%;"></div></div>
-          <!-- 3 mini stats -->
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:8px;">
-            <div style="background:#fbefd8; border-radius:8px; padding:5px 4px; text-align:center;">
-              <div style="font-family:'JetBrains Mono'; font-size:6px; letter-spacing:.12em; text-transform:uppercase; color:#5a4220; font-weight:700;">רצף 🔥</div>
-              <div style="font-weight:900; font-size:13px; color:#1a1814; margin-top:2px;">—</div>
-            </div>
-            <div style="background:#fbefd8; border-radius:8px; padding:5px 4px; text-align:center;">
-              <div style="font-family:'JetBrains Mono'; font-size:6px; letter-spacing:.12em; text-transform:uppercase; color:#5a4220; font-weight:700;">מים 💧</div>
-              <div style="font-weight:900; font-size:13px; color:#1a1814; margin-top:2px;">—</div>
-            </div>
-            <div style="background:#fbefd8; border-radius:8px; padding:5px 4px; text-align:center;">
-              <div style="font-family:'JetBrains Mono'; font-size:6px; letter-spacing:.12em; text-transform:uppercase; color:#5a4220; font-weight:700;">צעדים 👣</div>
-              <div style="font-weight:900; font-size:13px; color:#1a1814; margin-top:2px;">—</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Weight chart mini -->
-        <div class="ph-card" style="margin-bottom:6px;">
-          <div class="ph-card-title" style="display:flex; justify-content:space-between;"><span>משקל</span><span style="color:var(--green);">−1 ק"ג</span></div>
-          <div style="display:flex; align-items:flex-end; gap:3px; height:26px; margin-top:2px;">
-            <div style="flex:1; background:#f5dd4b; border-radius:2px; height:70%;"></div>
-            <div style="flex:1; background:#f5dd4b; border-radius:2px; height:60%;"></div>
-            <div style="flex:1; background:#f5dd4b; border-radius:2px; height:65%;"></div>
-            <div style="flex:1; background:#ff6b47; border-radius:2px; height:45%;"></div>
-            <div style="flex:1; background:#ff6b47; border-radius:2px; height:40%;"></div>
-          </div>
-        </div>
-
-        <!-- Action grid -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:0 12px 5px;">
-          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
-            <div style="font-size:16px; margin-bottom:3px;">👣</div>
-            <div style="font-weight:700; font-size:10px;">צעדים</div>
-            <div style="font-size:8px; color:#8a7e68; margin-top:1px;">טבלת מובילים</div>
-          </div>
-          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
-            <div style="font-size:16px; margin-bottom:3px;">✅</div>
-            <div style="font-weight:700; font-size:10px;">צ'ק-אין</div>
-            <div style="font-size:8px; color:#8a7e68; margin-top:1px;">מים, אימון, משקל</div>
-          </div>
-        </div>
-
-        <!-- SOS -->
-        <div style="margin:0 12px 5px; border:1.5px solid #d4541a; border-radius:12px; padding:7px; text-align:center; font-weight:800; font-size:9px; color:#d4541a;">SOS - אני צריך/ה תמיכה ⚠️</div>
-
-        <!-- Nav -->
-        <div class="ph-nav">
-          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>צ'ק-אין</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
-        </div>
-      </div>
+      <div class="phone-screen" style="background:#fbf4e6;"><img class="phone-screenshot" src="/onehabit/he/dashboard.jpg" alt=""></div>
     </div>
   </div>
   <div class="page-num">עמ' 4</div>
@@ -711,65 +637,7 @@ h1, h2 { line-height: 1.08 !important; }
 
     <!-- Phone: meals -->
     <div class="phone">
-      <div class="phone-screen" style="background:#fbf4e6;">
-        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
-
-        <!-- Header with Photo + Manual buttons + title -->
-        <div style="padding:2px 12px 6px; display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; gap:5px;">
-            <div style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:999px; padding:4px 9px; font-size:9px; font-weight:800; color:#1a1814; display:flex; align-items:center; gap:3px;">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
-              צילום
-            </div>
-            <div style="background:white; border:1px solid #ede5d0; border-radius:999px; padding:4px 9px; font-size:9px; font-weight:700; color:#1a1814; display:flex; align-items:center; gap:3px;">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              ידני
-            </div>
-          </div>
-          <div style="font-weight:800; font-size:14px; letter-spacing:-.02em;">ארוחות</div>
-        </div>
-
-        <!-- Today label -->
-        <div style="text-align:right; padding:6px 12px 4px; font-size:9px; font-weight:600; color:#8a7e68;">היום</div>
-
-        <!-- Meal card with photo -->
-        <div class="ph-meal-hero">
-          <div class="img" style="background:linear-gradient(135deg,#c8b090,#8a6840);">
-            <div style="position:absolute; top:6px; left:8px;">
-              <span style="background:white; color:#1a1814; font-size:7.5px; font-weight:700; padding:2px 7px; border-radius:999px;">צהריים · 13:19</span>
-            </div>
-            <div style="position:absolute; bottom:6px; left:8px;">
-              <div style="font-weight:900; font-size:18px; letter-spacing:-.03em; color:white; line-height:1; text-shadow:0 1px 4px rgba(0,0,0,.4);">520</div>
-              <div style="font-family:'JetBrains Mono'; font-size:7px; color:rgba(255,255,255,.85); text-transform:uppercase; letter-spacing:.1em;">קק"ל</div>
-            </div>
-            <div style="position:absolute; bottom:10px; right:8px; left:56px; font-size:8px; font-weight:600; color:white; text-shadow:0 1px 3px rgba(0,0,0,.5);">נתחי עוף ברוטב קל</div>
-          </div>
-          <div style="background:white; padding:5px 10px; display:flex; justify-content:flex-end; gap:10px;">
-            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#2f8d5f; font-weight:700;">F 24</span>
-            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#c79a00; font-weight:700;">C 28</span>
-            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#d4541a; font-weight:700;">P 42</span>
-          </div>
-        </div>
-
-        <!-- Date accordion items -->
-        <div style="margin:0 12px 3px; background:white; border:1px solid #ede5d0; border-radius:10px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a7e68" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-          <span style="font-size:10px; font-weight:700;">יום שלישי 26/5/26</span>
-        </div>
-        <div style="margin:0 12px 3px; background:white; border:1px solid #ede5d0; border-radius:10px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a7e68" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-          <span style="font-size:10px; font-weight:700;">יום שני 25/5/26</span>
-        </div>
-
-        <!-- Nav -->
-        <div class="ph-nav">
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
-          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>צ'ק-אין</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
-        </div>
-      </div>
+      <div class="phone-screen" style="background:#fbf4e6;"><img class="phone-screenshot" src="/onehabit/he/meals.jpg" alt=""></div>
     </div>
   </div>
   <div class="page-num">עמ' 5</div>
@@ -1164,42 +1032,7 @@ h1, h2 { line-height: 1.08 !important; }
 
     <!-- Phone: Habits mockup -->
     <div class="phone">
-      <div class="phone-screen" style="background:#fbf4e6;">
-        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
-        <div style="padding:2px 12px 6px;">
-          <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.14em; text-transform:uppercase;">הרגל 1 מתוך 8</div>
-          <div style="font-weight:800; font-size:16px; letter-spacing:-.025em; margin-top:1px;">מים לפני האוכל</div>
-        </div>
-
-        <div class="ph-card" style="margin-bottom:6px;">
-          <div class="ph-card-title">משפט ההפעלה</div>
-          <p style="font-size:10px; line-height:1.4; font-style:italic; color:#1a1814;">"לפני כל ארוחה עיקרית שותים כוס מים מלאה."</p>
-        </div>
-
-        <div class="ph-card" style="margin-bottom:6px;">
-          <div class="ph-card-title">סימן ← פעולה ← תגמול</div>
-          <p style="font-size:9px; line-height:1.5; color:#3a3329;"><b>סימן:</b> לפני ארוחה.<br><b>פעולה:</b> כוס מים מלאה קודם.<br><b>תגמול:</b> עצירה מודעת בתחילת הארוחה.</p>
-        </div>
-
-        <div class="ph-card" style="margin-bottom:6px;">
-          <div class="ph-card-title">ימים בהרגל הזה</div>
-          <div style="display:flex; align-items:baseline; gap:5px;">
-            <div style="font-weight:900; font-size:22px; letter-spacing:-.03em;">12</div>
-            <div style="font-size:8px; color:#8a7e68;">החציוני הוא 66 ימים</div>
-          </div>
-        </div>
-
-        <div class="ph-cta">סימון ההרגל כמותקן</div>
-
-        <!-- Nav -->
-        <div class="ph-nav">
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>צ'ק-אין</div>
-          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
-          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
-        </div>
-      </div>
+      <div class="phone-screen" style="background:#fbf4e6;"><img class="phone-screenshot" src="/onehabit/he/habits.jpg" alt=""></div>
     </div>
   </div>
   <div class="page-num">עמ' 9</div>
@@ -1276,32 +1109,7 @@ h1, h2 { line-height: 1.08 !important; }
 
     <!-- Phone: Membership mockup -->
     <div class="phone">
-      <div class="phone-screen" style="background:#fbf4e6;">
-        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
-        <div style="padding:2px 12px 8px;">
-          <div style="font-weight:800; font-size:15px;">ניהול מנוי</div>
-        </div>
-        <div class="ph-card" style="margin-bottom:6px; text-align:center; background:linear-gradient(135deg,rgba(245,221,75,.18),rgba(255,107,71,.12)); border:1px solid rgba(212,84,26,.2);">
-          <div style="font-size:9px; font-weight:700; color:#1a1814;">חינם עד סוף הרגל 1</div>
-          <div style="font-size:7.5px; color:#5a4220; margin-top:2px;">בלי הגבלת ימים</div>
-        </div>
-        <div class="ph-card" style="margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
-          <div><div style="font-weight:700; font-size:11px;">שנתי</div><div style="font-size:7px; color:#8a7e68;">מומלץ</div></div>
-          <div style="font-weight:900; font-size:14px;">₪89</div>
-        </div>
-        <div class="ph-card" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-weight:600; font-size:11px;">חודשי</div>
-          <div style="font-weight:900; font-size:14px;">₪8.90</div>
-        </div>
-        <div class="ph-card">
-          <div class="ph-card-title">מזמינים עד 2 חברים בחינם</div>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <div class="ph-av" style="background:#d4541a; width:22px; height:22px; font-size:9px;">S</div>
-            <div class="ph-av dashed" style="width:22px; height:22px; font-size:13px;">+</div>
-            <div class="ph-av dashed" style="width:22px; height:22px; font-size:13px;">+</div>
-          </div>
-        </div>
-      </div>
+      <div class="phone-screen" style="background:#fbf4e6;"><img class="phone-screenshot" src="/onehabit/he/subscription.jpg" alt=""></div>
     </div>
   </div>
   <div class="page-num">עמ' 10</div>
