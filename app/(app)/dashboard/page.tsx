@@ -29,6 +29,7 @@ import type { DailyCheckin, WeightLog } from "@/types";
 import { Bell, Footprints, Scale, ChevronLeft, Droplets, Flame, Plus, Minus, Leaf, Check, Pencil, Users, UtensilsCrossed, MessageCircle, Trophy } from "lucide-react";
 import { getWingSteps, getUserCheckinDates } from "@/lib/firebase/firestore";
 import { calcStreak } from "@/lib/utils/streak";
+import { usesImperial } from "@/lib/utils/units";
 import type { StepsEntry } from "@/types";
 import { AdBanner } from "@/components/ads/AdBanner";
 import { isWingAdmin } from "@/lib/wing/roles";
@@ -629,7 +630,7 @@ if (!r.authorized || !r.steps || r.steps <= 0) return;
                 <Scale size={15} className="text-wing-muted" />
                 <span className="font-bold text-wing-ink text-sm">{t("dashboard_weight_progress")}</span>
               </div>
-              <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} lang={lang} imperial={!!user?.bookAccess?.active} />
+              <WeightChart logs={weightLogs} targetWeight={user?.profile?.targetWeightKg} lang={lang} imperial={usesImperial(!!user?.bookAccess?.active, lang)} />
             </div>
           )}
 

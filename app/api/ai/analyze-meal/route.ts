@@ -9,6 +9,7 @@ import { analyzeMealImage, analyzeMealImages, analyzeMealText } from "@/lib/ai/c
 import { isGrandfathered, isPremium, FREE_LIMITS, type Plan, type AccessGrants } from "@/lib/subscription";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
+import { getCurrentHabit, type HabitProgressMap } from "@/lib/book/habits";
 
 // ── Admin-SDK helpers (server-safe, no client SDK) ────────────────────────────
 
@@ -17,17 +18,18 @@ type CourseAccess = { expiresAt: string; wingId: string };
 type CoachAccess = { active?: boolean };
 type BookAccess = { active?: boolean; grantedBy?: string };
 type FitDadAccess = { active?: boolean; expiresAt?: string };
-type UserDoc = { email?: string; subscription?: SubDoc; courseAccess?: CourseAccess; coachAccess?: CoachAccess; bookAccess?: BookAccess; fitDadAccess?: FitDadAccess };
+type UserDoc = { habitProgress?: HabitProgressMap; email?: string; subscription?: SubDoc; courseAccess?: CourseAccess; coachAccess?: CoachAccess; bookAccess?: BookAccess; fitDadAccess?: FitDadAccess };
 
 async function getUserPlanAdmin(
   uid: string
-): Promise<{ email: string; sub: SubDoc | null; grants: AccessGrants }> {
+): Promise<{ email: string; sub: SubDoc | null; grants: AccessGrants; habitProgress?: HabitProgressMap }> {
   const snap = await admin.firestore().doc(`users/${uid}`).get();
   if (!snap.exists) return { email: "", sub: null, grants: {} };
   const data = snap.data() as UserDoc;
   return {
     email: data.email ?? "",
     sub: data.subscription ?? null,
+    habitProgress: data.habitProgress,
     // Bundled so a future access type doesn't need a new destructured field
     // at every call site below — see lib/subscription.ts's AccessGrants doc.
     grants: {
@@ -109,7 +111,9 @@ export async function POST(req: NextRequest) {
     const { base64Images, hint, previousAnalysis, textDescription, lang, imageUrl } = body;
 
     getAdminApp();
-    const { email: userEmail, sub, grants } = await getUserPlanAdmin(uid);
+    const { email: userEmail, sub, grants, habitProgress } = await getUserPlanAdmin(uid);
+    // Book mode: steer the tip toward the habit the user is installing now.
+    const habit = grants.bookAccess?.active ? getCurrentHabit(habitProgress, lang ?? "he") : undefined;
     const plan = sub?.plan ?? "free";
     const today = format(new Date(), "yyyy-MM-dd");
     const grandfathered = isGrandfathered(userEmail);
@@ -152,13 +156,13 @@ export async function POST(req: NextRequest) {
     try {
       // ── Text analysis (manual entry / voice, or a saved meal with no photo)
       if (textDescription) {
-        const analysis = await analyzeMealText(textDescription, lang ?? "he");
+        const analysis = await analyzeMealText(textDescription, lang ?? "he", habit);
         return NextResponse.json(analysis);
       }
 
       // ── Multi-image analysis ─────────────────────────────────────────────
       if (base64Images && Array.isArray(base64Images) && base64Images.length > 0) {
-        const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis);
+        const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis, habit);
         return NextResponse.json(analysis);
       }
 
@@ -167,7 +171,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Missing image data" }, { status: 400 });
       }
 
-      const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis);
+      const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis, habit);
       return NextResponse.json(analysis);
     } catch (err) {
       if (needsQuota) await releaseMealQuota(uid, today, imageCount);

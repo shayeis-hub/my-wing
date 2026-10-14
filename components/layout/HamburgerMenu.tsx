@@ -142,10 +142,10 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           </Link>
 
           {/* User Guide — book-mode users get a guide adapted for their
-              flow (redeem code, Habits tab, imperial units) instead of the
+              flow (redeem code, Habits tab, units) instead of the
               general one, since Feed/Challenges/Coach sections don't apply. */}
           <a
-            href={user?.bookAccess?.active ? "/guides/en-book.html" : `/guides/${lang}.html`}
+            href={user?.bookAccess?.active ? `/guides/${lang === "he" ? "he" : "en"}-book.html` : `/guides/${lang}.html`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}

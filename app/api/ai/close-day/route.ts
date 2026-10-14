@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     const userSnap = await admin.firestore().doc(`users/${userId}`).get();
     const userData = userSnap.data();
     const currentHabit = userData?.bookAccess?.active
-      ? getCurrentHabit(userData.habitProgress)
+      ? getCurrentHabit(userData.habitProgress, lang)
       : undefined;
 
     const result = await generatePersonalDaySummary({

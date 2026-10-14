@@ -3,30 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/lib/i18n";
 import { updateUserProfile } from "@/lib/firebase/auth";
 import { calculateDailyTarget } from "@/lib/utils/calculator";
 import { getHabitByOrder } from "@/lib/book/habits";
+import { lbToKg, ftInToCm, usesImperial } from "@/lib/utils/units";
 import { Button } from "@/components/ui/Button";
 import toast from "react-hot-toast";
 import type { UserProfile } from "@/types";
 
-// Phase-1 book-mode audience is the US (the book is English-only, sold on
-// Amazon US) — imperial units here, unlike the regular onboarding's metric
-// fields. Storage stays metric internally (kg/cm) so the existing calorie
-// calculator and every other page that reads user.profile need no changes —
-// this page just converts at the edges.
-const LB_PER_KG = 2.2046226218;
-const CM_PER_IN = 2.54;
-
-function lbToKg(lb: number) {
-  return lb / LB_PER_KG;
-}
-function ftInToCm(feet: number, inches: number) {
-  return (feet * 12 + inches) * CM_PER_IN;
-}
-
+// The English (US) edition collects imperial units; the Hebrew edition is
+// metric like the rest of the app. Storage stays metric internally (kg/cm) so
+// the existing calorie calculator and every other page that reads
+// user.profile need no changes — this page just converts at the edges.
 export default function BookOnboardingPage() {
   const { user, firebaseUser } = useAuth();
+  const { lang, dir, t } = useLanguage();
+  const he = lang === "he";
+  const imperial = usesImperial(true, lang);
   const router = useRouter();
   const [step, setStep] = useState<"profile" | "intro">("profile");
   const [saving, setSaving] = useState(false);
@@ -35,19 +29,24 @@ export default function BookOnboardingPage() {
   const [age, setAge] = useState("35");
   const [feet, setFeet] = useState("5");
   const [inches, setInches] = useState("8");
+  const [heightCm, setHeightCm] = useState("175");
   const [weightLb, setWeightLb] = useState("190");
   const [targetWeightLb, setTargetWeightLb] = useState("170");
+  const [weightKg, setWeightKg] = useState("86");
+  const [targetWeightKg, setTargetWeightKg] = useState("77");
   const [activity, setActivity] = useState<UserProfile["activityLevel"]>("moderate");
 
-  const habit1 = getHabitByOrder(1)!;
+  const habit1 = getHabitByOrder(1, lang)!;
   const firstName = user?.displayName?.split(" ")[0] ?? "";
 
   function handleProfileNext() {
-    const w = parseFloat(weightLb);
-    const tw = parseFloat(targetWeightLb);
-    if (!age || +age < 10 || +age > 100) { toast.error("Enter a valid age"); return; }
-    if (!feet || !w || w < 60 || w > 700) { toast.error("Enter a valid weight"); return; }
-    if (tw >= w) { toast.error("Target weight should be less than your current weight"); return; }
+    const w = parseFloat(imperial ? weightLb : weightKg);
+    const tw = parseFloat(imperial ? targetWeightLb : targetWeightKg);
+    const minW = imperial ? 60 : 30;
+    const maxW = imperial ? 700 : 320;
+    if (!age || +age < 10 || +age > 100) { toast.error(he ? "הזינו גיל תקין" : "Enter a valid age"); return; }
+    if (!(imperial ? feet : heightCm) || !w || w < minW || w > maxW) { toast.error(he ? "הזינו גובה ומשקל תקינים" : "Enter a valid weight"); return; }
+    if (tw >= w) { toast.error(he ? "משקל היעד צריך להיות נמוך מהמשקל הנוכחי" : "Target weight should be less than your current weight"); return; }
     setStep("intro");
   }
 
@@ -59,9 +58,9 @@ export default function BookOnboardingPage() {
       const profile: UserProfile = {
         gender,
         age: +age,
-        heightCm: Math.round(ftInToCm(+feet, +inches)),
-        weightKg: +lbToKg(+weightLb).toFixed(1),
-        targetWeightKg: +lbToKg(+targetWeightLb).toFixed(1),
+        heightCm: imperial ? Math.round(ftInToCm(+feet, +inches)) : Math.round(+heightCm),
+        weightKg: imperial ? +lbToKg(+weightLb).toFixed(1) : +(+weightKg).toFixed(1),
+        targetWeightKg: imperial ? +lbToKg(+targetWeightLb).toFixed(1) : +(+targetWeightKg).toFixed(1),
         activityLevel: activity,
         dailyCalorieTarget: 0,
       };
@@ -78,7 +77,7 @@ export default function BookOnboardingPage() {
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
           body: JSON.stringify({
             ownerName: user.displayName,
-            name: `${firstName}'s Circle`,
+            name: he ? `המבנה של ${firstName}` : `${firstName}'s Circle`,
             isBookWing: true,
           }),
         });
@@ -96,95 +95,116 @@ export default function BookOnboardingPage() {
 
       router.replace("/habits");
     } catch {
-      toast.error("Something went wrong, please try again");
+      toast.error(he ? "משהו השתבש, נסו שוב" : "Something went wrong, please try again");
     } finally {
       setSaving(false);
     }
   }
 
+  const inputCls = "w-full bg-wing-surface border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink";
+  const labelCls = "text-xs font-mono uppercase tracking-wider text-wing-muted mb-1.5";
+  const chip = (on: boolean) => `text-xs font-semibold px-3 py-1.5 rounded-full border ${on ? "bg-wing-ink text-wing-elevated border-wing-ink" : "bg-wing-surface text-wing-muted border-wing-border"}`;
+  const sexBtn = (on: boolean) => `flex-1 py-2.5 rounded-xl text-sm font-bold border ${on ? "bg-wing-ink text-wing-elevated border-wing-ink" : "bg-wing-surface text-wing-muted border-wing-border"}`;
+  const unitTag = "absolute left-2 top-1/2 -translate-y-1/2 text-xs text-wing-subtle";
+
   return (
-    <div className="min-h-screen bg-wing-bg flex flex-col items-center justify-center p-5">
+    <div className="min-h-screen bg-wing-bg flex flex-col items-center justify-center p-5" dir={dir}>
       <div className="w-full max-w-[340px]">
         {step === "profile" ? (
           <div>
             <h1 className="text-2xl font-black text-wing-ink tracking-tight mb-2">
-              A few numbers first
+              {he ? "כמה מספרים קודם" : "A few numbers first"}
             </h1>
             <p className="text-sm text-wing-muted leading-relaxed mb-6">
-              This sets your baseline — the book tells you to measure it before you start.
+              {he
+                ? "זו נקודת המוצא שלכם - הספר מבקש למדוד אותה לפני שמתחילים."
+                : "This sets your baseline — the book tells you to measure it before you start."}
             </p>
 
             <div className="flex flex-col gap-5">
               <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-wing-muted mb-1.5">Sex</p>
+                <p className={labelCls}>{he ? "מין" : "Sex"}</p>
                 <div className="flex gap-2">
-                  <button onClick={() => setGender("male")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold border ${gender === "male" ? "bg-wing-ink text-wing-elevated border-wing-ink" : "bg-wing-surface text-wing-muted border-wing-border"}`}>Male</button>
-                  <button onClick={() => setGender("female")} className={`flex-1 py-2.5 rounded-xl text-sm font-bold border ${gender === "female" ? "bg-wing-ink text-wing-elevated border-wing-ink" : "bg-wing-surface text-wing-muted border-wing-border"}`}>Female</button>
+                  <button onClick={() => setGender("male")} className={sexBtn(gender === "male")}>{he ? "גבר" : "Male"}</button>
+                  <button onClick={() => setGender("female")} className={sexBtn(gender === "female")}>{he ? "אישה" : "Female"}</button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs font-mono uppercase tracking-wider text-wing-muted mb-1.5">Age</p>
-                  <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full bg-wing-surface border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink" />
+                  <p className={labelCls}>{he ? "גיל" : "Age"}</p>
+                  <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <p className="text-xs font-mono uppercase tracking-wider text-wing-muted mb-1.5">Height</p>
-                  <div className="flex gap-1.5">
-                    <div className="flex-1 relative">
-                      <input type="number" value={feet} onChange={(e) => setFeet(e.target.value)} className="w-full bg-wing-surface border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink" />
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-wing-subtle">ft</span>
+                  <p className={labelCls}>{he ? "גובה" : "Height"}</p>
+                  {imperial ? (
+                    <div className="flex gap-1.5">
+                      <div className="flex-1 relative">
+                        <input type="number" value={feet} onChange={(e) => setFeet(e.target.value)} className={inputCls} />
+                        <span className={unitTag}>ft</span>
+                      </div>
+                      <div className="flex-1 relative">
+                        <input type="number" value={inches} onChange={(e) => setInches(e.target.value)} className={inputCls} />
+                        <span className={unitTag}>in</span>
+                      </div>
                     </div>
-                    <div className="flex-1 relative">
-                      <input type="number" value={inches} onChange={(e) => setInches(e.target.value)} className="w-full bg-wing-surface border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink" />
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-wing-subtle">in</span>
+                  ) : (
+                    <div className="relative">
+                      <input type="number" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} className={inputCls} />
+                      <span className={unitTag}>{he ? "ס״מ" : "cm"}</span>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
               <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-wing-muted mb-1.5">Current weight (lb)</p>
-                <input type="number" value={weightLb} onChange={(e) => setWeightLb(e.target.value)} className="w-full bg-wing-surface border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink" />
+                <p className={labelCls}>{imperial ? "Current weight (lb)" : he ? "משקל נוכחי (ק״ג)" : "Current weight (kg)"}</p>
+                {imperial
+                  ? <input type="number" value={weightLb} onChange={(e) => setWeightLb(e.target.value)} className={inputCls} />
+                  : <input type="number" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} className={inputCls} />}
               </div>
 
               <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-wing-muted mb-1.5">Target weight (lb)</p>
-                <input type="number" value={targetWeightLb} onChange={(e) => setTargetWeightLb(e.target.value)} className="w-full bg-wing-surface border border-wing-border rounded-xl px-3 py-2.5 text-sm text-wing-ink" />
+                <p className={labelCls}>{imperial ? "Target weight (lb)" : he ? "משקל יעד (ק״ג)" : "Target weight (kg)"}</p>
+                {imperial
+                  ? <input type="number" value={targetWeightLb} onChange={(e) => setTargetWeightLb(e.target.value)} className={inputCls} />
+                  : <input type="number" value={targetWeightKg} onChange={(e) => setTargetWeightKg(e.target.value)} className={inputCls} />}
               </div>
 
               <div>
-                <p className="text-xs font-mono uppercase tracking-wider text-wing-muted mb-1.5">Activity level</p>
+                <p className={labelCls}>{he ? "רמת פעילות" : "Activity level"}</p>
                 <div className="flex flex-wrap gap-2">
                   {(["sedentary", "light", "moderate", "active", "very_active"] as const).map((a) => (
-                    <button key={a} onClick={() => setActivity(a)} className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${activity === a ? "bg-wing-ink text-wing-elevated border-wing-ink" : "bg-wing-surface text-wing-muted border-wing-border"}`}>
-                      {a.replace("_", " ")}
+                    <button key={a} onClick={() => setActivity(a)} className={chip(activity === a)}>
+                      {he ? (t(`activity_${a}`) as string) : a.replace("_", " ")}
                     </button>
                   ))}
                 </div>
               </div>
             </div>
 
-            <Button className="w-full mt-8" onClick={handleProfileNext}>Continue</Button>
+            <Button className="w-full mt-8" onClick={handleProfileNext}>{he ? "המשך" : "Continue"}</Button>
           </div>
         ) : (
           <div>
-            <p className="text-xs font-bold text-wing-heat uppercase tracking-wider mb-2">Habit 1 of 8</p>
+            <p className="text-xs font-bold text-wing-heat uppercase tracking-wider mb-2">
+              {he ? "הרגל 1 מתוך 8" : "Habit 1 of 8"}
+            </p>
             <h1 className="text-2xl font-black text-wing-ink tracking-tight mb-2">{habit1.name}</h1>
             <p className="text-sm text-wing-muted leading-relaxed mb-5">{habit1.tagline}</p>
 
             <div className="bg-wing-surface border border-wing-border rounded-[20px] p-5 space-y-3 mb-6">
-              <p className="text-sm text-wing-ink"><span className="font-bold">Cue:</span> {habit1.cue}</p>
-              <p className="text-sm text-wing-ink"><span className="font-bold">Routine:</span> {habit1.routine}</p>
-              <p className="text-sm text-wing-ink"><span className="font-bold">Reward:</span> {habit1.reward}</p>
+              <p className="text-sm text-wing-ink"><span className="font-bold">{he ? "סימן מפעיל:" : "Cue:"}</span> {habit1.cue}</p>
+              <p className="text-sm text-wing-ink"><span className="font-bold">{he ? "הפעולה:" : "Routine:"}</span> {habit1.routine}</p>
+              <p className="text-sm text-wing-ink"><span className="font-bold">{he ? "התגמול:" : "Reward:"}</span> {habit1.reward}</p>
             </div>
 
             <div className="bg-wing-elevated border border-wing-border rounded-2xl px-4 py-3 mb-6">
-              <p className="text-sm font-mono text-wing-ink" dir="ltr">"{habit1.triggerSentence}"</p>
+              <p className={`text-sm text-wing-ink ${he ? "" : "font-mono"}`} dir={he ? "rtl" : "ltr"}>"{habit1.triggerSentence}"</p>
             </div>
 
             <Button className="w-full" onClick={handleStart} loading={saving}>
-              Start habit one
+              {he ? "מתחילים בהרגל הראשון" : "Start habit one"}
             </Button>
           </div>
         )}

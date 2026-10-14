@@ -1,0 +1,1529 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Wingpact · מדריך מצב ספר</title>
+<meta name="viewport" content="width=794, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ─────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { direction: rtl; }
+body {
+  font-family: 'Heebo', system-ui, sans-serif;
+  background: #ede5d0;
+  color: #1a1814;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page shell ─────────────────────────────────── */
+.page {
+  width: 794px;
+  min-height: 1123px;
+  background: #fbf4e6;
+  margin: 32px auto;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+}
+
+/* ── Tokens ─────────────────────────────────────── */
+:root {
+  --ink:     #1a1814;
+  --muted:   #8a7e68;
+  --subtle:  #c9bc9c;
+  --border:  #ede5d0;
+  --surface: #ffffff;
+  --sand:    #fbf4e6;
+  --sun1:    #f5dd4b;
+  --sun2:    #ff6b47;
+  --coral:   #d4541a;
+  --honey:   #c79a00;
+  --green:   #2f8d5f;
+}
+
+.gradient-fill { background: linear-gradient(135deg, var(--sun1), var(--sun2)); }
+.gradient-text {
+  background: linear-gradient(90deg, var(--honey), var(--coral));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Cover ──────────────────────────────────────── */
+.cover-page {
+  background: var(--sand);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 80px 72px;
+}
+.cover-radial {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 85% 15%, rgba(245,221,75,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 15% 85%, rgba(255,107,71,.14) 0%, transparent 55%);
+}
+
+/* ── Typography ─────────────────────────────────── */
+.kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--muted);
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Layout helpers ─────────────────────────────── */
+.pad { padding: 64px 72px; }
+.two-col { display: grid; grid-template-columns: 1fr 232px; gap: 48px; align-items: start; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+
+/* ── Step numbers ───────────────────────────────── */
+.step {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px;
+}
+.step .num {
+  width: 28px; height: 28px; border-radius: 999px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sun1), var(--sun2));
+  color: var(--ink); font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.step .body b { display: block; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.step .body p { font-size: 13px; line-height: 1.5; color: #3a3329; }
+
+/* ── Tip box ────────────────────────────────────── */
+.tip {
+  background: linear-gradient(135deg, rgba(245,221,75,.18), rgba(255,107,71,.12));
+  border: 1px solid rgba(212,84,26,.2);
+  border-radius: 14px; padding: 14px 16px; margin-top: 22px;
+}
+.tip .tip-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--coral); font-weight: 700; margin-bottom: 4px;
+}
+.tip p { font-size: 12px; line-height: 1.5; color: #3a3329; }
+
+/* ── Phone shell ────────────────────────────────── */
+.phone {
+  width: 232px; height: 472px;
+  background: var(--surface);
+  border-radius: 36px;
+  border: 7px solid #1a1814;
+  position: relative; overflow: hidden;
+  box-shadow: 0 20px 56px rgba(26,24,20,.16), 0 4px 12px rgba(26,24,20,.08);
+  flex-shrink: 0;
+}
+.phone::before {
+  content: ''; position: absolute; top: 7px; left: 50%;
+  transform: translateX(-50%); width: 80px; height: 18px;
+  background: #1a1814; border-radius: 0 0 12px 12px; z-index: 10;
+}
+.phone-screen { height: 100%; overflow: hidden; background: #fbf4e6; }
+.phone-status {
+  padding: 28px 18px 4px; font-size: 10px; font-weight: 600;
+  display: flex; justify-content: space-between; color: var(--ink);
+}
+
+/* ── Phone UI elements ───────────────────────────── */
+.ph-hero {
+  margin: 6px 12px 8px;
+  background: linear-gradient(135deg, #fff3b8, #ffc89a);
+  border-radius: 14px; padding: 14px;
+}
+.ph-hero .ph-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: #5a4220; font-weight: 700; }
+.ph-hero .ph-num { font-weight: 900; font-size: 38px; letter-spacing: -.04em; line-height: 1; color: #1a1814; margin-top: 2px; }
+.ph-hero .ph-sub { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #5a4220; margin-top: 3px; }
+.ph-bar { height: 4px; background: rgba(26,24,20,.18); border-radius: 999px; margin-top: 8px; overflow: hidden; }
+.ph-bar > div { height: 100%; background: #1a1814; border-radius: 999px; }
+
+.ph-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin: 0 12px 8px; }
+.ph-stat { background: white; border: 1px solid #ede5d0; border-radius: 10px; padding: 7px 6px; }
+.ph-stat .l { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .14em; text-transform: uppercase; color: #8a7e68; }
+.ph-stat .v { font-weight: 900; font-size: 13px; letter-spacing: -.03em; margin-top: 1px; }
+
+.ph-card { background: white; border: 1px solid #ede5d0; border-radius: 12px; padding: 9px 11px; margin: 0 12px 8px; }
+.ph-card .ph-card-title { font-size: 9px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: #8a7e68; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+
+.ph-avatars { display: flex; gap: 5px; align-items: center; }
+.ph-av { width: 28px; height: 28px; border-radius: 999px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; position: relative; flex-shrink: 0; }
+.ph-av .you { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); background: #1a1814; color: #fbf4e6; font-size: 6px; font-weight: 800; padding: 0 3px; border-radius: 3px; letter-spacing: .06em; white-space: nowrap; }
+.ph-av.dashed { background: transparent; border: 1.5px dashed #c9bc9c; color: #8a7e68; }
+
+.ph-cta {
+  background: linear-gradient(135deg, #f5dd4b, #ff6b47);
+  border-radius: 12px; padding: 10px; margin: 0 12px 6px;
+  font-weight: 800; font-size: 12px; text-align: center; color: #1a1814;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+
+/* 5-item nav (Book Mode: Menu, Habits, Check-up, Meals, Home) */
+.ph-nav {
+  position: absolute; bottom: 10px; left: 8px; right: 8px; height: 44px;
+  background: white; border: 1px solid #ede5d0; border-radius: 16px;
+  display: flex; justify-content: space-around; align-items: center;
+}
+.ph-nav-item { display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 6px; color: #8a7e68; }
+.ph-nav-item.active { color: #d4541a; }
+.ph-nav-item svg { width: 13px; height: 13px; }
+
+.ph-pill-row { display: flex; gap: 4px; margin: 0 12px 8px; overflow: hidden; }
+.ph-pill { font-size: 9px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: white; border: 1px solid #ede5d0; color: #5a4f3f; white-space: nowrap; }
+.ph-pill.active { background: #1a1814; color: #fbf4e6; border-color: #1a1814; }
+
+/* ── Meal card ───────────────────────────────────── */
+.ph-meal-hero { margin: 0 12px 6px; border-radius: 12px; overflow: hidden; }
+.ph-meal-hero .img { height: 90px; position: relative; }
+.ph-meal-hero .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 7px 10px; background: linear-gradient(transparent, rgba(255,255,255,.96)); }
+.ph-meal-compact { display: flex; gap: 8px; margin: 0 12px 5px; background: white; border: 1px solid #ede5d0; border-radius: 10px; padding: 7px 8px; }
+.ph-meal-compact .thumb { width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0; }
+.ph-meal-compact .info { flex: 1; }
+.ph-meal-compact .info .name { font-size: 10px; font-weight: 600; }
+.ph-meal-compact .info .meta { font-size: 8px; color: #8a7e68; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.ph-meal-compact .cal { font-weight: 900; font-size: 16px; letter-spacing: -.03em; }
+
+/* ── Check-up elements ─────────────────────────── */
+.ph-slider-row { display: flex; align-items: center; gap: 8px; margin: 6px 0 2px; }
+.ph-slider { flex: 1; height: 6px; background: #ede5d0; border-radius: 999px; overflow: hidden; }
+.ph-slider .fill { height: 100%; background: linear-gradient(90deg, #f5dd4b, #ff6b47); border-radius: 999px; }
+.ph-counter { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 4px 0; }
+.ph-minus, .ph-plus { width: 28px; height: 28px; border-radius: 999px; border: 1px solid #ede5d0; background: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.ph-plus { background: linear-gradient(135deg, #f5dd4b, #ff6b47); border: none; color: #1a1814; }
+.ph-mood-row { display: flex; gap: 4px; justify-content: space-around; margin-top: 4px; }
+.ph-mood { font-size: 18px; padding: 4px; border-radius: 10px; }
+.ph-mood.sel { background: linear-gradient(135deg, rgba(245,221,75,.3), rgba(255,107,71,.2)); }
+
+/* ── Section header ─────────────────────────────── */
+.feature-header {
+  border-bottom: 1px solid var(--border);
+  padding: 48px 72px 28px; margin-bottom: 0;
+  display: flex; align-items: flex-end; justify-content: space-between;
+}
+.feature-header h2 { font-size: 52px; font-weight: 900; letter-spacing: -.035em; line-height: .95; }
+.feature-header .badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 999px;
+  background: linear-gradient(135deg, #f5dd4b, #ff6b47); color: #1a1814; font-weight: 700;
+}
+
+/* ── TOC ─────────────────────────────────────────── */
+.toc-item {
+  display: flex; align-items: center; padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.toc-item .toc-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); min-width: 36px; font-size: 14px; }
+.toc-item .toc-title { font-weight: 600; font-size: 15px; flex: 1; }
+.toc-item .toc-desc { font-size: 13px; color: var(--muted); }
+
+/* ── Page number ─────────────────────────────────── */
+.page-num {
+  position: absolute; bottom: 28px; left: 72px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .18em; color: var(--subtle); text-transform: uppercase;
+}
+
+/* ── FAQ ─────────────────────────────────────────── */
+.faq-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.faq-item .q { font-weight: 700; font-size: 14px; margin-bottom: 5px; display: flex; align-items: flex-start; gap: 8px; }
+.faq-item .q::before { content: 'ש'; font-family: 'JetBrains Mono', monospace; font-size: 10px; background: linear-gradient(135deg, #f5dd4b, #ff6b47); color: #1a1814; width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.faq-item .a { font-size: 13px; line-height: 1.6; color: #3a3329; padding-right: 28px; }
+
+/* ── Print ───────────────────────────────────────── */
+@media print {
+  body { background: white; }
+  .page { margin: 0; box-shadow: none; page-break-after: always; }
+  @page { size: A4 portrait; margin: 0; }
+}
+
+/* ── Hebrew overrides ───────────────────────────── */
+.kicker, .ph-hero .ph-label, .ph-stat .l, .ph-card .ph-card-title, .feature-header .badge, .tip .tip-label { letter-spacing: .04em; text-transform: none; }
+h1, h2 { line-height: 1.08 !important; }
+[style*="letter-spacing:-"] { letter-spacing: 0 !important; }
+.ph-av .you { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 1 — COVER
+═══════════════════════════════════════════ -->
+<section class="page cover-page">
+  <div class="cover-radial"></div>
+
+  <!-- Top: logo + eyebrow -->
+  <div style="position:relative;">
+    <svg width="72" height="44" viewBox="0 0 72 44" fill="none">
+      <defs>
+        <linearGradient id="cg" x1="0" y1="0" x2="72" y2="44">
+          <stop offset="0" stop-color="#f5dd4b"/>
+          <stop offset="1" stop-color="#ff6b47"/>
+        </linearGradient>
+      </defs>
+      <path d="M4 38 L36 8 L68 38" stroke="url(#cg)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="36" cy="8" r="5.5" fill="#d4541a"/>
+      <circle cx="20" cy="23" r="3.5" fill="#1a1814"/>
+      <circle cx="52" cy="23" r="3.5" fill="#1a1814"/>
+    </svg>
+    <div class="kicker" style="margin-top:14px;">Wingpact · מצב ספר</div>
+  </div>
+
+  <!-- Middle: main title -->
+  <div style="position:relative;">
+    <div style="font-weight:900; font-size:88px; letter-spacing:-.05em; line-height:.92; color:#1a1814;">
+      מצב ספר<br><span class="gradient-text">מדריך למשתמש</span>
+    </div>
+    <p style="font-size:22px; line-height:1.5; color:#3a3329; max-width:560px; margin-top:28px; font-weight:400;">
+      כל מה שצריך כדי להזין את הקוד ולהפוך את <i>הרגל אחד בכל פעם</i> לתרגול יומי - הרגל אחד בכל פעם, בדיוק כמו בספר.
+    </p>
+  </div>
+
+  <!-- Bottom: meta -->
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; position:relative;">
+    <div>
+      <div class="kicker">גרסה 1.0 · אוקטובר 2026</div>
+      <div style="font-size:14px; color:var(--muted); margin-top:4px;">אפליקציה · אתר</div>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <div style="text-align:center;">
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">8</div>
+        <div class="kicker" style="font-size:9px;">הרגלים</div>
+      </div>
+      <div style="width:1px; height:36px; background:#ede5d0;"></div>
+      <div style="text-align:center;">
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">1</div>
+        <div class="kicker" style="font-size:9px;">בכל פעם</div>
+      </div>
+      <div style="width:1px; height:36px; background:#ede5d0;"></div>
+      <div style="text-align:center;">
+        <div style="font-weight:900; font-size:28px; color:#d4541a; letter-spacing:-.03em;">AI</div>
+        <div class="kicker" style="font-size:9px;">ליווי הרגלים</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 2 — WELCOME + CONCEPT
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="pad">
+
+    <div class="kicker" style="margin-bottom:12px;">ברוכים הבאים</div>
+    <h1 style="font-size:48px; font-weight:900; letter-spacing:-.04em; line-height:.95; margin-bottom:32px;">
+      איך עובד<br><span class="gradient-text">מצב ספר?</span>
+    </h1>
+
+    <div class="two-col">
+      <!-- Left text -->
+      <div>
+        <p style="font-size:15px; line-height:1.65; color:#3a3329; margin-bottom:18px;">
+          <i>הרגל אחד בכל פעם</i> לוקח גישה אחרת לירידה במשקל: במקום לשנות הכול ביום הראשון, מתקינים הרגל אחד - סימן מפעיל, פעולה, תגמול - עד שהוא רץ על טייס אוטומטי, ורק אז עוברים להבא. מצב ספר הופך את השיטה הזאת לתרגול יומי בתוך האפליקציה.
+        </p>
+        <p style="font-size:15px; line-height:1.65; color:#3a3329; margin-bottom:28px;">
+          ברקע יש לכם גם מבנה כנף - אותם צ'ק-אין ותמונות ארוחות שמשתמשי Wingpact רגילים נשענים עליהם, ועד 2 חברים שאפשר להזמין בחינם - אבל התפקיד המרכזי של האפליקציה כאן פשוט יותר: לעזור לכם להתקין הרגל אחד בכל פעם, בדיוק כמו שהספר מלמד.
+        </p>
+
+        <!-- 3 concepts -->
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+            </div>
+            <div>
+              <b style="font-size:14px;">מצלמים ונהנים</b>
+              <p style="font-size:13px; color:#3a3329; line-height:1.5; margin-top:2px;">מצלמים את הצלחת - Claude AI מנתח קלוריות, חלבון, פחמימות ושומן בתוך שניות.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <div style="width:36px; height:36px; border-radius:10px; background:#1a1814; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbf4e6" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div>
+              <b style="font-size:14px;">צ'ק-אין יומי</b>
+              <p style="font-size:13px; color:#3a3329; line-height:1.5; margin-top:2px;">שתי דקות בכל ערב: מים, ירקות, אימון, חלון אכילה ומצב רוח. סיכום ה-AI מבוסס על ההרגל הנוכחי שלכם.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <div style="width:36px; height:36px; border-radius:10px; background:var(--green); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+            </div>
+            <div>
+              <b style="font-size:14px;">הרגל אחד בכל פעם</b>
+              <p style="font-size:13px; color:#3a3329; line-height:1.5; margin-top:2px;">לשונית ההרגלים מציגה את הסימן המפעיל, הפעולה והתגמול של ההרגל הנוכחי, ואת משפט ההפעלה שלכם. מסמנים כמותקן כשהוא אוטומטי - וההרגל הבא נפתח.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: V formation illustration -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="220" height="200" viewBox="0 0 220 200" fill="none">
+          <defs>
+            <linearGradient id="vg" x1="0" y1="0" x2="220" y2="200">
+              <stop offset="0" stop-color="#f5dd4b"/>
+              <stop offset="1" stop-color="#ff6b47"/>
+            </linearGradient>
+          </defs>
+          <path d="M18 170 L110 40 L202 170" stroke="url(#vg)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 4" opacity=".3"/>
+          <path d="M18 170 L110 40 L202 170" stroke="url(#vg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="110" cy="40" r="12" fill="#d4541a"/>
+          <text x="110" y="44" text-anchor="middle" font-family="Inter" font-weight="800" font-size="9" fill="white">אתם</text>
+          <circle cx="64" cy="105" r="10" fill="#1a1814"/>
+          <text x="64" y="109" text-anchor="middle" font-family="Inter" font-weight="700" font-size="8" fill="white">חבר</text>
+          <circle cx="156" cy="105" r="10" fill="#1a1814"/>
+          <text x="156" y="109" text-anchor="middle" font-family="Inter" font-weight="700" font-size="8" fill="white">חבר</text>
+          <path d="M100 180 L80 190 L90 182" stroke="#ede5d0" stroke-width="1.5"/>
+          <text x="88" y="198" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#8a7e68">רוח גבית</text>
+        </svg>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px 16px; width:100%;">
+          <div class="kicker" style="font-size:9px; margin-bottom:8px;">המבנה שלכם</div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <div class="ph-av" style="background:#d4541a;">S</div>
+            <div class="ph-av dashed" style="font-size:16px; color:#c9bc9c;">+</div>
+            <div class="ph-av dashed" style="font-size:16px; color:#c9bc9c;">+</div>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin-top:8px; line-height:1.4;">אחרי שמנויים, אפשר להזמין עד 2 חברים בחינם - ראו עמ' 10.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOC preview -->
+    <div style="margin-top:36px; padding-top:28px; border-top:1px solid #ede5d0;">
+      <div class="kicker" style="margin-bottom:14px;">במדריך הזה</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 32px;">
+        <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">הזנת הקוד והתחלה</span><span class="toc-desc">עמ' 3</span></div>
+        <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">מסך הבית ורישום מהיר</span><span class="toc-desc">עמ' 4</span></div>
+        <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">תמונת ארוחה ו-AI</span><span class="toc-desc">עמ' 5</span></div>
+        <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">צ'ק-אין יומי</span><span class="toc-desc">עמ' 6</span></div>
+        <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">לוח שנה · היסטוריית הצ'ק-אין</span><span class="toc-desc">עמ' 7</span></div>
+        <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">מחשבון BMI ו-TDEE</span><span class="toc-desc">עמ' 8</span></div>
+        <div class="toc-item"><span class="toc-num">07</span><span class="toc-title">ההרגלים שלכם · אחד בכל פעם</span><span class="toc-desc">עמ' 9</span></div>
+        <div class="toc-item"><span class="toc-num">08</span><span class="toc-title">מנוי · מחיר וחברים בחינם</span><span class="toc-desc">עמ' 10</span></div>
+        <div class="toc-item"><span class="toc-num">09</span><span class="toc-title">טיפים ושאלות</span><span class="toc-desc">עמ' 11</span></div>
+        <div class="toc-item" style="border-bottom:none;"><span class="toc-num">10</span><span class="toc-title">האפליקציה · ווידג'ט וצעדים</span><span class="toc-desc">עמ' 12</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 2</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 3 — REDEEM YOUR CODE
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">01 · הזנת קוד והתחלה</div>
+      <h2>פותחים את<br><span class="gradient-text">האפליקציה המלווה</span></h2>
+    </div>
+    <span class="badge">הזנת קוד</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        הקוד המודפס בעותק שלכם של <i>הרגל אחד בכל פעם</i> מפעיל את מצב ספר בחשבון ה-Wingpact שלכם. בלי אפליקציה נפרדת ובלי כניסה נפרדת.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>פותחים חשבון</b>
+          <p>נרשמים עם מייל או גוגל, כמו כל משתמש Wingpact. כבר יש לכם חשבון? עוברים ישר לצעד 2.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>מזינים את קוד הספר</b>
+          <p>נרשמים חדשים רואים בראש ההרשמה תיבה מקווקוות עם "יש קוד מהספר?". משתמשים קיימים ימצאו אותה בהגדרות ← "יש לי קוד מהספר". מקלידים את הקוד בדיוק כפי שהוא מודפס.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>ממלאים פרופיל - בק"ג ובס"מ</b>
+          <p>ההרשמה במצב ספר שואלת על גובה בס"מ ועל משקל בק"ג, כמו בספר העברי. אין מה להמיר.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>פוגשים את הרגל 1</b>
+          <p>ההרגל הראשון - <i>מים לפני האוכל</i> - נפתח מיד. הוא חינם כל עוד תצטרכו, בלי שעון שסופר לאחור.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">טיפ · כבר משתמשים ב-Wingpact?</div>
+        <p>הזנת קוד מחשבון קיים רק מוסיפה אליו גישה לספר - אותה כניסה, אותם נתונים, בלי כפילויות. המנוי הרגיל שלכם (אם יש) לא מושפע.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Redeem code mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 10px;">
+          <div style="font-weight:800; font-size:15px; letter-spacing:-.025em;">הזנת קוד הספר</div>
+          <div style="font-size:8.5px; color:#8a7e68; margin-top:3px; line-height:1.4;">מופיע בסוף הספר<br>הרגל אחד בכל פעם</div>
+        </div>
+        <div class="ph-card" style="margin-top:8px;">
+          <div class="ph-card-title">קוד הספר</div>
+          <div style="background:#fbf4e6; border:1.5px dashed #c9bc9c; border-radius:9px; padding:10px; text-align:center; font-family:'JetBrains Mono'; font-size:12px; font-weight:700; color:#c9bc9c; letter-spacing:.08em;">ONEHABIT-••••</div>
+        </div>
+        <div class="ph-cta" style="margin-top:4px;">פתיחה</div>
+        <div style="margin:14px 12px 0; text-align:center; font-size:8px; color:#8a7e68; line-height:1.5;">הגדרות ← "יש לי קוד מהספר"</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 3</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 4 — DASHBOARD
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">02 · מסך הבית</div>
+      <h2>הבית שלכם<br><span class="gradient-text">בכל בוקר</span></h2>
+    </div>
+    <span class="badge">מסך הבית</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        מסך הבית הוא הדבר הראשון שרואים בכל פתיחה של האפליקציה. הוא מציג את הקלוריות של היום, את גרף המשקל בק"ג וקיצורי דרך לפעולות החשובות.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>כרטיס הקלוריות</b>
+          <p>הכרטיס הגדול בראש המסך מראה כמה קלוריות אכלתם היום מול היעד היומי. מתחתיו - רצף, מים וצעדים במבט אחד.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>גרף משקל</b>
+          <p>השקילות האחרונות שלכם, תמיד בק"ג, עם משקל היעד מסומן בקו מקווקו.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>פעולות מהירות</b>
+          <p>שני כרטיסים גדולים: <strong>צעדים</strong> (טבלת מובילים) ו<strong>צ'ק-אין</strong> (מים, אימון, משקל). לחיצה אחת לכל מסך.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>המדריך הזה ו-SOS</b>
+          <p>באנר המדריך מקשר למסמך הזה. כפתור ה-SOS שולח למבנה שלכם התראת תמיכה מיידית.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">טיפ · לאן נעלמו הפיד והאתגרים?</div>
+        <p>מצב ספר מחליף את לשוניות הפיד והאתגרים בלשונית הרגלים ייעודית (עמ' 9) - התפקיד של האפליקציה כאן הוא לעזור לכם להתקין הרגל אחד, לא להריץ פיד חברתי. שום דבר לא נמחק מהחשבון, פשוט לא מוצג.</p>
+      </div>
+
+      <div style="margin-top:20px; background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px 16px;">
+        <div class="kicker" style="font-size:9px; margin-bottom:8px;">ניווט תחתון - 5 האייקונים של מצב ספר</div>
+        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:6px; text-align:center;">
+          <div><div style="font-size:9px; font-weight:700;">בית</div><div style="font-size:9px; color:var(--muted); margin-top:2px;">מסך הבית</div></div>
+          <div><div style="font-size:9px; font-weight:700;">ארוחות</div><div style="font-size:9px; color:var(--muted); margin-top:2px;">תמונה ו-AI</div></div>
+          <div><div style="font-size:9px; font-weight:700;">הרגלים</div><div style="font-size:9px; color:var(--muted); margin-top:2px;">אחד בכל פעם</div></div>
+          <div><div style="font-size:9px; font-weight:700;">צ'ק-אין</div><div style="font-size:9px; color:var(--muted); margin-top:2px;">יומי</div></div>
+          <div><div style="font-size:9px; font-weight:700;">תפריט</div><div style="font-size:9px; color:var(--muted); margin-top:2px;">הגדרות</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone mockup — Dashboard -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+
+        <!-- Date + greeting -->
+        <div style="padding:2px 12px 5px; text-align:right;">
+          <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.14em; text-transform:uppercase;">יום רביעי, 27 במאי</div>
+          <div style="font-weight:800; font-size:16px; letter-spacing:-.025em; margin-top:1px;">שלום, שי</div>
+          <div style="font-size:7px; color:#8a7e68; margin-top:1px;">הרגל 1 · מים לפני האוכל</div>
+        </div>
+
+        <!-- Hero calorie card -->
+        <div class="ph-hero" style="margin:0 12px 7px; padding:10px 12px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div style="font-size:8px; color:#5a4220;">0 ארוחות</div>
+            <div style="font-family:'JetBrains Mono'; font-size:7px; letter-spacing:.16em; text-transform:uppercase; color:#5a4220; font-weight:700;">קלוריות היום</div>
+          </div>
+          <div style="display:flex; align-items:baseline; justify-content:flex-end; gap:4px; margin-top:2px;">
+            <div style="font-size:8px; color:#5a4220;">מתוך 2033 קק"ל</div>
+            <div style="font-weight:900; font-size:32px; letter-spacing:-.04em; line-height:1; color:#1a1814;">0</div>
+          </div>
+          <div class="ph-bar" style="margin-top:6px;"><div style="width:0%;"></div></div>
+          <!-- 3 mini stats -->
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:8px;">
+            <div style="background:#fbefd8; border-radius:8px; padding:5px 4px; text-align:center;">
+              <div style="font-family:'JetBrains Mono'; font-size:6px; letter-spacing:.12em; text-transform:uppercase; color:#5a4220; font-weight:700;">רצף 🔥</div>
+              <div style="font-weight:900; font-size:13px; color:#1a1814; margin-top:2px;">—</div>
+            </div>
+            <div style="background:#fbefd8; border-radius:8px; padding:5px 4px; text-align:center;">
+              <div style="font-family:'JetBrains Mono'; font-size:6px; letter-spacing:.12em; text-transform:uppercase; color:#5a4220; font-weight:700;">מים 💧</div>
+              <div style="font-weight:900; font-size:13px; color:#1a1814; margin-top:2px;">—</div>
+            </div>
+            <div style="background:#fbefd8; border-radius:8px; padding:5px 4px; text-align:center;">
+              <div style="font-family:'JetBrains Mono'; font-size:6px; letter-spacing:.12em; text-transform:uppercase; color:#5a4220; font-weight:700;">צעדים 👣</div>
+              <div style="font-weight:900; font-size:13px; color:#1a1814; margin-top:2px;">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weight chart mini -->
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between;"><span>משקל</span><span style="color:var(--green);">−1 ק"ג</span></div>
+          <div style="display:flex; align-items:flex-end; gap:3px; height:26px; margin-top:2px;">
+            <div style="flex:1; background:#f5dd4b; border-radius:2px; height:70%;"></div>
+            <div style="flex:1; background:#f5dd4b; border-radius:2px; height:60%;"></div>
+            <div style="flex:1; background:#f5dd4b; border-radius:2px; height:65%;"></div>
+            <div style="flex:1; background:#ff6b47; border-radius:2px; height:45%;"></div>
+            <div style="flex:1; background:#ff6b47; border-radius:2px; height:40%;"></div>
+          </div>
+        </div>
+
+        <!-- Action grid -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:0 12px 5px;">
+          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+            <div style="font-size:16px; margin-bottom:3px;">👣</div>
+            <div style="font-weight:700; font-size:10px;">צעדים</div>
+            <div style="font-size:8px; color:#8a7e68; margin-top:1px;">טבלת מובילים</div>
+          </div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:12px; padding:10px; text-align:center;">
+            <div style="font-size:16px; margin-bottom:3px;">✅</div>
+            <div style="font-weight:700; font-size:10px;">צ'ק-אין</div>
+            <div style="font-size:8px; color:#8a7e68; margin-top:1px;">מים, אימון, משקל</div>
+          </div>
+        </div>
+
+        <!-- SOS -->
+        <div style="margin:0 12px 5px; border:1.5px solid #d4541a; border-radius:12px; padding:7px; text-align:center; font-weight:800; font-size:9px; color:#d4541a;">SOS - אני צריך/ה תמיכה ⚠️</div>
+
+        <!-- Nav -->
+        <div class="ph-nav">
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>צ'ק-אין</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 4</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 5 — MEALS + AI CAMERA
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">03 · ארוחות ו-AI</div>
+      <h2>מצלמים.<br><span class="gradient-text">מנתחים. נהנים.</span></h2>
+    </div>
+    <span class="badge">ארוחות · מצלמת AI</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        מצלמים כל ארוחה - Claude AI מנתח קלוריות, חלבון, פחמימות ושומן בתוך שניות. לא מדויק? מוסיפים רמז בטקסט ומקבלים ניתוח חדש. אין מצלמה? משתמשים בכפתור "ידני". במצב ספר הניתוח גם מוסיף טיפ קצר שקשור להרגל שאתם עובדים עליו עכשיו.
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+        <div>
+          <div class="kicker" style="font-size:9px; margin-bottom:12px;">שלב 1 · צילום</div>
+          <div class="step">
+            <div class="num">1</div>
+            <div class="body"><b>לוחצים "צילום"</b><p>במסך הארוחות לוחצים על כפתור הצילום כדי לפתוח את המצלמה או לבחור מהגלריה. אפשר לצרף כמה תמונות לארוחה אחת.</p></div>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <div class="body"><b>ממסגרים את הצלחת</b><p>קו הסריקה עובר על התמונה - המאכלים מזוהים אחד אחד.</p></div>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <div class="body"><b>ה-AI מנתח</b><p>קלוריות, חלבון, פחמימות ושומן מופיעים מיד.</p></div>
+          </div>
+        </div>
+        <div>
+          <div class="kicker" style="font-size:9px; margin-bottom:12px;">שלב 2 · בדיקה ושמירה</div>
+          <div class="step">
+            <div class="num">4</div>
+            <div class="body"><b>בודקים את הניתוח</b><p>רואים את הפירוט המלא. לוחצים "תיקון" כדי לערוך ערכים ידנית.</p></div>
+          </div>
+          <div class="step">
+            <div class="num">5</div>
+            <div class="body"><b>מוסיפים רמז (לא חובה)</b><p>"בלי טחינה" / "זה היה לחם מחיטה מלאה" - ה-AI מנתח מחדש עם התיקון שלכם.</p></div>
+          </div>
+          <div class="step">
+            <div class="num">6</div>
+            <div class="body"><b>שומרים</b><p>לוחצים "שמירה" - הארוחה נרשמת מיד מול יעד הקלוריות של היום.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip" style="margin-top:18px;">
+        <div class="tip-label">טיפ · רישום ידני ורטרואקטיבי</div>
+        <p>אין מצלמה זמינה? לוחצים "ידני" ומוסיפים ארוחה בתיאור טקסט. שכחתם לרשום אתמול? אפשר להוסיף ארוחה לתאריך שעבר - לוחצים על אייקון התאריך בטופס ובוחרים יום.</p>
+      </div>
+
+      <div style="margin-top:18px; padding:16px; background:white; border:1px solid #ede5d0; border-radius:14px;">
+        <div class="kicker" style="font-size:9px; margin-bottom:10px;">סימון מקרו-נוטריינטים</div>
+        <div style="display:flex; gap:16px; align-items:center;">
+          <div style="display:flex; align-items:center; gap:5px;">
+            <div style="width:10px; height:10px; border-radius:3px; background:#d4541a;"></div>
+            <span style="font-size:12px; font-weight:600;">P - חלבון</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:5px;">
+            <div style="width:10px; height:10px; border-radius:3px; background:#c79a00;"></div>
+            <span style="font-size:12px; font-weight:600;">C - פחמימות</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:5px;">
+            <div style="width:10px; height:10px; border-radius:3px; background:#2f8d5f;"></div>
+            <span style="font-size:12px; font-weight:600;">F - שומן</span>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--muted); margin-top:6px;">אותו סימון בכל מסכי האפליקציה.</p>
+      </div>
+    </div>
+
+    <!-- Phone: meals -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+
+        <!-- Header with Photo + Manual buttons + title -->
+        <div style="padding:2px 12px 6px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; gap:5px;">
+            <div style="background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:999px; padding:4px 9px; font-size:9px; font-weight:800; color:#1a1814; display:flex; align-items:center; gap:3px;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+              צילום
+            </div>
+            <div style="background:white; border:1px solid #ede5d0; border-radius:999px; padding:4px 9px; font-size:9px; font-weight:700; color:#1a1814; display:flex; align-items:center; gap:3px;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              ידני
+            </div>
+          </div>
+          <div style="font-weight:800; font-size:14px; letter-spacing:-.02em;">ארוחות</div>
+        </div>
+
+        <!-- Today label -->
+        <div style="text-align:right; padding:6px 12px 4px; font-size:9px; font-weight:600; color:#8a7e68;">היום</div>
+
+        <!-- Meal card with photo -->
+        <div class="ph-meal-hero">
+          <div class="img" style="background:linear-gradient(135deg,#c8b090,#8a6840);">
+            <div style="position:absolute; top:6px; left:8px;">
+              <span style="background:white; color:#1a1814; font-size:7.5px; font-weight:700; padding:2px 7px; border-radius:999px;">צהריים · 13:19</span>
+            </div>
+            <div style="position:absolute; bottom:6px; left:8px;">
+              <div style="font-weight:900; font-size:18px; letter-spacing:-.03em; color:white; line-height:1; text-shadow:0 1px 4px rgba(0,0,0,.4);">520</div>
+              <div style="font-family:'JetBrains Mono'; font-size:7px; color:rgba(255,255,255,.85); text-transform:uppercase; letter-spacing:.1em;">קק"ל</div>
+            </div>
+            <div style="position:absolute; bottom:10px; right:8px; left:56px; font-size:8px; font-weight:600; color:white; text-shadow:0 1px 3px rgba(0,0,0,.5);">נתחי עוף ברוטב קל</div>
+          </div>
+          <div style="background:white; padding:5px 10px; display:flex; justify-content:flex-end; gap:10px;">
+            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#2f8d5f; font-weight:700;">F 24</span>
+            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#c79a00; font-weight:700;">C 28</span>
+            <span style="font-family:'JetBrains Mono'; font-size:8px; color:#d4541a; font-weight:700;">P 42</span>
+          </div>
+        </div>
+
+        <!-- Date accordion items -->
+        <div style="margin:0 12px 3px; background:white; border:1px solid #ede5d0; border-radius:10px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a7e68" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          <span style="font-size:10px; font-weight:700;">יום שלישי 26/5/26</span>
+        </div>
+        <div style="margin:0 12px 3px; background:white; border:1px solid #ede5d0; border-radius:10px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a7e68" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          <span style="font-size:10px; font-weight:700;">יום שני 25/5/26</span>
+        </div>
+
+        <!-- Nav -->
+        <div class="ph-nav">
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>צ'ק-אין</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 5</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 6 — CHECK-IN
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">04 · צ'ק-אין יומי</div>
+      <h2>טקס הערב<br><span class="gradient-text">שלכם</span></h2>
+    </div>
+    <span class="badge">צ'ק-אין יומי</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        הצ'ק-אין הוא שתי דקות שסוגרות את היום. אחרי השמירה, ה-AI מייצר סיכום אישי שמבוסס על ההרגל הנוכחי שלכם, עם טיפ למחר.
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:22px;">
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a1814" stroke-width="2.5"><path d="M12 2C8 2 4 6 4 10c0 5.5 8 14 8 14s8-8.5 8-14c0-4-4-8-8-8z"/></svg>
+            </div>
+            <b style="font-size:13px;">שתיית מים</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">גוררים את המחוון או לוחצים על כפתור מהיר (0.5 עד 4 ליטר). זה מעקב בלבד - ההרגל עצמו הוא כוס מים לפני כל ארוחה (עמ' 9).</p>
+        </div>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:#1a1814; display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <b style="font-size:13px;">משקל - בק"ג</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">רושמים את המשקל של היום בק"ג. הגרף במסך הבית והפרופיל נשארים בק"ג אוטומטית.</p>
+        </div>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:var(--green); display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4 4-4"/></svg>
+            </div>
+            <b style="font-size:13px;">אימון</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">מפעילים, בוחרים סוג, עצימות ומשך. ה-AI מחשב קלוריות שנשרפו.</p>
+        </div>
+        <div style="background:white; border:1px solid #ede5d0; border-radius:14px; padding:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,rgba(245,221,75,.3),rgba(255,107,71,.2)); display:flex; align-items:center; justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d4541a" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <b style="font-size:13px;">מצב רוח</b>
+          </div>
+          <p style="font-size:12px; color:#3a3329; line-height:1.4;">בוחרים אחד מ-5 אימוג'י. מצב הרוח נשמר בהיסטוריה ונראה לחברי המבנה.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">סיכום יומי ב-AI</div>
+        <p>אחרי "שמירה" - לוחצים "סגירת יום" כדי לקבל סיכום AI אישי שמבוסס על ההרגל שאתם עובדים עליו כרגע: מה עשיתם טוב, וטיפ ספציפי למחר, לא עצה כללית.</p>
+      </div>
+    </div>
+
+    <!-- Phone: check-up -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+
+        <!-- Title -->
+        <div style="padding:2px 12px 6px; text-align:right;">
+          <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.14em; text-transform:uppercase;">יום רביעי, 27 במאי</div>
+          <div style="font-weight:800; font-size:16px; letter-spacing:-.025em; margin-top:1px;">צ'ק-אין יומי</div>
+        </div>
+
+        <!-- Water card -->
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#d4541a; font-weight:900; font-family:'JetBrains Mono'; font-size:13px;">1.4 ל'</span>
+            <span>שתיית מים 💧</span>
+          </div>
+          <div class="ph-slider-row">
+            <div class="ph-slider"><div class="fill" style="width:35%;"></div></div>
+          </div>
+        </div>
+
+        <!-- Weight card -->
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between;">
+            <span>נרשם: 80.7 ק"ג</span><span>משקל ⚖️</span>
+          </div>
+          <div style="background:#fbf4e6; border:1px solid #ede5d0; border-radius:8px; padding:6px 8px; display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono'; font-size:13px; font-weight:900;">80.0</span>
+            <span style="font-size:9px; color:#8a7e68; font-weight:700;">ק"ג</span>
+          </div>
+        </div>
+
+        <!-- Mood card -->
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title">מצב רוח</div>
+          <div class="ph-mood-row">
+            <div class="ph-mood">😞</div><div class="ph-mood">😐</div><div class="ph-mood sel">🙂</div><div class="ph-mood">😄</div><div class="ph-mood">🤩</div>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <div class="ph-nav">
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>צ'ק-אין</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 6</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 7 — CALENDAR
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">05 · לוח שנה</div>
+      <h2>ההיסטוריה שלכם,<br><span class="gradient-text">יום אחרי יום</span></h2>
+    </div>
+    <span class="badge">לוח שנה</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        לוח השנה מאגד את כל הצ'ק-אין בתצוגה חודשית - נקודה מסמנת כל יום שרשמתם בו נתונים. לוחצים על יום כדי לראות פירוט מלא. פותחים מתפריט ההמבורגר (☰) ← <b>לוח שנה</b>.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>מעבר בין חודשים</b>
+          <p>החצים משני צידי שם החודש מזיזים חודש אחורה או קדימה. אי אפשר להתקדם לחודש עתידי.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>נקודה = נתונים שנרשמו</b>
+          <p>לכל יום עם צ'ק-אין יש נקודה קטנה מתחת לתאריך. אין נקודה - לא נרשם דבר.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>לוחצים על יום לפירוט</b>
+          <p>בתחתית נפתח פאנל עם כל מה שנרשם באותו יום: מים, משקל, צעדים, אימון, מצב רוח והערות.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>מחליקים בין ימים</b>
+          <p>בתוך הפאנל מחליקים ימינה או שמאלה כדי לעבור ליום הקודם או הבא בלי לחזור לרשת.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">טיפ · צ'ק-אין רטרואקטיבי</div>
+        <p>שכחתם לרשום אתמול? פותחים את היום מלוח השנה וממלאים את הצ'ק-אין בדיעבד - כך שפספוס חד-פעמי לא עולה לכם ברצף.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Calendar mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:#c9bc9c;">‹</span>
+          <div style="font-weight:800; font-size:14px;">אוגוסט 2026</div>
+          <span style="font-size:13px; color:#8a7e68;">›</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin:0 10px 6px; text-align:center;">
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">א</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ב</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ג</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ד</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ה</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ו</div>
+          <div style="font-size:8px; color:#8a7e68; font-weight:600; padding:2px 0;">ש</div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin:0 10px 8px;">
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">1<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">2<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">3</div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">4<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">5<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:#c9bc9c;">6</div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; color:#8a7e68;">7<div style="width:3px;height:3px;border-radius:999px;background:#d4541a;margin-top:1px;"></div></div>
+          <div style="aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:white; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:8px;">8<div style="width:3px;height:3px;border-radius:999px;background:rgba(255,255,255,.9);margin-top:1px;"></div></div>
+        </div>
+
+        <!-- Day panel -->
+        <div class="ph-card" style="margin:0 10px 8px;">
+          <div class="ph-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>8 באוג'</span><span style="color:#d4541a;">היום</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:4px;">
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">1.8 ל'</div><div style="font-size:6.5px; color:#8a7e68;">מים</div></div>
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">80 ק"ג</div><div style="font-size:6.5px; color:#8a7e68;">משקל</div></div>
+            <div style="text-align:center;"><div style="font-weight:800; font-size:11px;">6.2k</div><div style="font-size:6.5px; color:#8a7e68;">צעדים</div></div>
+            <div style="text-align:center;"><div style="font-size:13px;">😊</div><div style="font-size:6.5px; color:#8a7e68;">מצב רוח</div></div>
+          </div>
+        </div>
+
+        <div class="ph-nav">
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>צ'ק-אין</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 7</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 8 — CALCULATOR
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">06 · מחשבון</div>
+      <h2>היעד המדויק<br><span class="gradient-text">שלכם</span></h2>
+    </div>
+    <span class="badge">מחשבון BMI ו-TDEE</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        המחשבון באפליקציה (תפריט ← מחשבון) מחשב BMI, קצב חילוף חומרים בסיסי (BMR), הוצאה אנרגטית יומית כוללת (TDEE) ויעד קלוריות מותאם - ושומר אותם ישר בפרופיל. בעברית הגובה והמשקל מוזנים בס"מ ובק"ג.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>בוחרים מין</b>
+          <p>נכנס לנוסחת ה-BMR, שנבדלת סטטיסטית בין גברים לנשים.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>מזינים גיל, גובה, משקל ומשקל יעד</b>
+          <p>גובה בס"מ, משקל בק"ג - ארבעה שדות פשוטים.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>בוחרים רמת פעילות</b>
+          <p>חמש רמות - מיושבני ועד מאוד פעיל. ככל שהרמה גבוהה יותר, ה-TDEE גבוה יותר (וכך גם יעד הקלוריות שנגזר ממנו).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>לוחצים "חישוב"</b>
+          <p>ארבע תוצאות מופיעות מיד: BMI, BMR, TDEE ויעד יומי מותאם לירידה במשקל.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body">
+          <b>"שמירה בפרופיל"</b>
+          <p>מעדכן את יעד הקלוריות היומי בכל האפליקציה - מסך הבית, הצ'ק-אין, וכל מקום שבו ההתקדמות מוצגת מול יעד.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">טיפ · מחשבים מחדש מדי פעם</div>
+        <p>המשקל משתנה - ויעד הקלוריות צריך להשתנות איתו. חוזרים למחשבון כל 3 עד 4 שבועות ומעדכנים את המשקל הנוכחי כדי שהיעד היומי יישאר מדויק.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Calculator mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px;">
+          <div style="font-weight:800; font-size:14px;">מחשבון BMI ו-TDEE</div>
+        </div>
+        <div class="ph-pill-row" style="margin-bottom:6px;">
+          <div class="ph-pill active" style="flex:1; text-align:center;">גבר</div>
+          <div class="ph-pill" style="flex:1; text-align:center;">אישה</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:0 12px 6px;">
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">גיל</div><div style="font-size:11px; font-weight:700;">34</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">גובה</div><div style="font-size:11px; font-weight:700;">178 ס"מ</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">משקל</div><div style="font-size:11px; font-weight:700;">88 ק"ג</div></div>
+          <div style="background:white; border:1px solid #ede5d0; border-radius:9px; padding:5px 8px;"><div style="font-size:7px; color:#8a7e68;">יעד</div><div style="font-size:11px; font-weight:700;">78 ק"ג</div></div>
+        </div>
+        <div style="margin:0 12px 6px; background:white; border:1px solid #ede5d0; border-radius:9px; padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:9px; font-weight:600;">פעילות בינונית</span>
+          <span style="font-size:7px; color:#8a7e68;">3 עד 4 פעמים בשבוע</span>
+        </div>
+        <div class="ph-cta" style="margin-top:2px;">חישוב</div>
+        <div class="ph-stats" style="margin-top:8px;">
+          <div class="ph-stat"><div class="l">BMI</div><div class="v">27.8</div></div>
+          <div class="ph-stat"><div class="l">BMR</div><div class="v">1828</div></div>
+          <div class="ph-stat"><div class="l">TDEE</div><div class="v">2833</div></div>
+        </div>
+        <div style="margin:0 12px; background:linear-gradient(135deg,#f5dd4b,#ff6b47); border-radius:10px; padding:8px; text-align:center;">
+          <div style="font-size:7px; font-weight:700; color:#5a4220;">יעד יומי</div>
+          <div style="font-weight:900; font-size:18px; color:#1a1814;">2,333</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 8</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 9 — YOUR HABITS
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">07 · ההרגלים שלכם</div>
+      <h2>הרגל אחד.<br><span class="gradient-text">בכל פעם.</span></h2>
+    </div>
+    <span class="badge">הרגלים</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        לשונית ההרגלים היא הבסיס של מצב ספר. במקום פיד חברתי היא מציגה את ההרגל האחד שאתם עובדים עליו עכשיו, ישר מהספר: הסימן המפעיל, הפעולה, התגמול ומשפט ההפעלה שלכם.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>כרטיס ההרגל הנוכחי</b>
+          <p>שם, סימן מפעיל ← פעולה ← תגמול, ומשפט ההפעלה המדויק מהספר להרגל הזה - למשל של הרגל 1: "לפני כל ארוחה עיקרית שותים כוס מים מלאה."</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>"מה אולי עובר לכם בראש"</b>
+          <p>התשובות של הספר עצמו לספקות נפוצים לגבי ההרגל הספציפי הזה, כדי שהיסוס יטופל לפני שהוא עוצר אתכם.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>מצבים מאתגרים</b>
+          <p>ההכוונה של הספר בדיוק למצבים שבהם קשה לשמור על ההרגל - מסעדות, נסיעות, אלכוהול ועוד, לפי ההרגל.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>מסמנים כמותקן</b>
+          <p>כשההרגל מרגיש אוטומטי - נקודת הייחוס של הספר היא חציוני של 66 ימים, בדרך כלל 18 עד 254, ובדיקת היציבות היא 11 מתוך 14 ימים - לוחצים "סימון ההרגל כמותקן". ההרגל הבא נפתח מיד.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body">
+          <b>כל 8 הותקנו</b>
+          <p>אחרי שכל 8 הותקנו, לשונית ההרגלים הופכת לתיעוד ההישגים שלכם - כל הרגל שהפכתם לאוטומטי, לפי הסדר.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-label">טיפ · בלי לחץ</div>
+        <p>אין כאן שעון. הרגל 1 נשאר חינם וזמין כל עוד תצטרכו - מצב ספר מבקש מנוי רק אחרי שסימנתם אותו כמותקן ועוברים להרגל 2.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Habits mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 6px;">
+          <div style="font-family:'JetBrains Mono'; font-size:7px; color:#8a7e68; letter-spacing:.14em; text-transform:uppercase;">הרגל 1 מתוך 8</div>
+          <div style="font-weight:800; font-size:16px; letter-spacing:-.025em; margin-top:1px;">מים לפני האוכל</div>
+        </div>
+
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title">משפט ההפעלה</div>
+          <p style="font-size:10px; line-height:1.4; font-style:italic; color:#1a1814;">"לפני כל ארוחה עיקרית שותים כוס מים מלאה."</p>
+        </div>
+
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title">סימן ← פעולה ← תגמול</div>
+          <p style="font-size:9px; line-height:1.5; color:#3a3329;"><b>סימן:</b> לפני ארוחה.<br><b>פעולה:</b> כוס מים מלאה קודם.<br><b>תגמול:</b> עצירה מודעת בתחילת הארוחה.</p>
+        </div>
+
+        <div class="ph-card" style="margin-bottom:6px;">
+          <div class="ph-card-title">ימים בהרגל הזה</div>
+          <div style="display:flex; align-items:baseline; gap:5px;">
+            <div style="font-weight:900; font-size:22px; letter-spacing:-.03em;">12</div>
+            <div style="font-size:8px; color:#8a7e68;">החציוני הוא 66 ימים</div>
+          </div>
+        </div>
+
+        <div class="ph-cta">סימון ההרגל כמותקן</div>
+
+        <!-- Nav -->
+        <div class="ph-nav">
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>בית</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/></svg>ארוחות</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg>צ'ק-אין</div>
+          <div class="ph-nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 17l2 2 4-4"/><path d="M3 7l2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>הרגלים</div>
+          <div class="ph-nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>תפריט</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 9</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 10 — MEMBERSHIP · PRICING & FREE FRIENDS
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">08 · מנוי</div>
+      <h2>הרגל ראשון בחינם.<br><span class="gradient-text">פשוט גם אחר כך.</span></h2>
+    </div>
+    <span class="badge">מחיר · חברים בחינם</span>
+  </div>
+
+  <div style="padding:32px 72px 48px; display:grid; grid-template-columns:1fr 232px; gap:52px; align-items:start;">
+    <div>
+      <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+        מצב ספר לא נמצא על ספירת 21 הימים הרגילה של האפליקציה. הרגל 1 חינם כל עוד תצטרכו. אחרי שמסמנים אותו כמותקן ועוברים להרגל 2, מנוי שומר על שאר השיטה פתוחה.
+      </p>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <b>חינם עד סוף הרגל 1</b>
+          <p>קוראים, מתרגלים ומסמנים את הרגל 1 כמותקן בקצב שלכם - בלי מנוי ובלי שעון ניסיון.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <b>בוחרים חודשי או שנתי</b>
+          <p>מתפריט ← ניהול מנוי, בוחרים את המסלול שמתאים.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <b>מזמינים עד 2 חברים בחינם</b>
+          <p>אחרי שמנויים, מזמינים עד 2 חברים למבנה - הם מקבלים גישה למצב ספר בלי עלות נוספת לאף אחד מכם, כל עוד המנוי שלכם פעיל.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <b>מבטלים בכל עת</b>
+          <p>מנהלים או מבטלים מאותו מסך - אותם כלי מנויים של App Store / Google Play שאתם כבר מכירים, בלי שום דבר ייחודי לאפליקציה.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:4px; overflow:hidden; border:1px solid #ede5d0; border-radius:12px;">
+        <div style="display:grid; grid-template-columns:1.3fr 1fr; background:#fbf4e6; padding:6px 12px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+          <div>מסלול</div><div>מחיר</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">הרגל 1</div><div style="color:var(--green); font-weight:600;">חינם, בלי הגבלה</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center;">
+          <div style="font-weight:700;">חודשי</div><div>₪8.90 / חודש</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.3fr 1fr; padding:6px 12px; font-size:11.5px; border-top:1px solid #ede5d0; align-items:center; background:linear-gradient(135deg,rgba(245,221,75,.12),rgba(255,107,71,.08));">
+          <div style="font-weight:700;">שנתי <span style="font-family:'JetBrains Mono'; font-size:8px; color:var(--coral);">מומלץ</span></div><div>₪89 / שנה</div>
+        </div>
+      </div>
+
+      <div class="tip" style="margin-top:12px;">
+        <div class="tip-label">טיפ · כבר משתמשים ב-Wingpact?</div>
+        <p>אם אתם כבר משלמים על Wingpact הרגיל ומזינים קוד מהספר, הגישה לספר פשוט נוספת מעל - בלי חיוב כפול.</p>
+      </div>
+    </div>
+
+    <!-- Phone: Membership mockup -->
+    <div class="phone">
+      <div class="phone-screen" style="background:#fbf4e6;">
+        <div class="phone-status"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:2px 12px 8px;">
+          <div style="font-weight:800; font-size:15px;">ניהול מנוי</div>
+        </div>
+        <div class="ph-card" style="margin-bottom:6px; text-align:center; background:linear-gradient(135deg,rgba(245,221,75,.18),rgba(255,107,71,.12)); border:1px solid rgba(212,84,26,.2);">
+          <div style="font-size:9px; font-weight:700; color:#1a1814;">חינם עד סוף הרגל 1</div>
+          <div style="font-size:7.5px; color:#5a4220; margin-top:2px;">בלי הגבלת ימים</div>
+        </div>
+        <div class="ph-card" style="margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+          <div><div style="font-weight:700; font-size:11px;">שנתי</div><div style="font-size:7px; color:#8a7e68;">מומלץ</div></div>
+          <div style="font-weight:900; font-size:14px;">₪89</div>
+        </div>
+        <div class="ph-card" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-weight:600; font-size:11px;">חודשי</div>
+          <div style="font-weight:900; font-size:14px;">₪8.90</div>
+        </div>
+        <div class="ph-card">
+          <div class="ph-card-title">מזמינים עד 2 חברים בחינם</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <div class="ph-av" style="background:#d4541a; width:22px; height:22px; font-size:9px;">S</div>
+            <div class="ph-av dashed" style="width:22px; height:22px; font-size:13px;">+</div>
+            <div class="ph-av dashed" style="width:22px; height:22px; font-size:13px;">+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 10</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 11 — TIPS + FAQ
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">09 · טיפים ושאלות</div>
+      <h2>שאלות<br><span class="gradient-text">נפוצות</span></h2>
+    </div>
+    <span class="badge">שאלות וטיפים</span>
+  </div>
+
+  <div style="padding:32px 72px 64px; display:grid; grid-template-columns:1fr 1fr; gap:48px;">
+
+    <!-- Left: FAQ -->
+    <div>
+      <div class="kicker" style="margin-bottom:14px;">שאלות נפוצות</div>
+
+      <div class="faq-item">
+        <div class="q">איך מזינים את הקוד מהספר?</div>
+        <div class="a">הגדרות ← "יש לי קוד מהספר" (או התיבה בראש ההרשמה) ← מזינים את הקוד בדיוק כפי שהוא מודפס. מצב ספר נפתח בחשבון מיד.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">צריך לסיים את הרגל 1 עד מועד מסוים?</div>
+        <div class="a">לא - להרגל 1 אין הגבלת ימים. הספר מציע בדיקת יציבות של 11 מתוך 14 ימים; הפיכה לאוטומטי לגמרי לוקחת בדרך כלל יותר (חציוני 66 ימים, טווח 18 עד 254).</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">החברים שהזמנתי רואים את הצ'ק-אין שלי?</div>
+        <div class="a">כן - מבנה הספר שלכם הוא אתם ועד 2 חברים מוזמנים (3 בסך הכול). שניהם נהנים מהמנוי שלכם בחינם, כל עוד הוא פעיל.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">מה קורה אחרי שסימנתי הרגל כמותקן?</div>
+        <div class="a">ההרגל הבא נפתח מיד בלשונית ההרגלים - הסימן המפעיל, הפעולה, התגמול ומשפט ההפעלה שלו, והתשובות של הספר לספקות נפוצים לגביו.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="q">המדידות בק"ג או בפאונד?</div>
+        <div class="a">בעברית: ק"ג וס"מ בכל מקום - פרופיל, צ'ק-אין וגרף במסך הבית - כמו בספר העברי. באנגלית האפליקציה עוברת לפאונד ורגל/אינץ'.</div>
+      </div>
+
+      <div class="faq-item" style="border-bottom:none;">
+        <div class="q">לא במצב ספר, אבל קניתי את הספר - אפשר לעבור?</div>
+        <div class="a">כן. בחשבון Wingpact קיים נכנסים להגדרות ← "יש לי קוד מהספר" ומזינים את הקוד - הגישה לספר נוספת לחשבון הנוכחי.</div>
+      </div>
+    </div>
+
+    <!-- Right: Pro tips -->
+    <div>
+      <div class="kicker" style="margin-bottom:14px;">7 טיפים לשבוע הראשון</div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">01</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>מצלמים הכול - גם קפה.</b> חטיפים, משקאות עם קלוריות, מתוקים. ניתוח AI של 3 שניות שווה הרבה יותר מ"ארשום אחר כך".</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">02</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>צ'ק-אין = שגרה.</b> בוחרים שעה קבועה - למשל 21:00. ההתראה תזכיר לכם.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">03</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>אומרים את משפט ההפעלה בקול.</b> של הרגל 1: "לפני כל ארוחה עיקרית שותים כוס מים מלאה." לומר אותו ברגע האמת עדיף על לנסות לזכור.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">04</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>קוראים את סיכום ה-AI.</b> לא כדי להרגיש רע, אלא כדי ללמוד. הוא מבוסס על ההרגל שאתם באמת עובדים עליו.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">05</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>לא מחכים ליום "מושלם".</b> יום של 2,400 קלוריות שנרשם עדיף על יום "נקי" שלא תועד בכלל.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:white; border:1px solid #ede5d0; border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">06</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>אין למה למהר.</b> לא מסמנים הרגל כמותקן רק כדי לראות את הבא. "מותקן" פירושו אוטומטי, לא "סיימתי להיום" - הטווח בספר הוא 18 עד 254 ימים.</p>
+        </div>
+        <div style="display:flex; gap:12px; padding:12px; background:linear-gradient(135deg,rgba(245,221,75,.15),rgba(255,107,71,.1)); border:1px solid rgba(212,84,26,.2); border-radius:12px;">
+          <div style="font-weight:900; font-size:20px; color:var(--coral); letter-spacing:-.03em; line-height:1; min-width:28px;">07</div>
+          <p style="font-size:12px; line-height:1.5; color:#3a3329;"><b>צעדים = הכול.</b> Health Connect (Google Fit / Samsung Health) מסתנכרן אוטומטית. הליכה של עשר דקות אחרי הארוחה היא ההרגל; כ-7,000 צעדים ביום הם נקודת ייחוס, לא תקרה.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">עמ' 11</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 12 — MOBILE APP (steps / widget / notifications)
+═══════════════════════════════════════════ -->
+<section class="page">
+  <div class="feature-header">
+    <div>
+      <div class="kicker" style="margin-bottom:8px;">10 · האפליקציה</div>
+      <h2>צעדים, ווידג'ט<br><span class="gradient-text">והתראות</span></h2>
+    </div>
+    <span class="badge">אפליקציית אנדרואיד</span>
+  </div>
+
+  <div style="padding:32px 72px 48px;">
+    <p style="font-size:14px; line-height:1.65; color:#3a3329; margin-bottom:26px;">
+      Wingpact היא גם אפליקציית אנדרואיד מלאה - עם ספירת צעדים אוטומטית, ווידג'ט במסך הבית והתראות חכמות. הכול מסתנכרן עם גרסת האתר, ושום דבר מזה לא משתנה במצב ספר.
+    </p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div>
+        <div class="kicker" style="font-size:9px; margin-bottom:12px;">ספירת צעדים אוטומטית</div>
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body"><b>מתחברים ל-Health Connect</b><p>בפתיחה הראשונה האפליקציה מבקשת הרשאה לקרוא את הצעדים. מאשרים פעם אחת - וזהו.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body"><b>סנכרון אוטומטי</b><p>הצעדים נקראים מ-Health Connect (Google Fit / Samsung Health) ומופיעים במסך הבית - בלי הזנה ידנית.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="body"><b>עריכה ידנית תמיד זמינה</b><p>אין Health Connect? אפשר לערוך צעדים ידנית בכרטיס הרישום המהיר במסך הבית.</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="kicker" style="font-size:9px; margin-bottom:12px;">התראות</div>
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body"><b>מישהו עודד אתכם</b><p>תגובה או עידוד על ארוחה או צ'ק-אין שולחים התראה מיידית.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body"><b>התראת SOS</b><p>חבר לחץ "צריך תמיכה" - כל המבנה מקבל התראה. לחיצה עליה פותחת את הדף שלו.</p></div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="body"><b>תזכורת ב-17:00</b><p>לא רשמתם צ'ק-אין עד אחר הצהריים? תזכורת עדינה כדי שלא תשברו את הרצף.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget showcase -->
+    <div style="margin-top:26px; padding:20px; background:white; border:1px solid #ede5d0; border-radius:16px;">
+      <div class="kicker" style="font-size:9px; margin-bottom:12px;">ווידג'ט במסך הבית</div>
+      <div style="display:flex; align-items:center; background:linear-gradient(90deg,#fff3b8,#ffd89a,#ffb27a); border-radius:999px; padding:10px 16px;">
+        <div style="flex:1; display:flex; justify-content:center;">
+          <svg width="36" height="22" viewBox="0 0 72 44" fill="none"><path d="M4 38 L36 8 L68 38" stroke="#1a1814" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="8" r="5.5" fill="#d4541a"/><circle cx="20" cy="23" r="3.5" fill="#1a1814"/><circle cx="52" cy="23" r="3.5" fill="#1a1814"/></svg>
+        </div>
+        <div style="flex:1; text-align:center;">
+          <div style="font-weight:900; font-size:16px; color:#1a1814;">6,548</div>
+          <div style="font-size:11px; font-weight:700; color:#5c4f37;">צעדים</div>
+        </div>
+        <div style="flex:1.7; display:flex; align-items:center; justify-content:center; gap:7px;">
+          <div style="width:24px; height:24px; border-radius:999px; background:rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; font-weight:900; color:#1a1814;">−</div>
+          <div style="text-align:center;"><div style="font-weight:900; font-size:16px; color:#1a1814;">1.5 ל'</div><div style="font-size:11px; font-weight:700; color:#5c4f37;">מים</div></div>
+          <div style="width:24px; height:24px; border-radius:999px; background:rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; font-weight:900; color:#1a1814;">+</div>
+        </div>
+        <div style="flex:1; display:flex; justify-content:center;">
+          <div style="width:40px; height:40px; border-radius:999px; background:#fff; border:2px solid #d92d20; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; color:#d92d20;">SOS</div>
+        </div>
+      </div>
+      <p style="font-size:12px; color:#3a3329; line-height:1.5; margin-top:12px;">פס מהיר במסך הבית: לוגו, צעדים, מים עם <b>+</b>/<b>−</b> וכפתור SOS. לחיצה על <b>+</b>/<b>−</b> מעדכנת מים מיד - גם כשהאפליקציה סגורה; כפתור ה-SOS פותח את האפליקציה ושולח התראה למבנה.</p>
+      <p style="font-size:11px; color:var(--muted); margin-top:6px;">להוספה: לחיצה ארוכה על מסך הבית ← ווידג'טים ← Wingpact.</p>
+    </div>
+
+    <div class="tip" style="margin-top:18px;">
+      <div class="tip-label">טיפ · מסך הבית</div>
+      <p>מצמידים את הווידג'ט למסך הבית כדי לבדוק צעדים ולהוסיף מים בלי לפתוח את האפליקציה - שתי שניות ביום.</p>
+    </div>
+  </div>
+  <div class="page-num">עמ' 12</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE 13 — BACK COVER
+═══════════════════════════════════════════ -->
+<section class="page" style="background:#1a1814; color:#fbf4e6;">
+  <div style="position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 20% 20%, rgba(245,221,75,.12) 0%, transparent 55%), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(255,107,71,.1) 0%, transparent 50%); pointer-events:none;"></div>
+
+  <div style="position:relative; height:100%; padding:80px 72px; display:flex; flex-direction:column; justify-content:space-between;">
+
+    <div>
+      <svg width="56" height="34" viewBox="0 0 72 44" fill="none">
+        <defs>
+          <linearGradient id="cg2" x1="0" y1="0" x2="72" y2="44">
+            <stop offset="0" stop-color="#f5dd4b"/>
+            <stop offset="1" stop-color="#ff6b47"/>
+          </linearGradient>
+        </defs>
+        <path d="M4 38 L36 8 L68 38" stroke="url(#cg2)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="36" cy="8" r="5.5" fill="#d4541a"/>
+        <circle cx="20" cy="23" r="3.5" fill="#fbf4e6"/>
+        <circle cx="52" cy="23" r="3.5" fill="#fbf4e6"/>
+      </svg>
+    </div>
+
+    <div>
+      <div style="font-weight:900; font-size:88px; letter-spacing:-.05em; line-height:.9; color:#fbf4e6;">
+        הרגל אחד.<br><span style="background:linear-gradient(90deg,#f5dd4b,#ff6b47); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">בכל פעם.</span>
+      </div>
+      <p style="font-size:22px; line-height:1.5; color:#a8a090; max-width:560px; margin-top:28px; font-weight:400;">
+        אתם לא צריכים לשנות הכול היום. אתם צריכים להתקין הרגל אחד עד שהוא אוטומטי - ואז את הבא. זו כל השיטה.
+      </p>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.22em; color:#7a8492; margin-bottom:4px;">Wingpact · מצב ספר</div>
+        <div style="font-size:13px; color:#7a8492;">גרסה 1.0 · אוקטובר 2026</div>
+      </div>
+      <div style="text-align:left;">
+        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.18em; color:#7a8492; margin-bottom:4px;">תמיכה</div>
+        <div style="font-size:13px; color:#a8a090;">הגדרות ← צור קשר</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

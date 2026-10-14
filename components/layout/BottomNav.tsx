@@ -19,7 +19,7 @@ import { HamburgerMenu } from "./HamburgerMenu";
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const isBookMode = !!user?.bookAccess?.active;
@@ -31,7 +31,7 @@ export function BottomNav() {
     ? [
         { href: "/dashboard", icon: Home, label: t("nav_home") },
         { href: "/meals", icon: UtensilsCrossed, label: t("nav_meals") },
-        { href: "/habits", icon: ListChecks, label: "Habits" },
+        { href: "/habits", icon: ListChecks, label: lang === "he" ? "הרגלים" : "Habits" },
         { href: "/checkin", icon: CheckSquare, label: t("nav_checkin") },
       ]
     : [

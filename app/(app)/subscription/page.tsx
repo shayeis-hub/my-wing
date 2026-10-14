@@ -196,12 +196,19 @@ function SubscriptionPageInner() {
   }
 
   const FEATURES = isBookMode
-    ? [
-        "Continue past habit one, all the way to habit eight",
-        "Unlimited meal photo analysis",
-        "AI guidance grounded in the book's own rules",
-        "No ads",
-      ]
+    ? lang === "he"
+      ? [
+          "ממשיכים אחרי הרגל 1 עד הרגל 8",
+          "ניתוח תמונות ארוחות ללא הגבלה",
+          "הנחיית AI שמבוססת על כללי הספר עצמו",
+          "ללא פרסומות",
+        ]
+      : [
+          "Continue past habit one, all the way to habit eight",
+          "Unlimited meal photo analysis",
+          "AI guidance grounded in the book's own rules",
+          "No ads",
+        ]
     : lang === "he"
     ? [
         "ניתוח תמונות ארוחות ללא הגבלה",
@@ -284,8 +291,8 @@ function SubscriptionPageInner() {
         {/* Trial banner — book mode isn't on a day clock, so no countdown dots */}
         {inTrial && !isExpiredPaywall && isBookMode && (
           <div className="bg-wing-elevated border border-wing-border rounded-[20px] px-4 py-3">
-            <p className="text-sm font-medium text-wing-ink">Free through habit one</p>
-            <p className="text-xs text-wing-muted mt-0.5">Mark it installed on the Habits tab whenever you're ready — no day limit.</p>
+            <p className="text-sm font-medium text-wing-ink">{lang === "he" ? "חינם עד סוף הרגל 1" : "Free through habit one"}</p>
+            <p className="text-xs text-wing-muted mt-0.5">{lang === "he" ? "סמנו אותו כמותקן בלשונית ההרגלים כשאתם מוכנים - אין הגבלת ימים." : "Mark it installed on the Habits tab whenever you're ready — no day limit."}</p>
           </div>
         )}
         {inTrial && !isExpiredPaywall && !isBookMode && (
@@ -320,7 +327,7 @@ function SubscriptionPageInner() {
                   ? t("upgrade_active")
                   : inTrial
                   ? isBookMode
-                    ? "Free trial"
+                    ? (lang === "he" ? "תקופת ניסיון חינם" : "Free trial")
                     : t("trial_active_sub")
                   : isFitDadMode
                   ? (lang === "he" ? "המסלול הסתיים" : "Your plan has ended")
@@ -338,7 +345,7 @@ function SubscriptionPageInner() {
               )}
               {inTrial && (
                 <p className="text-xs text-wing-muted">
-                  {isBookMode ? "Free through habit one" : (t("trial_days_left") as (n: number) => string)(daysLeft)}
+                  {isBookMode ? (lang === "he" ? "חינם עד סוף הרגל 1" : "Free through habit one") : (t("trial_days_left") as (n: number) => string)(daysLeft)}
                 </p>
               )}
             </div>
@@ -447,7 +454,7 @@ function SubscriptionPageInner() {
               <div className="text-start">
                 <p className="font-bold text-wing-ink">{t("upgrade_cta_yearly")}</p>
                 <p className="text-wing-primary text-base font-bold">
-                  {nativeOffering?.annual?.product.priceString ?? (isBookMode ? "$79 / year" : t("upgrade_yearly"))}
+                  {nativeOffering?.annual?.product.priceString ?? (isBookMode ? (lang === "he" ? "₪89 / שנה" : "$79 / year") : t("upgrade_yearly"))}
                 </p>
               </div>
               <span className="text-xs font-bold text-white bg-wing-primary px-3 py-1 rounded-full">
@@ -464,7 +471,7 @@ function SubscriptionPageInner() {
               <div className="text-start">
                 <p className="font-medium text-wing-ink">{t("upgrade_cta_monthly")}</p>
                 <p className="text-wing-ink text-base font-bold">
-                  {nativeOffering?.monthly?.product.priceString ?? (isBookMode ? "$7.90 / month" : t("upgrade_monthly"))}
+                  {nativeOffering?.monthly?.product.priceString ?? (isBookMode ? (lang === "he" ? "₪8.90 / חודש" : "$7.90 / month") : t("upgrade_monthly"))}
                 </p>
               </div>
             </button>

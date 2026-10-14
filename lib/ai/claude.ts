@@ -26,15 +26,40 @@ function buildCorrectionBlock(hint: string | undefined, previous: MealAnalysis |
 The user is correcting you: "${hint}". Important: this is a correction RELATIVE to your previous analysis (e.g. "it was a double portion" or "add a bit more of everything") — use the previous values as your baseline and apply the correction to them, don't re-analyze the image from scratch. Update all nutritional values (including calories) to actually reflect the correction.\n\n`;
 }
 
+// Book mode: the user is installing one habit at a time. Meal analysis keeps
+// its nutrition numbers objective and only steers the "tips" field to that
+// habit — see mealLens in lib/book/habits.ts for what to look for per habit.
+export interface MealHabitContext {
+  name: string;
+  triggerSentence: string;
+  mealLens: string;
+}
+
+function buildHabitBlock(habit: MealHabitContext | undefined, isHe: boolean): string {
+  if (!habit) return "";
+  return isHe
+    ? `המשתמש/ת נמצא/ת במסלול "הרגל אחד בכל פעם" ועובד/ת כרגע על ההרגל: "${habit.name}" - משפט ההפעלה: "${habit.triggerSentence}".
+כיצד לבדוק את הארוחה לפי ההרגל: ${habit.mealLens}
+הערכים התזונתיים וציון הבריאות נשארים אובייקטיביים ואינם מושפעים מההרגל. השדה "tips" הוא הטיפ היחיד: טיפ קצר (עד שני משפטים) הקשור להרגל הזה בלבד, בטון חם וללא אשמה, בלשון רבים (אתם) כמו בספר. אל תזכיר הרגלים אחרים מהשיטה.
+
+`
+    : `The user is on the "one habit at a time" method and is currently working on: "${habit.name}" - trigger sentence: "${habit.triggerSentence}".
+How to look at this meal through the habit: ${habit.mealLens}
+Nutritional values and the health score stay objective and are not affected by the habit. The "tips" field is the only place the habit shows up: one short tip (max two sentences) tied to this habit only, warm and guilt-free. Do not mention other habits from the method.
+
+`;
+}
+
 export async function analyzeMealImage(
   base64Image: string,
   mediaType: "image/jpeg" | "image/png" | "image/webp",
   hint?: string,
   lang: "he" | "en" = "he",
-  previousAnalysis?: MealAnalysis
+  previousAnalysis?: MealAnalysis,
+  habit?: MealHabitContext
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
-  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe);
+  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe) + buildHabitBlock(habit, isHe);
   const promptText = isHe
     ? `${correctionBlock}המשתמש נמצא בתהליך ירידה במשקל. אנא נתח את הצלחת בתמונה הזו ותן לי:
 1. תיאור קצר של הארוחה בעברית
@@ -112,11 +137,12 @@ export async function analyzeMealImages(
   images: { base64: string; mediaType: "image/jpeg" | "image/png" | "image/webp" }[],
   hint?: string,
   lang: "he" | "en" = "he",
-  previousAnalysis?: MealAnalysis
+  previousAnalysis?: MealAnalysis,
+  habit?: MealHabitContext
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
   const count = images.length;
-  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe);
+  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe) + buildHabitBlock(habit, isHe);
 
   const promptText = isHe
     ? `${correctionBlock}לפניך ${count} תמונות של אותה ארוחה מזוויות/מנות שונות. נתח את כולן יחד כארוחה אחת שלמה — סכום כל המנות — ותן ערכים תזונתיים כוללים.
@@ -163,10 +189,11 @@ Reply ONLY with valid JSON:
   return JSON.parse(jsonMatch[0]) as MealAnalysis;
 }
 
-export async function analyzeMealText(description: string, lang: "he" | "en" = "he"): Promise<MealAnalysis> {
+export async function analyzeMealText(description: string, lang: "he" | "en" = "he", habit?: MealHabitContext): Promise<MealAnalysis> {
   const isHe = lang === "he";
+  const habitBlock = buildHabitBlock(habit, isHe);
   const promptContent = isHe
-    ? `המשתמש נמצא בתהליך ירידה במשקל. הוא תיאר את הארוחה שלו: "${description}"
+    ? `${habitBlock}המשתמש נמצא בתהליך ירידה במשקל. הוא תיאר את הארוחה שלו: "${description}"
 
 אנא נתח את הארוחה ותן לי:
 1. תיאור קצר בעברית
@@ -190,7 +217,7 @@ export async function analyzeMealText(description: string, lang: "he" | "en" = "
   "tips": "טיפ אופציונלי",
   "containsVegetables": false
 }`
-    : `The user is on a weight loss journey. They described their meal: "${description}"
+    : `${habitBlock}The user is on a weight loss journey. They described their meal: "${description}"
 
 Please analyze the meal and provide:
 1. A short description in English

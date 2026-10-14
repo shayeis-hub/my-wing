@@ -27,6 +27,12 @@ export function cmToFtIn(cm: number): { feet: number; inches: number } {
   return inches === 12 ? { feet: feet + 1, inches: 0 } : { feet, inches };
 }
 
+/** Book mode is imperial only for the English (US) edition; the Hebrew
+ * edition is metric like the rest of the app. */
+export function usesImperial(isBookMode: boolean, lang: string): boolean {
+  return isBookMode && lang !== "he";
+}
+
 /** Weight for display: "168 lb" or "76.5 kg". */
 export function formatWeight(kg: number, imperial: boolean): string {
   return imperial ? `${Math.round(kgToLb(kg))} lb` : `${kg} kg`;
