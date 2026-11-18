@@ -56,6 +56,7 @@ export function ClientStatusList({
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [onlyAttention, setOnlyAttention] = useState(false);
+  const [urgentFirst, setUrgentFirst] = useState(false);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState<string | null>(null);
 
@@ -89,13 +90,13 @@ export function ClientStatusList({
     };
   }, [clients]);
 
-  // Alphabetical, then narrowed by the search box and the attention filter.
+  // Alphabetical (or most urgent first when toggled), narrowed by the search box and the attention filter.
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
     return [...(clients ?? [])]
-      .sort((a, b) => a.displayName.localeCompare(b.displayName, "he"))
+      .sort((a, b) => (urgentFirst ? b.attention - a.attention : 0) || a.displayName.localeCompare(b.displayName, "he"))
       .filter((c) => (!onlyAttention || needsAttention(c)) && (!q || c.displayName.toLowerCase().includes(q)));
-  }, [clients, search, onlyAttention]);
+  }, [clients, search, onlyAttention, urgentFirst]);
 
   if (clients === null && !error) {
     return (
@@ -167,6 +168,13 @@ export function ClientStatusList({
             </button>
           ))}
         </div>
+        <button
+          onClick={() => setUrgentFirst((v) => !v)}
+          aria-pressed={urgentFirst}
+          className={cn("text-xs font-semibold px-3 py-1.5 rounded-full border ms-auto", urgentFirst ? "bg-wing-heat text-white border-wing-heat" : "bg-wing-surface text-wing-muted border-wing-border")}
+        >
+          {he ? "דחופים קודם" : "Urgent first"}
+        </button>
         <button onClick={load} disabled={loading} aria-label={he ? "רענון" : "Refresh"} className="p-2 text-wing-muted disabled:opacity-40">
           <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
         </button>
