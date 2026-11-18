@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/Card";
 import { CoachGate } from "@/components/coach/CoachGate";
 import { PLAN_META } from "@/components/coach/planMeta";
 import { useCoachAccount } from "@/hooks/useCoachAccount";
+import { useUnreadMessages } from "@/hooks/useChat";
+import { CountBadge } from "@/components/ui/CountBadge";
 import { COACH_PLANS } from "@/lib/subscription";
 import { getCoachClients, getCoachInvites, type CoachClient, type CoachInvite } from "@/lib/firebase/firestore";
 
@@ -22,6 +24,7 @@ function ClientsManager() {
   const [invites, setInvites] = useState<CoachInvite[]>([]);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const unread = useUnreadMessages(firebaseUser?.uid);
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   const reload = useCallback(async () => {
@@ -160,7 +163,7 @@ function ClientsManager() {
                 <button className="flex items-center gap-3 flex-1 min-w-0 text-start" onClick={() => router.push(`/coach/clients/${c.uid}`)}>
                   <Avatar name={c.displayName} photoURL={c.photoURL} size={36} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-wing-ink text-sm truncate">{c.displayName}</p>
+                    <p className="font-semibold text-wing-ink text-sm truncate flex items-center gap-1.5">{c.displayName}<CountBadge count={unread.byAuthor[c.uid] ?? 0} /></p>
                     <p className="text-[11px] text-wing-muted truncate">{c.isPrivate ? (he ? "פרטי" : "Private") : c.wingName}</p>
                   </div>
                 </button>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/cn";
+import { CountBadge } from "@/components/ui/CountBadge";
 import type { ClientStatus, StatusFlag } from "@/lib/coach/status";
 
 type Lang = "he" | "en";
@@ -38,12 +39,15 @@ export function ClientStatusList({
   getToken,
   onOpen,
   ready = true,
+  unread,
 }: {
   lang: Lang;
   getToken: () => Promise<string>;
   onOpen: (c: ClientStatus) => void;
   /** False until the signed-in user is available; loading before that would fail with 401. */
   ready?: boolean;
+  /** Unread chat messages per client uid. */
+  unread?: Record<string, number>;
 }) {
   const he = lang === "he";
   const [clients, setClients] = useState<ClientStatus[] | null>(null);
@@ -164,7 +168,7 @@ export function ClientStatusList({
             <div className="flex items-center gap-3">
               <Avatar name={c.displayName} photoURL={c.photoURL} size={38} />
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-wing-ink text-sm truncate">{c.displayName}</p>
+                <p className="font-semibold text-wing-ink text-sm truncate flex items-center gap-1.5">{c.displayName}<CountBadge count={unread?.[c.uid] ?? 0} /></p>
                 <p className="text-[11px] text-wing-muted truncate">{c.isPrivate ? (he ? "פרטי" : "Private") : c.wingName}</p>
               </div>
               <div className="flex gap-1 shrink-0" dir="ltr" aria-label={he ? "פעילות 7 ימים אחרונים" : "Activity, last 7 days"}>

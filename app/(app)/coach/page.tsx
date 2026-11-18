@@ -6,6 +6,7 @@ import { UserPlus } from "lucide-react";
 import { CoachGate } from "@/components/coach/CoachGate";
 import { ClientStatusList } from "@/components/coach/ClientStatusList";
 import { useCoachAccount } from "@/hooks/useCoachAccount";
+import { useUnreadMessages } from "@/hooks/useChat";
 
 // The dietitian's home: who needs attention, first thing on opening the app.
 function CoachHome() {
@@ -14,6 +15,7 @@ function CoachHome() {
   const router = useRouter();
   const getToken = useCallback(async () => (await firebaseUser?.getIdToken()) ?? "", [firebaseUser]);
   const first = user?.displayName?.split(" ")[0] ?? "";
+  const unread = useUnreadMessages(firebaseUser?.uid);
 
   return (
     <div className="p-4 space-y-4" dir={he ? "rtl" : "ltr"}>
@@ -42,7 +44,7 @@ function CoachHome() {
         </div>
       )}
 
-      <ClientStatusList lang={lang} getToken={getToken} ready={!!firebaseUser} onOpen={(c) => router.push(`/coach/clients/${c.uid}`)} />
+      <ClientStatusList lang={lang} getToken={getToken} ready={!!firebaseUser} unread={unread.byAuthor} onOpen={(c) => router.push(`/coach/clients/${c.uid}`)} />
     </div>
   );
 }

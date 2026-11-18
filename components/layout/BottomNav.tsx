@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils/cn";
 import { useLanguage } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { HamburgerMenu } from "./HamburgerMenu";
+import { CountBadge } from "@/components/ui/CountBadge";
+import { useUnreadMessages } from "@/hooks/useChat";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -23,6 +25,8 @@ export function BottomNav() {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const isBookMode = !!user?.bookAccess?.active;
+  const coachId = user?.coachAccess?.active ? user.coachAccess.coachId : undefined;
+  const unread = useUnreadMessages(coachId ? user?.uid : undefined, coachId ? [coachId] : undefined);
 
   // Book-mode readers get a "Habits" tab instead of feed/challenges — those
   // assume active wing-mates, which a solo book reader by default won't
@@ -56,7 +60,10 @@ export function BottomNav() {
                 active ? "text-wing-heat" : "text-wing-muted"
               )}
             >
-              <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
+              <span className="relative">
+                <Icon size={21} strokeWidth={active ? 2.5 : 1.8} />
+                {href === "/feed" && <CountBadge count={unread.total} className="absolute -top-1.5 -end-2.5" />}
+              </span>
               <span className="text-xs font-medium">{label}</span>
             </Link>
           );

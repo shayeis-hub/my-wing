@@ -944,6 +944,8 @@ export interface WallMessage {
   authorId: string;
   authorName: string;
   text: string;
+  /** Set when this message quotes a card in the dietitian chat (a meal, a post or an earlier message). */
+  replyTo?: { kind: "msg" | "meal" | "post"; id: string; preview: string; author: string };
   createdAt: import("firebase/firestore").Timestamp;
 }
 
