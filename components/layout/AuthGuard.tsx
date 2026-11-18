@@ -16,6 +16,10 @@ function toMs(ts: Timestamp | null | undefined): number | null {
   return s ? s * 1000 : null;
 }
 
+// Pages a dietitian (business) account can open; everything else is the
+// client app (dashboard, meals, feed, ...) and bounces to the coach home.
+const COACH_ALLOWED = ["/coach", "/settings", "/profile", "/member", "/subscription", "/change-password", "/guides", "/join", "/contact", "/privacy", "/terms"];
+
 const PAYWALL_EXEMPT = ["/subscription", "/onboarding", "/login", "/register", "/coach", "/book"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -69,6 +73,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       user?.bookAccess?.active && !Object.keys(user?.habitProgress ?? {}).length;
     if (needsBookOnboarding && !pathname.startsWith("/book")) {
       router.replace("/book/onboarding");
+      return;
+    }
+
+    // Dietitians land on their work tool, not the personal client app.
+    if (isBusiness && !COACH_ALLOWED.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+      router.replace("/coach");
       return;
     }
 

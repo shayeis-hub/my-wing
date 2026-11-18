@@ -235,7 +235,7 @@ export default function SettingsPage() {
       {/* Subscription */}
       <section className="bg-wing-surface border border-wing-border rounded-[20px] overflow-hidden">
         <Link
-          href={isBusiness ? "/coach" : "/subscription"}
+          href={isBusiness ? "/coach/plan" : "/subscription"}
           className="flex items-center gap-3 p-5 hover:bg-wing-elevated transition-colors"
         >
           <Crown size={18} className="text-yellow-500" />

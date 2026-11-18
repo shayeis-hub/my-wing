@@ -120,3 +120,14 @@ export function menuToPromptText(menu: MenuData): string {
   if (menu.notes.length) lines.push(`הערות: ${menu.notes.join("; ")}`);
   return lines.join("\n");
 }
+
+/** One row of the dietitian's menus overview (app/api/coach/menus). */
+export interface MenuOverviewRow {
+  uid: string;
+  displayName: string;
+  photoURL?: string;
+  published: boolean;
+  publishedAt: string | null;
+  hasDraft: boolean;
+  draftUpdatedAt: string | null;
+}

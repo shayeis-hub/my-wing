@@ -31,6 +31,7 @@ interface HamburgerMenuProps {
 export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
   const { user } = useAuth();
   const { t, lang, dir } = useLanguage();
+  const isBusiness = user?.accountType === "business";
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -106,6 +107,8 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
             <MenuItem icon={<UserCircle size={20} />} label={t("menu_profile")} />
           </Link>
 
+          {/* Client-app pages: not part of a dietitian's work tool */}
+          {!isBusiness && (<>
           {/* Wing */}
           <Link href="/wing" onClick={onClose}>
             <MenuItem icon={<Users size={20} />} label={t("menu_wing")} />
@@ -115,6 +118,7 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           <Link href="/calendar" onClick={onClose}>
             <MenuItem icon={<CalendarDays size={20} />} label={t("nav_calendar")} />
           </Link>
+          </>)}
 
           {/* Dietitian menu — only for clients of a dietitian */}
           {user?.coachAccess?.active && (
@@ -124,16 +128,18 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           )}
 
           {/* Weight progress */}
+          {!isBusiness && (
           <Link href="/weight" onClick={onClose}>
             <MenuItem
               icon={<TrendingDown size={20} />}
               label={lang === "he" ? "גרף ירידה במשקל" : "Weight Progress"}
             />
           </Link>
+          )}
 
           {/* Subscription — also reachable from Settings, but surfaced here so
               upgrading is two taps instead of three. */}
-          <Link href={user?.accountType === "business" ? "/coach" : "/subscription"} onClick={onClose}>
+          <Link href={isBusiness ? "/coach/plan" : "/subscription"} onClick={onClose}>
             <MenuItem
               icon={<Crown size={20} className="text-yellow-500" />}
               label={
@@ -152,6 +158,7 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           {/* User Guide — book-mode users get a guide adapted for their
               flow (redeem code, Habits tab, units) instead of the
               general one, since Feed/Challenges/Coach sections don't apply. */}
+          {!isBusiness && (
           <a
             href={user?.bookAccess?.active ? `/guides/${lang === "he" ? "he" : "en"}-book.html` : `/guides/${lang}.html`}
             target="_blank"
@@ -160,6 +167,7 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           >
             <MenuItem icon={<BookOpen size={20} />} label={t("menu_guide")} />
           </a>
+          )}
 
           {/* Divider */}
           <div className="h-px bg-wing-border mx-2 my-1" />

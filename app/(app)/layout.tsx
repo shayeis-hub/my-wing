@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { CoachNav } from "@/components/coach/CoachNav";
 import { useLanguage } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { consumeWidgetActions, isNativeApp, pushWidgetData } from "@/lib/widget/native";
@@ -96,6 +97,13 @@ function WidgetActions() {
   return null;
 }
 
+// Dietitian (business) accounts get their own work-tool navigation.
+function AppNav() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user?.accountType === "business" ? <CoachNav /> : <BottomNav />;
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { dir } = useLanguage();
   return (
@@ -105,7 +113,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <RevenueCatSync />
       <div className="min-h-screen bg-wing-bg" dir={dir}>
         <main className="max-w-lg mx-auto" style={{ paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}>{children}</main>
-        <BottomNav />
+        <AppNav />
       </div>
     </AuthGuard>
   );
