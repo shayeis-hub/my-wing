@@ -6,10 +6,12 @@ import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { Card } from "@/components/ui/Card";
+import { useCoachGender } from "@/hooks/useCoachGender";
 import type { PublishedClientMenu } from "@/lib/coach/menu";
 
 export default function MyMenuPage() {
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, user } = useAuth();
+  const coachWord = useCoachGender(user);
   const { lang, dir } = useLanguage();
   const he = lang === "he";
   const [state, setState] = useState<"loading" | "none" | "error" | PublishedClientMenu>("loading");
@@ -31,7 +33,7 @@ export default function MyMenuPage() {
         <p className="text-sm text-wing-muted">
           {state === "error"
             ? (he ? "לא הצלחנו לטעון את התפריט" : "Couldn't load the menu")
-            : (he ? "הדיאטנית עוד לא פרסמה לך תפריט" : "Your dietitian hasn't published a menu for you yet")}
+            : (he ? `${coachWord.word} עוד לא ${coachWord.gender === "male" ? "פרסם" : coachWord.gender === "female" ? "פרסמה" : "פרסם/ה"} לך תפריט` : "Your dietitian hasn't published a menu for you yet")}
         </p>
       </div>
     );

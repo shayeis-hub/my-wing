@@ -111,6 +111,8 @@ export interface UserProfile {
   weightKg: number;
   targetWeightKg: number;
   gender: "male" | "female";
+  /** True once the user actually chose a gender (accounts start with a "male" placeholder). */
+  genderSet?: boolean;
   activityLevel: "sedentary" | "light" | "moderate" | "active" | "very_active";
   dailyCalorieTarget: number;
   stepsGoal?: number;
@@ -146,6 +148,8 @@ export interface WingMember {
   displayName: string;
   photoURL?: string;
   stepsToday?: number;
+  /** Only set on a dietitian's own entry, so their clients see "הדיאטן"/"הדיאטנית". Absent = unknown. */
+  gender?: "male" | "female";
 }
 
 export interface Meal {

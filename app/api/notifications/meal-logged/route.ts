@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 import { clip, isWingMember, senderProfile, withinNotifyQuota } from "@/lib/server/notifyAuth";
+import { g3 } from "@/lib/utils/gender";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
     if (recipients.length === 0) return NextResponse.json({ ok: true, sent: 0 });
 
     const { name: authorName, gender } = await senderProfile(uid);
-    const logged = gender === "female" ? "הזינה" : "הזין";
+    const logged = g3(gender, "הזין", "הזינה", "הזין/ה");
 
     // Deep-link straight to the meal (scrolls + highlights it, where you can cheer).
     let link = `/member/${uid}`;

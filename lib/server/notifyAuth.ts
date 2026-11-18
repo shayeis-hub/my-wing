@@ -1,12 +1,13 @@
 import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { knownGender } from "@/lib/utils/gender";
 
 const DAILY_NOTIFY_LIMIT = 300;
 
-/** The sender's display name from their own profile — never trusted from the request body. */
-export async function senderProfile(uid: string): Promise<{ name: string; gender: "male" | "female" }> {
+/** The sender's display name from their own profile — never trusted from the request body. gender is null when they never told us (wording then stays neutral). */
+export async function senderProfile(uid: string): Promise<{ name: string; gender: "male" | "female" | null }> {
   getAdminApp();
   const d = (await admin.firestore().doc(`users/${uid}`).get()).data() ?? {};
-  return { name: String(d.displayName ?? "").slice(0, 80) || "Wingpact", gender: d.profile?.gender === "female" ? "female" : "male" };
+  return { name: String(d.displayName ?? "").slice(0, 80) || "Wingpact", gender: knownGender(d) };
 }
 
 export async function isWingMember(wingId: string, uid: string): Promise<{ ok: boolean; memberIds: string[] }> {

@@ -3,6 +3,7 @@ import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { canAddWingMember, canCoachAddClient, isCoachActive, isPremium, FREE_LIMITS, BOOK_WING_MAX_MEMBERS, FIT_DAD_WING_MAX_MEMBERS } from "@/lib/subscription";
 import type { CoachPlanId } from "@/lib/subscription";
 import { getUidFromRequest } from "@/lib/server/auth";
+import { knownGender } from "@/lib/utils/gender";
 
 export const dynamic = "force-dynamic";
 
@@ -201,7 +202,7 @@ export async function POST(req: NextRequest) {
         ownerId: coachId,
         memberIds: [coachId, userId],
         members: [
-          { uid: coachId, displayName: coachName },
+          { uid: coachId, displayName: coachName, ...(knownGender(coachData) ? { gender: knownGender(coachData) } : {}) },
           member,
         ],
         inviteToken,

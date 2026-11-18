@@ -44,6 +44,7 @@ export function PersonalThread({
   readWingIds,
   writeWingId,
   title,
+  emptyHint,
   limit = 40,
   maxAgeDays = 60,
 }: {
@@ -55,6 +56,8 @@ export function PersonalThread({
   readWingIds: string[];
   writeWingId: string;
   title?: string;
+  /** Empty-state line, worded by the caller (it knows the dietitian's gender). */
+  emptyHint?: string;
   limit?: number;
   maxAgeDays?: number;
 }) {
@@ -97,7 +100,7 @@ export function PersonalThread({
 
       <div ref={scrollRef} className="max-h-72 overflow-y-auto space-y-1.5 px-1 py-1 overscroll-contain">
         {msgs && msgs.length === 0 && (
-          <p className="text-xs text-wing-muted text-center py-3">{he ? "אפשר לכתוב כאן ישירות לדיאטנית" : "You can write to your dietitian here"}</p>
+          <p className="text-xs text-wing-muted text-center py-3">{emptyHint ?? (he ? "אפשר לכתוב כאן ישירות לדיאטנ/ית" : "You can write to your dietitian here")}</p>
         )}
         {msgs?.map((m, i) => {
           const mine = m.authorId === myId;

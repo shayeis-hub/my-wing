@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 import { clip, isWingMember, senderProfile, withinNotifyQuota } from "@/lib/server/notifyAuth";
+import { g3 } from "@/lib/utils/gender";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
     getAdminApp();
     const db = admin.firestore();
     const { name: authorName, gender } = await senderProfile(uid);
-    const wrote = gender === "female" ? "כתבה בפיד" : "כתב בפיד";
+    const wrote = g3(gender, "כתב בפיד", "כתבה בפיד", "כתב/ה בפיד");
 
     const preview = clip(body.preview, 200);
     const text = preview ? (preview.length > 80 ? preview.slice(0, 80) + "…" : preview) : "פוסט חדש במבנה שלך";

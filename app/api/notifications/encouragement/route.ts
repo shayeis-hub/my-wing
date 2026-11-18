@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 import { clip, safeLink, senderProfile, shareAWing, withinNotifyQuota } from "@/lib/server/notifyAuth";
+import { g3 } from "@/lib/utils/gender";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     if (userSnap.data()?.notificationPrefs?.personal === false) return NextResponse.json({ ok: true });
 
     const { name: authorName, gender } = await senderProfile(uid);
-    const encouraged = gender === "female" ? "עודדה" : "עודד";
+    const encouraged = g3(gender, "עודד", "עודדה", "עודד/ה");
 
     // Caller can specify which in-app page to open (relative paths only). Defaults to /checkin.
     const targetLink = safeLink(body.link, "/checkin");

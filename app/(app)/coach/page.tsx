@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
 import { CoachGate } from "@/components/coach/CoachGate";
 import { ClientStatusList } from "@/components/coach/ClientStatusList";
+import { CoachGenderCard } from "@/components/coach/CoachGenderCard";
 import { useCoachAccount } from "@/hooks/useCoachAccount";
 import { useUnreadMessages } from "@/hooks/useChat";
 
@@ -32,6 +33,8 @@ function CoachHome() {
           {he ? "הוספת לקוח" : "Add client"}
         </button>
       </div>
+
+      <CoachGenderCard he={he} />
 
       {coach?.plan === "free" && trialDaysLeft != null && (
         <div className="bg-wing-elevated border border-wing-honey rounded-2xl px-4 py-3 flex items-center justify-between gap-3">

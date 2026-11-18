@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
+import { useCoachGender } from "@/hooks/useCoachGender";
 import { useLanguage } from "@/lib/i18n";
 import { isWingAdmin } from "@/lib/wing/roles";
 import {
@@ -67,6 +68,7 @@ function getDailyQuote(quotes: string[]): string {
 export default function FeedPage() {
   const { user, firebaseUser } = useAuth();
   const { wing } = useWing(user?.wingId);
+  const coachWord = useCoachGender(user);
   const { t, lang } = useLanguage();
 
   const [todayPrompt, setTodayPrompt] = useState<DailyPrompt | null>(null);
@@ -122,8 +124,9 @@ export default function FeedPage() {
           myId={firebaseUser.uid}
           myName={user.displayName}
           otherId={user.coachAccess.coachId}
-          otherName={wing?.members.find((m) => m.uid === user.coachAccess!.coachId)?.displayName ?? (lang === "he" ? "הדיאטנית" : "your dietitian")}
-          title={lang === "he" ? "שיחה עם הדיאטנית" : "Chat with your dietitian"}
+          otherName={wing?.members.find((m) => m.uid === user.coachAccess!.coachId)?.displayName ?? (lang === "he" ? coachWord.word : "your dietitian")}
+          title={lang === "he" ? `שיחה עם ${coachWord.word}` : "Chat with your dietitian"}
+          emptyHint={lang === "he" ? `אפשר לכתוב כאן ישירות ל${coachWord.wordNoArticle}` : undefined}
           readWingIds={[user.coachAccess.wingId, user.wingId].filter(Boolean) as string[]}
           writeWingId={user.coachAccess.wingId}
         />

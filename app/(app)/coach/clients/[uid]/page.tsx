@@ -11,6 +11,7 @@ import type { ClientWing } from "@/components/coach/CoachClientActions";
 import { useCoachAccount } from "@/hooks/useCoachAccount";
 import { getCoachClients } from "@/lib/firebase/firestore";
 import type { ClientStatus, StatusFlag } from "@/lib/coach/status";
+import { g3 } from "@/lib/utils/gender";
 
 const FLAG_STYLE: Record<StatusFlag, string> = {
   silent: "bg-red-50 text-red-600 border-red-200",
@@ -23,12 +24,12 @@ const FLAG_STYLE: Record<StatusFlag, string> = {
 
 function flagText(f: StatusFlag, c: ClientStatus, he: boolean): string {
   switch (f) {
-    case "silent": return he ? `לא פעיל/ה ${c.daysSinceActivity} ימים` : `Inactive ${c.daysSinceActivity} days`;
+    case "silent": return he ? `${g3(c.gender, "לא פעיל", "לא פעילה", "לא פעיל/ה")} ${c.daysSinceActivity} ימים` : `Inactive ${c.daysSinceActivity} days`;
     case "no_data": return he ? "אין נתונים" : "No data";
     case "weight_up": return he ? "עלייה במשקל" : "Weight rising";
     case "menu_off": return he ? "חריגות מהתפריט" : "Off the menu";
     case "low_logging": return he ? "רישום דל" : "Light logging";
-    case "new": return he ? "חדש/ה" : "New";
+    case "new": return he ? g3(c.gender, "חדש", "חדשה", "חדש/ה") : "New";
   }
 }
 

@@ -10,6 +10,8 @@ export interface ClientStatus {
   uid: string;
   displayName: string;
   photoURL?: string;
+  /** Known gender of the client (null = never told us), for Hebrew wording on the dietitian's screens. */
+  gender?: "male" | "female" | null;
   wingId: string;
   wingName: string;
   isPrivate: boolean;

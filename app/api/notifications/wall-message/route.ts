@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 import { clip, isWingMember, senderProfile, withinNotifyQuota } from "@/lib/server/notifyAuth";
+import { g3 } from "@/lib/utils/gender";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     // Respect the recipient's personal-message preference (undefined = opted in).
     if (token && userSnap.data()?.notificationPrefs?.personal !== false) {
       const { name: authorName, gender } = await senderProfile(uid);
-      const verb = gender === "female" ? "כתבה לך על הקיר" : "כתב לך על הקיר";
+      const verb = g3(gender, "כתב לך על הקיר", "כתבה לך על הקיר", "כתב/ה לך על הקיר");
       // The message lives on the RECIPIENT's wall, so open their own member page.
       const link = `/member/${targetUserId}`;
 

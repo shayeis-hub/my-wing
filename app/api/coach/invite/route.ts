@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
+import { knownGender } from "@/lib/utils/gender";
 import { isCoachActive, canCoachAddClient, type CoachPlanId } from "@/lib/subscription";
 
 async function countCoachClients(db: admin.firestore.Firestore, coachId: string): Promise<number> {
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
       name: label?.trim() || "קבוצה חדשה",
       ownerId: uid,
       memberIds: [uid],
-      members: [{ uid, displayName: coachData.displayName ?? "מאמן/ת" }],
+      members: [{ uid, displayName: coachData.displayName ?? "מאמן/ת", ...(knownGender(coachData) ? { gender: knownGender(coachData) } : {}) }],
       inviteToken,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });

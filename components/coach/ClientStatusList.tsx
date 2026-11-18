@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { CountBadge } from "@/components/ui/CountBadge";
 import { cn } from "@/lib/utils/cn";
 import type { ClientStatus, StatusFlag } from "@/lib/coach/status";
+import { g3 } from "@/lib/utils/gender";
 
 type Lang = "he" | "en";
 
@@ -21,12 +22,12 @@ const FLAG_STYLE: Record<StatusFlag, string> = {
 function flagLabel(flag: StatusFlag, c: ClientStatus, lang: Lang): string {
   const he = lang === "he";
   switch (flag) {
-    case "silent": return he ? `לא פעיל/ה ${c.daysSinceActivity} ימים` : `Inactive ${c.daysSinceActivity} days`;
+    case "silent": return he ? `${g3(c.gender, "לא פעיל", "לא פעילה", "לא פעיל/ה")} ${c.daysSinceActivity} ימים` : `Inactive ${c.daysSinceActivity} days`;
     case "no_data": return he ? "אין נתונים" : "No data";
     case "weight_up": return he ? "עלייה במשקל" : "Weight rising";
     case "menu_off": return he ? "חריגות מהתפריט" : "Off the menu";
     case "low_logging": return he ? "רישום דל" : "Light logging";
-    case "new": return he ? "חדש/ה" : "New";
+    case "new": return he ? g3(c.gender, "חדש", "חדשה", "חדש/ה") : "New";
   }
 }
 

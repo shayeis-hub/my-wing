@@ -1,4 +1,5 @@
 import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { knownGender } from "@/lib/utils/gender";
 import { computeStatus, shiftDate, LOOKBACK_DAYS, type ClientStatus } from "@/lib/coach/status";
 
 const israelDate = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jerusalem" }).format(d);
@@ -100,6 +101,7 @@ export async function getCoachClientStatuses(coachId: string): Promise<{ today: 
       uid: clientId,
       displayName: user.displayName ?? member.displayName ?? "",
       photoURL: user.photoURL ?? member.photoURL,
+      gender: knownGender(user),
       wingId: primary.id,
       wingName: primary.name,
       isPrivate: primary.isPrivate,
