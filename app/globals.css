@@ -29,6 +29,18 @@ body[data-modal-open="true"] .wing-bottom-nav {
   pointer-events: none;
 }
 
+/* Same while a text field is focused (on-screen keyboard open): the fixed nav
+   would sit on top of the input. */
+.wing-bottom-nav { transition: transform 0.2s ease-out; }
+body[data-typing="true"] .wing-bottom-nav {
+  transform: translateY(140%);
+  pointer-events: none;
+}
+/* Full-height chat screens drop the nav allowance while typing. */
+body[data-typing="true"] .chat-screen {
+  height: calc(100dvh - env(safe-area-inset-bottom, 0px)) !important;
+}
+
 /* Smooth scroll */
 * {
   scroll-behavior: smooth;

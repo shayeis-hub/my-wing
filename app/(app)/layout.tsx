@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CoachNav } from "@/components/coach/CoachNav";
+import { KeyboardNavHider } from "@/components/layout/KeyboardNavHider";
 import { useLanguage } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { consumeWidgetActions, isNativeApp, pushWidgetData } from "@/lib/widget/native";
@@ -109,6 +110,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <GenderSync />
+      <KeyboardNavHider />
       <WidgetActions />
       <RevenueCatSync />
       <div className="min-h-screen bg-wing-bg" dir={dir}>

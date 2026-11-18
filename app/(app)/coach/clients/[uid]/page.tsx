@@ -71,7 +71,7 @@ function ClientHub() {
   const cal = c ? (c.calorieTarget ? `${c.todayCalories}/${c.calorieTarget}` : `${c.todayCalories}`) : "";
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100dvh - 5.5rem - env(safe-area-inset-bottom, 0px))" }} dir={he ? "rtl" : "ltr"}>
+    <div className="chat-screen flex flex-col" style={{ height: "calc(100dvh - 5.5rem - env(safe-area-inset-bottom, 0px))" }} dir={he ? "rtl" : "ltr"}>
       <div className="shrink-0 bg-wing-surface border-b border-wing-border px-3 pt-3 pb-2.5">
         <div className="flex items-center gap-2.5">
           <button onClick={() => router.back()} className="p-2 -ms-1 rounded-full shrink-0" aria-label={he ? "חזרה" : "Back"}>
