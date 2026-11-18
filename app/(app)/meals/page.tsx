@@ -23,6 +23,7 @@ import { dataUrlMediaType } from "@/lib/utils/imageCompress";
 import { AdBanner } from "@/components/ads/AdBanner";
 import { useTrialLock } from "@/hooks/useTrialLock";
 import { useSearchParams } from "next/navigation";
+import { MenuMatchBadge } from "@/components/meals/MenuMatchBadge";
 
 const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
 
@@ -530,6 +531,8 @@ function MealsPageInner() {
             >
               {editingValues ? t("meals_close_edit") : t("meals_edit_values")}
             </button>
+
+            {pendingAnalysis.analysis.menuMatch && <MenuMatchBadge match={pendingAnalysis.analysis.menuMatch} lang={lang} />}
 
             {pendingAnalysis.analysis.tips && (
               <p className="text-xs text-wing-heat bg-wing-elevated px-3 py-2 rounded-xl flex items-start gap-1.5">

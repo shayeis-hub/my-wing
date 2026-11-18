@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
     const user = userDocs.get(clientId) ?? {};
 
     const checkins: { date: string; weightKg?: number }[] = [];
-    const meals: { date: string; calories: number }[] = [];
+    const meals: { date: string; calories: number; menuStatus?: string; menuScore?: number }[] = [];
 
     for (const wingId of wingIds) {
       const refs = dates.map((d) => db.doc(`wings/${wingId}/checkins/${clientId}_${d}`));
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
         const created: Date | undefined = m.createdAt?.toDate?.();
         const date: string | undefined = m.mealDate ?? (created ? israelDate(created) : undefined);
         if (!date || date < dates[dates.length - 1]) return;
-        meals.push({ date, calories: Number(m.analysis?.calories) || 0 });
+        meals.push({ date, calories: Number(m.analysis?.calories) || 0, menuStatus: m.analysis?.menuMatch?.status, menuScore: typeof m.analysis?.menuMatch?.score === "number" ? m.analysis.menuMatch.score : undefined });
       });
     }
 

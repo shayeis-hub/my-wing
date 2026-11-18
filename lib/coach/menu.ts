@@ -1,3 +1,5 @@
+import type { MenuMatch } from "@/types";
+
 /**
  * Per-client nutrition menu uploaded by the dietitian. The AI extracts it from
  * a PDF/photo into this shape, the dietitian reviews and edits it, and only
@@ -23,6 +25,18 @@ export interface MenuData {
   notes: string[];
   /** Things the AI wasn't sure it read right. Draft-only; dropped on publish. */
   unclear: string[];
+}
+
+/** Bounds whatever the AI returned for menuMatch (or drops it if unusable). */
+export function normalizeMenuMatch(raw: unknown): MenuMatch | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const r = raw as Record<string, unknown>;
+  const status = ["match", "partial", "off", "unknown"].includes(String(r.status)) ? (r.status as MenuMatch["status"]) : "unknown";
+  const score = Math.max(0, Math.min(100, Math.round(Number(r.score) || 0)));
+  const slot = clip(r.slot, 60);
+  const mm: MenuMatch = { status, score, note: clip(r.note, 300) };
+  if (slot) mm.slot = slot;
+  return mm;
 }
 
 export interface MenuSource {

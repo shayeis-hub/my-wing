@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { X, Pencil, Trash2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
+import { MenuMatchBadge } from "@/components/meals/MenuMatchBadge";
 
 interface MealCardProps {
   meal: Meal;
@@ -538,6 +539,9 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
                     </div>
                   </div>
                 )}
+
+                {/* Fit to the dietitian's menu */}
+                {meal.analysis.menuMatch && <MenuMatchBadge match={meal.analysis.menuMatch} lang={lang === "he" ? "he" : "en"} />}
 
                 {/* Tips */}
                 {meal.analysis.tips && (

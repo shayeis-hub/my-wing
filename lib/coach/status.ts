@@ -4,7 +4,7 @@
  * them into one comparable row per client, flagged by what needs attention.
  */
 
-export type StatusFlag = "no_data" | "silent" | "low_logging" | "weight_up" | "new";
+export type StatusFlag = "no_data" | "silent" | "low_logging" | "weight_up" | "menu_off" | "new";
 
 export interface ClientStatus {
   uid: string;
@@ -31,6 +31,11 @@ export interface ClientStatus {
   weightChangeKg: number | null;
   weightSpanDays: number | null;
   targetWeightKg: number | null;
+  /** Average menu-match score over the last 7 days (null = no scored meals). */
+  menuAvgScore: number | null;
+  menuMeals7: number;
+  /** Meals in the last 7 days that were partly or fully off the menu. */
+  menuOff7: number;
   flags: StatusFlag[];
   /** Higher = needs attention sooner. Used only for sorting. */
   attention: number;
@@ -46,7 +51,7 @@ export interface StatusInput {
   /** Check-ins in the window: date + the metrics we read from them. */
   checkins: { date: string; weightKg?: number }[];
   /** Meals in the window: the Israel-time date and calories of each. */
-  meals: { date: string; calories: number }[];
+  meals: { date: string; calories: number; menuStatus?: string; menuScore?: number }[];
   calorieTarget?: number | null;
   targetWeightKg?: number | null;
   /** Account creation as "yyyy-MM-dd" (Israel time), if known. */
@@ -104,6 +109,12 @@ export function computeStatus(
     weights.length >= 2 ? Math.round((weights[weights.length - 1].weightKg! - weights[0].weightKg!) * 10) / 10 : null;
   const weightSpanDays = weights.length >= 2 ? daysBetween(weights[0].date, weights[weights.length - 1].date) : null;
 
+  const since7 = shiftDate(today, -6);
+  const scored = input.meals.filter((m) => m.date >= since7 && typeof m.menuScore === "number" && m.menuStatus && m.menuStatus !== "unknown");
+  const menuMeals7 = scored.length;
+  const menuOff7 = scored.filter((m) => m.menuStatus === "off" || m.menuStatus === "partial").length;
+  const menuAvgScore = menuMeals7 ? Math.round(scored.reduce((s, m) => s + (m.menuScore ?? 0), 0) / menuMeals7) : null;
+
   const flags: StatusFlag[] = [];
   const isNew = !!input.createdDate && daysBetween(input.createdDate, today) < NEW_CLIENT_DAYS;
   if (daysSinceActivity == null) {
@@ -119,11 +130,14 @@ export function computeStatus(
     if (a < b && b < c && c - a >= 0.5) flags.push("weight_up");
   }
 
+  if (menuOff7 >= 3) flags.push("menu_off");
+
   let attention = 0;
   if (flags.includes("no_data")) attention += 40;
   if (flags.includes("silent")) attention += 50 + Math.min(daysSinceActivity ?? 0, 20);
   if (flags.includes("weight_up")) attention += 30;
   if (flags.includes("low_logging")) attention += 20;
+  if (flags.includes("menu_off")) attention += 25;
 
   return {
     lastCheckinDate,
@@ -140,6 +154,9 @@ export function computeStatus(
     weightChangeKg,
     weightSpanDays,
     targetWeightKg: input.targetWeightKg ?? null,
+    menuAvgScore,
+    menuMeals7,
+    menuOff7,
     flags,
     attention,
   };

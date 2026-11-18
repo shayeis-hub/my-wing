@@ -13,6 +13,7 @@ const FLAG_STYLE: Record<StatusFlag, string> = {
   silent: "bg-red-50 text-red-600 border-red-200",
   no_data: "bg-red-50 text-red-600 border-red-200",
   weight_up: "bg-orange-50 text-orange-600 border-orange-200",
+  menu_off: "bg-orange-50 text-orange-600 border-orange-200",
   low_logging: "bg-amber-50 text-amber-700 border-amber-200",
   new: "bg-wing-elevated text-wing-muted border-wing-border",
 };
@@ -23,6 +24,7 @@ function flagLabel(flag: StatusFlag, c: ClientStatus, lang: Lang): string {
     case "silent": return he ? `לא פעיל/ה ${c.daysSinceActivity} ימים` : `Inactive ${c.daysSinceActivity} days`;
     case "no_data": return he ? "אין נתונים" : "No data";
     case "weight_up": return he ? "עלייה במשקל" : "Weight rising";
+    case "menu_off": return he ? "חריגות מהתפריט" : "Off the menu";
     case "low_logging": return he ? "רישום דל" : "Light logging";
     case "new": return he ? "חדש/ה" : "New";
   }
@@ -239,6 +241,9 @@ export function ClientStatusList({
                         <span className="text-wing-ink font-medium">—</span>
                       )}
                     </p>
+                    {c.menuMeals7 > 0 && (
+                      <p className="col-span-2">{he ? "התאמה לתפריט (7 ימים): " : "Menu fit (7 days): "}<span className="text-wing-ink font-medium tabular">{c.menuAvgScore}/100</span>{c.menuOff7 > 0 && <span className="text-red-500 ms-1">· {c.menuOff7} {he ? "חריגות" : "off"}</span>}</p>
+                    )}
                     {c.streak > 0 && <p className="col-span-2">{he ? "רצף צ'ק-אין: " : "Check-in streak: "}<span className="text-wing-ink font-medium">{c.streak} {he ? "ימים" : "days"}</span></p>}
                   </div>
 

@@ -173,6 +173,17 @@ export interface MealAnalysis {
   healthScore: number;
   tips?: string;
   containsVegetables?: boolean;
+  /** Set when the user has a published menu from their dietitian: how this meal fits it. */
+  menuMatch?: MenuMatch;
+}
+
+export interface MenuMatch {
+  /** The menu meal this was matched to (e.g. "ארוחת צהריים"), if any. */
+  slot?: string;
+  status: "match" | "partial" | "off" | "unknown";
+  /** 0-100, shown to the client and the dietitian. */
+  score: number;
+  note: string;
 }
 
 export interface FoodItem {

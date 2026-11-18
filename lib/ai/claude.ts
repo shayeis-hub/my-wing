@@ -50,16 +50,40 @@ Nutritional values and the health score stay objective and are not affected by t
 `;
 }
 
+// A client of a dietitian has a personal menu: the meal is compared to it and the
+// result comes back as an extra "menuMatch" field (shown to the client AND the
+// dietitian). Nutrition numbers stay objective; only "tips" and menuMatch use the menu.
+function buildMenuBlock(menuText: string | undefined, isHe: boolean): string {
+  if (!menuText) return "";
+  const now = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit" }).format(new Date());
+  return isHe
+    ? `ללקוח/ה יש תפריט אישי מהדיאטנית שלו/ה. השעה עכשיו בישראל ${now}.
+התפריט:
+${menuText}
+
+משימה נוספת: 1) קבע לאיזו ארוחה בתפריט הארוחה הזו שייכת (לפי התוכן והשעה). 2) השווה את מה שבצלחת לאפשרויות באותה ארוחה, לכמויות ולמזונות שצריך להימנע מהם. 3) הוסף ל-JSON שדה נוסף בשם "menuMatch" בצורה: {"slot":"שם הארוחה בתפריט או ריק","status":"match" (תואם) או "partial" (תואם חלקית) או "off" (חורג) או "unknown" (אי אפשר לקבוע),"score":מספר בין 0 ל-100,"note":"משפט קצר אחד: מה תואם ומה חורג, בלי אשמה"}. ארוחה שאינה חלק מהתפריט ואינה מותרת בו היא "off". הערכים התזונתיים נשארים אובייקטיביים. שדה "tips" יהיה משפט אחד שמבוסס על התפריט, בלשון רבים; האפשרויות באותה ארוחה הן חלופות (במקום ולא בנוסף), אז אל תציע להוסיף עליהן.
+
+`
+    : `The user has a personal menu from their dietitian. The time in Israel is ${now}.
+The menu:
+${menuText}
+
+Extra task: 1) Decide which menu meal this belongs to (by content and time). 2) Compare the plate to the options for that meal, the quantities, and the foods to avoid. 3) Add one more field to the JSON named "menuMatch": {"slot":"menu meal name or empty","status":"match" | "partial" | "off" | "unknown","score": number 0-100,"note":"one short sentence: what fits and what doesn't, no guilt"}. A meal that isn't part of the menu and isn't allowed by it is "off". Nutritional values stay objective. "tips" is one sentence based on the menu; the options for one meal are alternatives (instead of, not in addition to), so don't suggest adding them on top.
+
+`;
+}
+
 export async function analyzeMealImage(
   base64Image: string,
   mediaType: "image/jpeg" | "image/png" | "image/webp",
   hint?: string,
   lang: "he" | "en" = "he",
   previousAnalysis?: MealAnalysis,
-  habit?: MealHabitContext
+  habit?: MealHabitContext,
+  menuText?: string
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
-  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe) + buildHabitBlock(habit, isHe);
+  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe) + buildHabitBlock(habit, isHe) + buildMenuBlock(menuText, isHe);
   const promptText = isHe
     ? `${correctionBlock}המשתמש נמצא בתהליך ירידה במשקל. אנא נתח את הצלחת בתמונה הזו ותן לי:
 1. תיאור קצר של הארוחה בעברית
@@ -138,11 +162,12 @@ export async function analyzeMealImages(
   hint?: string,
   lang: "he" | "en" = "he",
   previousAnalysis?: MealAnalysis,
-  habit?: MealHabitContext
+  habit?: MealHabitContext,
+  menuText?: string
 ): Promise<MealAnalysis> {
   const isHe = lang === "he";
   const count = images.length;
-  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe) + buildHabitBlock(habit, isHe);
+  const correctionBlock = buildCorrectionBlock(hint, previousAnalysis, isHe) + buildHabitBlock(habit, isHe) + buildMenuBlock(menuText, isHe);
 
   const promptText = isHe
     ? `${correctionBlock}לפניך ${count} תמונות של אותה ארוחה מזוויות/מנות שונות. נתח את כולן יחד כארוחה אחת שלמה — סכום כל המנות — ותן ערכים תזונתיים כוללים.
@@ -189,9 +214,9 @@ Reply ONLY with valid JSON:
   return JSON.parse(jsonMatch[0]) as MealAnalysis;
 }
 
-export async function analyzeMealText(description: string, lang: "he" | "en" = "he", habit?: MealHabitContext): Promise<MealAnalysis> {
+export async function analyzeMealText(description: string, lang: "he" | "en" = "he", habit?: MealHabitContext, menuText?: string): Promise<MealAnalysis> {
   const isHe = lang === "he";
-  const habitBlock = buildHabitBlock(habit, isHe);
+  const habitBlock = buildHabitBlock(habit, isHe) + buildMenuBlock(menuText, isHe);
   const promptContent = isHe
     ? `${habitBlock}המשתמש נמצא בתהליך ירידה במשקל. הוא תיאר את הארוחה שלו: "${description}"
 

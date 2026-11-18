@@ -10,6 +10,8 @@ import { isGrandfathered, isPremium, FREE_LIMITS, type Plan, type AccessGrants }
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 import { getCurrentHabit, type HabitProgressMap } from "@/lib/book/habits";
+import { menuToPromptText, normalizeMenuMatch, sanitizeMenu } from "@/lib/coach/menu";
+import type { MealAnalysis } from "@/types";
 
 // ── Admin-SDK helpers (server-safe, no client SDK) ────────────────────────────
 
@@ -112,8 +114,25 @@ export async function POST(req: NextRequest) {
 
     getAdminApp();
     const { email: userEmail, sub, grants, habitProgress } = await getUserPlanAdmin(uid);
+    // A dietitian's client with a published menu: compare the meal to it (that takes
+    // the place of the book-mode habit tip, which would otherwise compete for "tips").
+    let menuText: string | undefined;
+    const coachAccess = grants.coachAccess as { active?: boolean; coachId?: string } | null | undefined;
+    if (coachAccess?.active && coachAccess.coachId) {
+      const menuSnap = await admin.firestore().doc(`clientMenus/${uid}`).get();
+      const md = menuSnap.data();
+      if (menuSnap.exists && md?.coachId === coachAccess.coachId) {
+        const menu = sanitizeMenu(md.menu);
+        if (menu.meals.length > 0) menuText = menuToPromptText(menu);
+      }
+    }
     // Book mode: steer the tip toward the habit the user is installing now.
-    const habit = grants.bookAccess?.active ? getCurrentHabit(habitProgress, lang ?? "he") : undefined;
+    const habit = !menuText && grants.bookAccess?.active ? getCurrentHabit(habitProgress, lang ?? "he") : undefined;
+    const finish = (a: MealAnalysis) => {
+      const { menuMatch, ...rest } = a as MealAnalysis & { menuMatch?: unknown };
+      const mm = menuText ? normalizeMenuMatch(menuMatch) : undefined;
+      return NextResponse.json(mm ? { ...rest, menuMatch: mm } : rest);
+    };
     const plan = sub?.plan ?? "free";
     const today = format(new Date(), "yyyy-MM-dd");
     const grandfathered = isGrandfathered(userEmail);
@@ -156,14 +175,14 @@ export async function POST(req: NextRequest) {
     try {
       // ── Text analysis (manual entry / voice, or a saved meal with no photo)
       if (textDescription) {
-        const analysis = await analyzeMealText(textDescription, lang ?? "he", habit);
-        return NextResponse.json(analysis);
+        const analysis = await analyzeMealText(textDescription, lang ?? "he", habit, menuText);
+        return finish(analysis);
       }
 
       // ── Multi-image analysis ─────────────────────────────────────────────
       if (base64Images && Array.isArray(base64Images) && base64Images.length > 0) {
-        const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis, habit);
-        return NextResponse.json(analysis);
+        const analysis = await analyzeMealImages(base64Images, hint, lang ?? "he", previousAnalysis, habit, menuText);
+        return finish(analysis);
       }
 
       if (!base64Image || !mediaType) {
@@ -171,8 +190,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Missing image data" }, { status: 400 });
       }
 
-      const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis, habit);
-      return NextResponse.json(analysis);
+      const analysis = await analyzeMealImage(base64Image, mediaType, hint, lang ?? "he", previousAnalysis, habit, menuText);
+      return finish(analysis);
     } catch (err) {
       if (needsQuota) await releaseMealQuota(uid, today, imageCount);
       throw err;

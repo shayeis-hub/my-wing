@@ -10,6 +10,7 @@ import { addWallMessage, getWingChallenges, type WallMessage } from "@/lib/fireb
 import { markChatRead, useThreadMessages } from "@/hooks/useChat";
 import { dayLabel, ReplyQuote } from "@/components/feed/PersonalThread";
 import { ChallengePanel, MessagePanel, type ClientWing } from "@/components/coach/CoachClientActions";
+import { MenuMatchBadge } from "@/components/meals/MenuMatchBadge";
 import { cn } from "@/lib/utils/cn";
 import type { Meal, WingPost } from "@/types";
 
@@ -201,6 +202,7 @@ export function CoachChat({
                       <p className="text-[10px] font-bold text-wing-heat">{he ? `ארוחה · ${MEAL_TYPE_HE[it.meal.mealType] ?? ""}` : "Meal"}</p>
                       <p className="text-sm text-wing-ink font-semibold">{it.meal.analysis?.description || (he ? "ארוחה" : "Meal")}</p>
                       <p className="text-xs text-wing-muted tabular">{Math.round(it.meal.analysis?.calories ?? 0)} {he ? 'קק"ל' : "kcal"} · P{Math.round(it.meal.analysis?.protein ?? 0)} C{Math.round(it.meal.analysis?.carbs ?? 0)} F{Math.round(it.meal.analysis?.fat ?? 0)}</p>
+                      {it.meal.analysis?.menuMatch && <div className="mt-1.5"><MenuMatchBadge match={it.meal.analysis.menuMatch} lang={lang} /></div>}
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-[10px] text-wing-subtle tabular">{format(d, "HH:mm")}</span>
                         <button onClick={() => quoteMeal(it.meal)} className="flex items-center gap-1 text-[11px] font-bold text-wing-heat"><Reply size={12} />{he ? "השב" : "Reply"}</button>
