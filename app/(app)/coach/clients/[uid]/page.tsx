@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/cn";
 import { CoachGate } from "@/components/coach/CoachGate";
 import { CoachChat } from "@/components/coach/CoachChat";
+import { ClientDataView } from "@/components/coach/ClientDataView";
 import type { ClientWing } from "@/components/coach/CoachClientActions";
 import { useCoachAccount } from "@/hooks/useCoachAccount";
 import { getCoachClients } from "@/lib/firebase/firestore";
@@ -46,6 +47,8 @@ function ClientHub() {
   const [name, setName] = useState("");
   const [photoURL, setPhotoURL] = useState<string | undefined>();
   const [notFound, setNotFound] = useState(false);
+  const [tab, setTab] = useState<"chat" | "data">("chat");
+  const getToken = useCallback(async () => (await firebaseUser?.getIdToken()) ?? "", [firebaseUser]);
 
   const load = useCallback(async () => {
     if (!firebaseUser) return;
@@ -105,7 +108,22 @@ function ClientHub() {
         )}
       </div>
 
-      {firebaseUser && user && wings.length > 0 && (
+      <div className="shrink-0 grid grid-cols-2 gap-1.5 px-3 py-2 bg-wing-surface border-b border-wing-border">
+        {(["chat", "data"] as const).map((tb) => (
+          <button
+            key={tb}
+            onClick={() => setTab(tb)}
+            aria-pressed={tab === tb}
+            className={cn("py-2 rounded-xl text-sm font-bold border", tab === tb ? "bg-wing-ink text-wing-elevated border-wing-ink" : "bg-wing-elevated text-wing-muted border-wing-border")}
+          >
+            {tb === "chat" ? (he ? "פתיחת שיחה" : "Chat") : he ? "פתיחת נתונים" : "Data"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "data" && firebaseUser && <ClientDataView clientId={uid} getToken={getToken} he={he} />}
+
+      {tab === "chat" && firebaseUser && user && wings.length > 0 && (
         <CoachChat lang={lang} coachId={firebaseUser.uid} coachName={user.displayName} clientId={uid} clientName={name} wings={wings} />
       )}
     </div>
