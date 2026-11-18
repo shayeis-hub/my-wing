@@ -195,7 +195,7 @@ export function ClientStatusList({
               >
                 <Avatar name={c.displayName} photoURL={c.photoURL} size={34} />
                 <span className="flex-1 min-w-0 font-semibold text-wing-ink text-sm truncate">{c.displayName}</span>
-                <CountBadge count={unread?.[c.uid] ?? 0} />
+                <CountBadge count={(unread?.[c.uid] ?? 0) + (c.unreadPosts ?? 0)} />
                 {needsAttention(c) && <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-label={he ? "דורש תשומת לב" : "Needs attention"} />}
                 <ChevronDown size={18} className={cn("text-wing-muted shrink-0 transition-transform", isOpen && "rotate-180")} />
               </button>

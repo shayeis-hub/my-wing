@@ -13,6 +13,8 @@ export interface ClientStatus {
   wingId: string;
   wingName: string;
   isPrivate: boolean;
+  /** Feed posts by this client that the dietitian hasn't opened the chat since (last 14 days). */
+  unreadPosts: number;
   /** "yyyy-MM-dd" of the latest check-in / meal inside the lookback window. */
   lastCheckinDate: string | null;
   lastMealDate: string | null;
@@ -70,7 +72,7 @@ function daysBetween(from: string, to: string): number {
 
 export function computeStatus(
   input: StatusInput
-): Omit<ClientStatus, "uid" | "displayName" | "photoURL" | "wingId" | "wingName" | "isPrivate"> {
+): Omit<ClientStatus, "uid" | "displayName" | "photoURL" | "wingId" | "wingName" | "isPrivate" | "unreadPosts"> {
   const { today } = input;
   const checkinDates = new Set(input.checkins.map((c) => c.date));
   const mealDates = new Set(input.meals.map((m) => m.date));

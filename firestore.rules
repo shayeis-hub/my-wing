@@ -288,6 +288,18 @@ service cloud.firestore {
            request.auth.uid == resource.data.targetUserId);
       }
 
+      // Chat read markers ("seen" ticks): doc id is {readerId}_{otherId}. Members of the
+      // wing can read them (so the sender sees the tick); only the reader can write theirs.
+      match /chatReads/{markerId} {
+        allow read: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow create, update: if request.auth != null &&
+          request.resource.data.readerId == request.auth.uid &&
+          markerId == request.auth.uid + '_' + request.resource.data.otherId &&
+          request.auth.uid in get(/databases/$(database)/documents/wings/$(wingId)).data.memberIds;
+        allow delete: if false;
+      }
+
       // Wing posts: members can read, create their own; any member can add
       // comments/reactions, but only the author may change anything else
       // (text/imageURL etc.) — update used to allow any member to rewrite

@@ -3,15 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import { postAuthed } from "@/lib/utils/postAuthed";
 import { format, isToday, isYesterday } from "date-fns";
-import { Send, Stethoscope } from "lucide-react";
+import { Check, CheckCheck, Send, Stethoscope } from "lucide-react";
 import { addWallMessage, type WallMessage } from "@/lib/firebase/firestore";
-import { markChatRead, useThreadMessages } from "@/hooks/useChat";
+import { markChatRead, useOtherReadAt, useThreadMessages } from "@/hooks/useChat";
 import { cn } from "@/lib/utils/cn";
 
 export function dayLabel(d: Date, he: boolean): string {
   if (isToday(d)) return he ? "היום" : "Today";
   if (isYesterday(d)) return he ? "אתמול" : "Yesterday";
   return format(d, "d/M/yyyy");
+}
+
+/** WhatsApp-style delivery marks on my own messages: one tick = sent, two = the other person opened the chat after it. */
+export function Ticks({ read, onDark }: { read: boolean; onDark: boolean }) {
+  const Icon = read ? CheckCheck : Check;
+  return <Icon size={12} className={cn("inline-block ms-1 -mt-0.5", read ? (onDark ? "text-sky-300" : "text-sky-500") : onDark ? "text-wing-elevated/60" : "text-wing-subtle")} aria-label={read ? "seen" : "sent"} />;
 }
 
 /** The quoted card/message shown above a reply bubble. */
@@ -54,6 +60,7 @@ export function PersonalThread({
 }) {
   const he = lang === "he";
   const msgs = useThreadMessages(readWingIds, myId, otherId, limit, maxAgeDays);
+  const otherReadAt = useOtherReadAt(readWingIds, myId, otherId);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -62,8 +69,8 @@ export function PersonalThread({
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-    if (msgs && msgs.length > 0 && document.visibilityState === "visible") markChatRead(myId, otherId);
-  }, [msgs, myId, otherId]);
+    if (msgs && msgs.length > 0 && document.visibilityState === "visible") markChatRead(myId, otherId, writeWingId);
+  }, [msgs, myId, otherId, writeWingId]);
 
   async function send() {
     const body = text.trim();
@@ -105,7 +112,7 @@ export function PersonalThread({
                 <div className={cn("max-w-[85%] rounded-2xl px-3 py-2 text-sm", mine ? "bg-wing-ink text-wing-elevated" : "bg-wing-surface border border-wing-border text-wing-ink")}>
                   {m.replyTo && <ReplyQuote r={m.replyTo} mine={mine} />}
                   <p className="leading-relaxed whitespace-pre-wrap">{m.text}</p>
-                  <p className={cn("text-[10px] mt-0.5 tabular", mine ? "text-wing-elevated/60" : "text-wing-subtle")}>{format(d, "HH:mm")}</p>
+                  <p className={cn("text-[10px] mt-0.5 tabular", mine ? "text-wing-elevated/60" : "text-wing-subtle")}>{format(d, "HH:mm")}{mine && <Ticks read={otherReadAt >= d.getTime()} onDark />}</p>
                 </div>
               </div>
             </div>

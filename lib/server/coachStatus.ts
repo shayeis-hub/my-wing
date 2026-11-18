@@ -42,6 +42,11 @@ export async function getCoachClientStatuses(coachId: string): Promise<{ today: 
   const userSnaps = clientIds.length ? await db.getAll(...clientIds.map((id) => db.doc(`users/${id}`))) : [];
   const userDocs = new Map(userSnaps.map((s) => [s.id, s.data() ?? {}]));
 
+  // When the dietitian last opened each client's chat (set by markChatRead).
+  const readSnap = await db.collection(`users/${coachId}/chatReads`).get();
+  const lastReadMs = new Map(readSnap.docs.map((d) => [d.id, (d.data().lastReadAt?.toMillis?.() as number | undefined) ?? 0]));
+  const postsCutoff = Date.now() - 14 * 86_400_000;
+
   async function buildClient(clientId: string): Promise<ClientStatus> {
     const { member, wingIds } = clientWings.get(clientId)!;
     const user = userDocs.get(clientId) ?? {};
@@ -69,6 +74,17 @@ export async function getCoachClientStatuses(coachId: string): Promise<{ today: 
       });
     }
 
+    // Feed posts by this client the dietitian hasn't seen yet (since she last opened the chat).
+    let unreadPosts = 0;
+    const seenAt = Math.max(lastReadMs.get(clientId) ?? 0, postsCutoff);
+    for (const wingId of wingIds) {
+      const postsSnap = await db.collection(`wings/${wingId}/posts`).orderBy("createdAt", "desc").limit(30).get().catch(() => null);
+      postsSnap?.docs.forEach((d) => {
+        const p = d.data();
+        if (p.userId === clientId && (p.createdAt?.toMillis?.() ?? 0) > seenAt) unreadPosts++;
+      });
+    }
+
     const createdAt: Date | undefined = user.createdAt?.toDate?.();
     const status = computeStatus({
       today,
@@ -87,6 +103,7 @@ export async function getCoachClientStatuses(coachId: string): Promise<{ today: 
       wingId: primary.id,
       wingName: primary.name,
       isPrivate: primary.isPrivate,
+      unreadPosts,
       ...status,
     };
   }

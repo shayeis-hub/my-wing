@@ -8,8 +8,8 @@ import { collection, limit as fsLimit, onSnapshot, orderBy, query, where } from 
 import { ClipboardList, MessageSquare, Plus, Reply, Send, Trophy, X } from "lucide-react";
 import { auth, db } from "@/lib/firebase/config";
 import { addWallMessage, getWingChallenges, type WallMessage } from "@/lib/firebase/firestore";
-import { markChatRead, useThreadMessages } from "@/hooks/useChat";
-import { dayLabel, ReplyQuote } from "@/components/feed/PersonalThread";
+import { markChatRead, useOtherReadAt, useThreadMessages } from "@/hooks/useChat";
+import { dayLabel, ReplyQuote, Ticks } from "@/components/feed/PersonalThread";
 import { ChallengePanel, MessagePanel, type ClientWing } from "@/components/coach/CoachClientActions";
 import { MenuMatchBadge } from "@/components/meals/MenuMatchBadge";
 import { cn } from "@/lib/utils/cn";
@@ -55,6 +55,7 @@ export function CoachChat({
   const privateIds = useMemo(() => new Set(wings.filter((w) => w.isPrivate).map((w) => w.wingId)), [wings]);
 
   const msgs = useThreadMessages(wingIds, coachId, clientId, 150, 90);
+  const clientReadAt = useOtherReadAt(wingIds, coachId, clientId);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [posts, setPosts] = useState<{ post: WingPost; wingId: string }[]>([]);
   const [events, setEvents] = useState<{ id: string; at: number; text: string }[]>([]);
@@ -130,8 +131,8 @@ export function CoachChat({
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-    if (msgs && msgs.length > 0 && document.visibilityState === "visible") markChatRead(coachId, clientId);
-  }, [items.length, msgs, coachId, clientId]);
+    if (items.length > 0 && document.visibilityState === "visible") markChatRead(coachId, clientId, privateFirst[0]?.wingId);
+  }, [items.length, msgs, coachId, clientId, privateFirst]);
 
   async function send() {
     const body = text.trim();
@@ -185,7 +186,7 @@ export function CoachChat({
                     <button onClick={() => quoteMsg(it.m)} className={cn("max-w-[85%] text-start rounded-2xl px-3 py-2 text-sm", mine ? "bg-wing-ink text-wing-elevated" : "bg-wing-surface border border-wing-border text-wing-ink")}>
                       {it.m.replyTo && <ReplyQuote r={it.m.replyTo} mine={mine} />}
                       <p className="leading-relaxed whitespace-pre-wrap">{it.m.text}</p>
-                      <p className={cn("text-[10px] mt-0.5 tabular", mine ? "text-wing-elevated/60" : "text-wing-subtle")}>{format(d, "HH:mm")}</p>
+                      <p className={cn("text-[10px] mt-0.5 tabular", mine ? "text-wing-elevated/60" : "text-wing-subtle")}>{format(d, "HH:mm")}{mine && <Ticks read={clientReadAt >= it.at} onDark />}</p>
                     </button>
                   </div>
                 );

@@ -56,9 +56,36 @@ export function useThreadMessages(readWingIds: string[], myId: string, otherId: 
   return msgs;
 }
 
-/** Marks the conversation with `otherId` as read up to now. */
-export function markChatRead(myId: string, otherId: string): Promise<void> {
-  return setDoc(doc(db, "users", myId, "chatReads", otherId), { lastReadAt: serverTimestamp() }, { merge: true }).catch(() => {});
+/**
+ * Marks the conversation with `otherId` as read up to now: privately (drives my
+ * unread counters) and, when a wing is given, as a shared marker the other person
+ * can see (drives the "seen" ticks).
+ */
+export function markChatRead(myId: string, otherId: string, wingId?: string): Promise<void> {
+  const priv = setDoc(doc(db, "users", myId, "chatReads", otherId), { lastReadAt: serverTimestamp() }, { merge: true }).catch(() => {});
+  const shared = wingId
+    ? setDoc(doc(db, "wings", wingId, "chatReads", `${myId}_${otherId}`), { readerId: myId, otherId, lastReadAt: serverTimestamp() }, { merge: true }).catch(() => {})
+    : Promise.resolve();
+  return Promise.all([priv, shared]).then(() => {});
+}
+
+/** When the other person last opened our conversation (ms; 0 = never/unknown). Live. */
+export function useOtherReadAt(wingIds: string[], myId: string, otherId: string): number {
+  const [byWing, setByWing] = useState<Record<string, number>>({});
+  const key = wingIds.join(",");
+  useEffect(() => {
+    const ids = [...new Set(wingIds)];
+    const unsubs = ids.map((w) =>
+      onSnapshot(
+        doc(db, "wings", w, "chatReads", `${otherId}_${myId}`),
+        (snap) => setByWing((prev) => ({ ...prev, [w]: snap.exists() ? snap.data({ serverTimestamps: "estimate" }).lastReadAt?.toMillis?.() ?? 0 : 0 })),
+        () => {}
+      )
+    );
+    return () => unsubs.forEach((u) => u());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, myId, otherId]);
+  return Math.max(0, ...Object.values(byWing));
 }
 
 /**
