@@ -17,7 +17,7 @@ export function CoachNav() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const items = [
-    { href: "/coach", icon: LayoutDashboard, label: he ? "סטטוס" : "Status", match: (p: string) => p === "/coach" },
+    { href: "/coach", icon: LayoutDashboard, label: he ? "דשבורד" : "Dashboard", match: (p: string) => p === "/coach" },
     { href: "/coach/clients", icon: Users, label: he ? "לקוחות" : "Clients", match: (p: string) => p.startsWith("/coach/clients") },
     { href: "/coach/menus", icon: ClipboardList, label: he ? "תפריטים" : "Menus", match: (p: string) => p.startsWith("/coach/menu") },
   ];

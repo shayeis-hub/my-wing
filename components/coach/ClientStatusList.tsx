@@ -37,10 +37,13 @@ export function ClientStatusList({
   lang,
   getToken,
   onOpen,
+  ready = true,
 }: {
   lang: Lang;
   getToken: () => Promise<string>;
   onOpen: (c: ClientStatus) => void;
+  /** False until the signed-in user is available; loading before that would fail with 401. */
+  ready?: boolean;
 }) {
   const he = lang === "he";
   const [clients, setClients] = useState<ClientStatus[] | null>(null);
@@ -65,9 +68,9 @@ export function ClientStatusList({
   }, [getToken]);
 
   useEffect(() => {
-    load();
+    if (ready) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ready]);
 
   const needsAttention = (c: ClientStatus) => c.flags.some((f) => f !== "new");
   const summary = useMemo(() => {

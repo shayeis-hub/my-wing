@@ -42,7 +42,7 @@ function CoachHome() {
         </div>
       )}
 
-      <ClientStatusList lang={lang} getToken={getToken} onOpen={(c) => router.push(`/coach/clients/${c.uid}`)} />
+      <ClientStatusList lang={lang} getToken={getToken} ready={!!firebaseUser} onOpen={(c) => router.push(`/coach/clients/${c.uid}`)} />
     </div>
   );
 }
