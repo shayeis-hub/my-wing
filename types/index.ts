@@ -74,6 +74,8 @@ export interface User {
 }
 
 export interface NotificationPrefs {
+  /** Dietitians: the daily morning summary push (coach-digest cron). */
+  coachDigest?: boolean;
   /** Daily check-in reminder (nudge cron). */
   reminders?: boolean;
   /** Someone posted to the wing feed. */

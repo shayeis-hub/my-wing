@@ -13,7 +13,7 @@ import type { NotificationPrefs } from "@/types";
 import { Languages, Bell, Crown, ChevronLeft, ChevronRight, Users, UserPlus, BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 
-type PrefKey = "reminders" | "personal" | "feed" | "meals";
+type PrefKey = "reminders" | "personal" | "feed" | "meals" | "coachDigest";
 
 export default function SettingsPage() {
   const { user, firebaseUser } = useAuth();
@@ -29,6 +29,7 @@ export default function SettingsPage() {
     personal: stored.personal !== false,
     feed: stored.feed !== false,
     meals: stored.meals !== false,
+    coachDigest: stored.coachDigest !== false,
   });
   // Author uids muted for meal notifications.
   const [mealsMuted, setMealsMuted] = useState<string[]>(stored.mealsMuted ?? []);
@@ -72,11 +73,18 @@ export default function SettingsPage() {
   // notification toggle would be dead/confusing there, so it's dropped from
   // the list rather than just left unreachable.
   const notifItems: { key: PrefKey; title: string; desc: string }[] = [
-    {
-      key: "reminders",
-      title: isHe ? "תזכורות יומיות" : "Daily reminders",
-      desc: isHe ? "תזכורת לבצע צ'ק-אין אם עוד לא רשמת היום" : "A nudge to check in if you haven't logged today",
-    },
+    // Dietitians get the morning client summary instead of the personal check-in reminder.
+    isBusiness
+      ? {
+          key: "coachDigest" as PrefKey,
+          title: isHe ? "סיכום בוקר על הלקוחות" : "Morning client summary",
+          desc: isHe ? "פעם ביום: אילו לקוחות דורשים תשומת לב" : "Once a day: which clients need attention",
+        }
+      : {
+          key: "reminders" as PrefKey,
+          title: isHe ? "תזכורות יומיות" : "Daily reminders",
+          desc: isHe ? "תזכורת לבצע צ'ק-אין אם עוד לא רשמת היום" : "A nudge to check in if you haven't logged today",
+        },
     {
       key: "personal",
       title: isHe ? "הודעה אישית אליי" : "Personal messages",

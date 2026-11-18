@@ -75,6 +75,8 @@ export async function GET(req: Request) {
       const gender: "male" | "female" = data.profile?.gender === "female" ? "female" : "male";
 
       if (!fcmToken || !wingId) { skipped++; return; }
+      // Dietitians don't do personal check-ins; the daily check-in nudge isn't for them.
+      if (data.accountType === "business") { skipped++; return; }
       // Respect the user's reminder preference (undefined = opted in).
       if (data.notificationPrefs?.reminders === false) { skipped++; return; }
 
