@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Stethoscope } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
 import { useLanguage } from "@/lib/i18n";
@@ -11,6 +11,8 @@ import {
   createDailyPrompt,
   getTodayPrompt,
   getWingPosts,
+  getWallMessages,
+  type WallMessage,
 } from "@/lib/firebase/firestore";
 import { getPromptForDate } from "@/lib/dailyPrompts";
 import { DailyPromptCard } from "@/components/feed/DailyPromptCard";
@@ -71,6 +73,7 @@ export default function FeedPage() {
   const [todayPrompt, setTodayPrompt] = useState<DailyPrompt | null>(null);
   const [posts, setPosts] = useState<WingPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coachMsgs, setCoachMsgs] = useState<WallMessage[]>([]);
 
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -101,6 +104,26 @@ export default function FeedPage() {
     return () => { cancelled = true; };
   }, [user?.wingId, firebaseUser, today, lang]);
 
+  // Messages the dietitian wrote to this client's personal wall. The wall itself has no
+  // entry point in the client app, so surface the recent ones here.
+  useEffect(() => {
+    const coachId = user?.coachAccess?.active ? user.coachAccess.coachId : null;
+    if (!coachId || !firebaseUser) return;
+    const wingIds = [...new Set([user?.coachAccess?.wingId, user?.wingId].filter(Boolean) as string[])];
+    let cancelled = false;
+    Promise.all(wingIds.map((w) => getWallMessages(w, firebaseUser.uid, 10).catch(() => [] as WallMessage[]))).then((lists) => {
+      if (cancelled) return;
+      const cutoff = Date.now() - 14 * 86_400_000;
+      setCoachMsgs(
+        lists.flat()
+          .filter((m) => m.authorId === coachId && (m.createdAt?.toMillis?.() ?? 0) > cutoff)
+          .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0))
+          .slice(0, 3)
+      );
+    });
+    return () => { cancelled = true; };
+  }, [user?.coachAccess?.active, user?.coachAccess?.coachId, user?.coachAccess?.wingId, user?.wingId, firebaseUser]);
+
   if (!firebaseUser || !user) return null;
 
   return (
@@ -114,6 +137,17 @@ export default function FeedPage() {
           &ldquo;{getDailyQuote(lang === "he" ? QUOTES_HE : QUOTES_EN)}&rdquo;
         </p>
       </div>
+
+      {coachMsgs.map((m) => (
+        <div key={m.id} className="bg-wing-elevated border-2 border-wing-honey/40 rounded-[20px] p-4">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Stethoscope size={16} className="text-wing-heat" />
+            <p className="text-xs font-bold text-wing-heat">{lang === "he" ? `הודעה מ${m.authorName}` : `Message from ${m.authorName}`}</p>
+            <span className="text-[11px] text-wing-subtle tabular ms-auto">{m.createdAt?.toDate ? format(m.createdAt.toDate(), "d/M HH:mm") : ""}</span>
+          </div>
+          <p className="text-sm text-wing-ink leading-relaxed">{m.text}</p>
+        </div>
+      ))}
 
       {/* Create post form */}
       {user.wingId && (

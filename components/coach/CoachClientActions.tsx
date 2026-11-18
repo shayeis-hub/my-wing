@@ -27,7 +27,7 @@ function useTargets(wings: ClientWing[], clientName: string, he: boolean) {
       label: w.isPrivate ? (he ? "הפיד הפרטי שלכם" : "Your private feed") : he ? `פיד הקבוצה "${w.wingName}" (כולם רואים)` : `Group feed "${w.wingName}" (everyone sees)`,
     }));
     const wall = ordered[0]
-      ? [{ key: `wall:${ordered[0].wingId}`, kind: "wall" as const, wingId: ordered[0].wingId, label: he ? `הקיר האישי של ${clientName} (התראה אליו בלבד)` : `${clientName}'s personal wall (only they're notified)` }]
+      ? [{ key: `wall:${ordered[0].wingId}`, kind: "wall" as const, wingId: ordered[0].wingId, label: he ? `הודעה אישית ל${clientName} (בראש הפיד שלו + התראה, רק הוא רואה)` : `Personal message to ${clientName} (top of their feed + push, only they see it)` }]
       : [];
     return [...feeds, ...wall];
   }, [wings, clientName, he]);
