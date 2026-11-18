@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { ChevronDown, MessageCircle, RefreshCw, Search } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
-import { cn } from "@/lib/utils/cn";
 import { CountBadge } from "@/components/ui/CountBadge";
+import { cn } from "@/lib/utils/cn";
 import type { ClientStatus, StatusFlag } from "@/lib/coach/status";
 
 type Lang = "he" | "en";
@@ -34,6 +34,8 @@ function daysAgo(n: number | null, lang: Lang): string {
   return n === 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`;
 }
 
+const needsAttention = (c: ClientStatus) => c.flags.some((f) => f !== "new");
+
 export function ClientStatusList({
   lang,
   getToken,
@@ -54,6 +56,8 @@ export function ClientStatusList({
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [onlyAttention, setOnlyAttention] = useState(false);
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -76,7 +80,6 @@ export function ClientStatusList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
-  const needsAttention = (c: ClientStatus) => c.flags.some((f) => f !== "new");
   const summary = useMemo(() => {
     const list = clients ?? [];
     return {
@@ -86,12 +89,18 @@ export function ClientStatusList({
     };
   }, [clients]);
 
-  const visible = (clients ?? []).filter((c) => !onlyAttention || needsAttention(c));
+  // Alphabetical, then narrowed by the search box and the attention filter.
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return [...(clients ?? [])]
+      .sort((a, b) => a.displayName.localeCompare(b.displayName, "he"))
+      .filter((c) => (!onlyAttention || needsAttention(c)) && (!q || c.displayName.toLowerCase().includes(q)));
+  }, [clients, search, onlyAttention]);
 
   if (clients === null && !error) {
     return (
       <div className="space-y-2">
-        {[0, 1, 2].map((i) => <div key={i} className="h-24 bg-wing-elevated border border-wing-border rounded-2xl animate-pulse" />)}
+        {[0, 1, 2].map((i) => <div key={i} className="h-14 bg-wing-elevated border border-wing-border rounded-2xl animate-pulse" />)}
       </div>
     );
   }
@@ -99,7 +108,7 @@ export function ClientStatusList({
   if (error && clients === null) {
     return (
       <div className="text-center py-8 space-y-3">
-        <p className="text-sm text-wing-muted">{he ? "לא הצלחנו לטעון את הסטטוס" : "Couldn't load the status"}</p>
+        <p className="text-sm text-wing-muted">{he ? "לא הצלחנו לטעון את הנתונים" : "Couldn't load the data"}</p>
         <button onClick={load} className="px-4 py-2 rounded-xl border border-wing-border text-sm font-bold text-wing-ink">
           {he ? "נסו שוב" : "Try again"}
         </button>
@@ -110,7 +119,7 @@ export function ClientStatusList({
   if ((clients ?? []).length === 0) {
     return (
       <p className="text-sm text-wing-muted text-center py-8">
-        {he ? "אין עדיין לקוחות - צרו קישור הזמנה בלשונית הלקוחות" : "No clients yet - create an invite link in the Clients tab"}
+        {he ? "אין עדיין לקוחות - לחצו על \"הוספת לקוח\"" : "No clients yet - tap \"Add client\""}
       </p>
     );
   }
@@ -128,6 +137,16 @@ export function ClientStatusList({
             <p className="text-[11px] text-wing-muted mt-0.5">{s.l}</p>
           </div>
         ))}
+      </div>
+
+      <div className="relative">
+        <Search size={16} className="absolute top-1/2 -translate-y-1/2 start-3 text-wing-muted pointer-events-none" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={he ? "חיפוש לקוח לפי שם..." : "Search clients by name..."}
+          className="w-full text-sm border border-wing-border rounded-2xl ps-9 pe-3 py-2.5 bg-wing-surface focus:outline-none focus:ring-2 focus:ring-wing-ink text-wing-ink placeholder:text-wing-subtle"
+        />
       </div>
 
       <div className="flex items-center justify-between gap-2">
@@ -154,66 +173,80 @@ export function ClientStatusList({
       </div>
 
       {visible.length === 0 && (
-        <p className="text-sm text-wing-muted text-center py-6">{he ? "אף לקוח לא דורש תשומת לב כרגע" : "No client needs attention right now"}</p>
+        <p className="text-sm text-wing-muted text-center py-6">
+          {search.trim() ? (he ? "לא נמצאו לקוחות" : "No clients found") : he ? "אף לקוח לא דורש תשומת לב כרגע" : "No client needs attention right now"}
+        </p>
       )}
 
-      {visible.map((c) => {
-        const cal = c.calorieTarget ? `${c.todayCalories} / ${c.calorieTarget}` : `${c.todayCalories}`;
-        return (
-          <button
-            key={`${c.wingId}_${c.uid}`}
-            onClick={() => onOpen(c)}
-            className="w-full text-start bg-wing-surface border border-wing-border rounded-2xl p-3.5 space-y-2.5 active:scale-[0.99] transition-transform"
-          >
-            <div className="flex items-center gap-3">
-              <Avatar name={c.displayName} photoURL={c.photoURL} size={38} />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-wing-ink text-sm truncate flex items-center gap-1.5">{c.displayName}<CountBadge count={unread?.[c.uid] ?? 0} /></p>
-                <p className="text-[11px] text-wing-muted truncate">{c.isPrivate ? (he ? "פרטי" : "Private") : c.wingName}</p>
-              </div>
-              <div className="flex gap-1 shrink-0" dir="ltr" aria-label={he ? "פעילות 7 ימים אחרונים" : "Activity, last 7 days"}>
-                {c.last7.map((on, i) => (
-                  <span key={i} className={cn("w-2 h-2 rounded-full", on ? "bg-wing-success" : "bg-wing-border")} />
-                ))}
-              </div>
-            </div>
+      <div className="space-y-2">
+        {visible.map((c) => {
+          const key = `${c.wingId}_${c.uid}`;
+          const isOpen = open === key;
+          const cal = c.calorieTarget ? `${c.todayCalories} / ${c.calorieTarget}` : `${c.todayCalories}`;
+          return (
+            <div key={key} className="bg-wing-surface border border-wing-border rounded-2xl overflow-hidden">
+              <button
+                onClick={() => setOpen(isOpen ? null : key)}
+                aria-expanded={isOpen}
+                className="w-full flex items-center gap-3 px-3.5 py-3 text-start"
+              >
+                <Avatar name={c.displayName} photoURL={c.photoURL} size={34} />
+                <span className="flex-1 min-w-0 font-semibold text-wing-ink text-sm truncate">{c.displayName}</span>
+                <CountBadge count={unread?.[c.uid] ?? 0} />
+                {needsAttention(c) && <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-label={he ? "דורש תשומת לב" : "Needs attention"} />}
+                <ChevronDown size={18} className={cn("text-wing-muted shrink-0 transition-transform", isOpen && "rotate-180")} />
+              </button>
 
-            {c.flags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {c.flags.map((f) => (
-                  <span key={f} className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full border", FLAG_STYLE[f])}>
-                    {flagLabel(f, c, lang)}
-                  </span>
-                ))}
-              </div>
-            )}
+              {isOpen && (
+                <div className="px-3.5 pb-3.5 pt-0.5 space-y-2.5 border-t border-wing-divider">
+                  <div className="flex items-center justify-between gap-2 pt-2.5">
+                    <p className="text-[11px] text-wing-muted truncate">{c.isPrivate ? (he ? "פרטי" : "Private") : c.wingName}</p>
+                    <div className="flex gap-1 shrink-0" dir="ltr" aria-label={he ? "פעילות 7 ימים אחרונים" : "Activity, last 7 days"}>
+                      {c.last7.map((on, i) => <span key={i} className={cn("w-2 h-2 rounded-full", on ? "bg-wing-success" : "bg-wing-border")} />)}
+                    </div>
+                  </div>
 
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-wing-muted">
-              <p>{he ? "צ'ק-אין אחרון: " : "Last check-in: "}<span className="text-wing-ink font-medium">{daysAgo(c.daysSinceCheckin, lang)}</span></p>
-              <p>{he ? "ארוחה אחרונה: " : "Last meal: "}<span className="text-wing-ink font-medium">{daysAgo(c.daysSinceMeal, lang)}</span></p>
-              <p>{he ? "קלוריות היום: " : "Calories today: "}<span className="text-wing-ink font-medium tabular" dir="ltr">{cal}</span></p>
-              <p>
-                {he ? "משקל: " : "Weight: "}
-                {c.weightKg != null ? (
-                  <span className="text-wing-ink font-medium tabular">
-                    {c.weightKg} {he ? "ק\"ג" : "kg"}
-                    {c.weightChangeKg != null && c.weightChangeKg !== 0 && (
-                      <span className={cn("ms-1", c.weightChangeKg < 0 ? "text-wing-success" : "text-red-500")} dir="ltr">
-                        ({c.weightChangeKg > 0 ? "+" : ""}{c.weightChangeKg})
-                      </span>
-                    )}
-                  </span>
-                ) : (
-                  <span className="text-wing-ink font-medium">—</span>
-                )}
-              </p>
-              {c.streak > 0 && (
-                <p className="col-span-2">{he ? "רצף צ'ק-אין: " : "Check-in streak: "}<span className="text-wing-ink font-medium">{c.streak} {he ? "ימים" : "days"}</span></p>
+                  {c.flags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.flags.map((f) => (
+                        <span key={f} className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full border", FLAG_STYLE[f])}>{flagLabel(f, c, lang)}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-wing-muted">
+                    <p>{he ? "צ'ק-אין אחרון: " : "Last check-in: "}<span className="text-wing-ink font-medium">{daysAgo(c.daysSinceCheckin, lang)}</span></p>
+                    <p>{he ? "ארוחה אחרונה: " : "Last meal: "}<span className="text-wing-ink font-medium">{daysAgo(c.daysSinceMeal, lang)}</span></p>
+                    <p>{he ? "קלוריות היום: " : "Calories today: "}<span className="text-wing-ink font-medium tabular" dir="ltr">{cal}</span></p>
+                    <p>
+                      {he ? "משקל: " : "Weight: "}
+                      {c.weightKg != null ? (
+                        <span className="text-wing-ink font-medium tabular">
+                          {c.weightKg} {he ? "ק\"ג" : "kg"}
+                          {c.weightChangeKg != null && c.weightChangeKg !== 0 && (
+                            <span className={cn("ms-1", c.weightChangeKg < 0 ? "text-wing-success" : "text-red-500")} dir="ltr">({c.weightChangeKg > 0 ? "+" : ""}{c.weightChangeKg})</span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-wing-ink font-medium">—</span>
+                      )}
+                    </p>
+                    {c.streak > 0 && <p className="col-span-2">{he ? "רצף צ'ק-אין: " : "Check-in streak: "}<span className="text-wing-ink font-medium">{c.streak} {he ? "ימים" : "days"}</span></p>}
+                  </div>
+
+                  <button
+                    onClick={() => onOpen(c)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-wing-ink text-wing-elevated text-sm font-bold active:scale-[0.98] transition-transform"
+                  >
+                    <MessageCircle size={15} />
+                    {he ? "פתיחת שיחה" : "Open chat"}
+                  </button>
+                </div>
               )}
             </div>
-          </button>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
