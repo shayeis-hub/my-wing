@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { addDays, format } from "date-fns";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/Button";
@@ -56,11 +57,7 @@ export function MessagePanel({ lang, clientId, clientName, wings, onDone }: { la
         reactions: [],
         comments: [],
       });
-      fetch("/api/notifications/feed-post", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wingId: target.wingId, authorId: firebaseUser.uid, authorName, preview: body }),
-      }).catch(() => {});
+      postAuthed("/api/notifications/feed-post", { wingId: target.wingId, authorId: firebaseUser.uid, authorName, preview: body }).catch(() => {});
       toast.success(he ? "ההודעה נשלחה" : "Message sent");
       setText("");
       onDone();

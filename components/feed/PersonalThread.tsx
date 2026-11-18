@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { format, isToday, isYesterday } from "date-fns";
 import { Send, Stethoscope } from "lucide-react";
 import { addWallMessage, type WallMessage } from "@/lib/firebase/firestore";
@@ -71,11 +72,7 @@ export function PersonalThread({
     try {
       const msg = { wingId: writeWingId, targetUserId: otherId, authorId: myId, authorName: myName, text: body };
       await addWallMessage(writeWingId, msg);
-      fetch("/api/notifications/wall-message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...msg, message: body }),
-      }).catch(() => {});
+      postAuthed("/api/notifications/wall-message", { ...msg, message: body }).catch(() => {});
       setText("");
     } finally {
       setSending(false);

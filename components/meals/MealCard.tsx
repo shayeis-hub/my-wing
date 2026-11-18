@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
@@ -184,17 +185,13 @@ export function MealCard({ meal, currentUserId, currentUserName, isViewerAdmin =
         createdAt: Date.now(),
       };
       await addMealComment(meal.wingId, meal.id, comment);
-      await fetch("/api/notifications/encouragement", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      await postAuthed("/api/notifications/encouragement", {
           targetUserId: meal.userId,
           authorId: currentUserId,
           authorName: currentUserName,
           message: trimmed,
           link: `/meals?meal=${meal.id}`,
-        }),
-      });
+        });
       setComments((prev) => [...prev, comment]);
       setText("");
       setShowComments(true);

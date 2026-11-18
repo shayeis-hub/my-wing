@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { enUS } from "date-fns/locale";
@@ -29,11 +30,7 @@ const mealTypes = ["breakfast", "lunch", "dinner", "snack"] as const;
 
 // Notify other wing members that a meal was logged (fire-and-forget).
 function notifyMealLogged(wingId: string, authorId: string, authorName: string, mealId: string) {
-  fetch("/api/notifications/meal-logged", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ wingId, authorId, authorName, mealId }),
-  }).catch(() => {});
+  postAuthed("/api/notifications/meal-logged", { wingId, authorId, authorName, mealId }).catch(() => {});
 }
 
 function MealsPageInner() {

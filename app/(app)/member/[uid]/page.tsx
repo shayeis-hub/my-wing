@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
@@ -69,11 +70,7 @@ function MemberPageInner() {
       // a doc that didn't exist, silently leaving the real message behind
       // (found via QA, 2026-09).
       const newId = await addWallMessage(effectiveWingId, msgData);
-      await fetch("/api/notifications/wall-message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...msgData, message: text }),
-      });
+      await postAuthed("/api/notifications/wall-message", { ...msgData, message: text });
       setWallMsgs((prev) => [
         { ...msgData, id: newId, createdAt: null as unknown as WallMessage["createdAt"] },
         ...prev,

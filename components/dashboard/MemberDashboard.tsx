@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { Button } from "@/components/ui/Button";
 import { MealCard } from "@/components/meals/MealCard";
 import { getTodayCheckin, addEncouragement, deleteEncouragement } from "@/lib/firebase/firestore";
@@ -60,17 +61,13 @@ export function MemberDashboard({
         const enc: Encouragement = { authorId: currentUserId, authorName: currentUserName, text, createdAt: Date.now() };
         await addEncouragement(wingId, checkin.id, enc);
         setCheckin((prev) => prev ? { ...prev, encouragements: [...(prev.encouragements ?? []), enc] } : prev);
-        await fetch("/api/notifications/encouragement", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        await postAuthed("/api/notifications/encouragement", {
             targetUserId: memberId,
             authorId: currentUserId,
             authorName: currentUserName,
             message: text,
             link: `/checkin?date=${checkin.date}`,
-          }),
-        });
+          });
       }
       setEncText("");
       toast.success(isOwn ? t("member_reply_sent") : t("enc_sent"));

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { ImagePlus, X, Send } from "lucide-react";
 import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 import { createWingPost } from "@/lib/firebase/firestore";
@@ -65,11 +66,7 @@ export function CreatePostForm({ wingId, userId, userName, userPhotoURL, onPostC
 
       const id = await createWingPost(wingId, postData);
       // Notify other wing members (fire-and-forget — never block the post).
-      fetch("/api/notifications/feed-post", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wingId, authorId: userId, authorName: userName, preview: trimmed }),
-      }).catch(() => {});
+      postAuthed("/api/notifications/feed-post", { wingId, authorId: userId, authorName: userName, preview: trimmed }).catch(() => {});
       onPostCreated({
         id,
         ...postData,

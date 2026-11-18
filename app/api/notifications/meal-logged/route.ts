@@ -1,50 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { getUidFromRequest } from "@/lib/server/auth";
+import { clip, isWingMember, senderProfile, withinNotifyQuota } from "@/lib/server/notifyAuth";
+
 export const dynamic = "force-dynamic";
 
-import { admin, getAdminApp } from "@/lib/firebase/admin";
-
 // Fan-out: a wing member logged a meal → notify the other members who opted in.
+// The author is the verified caller; a mealId is only used in the link if that
+// meal really exists in the wing and belongs to the caller.
 export async function POST(req: NextRequest) {
+  const uid = await getUidFromRequest(req);
+  if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const { wingId, authorId, authorName, mealId } = await req.json();
-    if (!wingId || !authorId || !authorName) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-    }
+    const body = await req.json();
+    const wingId = clip(body.wingId, 100);
+    if (!wingId) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+    const { ok, memberIds } = await isWingMember(wingId, uid);
+    if (!ok) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await withinNotifyQuota(uid))) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
 
     getAdminApp();
     const db = admin.firestore();
-
-    const wingSnap = await db.doc(`wings/${wingId}`).get();
-    if (!wingSnap.exists) return NextResponse.json({ ok: true });
-    const memberIds: string[] = wingSnap.data()?.memberIds ?? [];
-
-    // Everyone except the author.
-    const recipients = memberIds.filter((id) => id && id !== authorId);
+    const recipients = memberIds.filter((id) => id && id !== uid);
     if (recipients.length === 0) return NextResponse.json({ ok: true, sent: 0 });
 
-    // Gender the verb after the author's name ("הזין" / "הזינה").
-    let authorGender: "male" | "female" = "male";
-    try {
-      const authorSnap = await db.doc(`users/${authorId}`).get();
-      if (authorSnap.data()?.profile?.gender === "female") authorGender = "female";
-    } catch { /* default masculine */ }
-    const logged = authorGender === "female" ? "הזינה" : "הזין";
+    const { name: authorName, gender } = await senderProfile(uid);
+    const logged = gender === "female" ? "הזינה" : "הזין";
 
     // Deep-link straight to the meal (scrolls + highlights it, where you can cheer).
-    // Fall back to the member's page if we somehow don't have the meal id.
-    const link = typeof mealId === "string" && mealId ? `/meals?meal=${mealId}` : `/member/${authorId}`;
+    let link = `/member/${uid}`;
+    const mealId = clip(body.mealId, 100);
+    if (mealId) {
+      const meal = await db.doc(`wings/${wingId}/meals/${mealId}`).get();
+      if (meal.exists && meal.data()?.userId === uid) link = `/meals?meal=${mealId}`;
+    }
     let sent = 0;
 
     await Promise.allSettled(
-      recipients.map(async (uid) => {
-        const snap = await db.doc(`users/${uid}`).get();
-        const data = snap.data();
+      recipients.map(async (rid) => {
+        const data = (await db.doc(`users/${rid}`).get()).data();
         const token: string | undefined = data?.fcmToken;
         // Missing/undefined pref = opted in; only an explicit false silences it.
         if (!token || data?.notificationPrefs?.meals === false) return;
         // Per-member mute: skip if this recipient muted the author specifically.
         const muted: string[] = data?.notificationPrefs?.mealsMuted ?? [];
-        if (muted.includes(authorId)) return;
+        if (muted.includes(uid)) return;
 
         try {
           await admin.messaging().send({

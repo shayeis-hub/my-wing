@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useState, useRef, useCallback, Suspense } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { useTrialLock } from "@/hooks/useTrialLock";
@@ -24,17 +25,13 @@ import { SPORTS, getSport, computeWorkoutCalories, usesDistance, paceFeedback, t
 const MOOD_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
 
 async function sendEncouragementPush(targetUserId: string, authorId: string, authorName: string, text: string, date?: string) {
-  await fetch("/api/notifications/encouragement", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  await postAuthed("/api/notifications/encouragement", {
       targetUserId,
       authorId,
       authorName,
       message: text,
       link: date ? `/checkin?date=${date}` : "/checkin",
-    }),
-  });
+    });
 }
 
 function SectionCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {

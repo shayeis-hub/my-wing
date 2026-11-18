@@ -1,14 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { getUidFromRequest } from "@/lib/server/auth";
+import { clip, safeLink, senderProfile, shareAWing, withinNotifyQuota } from "@/lib/server/notifyAuth";
+
 export const dynamic = "force-dynamic";
 
-import { admin, getAdminApp } from "@/lib/firebase/admin";
-
+// Push for an encouragement / comment. The sender is the verified caller (name and
+// gender from their own profile), and must share a wing with the recipient.
 export async function POST(req: NextRequest) {
+  const uid = await getUidFromRequest(req);
+  if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const { targetUserId, authorId, authorName, message, link } = await req.json();
-    if (!targetUserId || !authorName || !message) {
+    const body = await req.json();
+    const targetUserId = clip(body.targetUserId, 128);
+    const message = clip(body.message, 300);
+    if (!targetUserId || !message) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
+    // Replying on your own post/meal sends no push.
+    if (targetUserId === uid) return NextResponse.json({ ok: true });
+    if (!(await shareAWing(uid, targetUserId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!(await withinNotifyQuota(uid))) return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
 
     getAdminApp();
     const userSnap = await admin.firestore().doc(`users/${targetUserId}`).get();
@@ -19,18 +31,11 @@ export async function POST(req: NextRequest) {
     // Respect the recipient's personal-message preference (undefined = opted in).
     if (userSnap.data()?.notificationPrefs?.personal === false) return NextResponse.json({ ok: true });
 
-    // Gender the verb after the author's name ("עודד" / "עודדה").
-    let authorGender: "male" | "female" = "male";
-    if (typeof authorId === "string" && authorId) {
-      try {
-        const authorSnap = await admin.firestore().doc(`users/${authorId}`).get();
-        if (authorSnap.data()?.profile?.gender === "female") authorGender = "female";
-      } catch { /* gender lookup failed — default masculine */ }
-    }
-    const encouraged = authorGender === "female" ? "עודדה" : "עודד";
+    const { name: authorName, gender } = await senderProfile(uid);
+    const encouraged = gender === "female" ? "עודדה" : "עודד";
 
-    // Caller can specify which page to open. Defaults to /checkin for back-compat.
-    const targetLink = typeof link === "string" && link.startsWith("/") ? link : "/checkin";
+    // Caller can specify which in-app page to open (relative paths only). Defaults to /checkin.
+    const targetLink = safeLink(body.link, "/checkin");
     await admin.messaging().send({
       token,
       notification: {

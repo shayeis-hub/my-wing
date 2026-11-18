@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { postAuthed } from "@/lib/utils/postAuthed";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { collection, limit as fsLimit, onSnapshot, orderBy, query, where } from "firebase/firestore";
@@ -147,11 +148,7 @@ export function CoachChat({
         ...(replyTo ? { replyTo } : {}),
       };
       await addWallMessage(writeWing, msg);
-      fetch("/api/notifications/wall-message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wingId: writeWing, targetUserId: clientId, authorId: coachId, authorName: coachName, message: body }),
-      }).catch(() => {});
+      postAuthed("/api/notifications/wall-message", { wingId: writeWing, targetUserId: clientId, authorId: coachId, authorName: coachName, message: body }).catch(() => {});
       setText("");
       setReplyTo(null);
     } finally {
