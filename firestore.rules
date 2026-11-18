@@ -83,6 +83,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Per-client nutrition menus from the client's dietitian. Written only by
+    // the Admin SDK (app/api/coach/menu). clientMenus holds the PUBLISHED copy
+    // (the client and their coach can read it); drafts are coach-only so a
+    // client never sees an unreviewed AI extraction.
+    match /clientMenus/{clientId} {
+      allow read: if request.auth != null &&
+        (request.auth.uid == clientId || request.auth.uid == resource.data.coachId);
+      allow write: if false;
+    }
+    match /clientMenuDrafts/{clientId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.coachId;
+      allow write: if false;
+    }
+
     // ── My Wing ────────────────────────────────────────────────────────────────
 
     // Users: owner or admin

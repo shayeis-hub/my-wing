@@ -17,7 +17,7 @@ import {
 } from "@/lib/firebase/firestore";
 import toast from "react-hot-toast";
 import {
-  Users, Link2, Copy, Trash2, UserPlus, UsersRound, Check, Crown,
+  Users, Link2, Copy, Trash2, UserPlus, UsersRound, Check, Crown, ClipboardList,
 } from "lucide-react";
 
 // Display metadata for the paid plans (the free trial is shown separately).
@@ -523,6 +523,14 @@ export default function CoachPage() {
                       {c.isPrivate ? (lang === "he" ? "פרטי" : "Private") : c.wingName}
                     </p>
                   </div>
+                </button>
+                <button
+                  onClick={() => router.push(`/coach/menu/${c.uid}`)}
+                  className="text-wing-muted hover:text-wing-heat transition-colors shrink-0 p-1"
+                  title={lang === "he" ? "תפריט ללקוח" : "Client menu"}
+                  aria-label={lang === "he" ? "תפריט ללקוח" : "Client menu"}
+                >
+                  <ClipboardList size={16} />
                 </button>
                 <button
                   onClick={async () => {

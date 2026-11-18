@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 import { isCoachActive } from "@/lib/subscription";
+import { coachHasClient, deleteClientMenu } from "@/lib/server/coachMenu";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,12 @@ export async function POST(req: NextRequest) {
     }
 
     await batch.commit();
+
+    // A client who is no longer in any of this coach's wings loses the menu
+    // (draft, published copy and uploaded files).
+    if (!(await coachHasClient(coachId, clientId))) {
+      await deleteClientMenu(coachId, clientId).catch((e) => console.error("menu cleanup:", e));
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -17,6 +17,7 @@ import {
   LogOut,
   BookOpen,
   CalendarDays,
+  ClipboardList,
   TrendingDown,
   Settings,
   Crown,
@@ -114,6 +115,13 @@ export function HamburgerMenu({ open, onClose }: HamburgerMenuProps) {
           <Link href="/calendar" onClick={onClose}>
             <MenuItem icon={<CalendarDays size={20} />} label={t("nav_calendar")} />
           </Link>
+
+          {/* Dietitian menu — only for clients of a dietitian */}
+          {user?.coachAccess?.active && (
+            <Link href="/menu" onClick={onClose}>
+              <MenuItem icon={<ClipboardList size={20} />} label={lang === "he" ? "התפריט שלי" : "My menu"} />
+            </Link>
+          )}
 
           {/* Weight progress */}
           <Link href="/weight" onClick={onClose}>

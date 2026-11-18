@@ -1,4 +1,5 @@
 import { admin, getAdminApp } from "@/lib/firebase/admin";
+import { storageBucket } from "@/lib/server/coachMenu";
 
 // Firestore batches are capped at 500 writes; stay safely under that.
 const BATCH_LIMIT = 450;
@@ -107,6 +108,19 @@ export async function purgeUserData(uid: string): Promise<void> {
   for (const wingId of wingIds) {
     await purgeUserFromWing(db, wingId, uid);
   }
+
+  // Dietitian menus: this user's own menu as a client, and every menu (plus
+  // uploaded file) they created as a coach.
+  const menuOps: Array<(batch: FirebaseFirestore.WriteBatch) => void> = [];
+  for (const name of ["clientMenus", "clientMenuDrafts"]) {
+    menuOps.push((batch) => batch.delete(db.collection(name).doc(uid)));
+    const authored = await db.collection(name).where("coachId", "==", uid).get();
+    authored.docs.forEach((d) => menuOps.push((batch) => batch.delete(d.ref)));
+  }
+  await commitInChunks(db, menuOps);
+  await storageBucket()
+    .deleteFiles({ prefix: `menus/${uid}/` })
+    .catch(() => { /* no uploads */ });
 
   const dailyUsageSnap = await db.collection("users").doc(uid).collection("dailyUsage").get();
   await commitInChunks(
