@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, BarChart3, MessageCircle } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/cn";
 import { CoachGate } from "@/components/coach/CoachGate";
@@ -47,7 +47,8 @@ function ClientHub() {
   const [name, setName] = useState("");
   const [photoURL, setPhotoURL] = useState<string | undefined>();
   const [notFound, setNotFound] = useState(false);
-  const [tab, setTab] = useState<"chat" | "data">("chat");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<"chat" | "data">(searchParams.get("tab") === "data" ? "data" : "chat");
   const getToken = useCallback(async () => (await firebaseUser?.getIdToken()) ?? "", [firebaseUser]);
 
   const load = useCallback(async () => {
@@ -88,6 +89,13 @@ function ClientHub() {
             <h1 className="font-bold text-wing-ink text-base truncate">{name}</h1>
             <p className="text-[11px] text-wing-muted truncate">{wings.map((w) => (w.isPrivate ? (he ? "פרטי" : "Private") : w.wingName)).join(" · ")}</p>
           </div>
+          <button
+            onClick={() => setTab((t) => (t === "chat" ? "data" : "chat"))}
+            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-wing-border bg-wing-elevated text-xs font-bold text-wing-ink"
+          >
+            {tab === "chat" ? <BarChart3 size={13} /> : <MessageCircle size={13} />}
+            {tab === "chat" ? (he ? "נתונים" : "Data") : he ? "שיחה" : "Chat"}
+          </button>
           {c && (
             <div className="flex gap-0.5 shrink-0" dir="ltr" aria-label={he ? "פעילות 7 ימים אחרונים" : "Activity, last 7 days"}>
               {c.last7.map((on, i) => <span key={i} className={cn("w-1.5 h-1.5 rounded-full", on ? "bg-wing-success" : "bg-wing-border")} />)}
@@ -106,19 +114,6 @@ function ClientHub() {
             {c.streak > 0 && <span>{he ? "רצף " : "Streak "}<b className="text-wing-ink">{c.streak}</b></span>}
           </div>
         )}
-      </div>
-
-      <div className="shrink-0 grid grid-cols-2 gap-1.5 px-3 py-2 bg-wing-surface border-b border-wing-border">
-        {(["chat", "data"] as const).map((tb) => (
-          <button
-            key={tb}
-            onClick={() => setTab(tb)}
-            aria-pressed={tab === tb}
-            className={cn("py-2 rounded-xl text-sm font-bold border", tab === tb ? "bg-wing-ink text-wing-elevated border-wing-ink" : "bg-wing-elevated text-wing-muted border-wing-border")}
-          >
-            {tb === "chat" ? (he ? "פתיחת שיחה" : "Chat") : he ? "פתיחת נתונים" : "Data"}
-          </button>
-        ))}
       </div>
 
       {tab === "data" && firebaseUser && <ClientDataView clientId={uid} getToken={getToken} he={he} />}

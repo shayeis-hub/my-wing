@@ -47,7 +47,7 @@ function CoachHome() {
         </div>
       )}
 
-      <ClientStatusList lang={lang} getToken={getToken} ready={!!firebaseUser} unread={unread.byAuthor} onOpen={(c) => router.push(`/coach/clients/${c.uid}`)} />
+      <ClientStatusList lang={lang} getToken={getToken} ready={!!firebaseUser} unread={unread.byAuthor} onOpen={(c, view) => router.push(`/coach/clients/${c.uid}${view === "data" ? "?tab=data" : ""}`)} />
     </div>
   );
 }

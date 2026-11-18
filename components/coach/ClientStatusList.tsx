@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronDown, MessageCircle, RefreshCw, Search } from "lucide-react";
+import { BarChart3, ChevronDown, MessageCircle, RefreshCw, Search } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { CountBadge } from "@/components/ui/CountBadge";
 import { cn } from "@/lib/utils/cn";
@@ -48,7 +48,7 @@ export function ClientStatusList({
 }: {
   lang: Lang;
   getToken: () => Promise<string>;
-  onOpen: (c: ClientStatus) => void;
+  onOpen: (c: ClientStatus, view: "chat" | "data") => void;
   /** False until the signed-in user is available; loading before that would fail with 401. */
   ready?: boolean;
   /** Unread chat messages per client uid. */
@@ -241,13 +241,22 @@ export function ClientStatusList({
                     {c.streak > 0 && <p className="col-span-2">{he ? "רצף צ'ק-אין: " : "Check-in streak: "}<span className="text-wing-ink font-medium">{c.streak} {he ? "ימים" : "days"}</span></p>}
                   </div>
 
-                  <button
-                    onClick={() => onOpen(c)}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-wing-ink text-wing-elevated text-sm font-bold active:scale-[0.98] transition-transform"
-                  >
-                    <MessageCircle size={15} />
-                    {he ? "פתיחת שיחה" : "Open chat"}
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => onOpen(c, "chat")}
+                      className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-wing-ink text-wing-elevated text-sm font-bold active:scale-[0.98] transition-transform"
+                    >
+                      <MessageCircle size={15} />
+                      {he ? "פתיחת שיחה" : "Open chat"}
+                    </button>
+                    <button
+                      onClick={() => onOpen(c, "data")}
+                      className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-wing-surface border border-wing-border text-wing-ink text-sm font-bold active:scale-[0.98] transition-transform"
+                    >
+                      <BarChart3 size={15} />
+                      {he ? "פתיחת נתונים" : "Open data"}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
