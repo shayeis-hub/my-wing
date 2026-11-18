@@ -14,21 +14,14 @@ const PROMPT = `זהו תפריט תזונה שדיאטנית כתבה ללקו�
 - בלי הסברים: החזר JSON בלבד בפורמט:
 {"title":"","targets":{"calories":0,"proteinG":0,"carbsG":0,"fatG":0},"meals":[{"name":"","time":"","day":"","options":[""]}],"avoid":[""],"notes":[""],"unclear":[""]}`;
 
-/**
- * Sends the uploaded menu (PDF or photo) to Claude once and returns it as
- * structured data. The Anthropic REST API is called directly because the
- * pinned SDK predates GA PDF ("document") blocks.
- */
-export async function extractMenu(base64: string, mediaType: string): Promise<MenuData> {
-  const isPdf = mediaType === "application/pdf";
-  const fileBlock = isPdf
-    ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } }
-    : { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } };
+type Block = { type: string; [k: string]: unknown };
 
+/** Sends the content blocks + the extraction prompt to Claude and returns the sanitized menu. */
+async function run(blocks: Block[]): Promise<MenuData> {
   const body = JSON.stringify({
     model: "claude-sonnet-4-6",
     max_tokens: 8000,
-    messages: [{ role: "user", content: [fileBlock, { type: "text", text: PROMPT }] }],
+    messages: [{ role: "user", content: [...blocks, { type: "text", text: PROMPT }] }],
   });
 
   let res: Response | null = null;
@@ -53,4 +46,23 @@ export async function extractMenu(base64: string, mediaType: string): Promise<Me
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("menu extraction returned no JSON");
   return sanitizeMenu(JSON.parse(match[0]));
+}
+
+/**
+ * Sends the uploaded menu (PDF or photo) to Claude once and returns it as
+ * structured data. The Anthropic REST API is called directly because the
+ * pinned SDK predates GA PDF ("document") blocks.
+ */
+export async function extractMenu(base64: string, mediaType: string): Promise<MenuData> {
+  const isPdf = mediaType === "application/pdf";
+  return run([
+    isPdf
+      ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } }
+      : { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+  ]);
+}
+
+/** Word documents arrive as extracted text (tables flattened to "a | b" rows). */
+export async function extractMenuFromText(text: string): Promise<MenuData> {
+  return run([{ type: "text", text: `תוכן המסמך:\n\n${text.slice(0, 60_000)}` }]);
 }

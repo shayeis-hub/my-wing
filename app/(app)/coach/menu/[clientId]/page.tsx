@@ -5,18 +5,20 @@ import { useParams, useRouter } from "next/navigation";
 import { getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 import { nanoid } from "nanoid";
 import toast from "react-hot-toast";
-import { ArrowRight, AlertTriangle, FileUp, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, AlertTriangle, Copy, FileUp, PenLine, Plus, Trash2, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
+  DOCX_MIME,
   MENU_ACCEPTED_TYPES,
   MENU_FILE_MAX_BYTES,
   linesToList,
   listToLines,
   type ClientMenuDraft,
   type MenuData,
+  type MenuOverviewRow,
   type PublishedClientMenu,
 } from "@/lib/coach/menu";
 
@@ -90,6 +92,9 @@ export default function CoachClientMenuPage() {
   const [form, setForm] = useState<Form>(emptyForm);
   const [unclear, setUnclear] = useState<string[]>([]);
   const [dirty, setDirty] = useState(false);
+  const [copyOpen, setCopyOpen] = useState(false);
+  const [copyRows, setCopyRows] = useState<MenuOverviewRow[] | null>(null);
+  const [copyBusy, setCopyBusy] = useState<string | null>(null);
   const [phase, setPhase] = useState<"idle" | "uploading" | "analyzing" | "saving" | "publishing">("idle");
 
   const api = useCallback(
@@ -136,7 +141,11 @@ export default function CoachClientMenuPage() {
   async function handleFile(file: File) {
     if (!firebaseUser) return;
     if (!MENU_ACCEPTED_TYPES.includes(file.type)) {
-      toast.error(he ? "אפשר להעלות PDF או תמונה (JPG, PNG). קובץ Word - שמרו כ-PDF" : "Upload a PDF or an image (JPG, PNG). For Word files, save as PDF first");
+      toast.error(
+        file.name.toLowerCase().endsWith(".doc")
+          ? (he ? "קובץ Word ישן (doc) לא נתמך - שמרו מחדש כ-docx או PDF" : "Old .doc files aren't supported - save as .docx or PDF")
+          : (he ? "אפשר להעלות Word (docx), PDF או תמונה (JPG, PNG)" : "Upload a Word (docx) file, a PDF or an image (JPG, PNG)")
+      );
       return;
     }
     if (file.size > MENU_FILE_MAX_BYTES * 3) {
@@ -148,7 +157,7 @@ export default function CoachClientMenuPage() {
       const blob = await shrinkImage(file);
       if (blob.size > MENU_FILE_MAX_BYTES) throw new Error("big");
       const type = blob.type || file.type;
-      const ext = type === "application/pdf" ? "pdf" : "jpg";
+      const ext = type === "application/pdf" ? "pdf" : type === DOCX_MIME ? "docx" : "jpg";
       const path = `menus/${firebaseUser.uid}/${clientId}/${nanoid()}.${ext}`;
       await uploadBytes(storageRef(getStorage(), path), blob, { contentType: type });
 
@@ -164,6 +173,7 @@ export default function CoachClientMenuPage() {
       const code = e instanceof Error ? e.message : "";
       toast.error(
         code === "DAILY_LIMIT" ? (he ? "הגעת למכסת הקריאות היומית" : "Daily limit reached")
+        : code === "EMPTY_DOCUMENT" ? (he ? "לא נמצא טקסט בקובץ ה-Word. אם התפריט הוא תמונה בתוך המסמך, שמרו כ-PDF" : "No text found in the Word file. If the menu is an image inside it, save as PDF")
         : code === "EXTRACTION_FAILED" ? (he ? "לא הצלחנו לקרוא את הקובץ. נסו קובץ ברור יותר" : "Couldn't read the file. Try a clearer one")
         : he ? "ההעלאה נכשלה" : "Upload failed"
       );
@@ -226,6 +236,49 @@ export default function CoachClientMenuPage() {
     setDraft({ clientId, coachId: published.coachId, menu: published.menu });
   }
 
+  function startBlank() {
+    setForm({ ...emptyForm, meals: [{ name: "", time: "", day: "", optionsText: "" }] });
+    setUnclear([]);
+    setDirty(true);
+    setDraft({ clientId, coachId: firebaseUser?.uid ?? "", menu: fromForm(emptyForm, []) });
+  }
+
+  async function openCopyPicker() {
+    setCopyOpen(true);
+    if (copyRows) return;
+    try {
+      const res = await api("/api/coach/menus", "GET");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setCopyRows((data.rows as MenuOverviewRow[]).filter((r) => r.uid !== clientId && (r.published || r.hasDraft)));
+    } catch {
+      setCopyOpen(false);
+      toast.error(he ? "לא הצלחנו לטעון את הלקוחות" : "Couldn't load your clients");
+    }
+  }
+
+  async function copyFrom(row: MenuOverviewRow) {
+    if (hasForm && dirty && !window.confirm(he ? "להחליף את מה שכתוב עכשיו בעותק של התפריט?" : "Replace what's on screen with the copy?")) return;
+    setCopyBusy(row.uid);
+    try {
+      const res = await api(`/api/coach/menu?clientId=${encodeURIComponent(row.uid)}`, "GET");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const menu: MenuData | undefined = data.published?.menu ?? data.draft?.menu;
+      if (!menu) throw new Error();
+      setForm(toForm(menu));
+      setUnclear([]);
+      setDirty(true);
+      setDraft({ clientId, coachId: firebaseUser?.uid ?? "", menu });
+      setCopyOpen(false);
+      toast.success(he ? `התפריט של ${row.displayName} הועתק - התאימו ושמרו` : `Copied ${row.displayName}'s menu - adjust and save`);
+    } catch {
+      toast.error(he ? "ההעתקה נכשלה" : "Copy failed");
+    } finally {
+      setCopyBusy(null);
+    }
+  }
+
   const busy = phase !== "idle";
   const hasForm = !!draft;
   const publishedAt = published?.publishedAt ? new Date(published.publishedAt).toLocaleDateString(he ? "he-IL" : "en-GB") : null;
@@ -256,13 +309,13 @@ export default function CoachClientMenuPage() {
             <h3 className="font-semibold text-wing-ink mb-1 flex items-center gap-1.5"><FileUp size={16} className="text-wing-muted" />{he ? "העלאת קובץ תפריט" : "Upload a menu file"}</h3>
             <p className="text-xs text-wing-muted mb-3 leading-relaxed">
               {he
-                ? "PDF או תמונה של התפריט. ה-AI קורא אותו למבנה שאפשר לערוך, ואתם מאשרים לפני שהלקוח רואה. העלאה חדשה מחליפה את הטיוטה, והתפריט שפורסם נשאר עד שתפרסמו."
-                : "A PDF or photo of the menu. AI reads it into an editable structure and you approve it before the client sees anything. A new upload replaces the draft; the published menu stays until you publish."}
+                ? "קובץ Word, PDF או תמונה של התפריט. ה-AI קורא אותו למבנה שאפשר לערוך, ואתם מאשרים לפני שהלקוח רואה. העלאה חדשה מחליפה את הטיוטה, והתפריט שפורסם נשאר עד שתפרסמו."
+                : "A Word file, PDF or photo of the menu. AI reads it into an editable structure and you approve it before the client sees anything. A new upload replaces the draft; the published menu stays until you publish."}
             </p>
             <input
               ref={fileRef}
               type="file"
-              accept="application/pdf,image/jpeg,image/png,image/webp"
+              accept={`application/pdf,${DOCX_MIME},.docx,image/jpeg,image/png,image/webp`}
               className="hidden"
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             />
@@ -275,6 +328,54 @@ export default function CoachClientMenuPage() {
               </button>
             )}
           </Card>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                if (hasForm && dirty && !window.confirm(he ? "להתחיל מדף ריק? מה שכתוב עכשיו יימחק." : "Start blank? What's on screen will be cleared.")) return;
+                startBlank();
+              }}
+              disabled={busy}
+              className="flex items-center justify-center gap-1.5 py-3 rounded-2xl border border-wing-border bg-wing-elevated text-sm font-bold text-wing-ink disabled:opacity-40"
+            >
+              <PenLine size={15} />{he ? "כתיבת תפריט מאפס" : "Write from scratch"}
+            </button>
+            <button
+              onClick={openCopyPicker}
+              disabled={busy}
+              className="flex items-center justify-center gap-1.5 py-3 rounded-2xl border border-wing-border bg-wing-elevated text-sm font-bold text-wing-ink disabled:opacity-40"
+            >
+              <Copy size={15} />{he ? "העתקה מלקוח אחר" : "Copy from a client"}
+            </button>
+          </div>
+
+          {copyOpen && (
+            <Card>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-bold text-wing-ink">{he ? "מאיזה לקוח להעתיק?" : "Copy from which client?"}</p>
+                <button onClick={() => setCopyOpen(false)} aria-label={he ? "סגירה" : "Close"} className="p-1 text-wing-subtle"><X size={16} /></button>
+              </div>
+              {!copyRows ? (
+                <div className="h-16 bg-wing-surface rounded-xl animate-pulse" />
+              ) : copyRows.length === 0 ? (
+                <p className="text-sm text-wing-muted">{he ? "אין עדיין תפריטים של לקוחות אחרים להעתקה." : "No other client has a menu to copy yet."}</p>
+              ) : (
+                <ul className="divide-y divide-wing-border max-h-64 overflow-y-auto">
+                  {copyRows.map((r) => (
+                    <li key={r.uid}>
+                      <button onClick={() => copyFrom(r)} disabled={copyBusy !== null} className="w-full flex items-center justify-between py-3 text-start disabled:opacity-50">
+                        <span className="text-sm font-semibold text-wing-ink truncate">{r.displayName || (he ? "ללא שם" : "Unnamed")}</span>
+                        <span className="text-xs text-wing-muted shrink-0 ms-3">
+                          {copyBusy === r.uid ? (he ? "מעתיק..." : "Copying...") : r.published ? (he ? "תפריט מפורסם" : "Published") : (he ? "טיוטה" : "Draft")}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-xs text-wing-subtle mt-2">{he ? "ההעתקה נפתחת כטיוטה לעריכה - שום דבר לא נשלח ללקוח עד שתפרסמו." : "The copy opens as an editable draft - nothing reaches the client until you publish."}</p>
+            </Card>
+          )}
 
           {hasForm && (
             <>

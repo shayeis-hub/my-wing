@@ -63,7 +63,8 @@ export interface PublishedClientMenu {
 }
 
 export const MENU_FILE_MAX_BYTES = 10 * 1024 * 1024;
-export const MENU_ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+export const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+export const MENU_ACCEPTED_TYPES = ["application/pdf", DOCX_MIME, "image/jpeg", "image/png", "image/webp"];
 
 const clip = (v: unknown, max: number): string =>
   (typeof v === "string" ? v : "").replace(/\s+/g, " ").trim().slice(0, max);

@@ -2,13 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { admin, getAdminApp } from "@/lib/firebase/admin";
 import { getUidFromRequest } from "@/lib/server/auth";
 import { assertCoachOwnsClient, MenuAuthError, storageBucket } from "@/lib/server/coachMenu";
-import { extractMenu } from "@/lib/ai/menuExtract";
-import { MENU_ACCEPTED_TYPES, MENU_FILE_MAX_BYTES, type MenuSource } from "@/lib/coach/menu";
+import mammoth from "mammoth";
+import { extractMenu, extractMenuFromText } from "@/lib/ai/menuExtract";
+import { DOCX_MIME, MENU_ACCEPTED_TYPES, MENU_FILE_MAX_BYTES, type MenuSource } from "@/lib/coach/menu";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const DAILY_EXTRACTIONS = 30;
+
+const ENTITIES: Record<string, string> = { "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&nbsp;": " " };
+
+/** Word → plain text. Table cells become "a | b" rows so the AI sees the grid. */
+async function docxToText(buf: Buffer): Promise<string> {
+  const { value: html } = await mammoth.convertToHtml({ buffer: buf });
+  return html
+    // Cells first (mammoth wraps cell text in <p>): "a | b | " per row.
+    .replace(/<(td|th)[^>]*>([\s\S]*?)<\/\1>/gi, (_m, _t, inner: string) => inner.replace(/<\/p>\s*<p[^>]*>|<br\s*\/?>/gi, " / ").replace(/<[^>]+>/g, "").trim() + " | ")
+    .replace(/ \| \s*<\/tr>/gi, "\n")
+    .replace(/<\/tr>/gi, "\n")
+    .replace(/<\/(p|h[1-6]|li|table)>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (m) => ENTITIES[m] ?? m)
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n");
+}
 
 /**
  * Turns an uploaded menu file (already in Storage at menus/{coach}/{client}/…)
@@ -53,7 +72,16 @@ export async function POST(req: NextRequest) {
 
     let menu;
     try {
-      menu = await extractMenu(buf.toString("base64"), contentType);
+      if (contentType === DOCX_MIME) {
+        const text = await docxToText(buf);
+        if (text.trim().length < 20) {
+          await usageRef.set({ menuExtractions: admin.firestore.FieldValue.increment(-1) }, { merge: true }).catch(() => {});
+          return NextResponse.json({ error: "EMPTY_DOCUMENT" }, { status: 422 });
+        }
+        menu = await extractMenuFromText(text);
+      } else {
+        menu = await extractMenu(buf.toString("base64"), contentType);
+      }
     } catch (err) {
       await usageRef.set({ menuExtractions: admin.firestore.FieldValue.increment(-1) }, { merge: true }).catch(() => {});
       console.error("menu extraction:", err);
