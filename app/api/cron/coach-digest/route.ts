@@ -23,7 +23,7 @@ function reason(c: ClientStatus): string {
   return f ? labels[f] : "";
 }
 
-export function buildDigest(clients: ClientStatus[]): { title: string; body: string } | null {
+function buildDigest(clients: ClientStatus[]): { title: string; body: string } | null {
   const needing = clients.filter((c) => c.flags.some((f) => f !== "new"));
   if (needing.length === 0) return null;
   const title = needing.length === 1 ? "סיכום בוקר: לקוח אחד דורש תשומת לב" : `סיכום בוקר: ${needing.length} לקוחות דורשים תשומת לב`;
