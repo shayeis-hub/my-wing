@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Users, Link2, Copy, Trash2, UserPlus, UsersRound, Check, ClipboardList } from "lucide-react";
+import { Users, Link2, Copy, Trash2, UserPlus, UsersRound, Check, ClipboardList, Share2 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { CoachGate } from "@/components/coach/CoachGate";
@@ -11,19 +11,21 @@ import { PLAN_META } from "@/components/coach/planMeta";
 import { useCoachAccount } from "@/hooks/useCoachAccount";
 import { useUnreadMessages } from "@/hooks/useChat";
 import { CountBadge } from "@/components/ui/CountBadge";
+import { ShareInviteSheet, type InviteShare } from "@/components/coach/ShareInviteSheet";
 import { COACH_PLANS } from "@/lib/subscription";
 import { getCoachClients, getCoachInvites, type CoachClient, type CoachInvite } from "@/lib/firebase/firestore";
 
 // Client roster + invite links. Status lives on the home screen; this is where
 // clients get added and removed.
 function ClientsManager() {
-  const { firebaseUser, coach, planLabel, maxClients, trialDaysLeft, contactUpgrade, lang } = useCoachAccount();
+  const { firebaseUser, user, coach, planLabel, maxClients, trialDaysLeft, contactUpgrade, lang } = useCoachAccount();
   const he = lang === "he";
   const router = useRouter();
   const [clients, setClients] = useState<CoachClient[]>([]);
   const [invites, setInvites] = useState<CoachInvite[]>([]);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [share, setShare] = useState<InviteShare | null>(null);
   const unread = useUnreadMessages(firebaseUser?.uid);
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -57,6 +59,7 @@ function ClientsManager() {
       if (!res.ok) throw new Error(data?.error ?? "Failed");
       copyLink(data.token);
       toast.success(type === "private" ? (he ? "קישור פרטי נוצר והועתק" : "Private link created & copied") : (he ? "קבוצה נוצרה וקישור הועתק" : "Group created & link copied"));
+      setShare({ url: `${origin}/join/${data.token}`, type, label: label.trim() || undefined });
       reload().catch(console.error);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
@@ -144,6 +147,7 @@ function ClientsManager() {
                   <p className="text-xs text-wing-muted truncate tabular" dir="ltr">/join/{inv.code}</p>
                 </div>
                 <span className="text-[11px] text-wing-subtle shrink-0">{inv.usedCount > 0 ? (he ? "נוצל" : "used") : ""}</span>
+                <button onClick={() => setShare({ url: `${origin}/join/${inv.code}`, type: "private", label: inv.label || undefined })} className="text-wing-muted hover:text-wing-heat shrink-0" aria-label={he ? "שליחה" : "Share"}><Share2 size={15} /></button>
                 <button onClick={() => copyLink(inv.code)} className="text-wing-muted hover:text-wing-ink shrink-0">{copied === inv.code ? <Check size={15} className="text-wing-success" /> : <Copy size={15} />}</button>
                 <button onClick={() => deleteInvite(inv.code)} className="text-wing-subtle hover:text-red-500 shrink-0"><Trash2 size={15} /></button>
               </div>
@@ -178,6 +182,8 @@ function ClientsManager() {
           </div>
         )}
       </Card>
+
+      {share && <ShareInviteSheet share={share} coachName={user?.displayName ?? ""} lang={lang} onClose={() => setShare(null)} />}
     </div>
   );
 }

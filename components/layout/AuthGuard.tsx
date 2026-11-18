@@ -43,6 +43,18 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     ).catch(() => {});
   }, [firebaseUser, user]);
 
+  // A pre-arranged dietitian plan (coachGrants/{email}) is applied the first
+  // time the account signs in on a device; cheap no-op for everyone else.
+  useEffect(() => {
+    if (!firebaseUser || typeof window === "undefined") return;
+    const key = `wingpact_grant_checked_${firebaseUser.uid}`;
+    if (localStorage.getItem(key)) return;
+    firebaseUser.getIdToken().then((token) =>
+      fetch("/api/coach/claim-grant", { method: "POST", headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => { if (r.ok) localStorage.setItem(key, "1"); })
+    ).catch(() => {});
+  }, [firebaseUser]);
+
   useEffect(() => {
     if (loading) return;
 
