@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Send, Stethoscope } from "lucide-react";
-import { addWallMessage, getWallMessages, type WallMessage } from "@/lib/firebase/firestore";
+import { collection, limit as fsLimit, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { addWallMessage, type WallMessage } from "@/lib/firebase/firestore";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -41,26 +43,36 @@ export function PersonalThread({
   const [sending, setSending] = useState(false);
   const key = readWingIds.join(",");
 
-  const load = useCallback(async () => {
+  // Live: one listener per (wing, direction); every snapshot re-merges the thread.
+  useEffect(() => {
     const ids = [...new Set(readWingIds)];
-    const lists = await Promise.all(
-      ids.flatMap((w) => [
-        getWallMessages(w, myId, 20).catch(() => [] as WallMessage[]),
-        getWallMessages(w, otherId, 20).catch(() => [] as WallMessage[]),
-      ])
-    );
+    const buckets = new Map<string, WallMessage[]>();
     const cutoff = Date.now() - maxAgeDays * 86_400_000;
-    const seen = new Set<string>();
-    const merged = lists
-      .flat()
-      .filter((m) => (m.authorId === otherId && m.targetUserId === myId) || (m.authorId === myId && m.targetUserId === otherId))
-      .filter((m) => (m.createdAt?.toMillis?.() ?? Date.now()) > cutoff && !seen.has(m.id) && seen.add(m.id))
-      .sort((a, b) => (a.createdAt?.toMillis?.() ?? Date.now()) - (b.createdAt?.toMillis?.() ?? Date.now()));
-    setMsgs(merged.slice(-limit));
+    const recompute = () => {
+      const seen = new Set<string>();
+      const merged = [...buckets.values()]
+        .flat()
+        .filter((m) => (m.authorId === otherId && m.targetUserId === myId) || (m.authorId === myId && m.targetUserId === otherId))
+        .filter((m) => (m.createdAt?.toMillis?.() ?? Date.now()) > cutoff && !seen.has(m.id) && seen.add(m.id))
+        .sort((a, b) => (a.createdAt?.toMillis?.() ?? Date.now()) - (b.createdAt?.toMillis?.() ?? Date.now()));
+      setMsgs(merged.slice(-limit));
+    };
+    if (ids.length === 0) { setMsgs([]); return; }
+    const unsubs = ids.flatMap((w) =>
+      [myId, otherId].map((target) =>
+        onSnapshot(
+          query(collection(db, "wings", w, "wallMessages"), where("targetUserId", "==", target), orderBy("createdAt", "desc"), fsLimit(20)),
+          (snap) => {
+            buckets.set(`${w}:${target}`, snap.docs.map((d) => ({ ...(d.data({ serverTimestamps: "estimate" }) as Omit<WallMessage, "id">), id: d.id })));
+            recompute();
+          },
+          () => { buckets.set(`${w}:${target}`, []); recompute(); }
+        )
+      )
+    );
+    return () => unsubs.forEach((u) => u());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, myId, otherId, limit, maxAgeDays]);
-
-  useEffect(() => { load(); }, [load]);
 
   async function send() {
     const body = text.trim();
@@ -68,13 +80,12 @@ export function PersonalThread({
     setSending(true);
     try {
       const msg = { wingId: writeWingId, targetUserId: otherId, authorId: myId, authorName: myName, text: body };
-      const id = await addWallMessage(writeWingId, msg);
+      await addWallMessage(writeWingId, msg);
       fetch("/api/notifications/wall-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...msg, message: body }),
       }).catch(() => {});
-      setMsgs((prev) => [...(prev ?? []), { ...msg, id, createdAt: null as unknown as WallMessage["createdAt"] }].slice(-limit));
       setText("");
     } finally {
       setSending(false);
