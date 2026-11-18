@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/lib/i18n";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
+import { ClientStatusList } from "@/components/coach/ClientStatusList";
+import { cn } from "@/lib/utils/cn";
 import { COACH_PLANS, isCoachActive, type CoachPlanId } from "@/lib/subscription";
 import {
   getCoachClients,
@@ -57,6 +59,8 @@ export default function CoachPage() {
   const [invites, setInvites] = useState<CoachInvite[]>([]);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [tab, setTab] = useState<"status" | "clients">("status");
+  const getToken = useCallback(async () => (await firebaseUser?.getIdToken()) ?? "", [firebaseUser]);
 
   const coach = user?.coach;
   const isActive = user?.accountType === "business" && isCoachActive(coach);
@@ -411,6 +415,34 @@ export default function CoachPage() {
         )
       )}
 
+      {/* Tabs: at-a-glance status vs. client/invite management */}
+      <div className="flex gap-1 p-1 bg-wing-elevated border border-wing-border rounded-2xl">
+        {([
+          { id: "status", label: lang === "he" ? "סטטוס" : "Status" },
+          { id: "clients", label: lang === "he" ? "לקוחות והזמנות" : "Clients & invites" },
+        ] as const).map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={cn(
+              "flex-1 py-2 rounded-xl text-sm font-bold transition-colors",
+              tab === t.id ? "bg-wing-surface text-wing-ink shadow-sm" : "text-wing-muted"
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "status" && (
+        <ClientStatusList
+          lang={lang}
+          getToken={getToken}
+          onOpen={(c) => router.push(`/member/${c.uid}?wing=${c.wingId}`)}
+        />
+      )}
+
+      {tab === "clients" && (<>
       {/* Create actions */}
       <div className="grid grid-cols-2 gap-3">
         <button
@@ -524,6 +556,7 @@ export default function CoachPage() {
           </div>
         )}
       </Card>
+      </>)}
     </div>
   );
 }
