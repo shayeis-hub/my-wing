@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { useWing } from "@/hooks/useWing";
-import { addWallMessage, createWingPost, finishChallenge, saveChallenge } from "@/lib/firebase/firestore";
+import { createWingPost, finishChallenge, saveChallenge } from "@/lib/firebase/firestore";
 import type { Challenge } from "@/types";
 import { cn } from "@/lib/utils/cn";
 
@@ -26,10 +26,7 @@ function useTargets(wings: ClientWing[], clientName: string, he: boolean) {
       wingId: w.wingId,
       label: w.isPrivate ? (he ? "הפיד הפרטי שלכם" : "Your private feed") : he ? `פיד הקבוצה "${w.wingName}" (כולם רואים)` : `Group feed "${w.wingName}" (everyone sees)`,
     }));
-    const wall = ordered[0]
-      ? [{ key: `wall:${ordered[0].wingId}`, kind: "wall" as const, wingId: ordered[0].wingId, label: he ? `הודעה אישית ל${clientName} (בראש הפיד שלו + התראה, רק הוא רואה)` : `Personal message to ${clientName} (top of their feed + push, only they see it)` }]
-      : [];
-    return [...feeds, ...wall];
+    return feeds;
   }, [wings, clientName, he]);
 }
 
@@ -50,30 +47,20 @@ export function MessagePanel({ lang, clientId, clientName, wings, onDone }: { la
     setSending(true);
     try {
       const authorName = user.displayName;
-      if (target.kind === "feed") {
-        await createWingPost(target.wingId, {
-          wingId: target.wingId,
-          userId: firebaseUser.uid,
-          userName: authorName,
-          ...(user.photoURL ? { userPhotoURL: user.photoURL } : {}),
-          text: body,
-          reactions: [],
-          comments: [],
-        });
-        fetch("/api/notifications/feed-post", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ wingId: target.wingId, authorId: firebaseUser.uid, authorName, preview: body }),
-        }).catch(() => {});
-      } else {
-        const msg = { wingId: target.wingId, targetUserId: clientId, authorId: firebaseUser.uid, authorName, text: body };
-        await addWallMessage(target.wingId, msg);
-        fetch("/api/notifications/wall-message", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...msg, message: body }),
-        }).catch(() => {});
-      }
+      await createWingPost(target.wingId, {
+        wingId: target.wingId,
+        userId: firebaseUser.uid,
+        userName: authorName,
+        ...(user.photoURL ? { userPhotoURL: user.photoURL } : {}),
+        text: body,
+        reactions: [],
+        comments: [],
+      });
+      fetch("/api/notifications/feed-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wingId: target.wingId, authorId: firebaseUser.uid, authorName, preview: body }),
+      }).catch(() => {});
       toast.success(he ? "ההודעה נשלחה" : "Message sent");
       setText("");
       onDone();
@@ -87,7 +74,7 @@ export function MessagePanel({ lang, clientId, clientName, wings, onDone }: { la
   return (
     <div className="bg-wing-surface border border-wing-border rounded-[20px] p-4 space-y-3">
       <div>
-        <p className={labelCls}>{he ? "לאן לשלוח" : "Send to"}</p>
+        <p className={labelCls}>{he ? "פוסט בפיד - לאן" : "Feed post - where"}</p>
         <div className="space-y-1.5">
           {targets.map((t) => (
             <button key={t.key} onClick={() => setTargetKey(t.key)} className={cn("w-full text-start text-sm px-3 py-2 rounded-xl border", targetKey === t.key ? "border-wing-ink bg-wing-elevated font-semibold text-wing-ink" : "border-wing-border text-wing-muted")}>

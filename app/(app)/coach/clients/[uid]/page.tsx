@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils/cn";
 import { CoachGate } from "@/components/coach/CoachGate";
 import { ChallengePanel, MessagePanel, type ClientWing } from "@/components/coach/CoachClientActions";
 import { useCoachAccount } from "@/hooks/useCoachAccount";
-import { getCoachClients, getMemberRecentMeals } from "@/lib/firebase/firestore";
+import { PersonalThread } from "@/components/feed/PersonalThread";
+import { PostCard } from "@/components/feed/PostCard";
+import { getCoachClients, getMemberRecentMeals, getWingPosts } from "@/lib/firebase/firestore";
 import type { ClientStatus, StatusFlag } from "@/lib/coach/status";
-import type { Meal } from "@/types";
+import type { Meal, WingPost } from "@/types";
 
 const FLAG_STYLE: Record<StatusFlag, string> = {
   silent: "bg-red-50 text-red-600 border-red-200",
@@ -37,7 +39,7 @@ const ago = (n: number | null, he: boolean) =>
 // write to them, open a challenge, manage their menu.
 function ClientHub() {
   const { uid } = useParams<{ uid: string }>();
-  const { firebaseUser, lang } = useCoachAccount();
+  const { firebaseUser, user, lang } = useCoachAccount();
   const he = lang === "he";
   const router = useRouter();
 
@@ -47,6 +49,7 @@ function ClientHub() {
   const [photoURL, setPhotoURL] = useState<string | undefined>();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [panel, setPanel] = useState<null | "message" | "challenge">(null);
+  const [feed, setFeed] = useState<{ post: WingPost; wingId: string }[] | null>(null);
 
   const load = useCallback(async () => {
     if (!firebaseUser) return;
@@ -61,6 +64,10 @@ function ClientHub() {
       const data = res.ok ? ((await res.json()) as { clients: ClientStatus[] }) : { clients: [] };
       setStatus(data.clients.find((c) => c.uid === uid) ?? null);
 
+      // Feed: everything in the private 1-on-1 wing, only this client's posts in group wings.
+      const feeds = await Promise.all(rows.map(async (r) => (await getWingPosts(r.wingId, 30).catch(() => [] as WingPost[])).filter((p) => r.isPrivate || p.userId === uid).map((post) => ({ post, wingId: r.wingId }))));
+      setFeed(feeds.flat().sort((a, b) => (b.post.createdAt?.toMillis?.() ?? 0) - (a.post.createdAt?.toMillis?.() ?? 0)).slice(0, 12));
+
       const all = await Promise.all(rows.map((r) => getMemberRecentMeals(r.wingId, uid, 6).catch(() => [] as Meal[])));
       setMeals(all.flat().sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0)).slice(0, 6));
     } catch {
@@ -72,7 +79,7 @@ function ClientHub() {
 
   const actions = useMemo(
     () => [
-      { id: "message" as const, icon: MessageSquare, label: he ? "הודעה" : "Message" },
+      { id: "message" as const, icon: MessageSquare, label: he ? "פוסט בפיד" : "Feed post" },
       { id: "challenge" as const, icon: Trophy, label: he ? "אתגר" : "Challenge" },
     ],
     [he]
@@ -135,8 +142,43 @@ function ClientHub() {
         </button>
       </div>
 
-      {panel === "message" && <MessagePanel lang={lang} clientId={uid} clientName={name} wings={wings} onDone={() => setPanel(null)} />}
+      {panel === "message" && <MessagePanel lang={lang} clientId={uid} clientName={name} wings={wings} onDone={() => { setPanel(null); load(); }} />}
       {panel === "challenge" && <ChallengePanel lang={lang} wings={wings} onDone={() => setPanel(null)} />}
+
+      {wings.length > 0 && firebaseUser && user && (
+        <PersonalThread
+          lang={lang}
+          myId={firebaseUser.uid}
+          myName={user.displayName}
+          otherId={uid}
+          otherName={name}
+          title={he ? `שיחה פרטית עם ${name}` : `Private chat with ${name}`}
+          readWingIds={wings.map((w) => w.wingId)}
+          writeWingId={[...wings].sort((a, b) => Number(b.isPrivate) - Number(a.isPrivate))[0].wingId}
+        />
+      )}
+
+      <div className="space-y-3">
+        <h2 className="font-bold text-wing-ink text-sm px-1">{he ? "הפיד של הלקוח" : "Client's feed"}</h2>
+        {feed === null ? (
+          <div className="h-20 bg-wing-elevated border border-wing-border rounded-2xl animate-pulse" />
+        ) : feed.length === 0 ? (
+          <p className="text-sm text-wing-muted text-center py-4">{he ? "אין עדיין פוסטים" : "No posts yet"}</p>
+        ) : (
+          feed.map((f) => (
+            <PostCard
+              key={f.post.id}
+              post={f.post}
+              wingId={f.wingId}
+              currentUserId={firebaseUser!.uid}
+              currentUserName={user?.displayName ?? ""}
+              isViewerAdmin
+              onUpdate={(next) => setFeed((prev) => (prev ?? []).map((x) => (x.post.id === next.id ? { ...x, post: next } : x)))}
+              onDelete={(id) => setFeed((prev) => (prev ?? []).filter((x) => x.post.id !== id))}
+            />
+          ))
+        )}
+      </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
